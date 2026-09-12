@@ -5,11 +5,17 @@
   "type": "module",
   "description": "Sistema de Gestão de Portfólio FE / ONS — MVP persistente",
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "node --test tests/**/*.test.js",
-    "check": "node --check src/services/initiativeService.js && node --check src/repositories/localInitiativeRepository.js && node --check src/repositories/supabaseInitiativeRepository.js"
+    "check": "node --check src/config/env.js && node --check src/lib/supabaseClient.js && node --check src/mappers/initiativeMapper.js && node --check src/rules/initiativeRules.js && node --check src/services/initiativeService.js && node --check src/repositories/localInitiativeRepository.js && node --check src/repositories/supabaseInitiativeRepository.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
   },
   "engines": {
     "node": ">=20"
