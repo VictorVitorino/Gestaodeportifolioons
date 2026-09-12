@@ -20,6 +20,7 @@ export function initiativeDbToDomain(row) {
     dataPrevistaAtual: row.data_prevista_atual,
     observacoes: row.observacoes,
     ativo: row.ativo,
+    rowVersion: row.row_version,
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
