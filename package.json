@@ -1,0 +1,17 @@
+{
+  "name": "gestao-portifolio-ons",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Sistema de Gestão de Portfólio FE / ONS — MVP persistente",
+  "scripts": {
+    "test": "node --test tests/**/*.test.js",
+    "check": "node --check src/services/initiativeService.js && node --check src/repositories/localInitiativeRepository.js && node --check src/repositories/supabaseInitiativeRepository.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.4"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
