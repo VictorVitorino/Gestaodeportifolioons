@@ -48,7 +48,9 @@ export class SupabaseInitiativeRepository extends InitiativeRepository {
       .update(initiativeDomainToDb(model))
       .eq('id', id);
 
-    if (expectedVersion) query = query.eq('updated_at', expectedVersion);
+    if (expectedVersion !== undefined && expectedVersion !== null) {
+      query = query.eq('row_version', expectedVersion);
+    }
 
     const { data, error } = await query.select('*');
     if (error) throw new Error(error.code || 'PERSISTENCE_ERROR');
