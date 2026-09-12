@@ -3,7 +3,8 @@ import { assertSupabaseEnv } from '../config/env.js';
 
 export function createSupabaseClient(env) {
   const cfg = assertSupabaseEnv(env);
-  return createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {
+
+  return createClient(cfg.supabaseUrl, cfg.supabasePublishableKey, {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
