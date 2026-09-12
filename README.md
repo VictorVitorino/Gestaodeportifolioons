@@ -44,7 +44,7 @@ Vite é usado somente como build/dev server para módulos ES e dependências; n�
 .
 ├── .github/workflows/ci.yml
 ├── database/
-│   ├── migrations/0001...0014
+│   ├── migrations/0001...0015
 │   ├── seeds/
 │   └── README.md
 ├── docs/
@@ -105,14 +105,15 @@ A `SUPABASE_ANON_KEY` só é segura no browser quando RLS está corretamente con
 - validação Gerência → Comunidade → Squad no banco;
 - snapshot fechado imutável sem bloquear exclusão de snapshot aberto;
 - horizonte 30/60/90 calculável com data de referência explícita para reprodutibilidade histórica;
-- runtime config compatível com HTML/JS sem exigir framework.
+- runtime config compatível com HTML/JS sem exigir framework;
+- controle de concorrência por `row_version` monotônico, sem depender de timestamp.
 
 ## Estado atual
 
 Concluído:
 - repositório privado;
 - arquitetura e documentação técnica;
-- migrations `0001` a `0014`;
+- migrations `0001` a `0015`;
 - seeds seguros;
 - base de RLS e hardening;
 - Repository Pattern;
@@ -121,6 +122,7 @@ Concluído:
 - runtime config para HTML puro;
 - Vite sem framework;
 - CI inicial;
-- testes unitários iniciais.
+- testes unitários iniciais;
+- optimistic locking por `row_version`.
 
 Próximo bloqueio externo: criar/conectar o **Supabase DEV**, aplicar migrations, configurar usuário de teste e executar o runbook de RLS/smoke tests. Depois disso, integrar a baseline HTML funcional ao Repository Pattern já preparado.
