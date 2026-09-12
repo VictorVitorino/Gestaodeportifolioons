@@ -13,11 +13,18 @@
 5. Toda migration deve ser testada em banco limpo e sobre a versão anterior esperada.
 
 ## Ordem atual
-`0001` a `0013`.
+`0001` a `0014`.
+
+## Hardening já incorporado
+- policies de leitura de cadastros mestres e tabelas filhas por escopo;
+- arquivamento validando ação + escopo de gerência;
+- validação de hierarquia Gerência → Comunidade → Squad no banco;
+- proteção correta de snapshot fechado sem bloquear exclusão de snapshot aberto;
+- horizonte 30/60/90 reproduzível por data de referência.
 
 ## Pendências para ambiente real
 - executar migrations no Supabase DEV;
-- validar PostgreSQL/Supabase version;
+- validar versão PostgreSQL/Supabase;
 - validar comportamento das views com RLS;
 - criar policies de escrita das tabelas filhas após matriz de permissões;
 - executar backup/restore antes de HML.
