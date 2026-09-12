@@ -8,7 +8,7 @@ Base técnica para evolução da baseline funcional do Portfólio FE de um prot�
 
 Preservar a experiência funcional já construída e separar progressivamente:
 
-`UI HTML/JS → Services → Repositories → PostgreSQL/Supabase`
+`HTML/JS → Services → Repositories → Supabase Auth/REST/RPC → RLS → PostgreSQL`
 
 O sistema permanece uma camada estratégica/gerencial e **não substitui** Azure DevOps, Jira, ITSM ou demais ferramentas operacionais.
 
@@ -18,9 +18,10 @@ O sistema permanece uma camada estratégica/gerencial e **não substitui** Azure
 - Distinguir sempre `FONTE_ONS`, `DECISAO_FUNCIONAL_PRODUTO` e `A_VALIDAR_FEG`.
 - Preservar histórico e rastreabilidade.
 - Não aplicar score/pesos de priorização como regra oficial sem validação.
-- Segurança deve existir no backend/banco, não apenas na interface.
+- Segurança deve existir no banco/backend, não apenas na interface ou nos Services do browser.
 - Migrations versionadas são a fonte de mudança estrutural do banco.
 - RLS segue deny-by-default até concessão explícita de permissões.
+- O HTML pode persistir dados, mas apenas via Supabase Client/REST/RPC com sessão autenticada e RLS.
 
 ## Arquitetura
 
@@ -31,12 +32,18 @@ Services / Rules
     ↓
 Repository Pattern
     ↓
-LocalStorage (transição) ou Supabase/PostgreSQL (persistente)
+Supabase Auth + REST/RPC
+    ↓
+Row Level Security + grants mínimos
+    ↓
+PostgreSQL
     ↓
 Histórico / Snapshots / Views executivas
 ```
 
-Vite é usado somente como build/dev server para módulos ES e dependências; não há migração para React/Next nesta fase.
+`LocalStorage` permanece somente como adapter temporário de transição/paridade.
+
+Vite é usado apenas como build/dev server para módulos ES e dependências; não há migração para React/Next nesta fase.
 
 ## Estrutura atual
 
@@ -44,7 +51,7 @@ Vite é usado somente como build/dev server para módulos ES e dependências; n�
 .
 ├── .github/workflows/ci.yml
 ├── database/
-│   ├── migrations/0001...0015
+│   ├── migrations/0001...0016
 │   ├── seeds/
 │   └── README.md
 ├── docs/
@@ -92,16 +99,24 @@ Para build:
 npm run build
 ```
 
-## Runtime config
+## Runtime config e acesso ao banco
 
 A configuração pode vir de variáveis de ambiente ou de `globalThis.__APP_CONFIG__` no navegador. Use `public/app-config.example.js` como referência e mantenha `public/app-config.js` fora do Git.
 
-A `SUPABASE_ANON_KEY` só é segura no browser quando RLS está corretamente configurada. **Nunca** colocar `service_role` no frontend.
+`SUPABASE_URL` e a anon/publishable key podem existir no frontend. Elas **não** substituem autenticação nem autorização. A proteção dos dados depende de sessão autenticada, grants mínimos e RLS corretamente configurada.
+
+Nunca colocar no frontend: `service_role`, senha PostgreSQL, token administrativo ou segredo de integração.
+
+O papel `anon` não recebe acesso aos dados do schema público. O papel `authenticated` recebe somente os privilégios mínimos necessários e continua sujeito às policies RLS por linha/escopo.
 
 ## Hardening incorporado
 
 - policies de leitura por escopo para cadastros mestres e tabelas filhas;
-- arquivamento validando ação + gerência;
+- acesso anônimo a dados explicitamente revogado;
+- privilégios mínimos para `authenticated`;
+- escrita pelo browser atualmente limitada a Iniciativas;
+- `DELETE` físico bloqueado no frontend;
+- arquivamento por RPC validando ação + gerência;
 - validação Gerência → Comunidade → Squad no banco;
 - snapshot fechado imutável sem bloquear exclusão de snapshot aberto;
 - horizonte 30/60/90 calculável com data de referência explícita para reprodutibilidade histórica;
@@ -112,10 +127,10 @@ A `SUPABASE_ANON_KEY` só é segura no browser quando RLS está corretamente con
 
 Concluído:
 - repositório privado;
-- arquitetura e documentação técnica;
-- migrations `0001` a `0015`;
+- arquitetura e documentação técnica revisadas;
+- migrations `0001` a `0016`;
 - seeds seguros;
-- base de RLS e hardening;
+- RLS e hardening para acesso pelo browser;
 - Repository Pattern;
 - Local e Supabase Initiative Repository;
 - mapper, rules e service de iniciativa;
