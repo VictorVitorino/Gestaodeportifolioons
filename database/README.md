@@ -13,14 +13,15 @@
 5. Toda migration deve ser testada em banco limpo e sobre a versão anterior esperada.
 
 ## Ordem atual
-`0001` a `0014`.
+`0001` a `0015`.
 
 ## Hardening já incorporado
 - policies de leitura de cadastros mestres e tabelas filhas por escopo;
 - arquivamento validando ação + escopo de gerência;
 - validação de hierarquia Gerência → Comunidade → Squad no banco;
 - proteção correta de snapshot fechado sem bloquear exclusão de snapshot aberto;
-- horizonte 30/60/90 reproduzível por data de referência.
+- horizonte 30/60/90 reproduzível por data de referência;
+- concorrência otimista por `row_version` monotônico.
 
 ## Pendências para ambiente real
 - executar migrations no Supabase DEV;
