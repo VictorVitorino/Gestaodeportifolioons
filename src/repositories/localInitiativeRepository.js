@@ -40,8 +40,9 @@ export class LocalInitiativeRepository extends InitiativeRepository {
     const now = new Date().toISOString();
     const item = {
       ...data,
-      id: data.id ?? crypto.randomUUID(),
+      id: data.id ?? globalThis.crypto.randomUUID(),
       ativo: data.ativo ?? true,
+      rowVersion: 1,
       createdAt: now,
       updatedAt: now
     };
@@ -54,13 +55,22 @@ export class LocalInitiativeRepository extends InitiativeRepository {
     const items = readStore(this.storage);
     const index = items.findIndex(i => i.id === id);
     if (index < 0) throw new Error('REFERENCE_NOT_FOUND');
-    if (expectedVersion && items[index].updatedAt !== expectedVersion) throw new Error('CONFLICT');
-    items[index] = { ...items[index], ...data, id, updatedAt: new Date().toISOString() };
+    if (expectedVersion !== undefined && expectedVersion !== null && items[index].rowVersion !== expectedVersion) {
+      throw new Error('CONFLICT');
+    }
+
+    items[index] = {
+      ...items[index],
+      ...data,
+      id,
+      rowVersion: (items[index].rowVersion ?? 1) + 1,
+      updatedAt: new Date().toISOString()
+    };
     writeStore(items, this.storage);
     return items[index];
   }
 
-  async archive(id) {
-    return this.update(id, { ativo: false });
+  async archive(id, expectedVersion) {
+    return this.update(id, { ativo: false }, expectedVersion);
   }
 }
