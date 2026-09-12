@@ -44,7 +44,7 @@ Vite é usado somente como build/dev server para módulos ES e dependências; n�
 .
 ├── .github/workflows/ci.yml
 ├── database/
-│   ├── migrations/0001...0013
+│   ├── migrations/0001...0014
 │   ├── seeds/
 │   └── README.md
 ├── docs/
@@ -98,12 +98,21 @@ A configuração pode vir de variáveis de ambiente ou de `globalThis.__APP_CONF
 
 A `SUPABASE_ANON_KEY` só é segura no browser quando RLS está corretamente configurada. **Nunca** colocar `service_role` no frontend.
 
+## Hardening incorporado
+
+- policies de leitura por escopo para cadastros mestres e tabelas filhas;
+- arquivamento validando ação + gerência;
+- validação Gerência → Comunidade → Squad no banco;
+- snapshot fechado imutável sem bloquear exclusão de snapshot aberto;
+- horizonte 30/60/90 calculável com data de referência explícita para reprodutibilidade histórica;
+- runtime config compatível com HTML/JS sem exigir framework.
+
 ## Estado atual
 
 Concluído:
 - repositório privado;
 - arquitetura e documentação técnica;
-- migrations `0001` a `0013`;
+- migrations `0001` a `0014`;
 - seeds seguros;
 - base de RLS e hardening;
 - Repository Pattern;
