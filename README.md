@@ -51,26 +51,12 @@ Vite é usado apenas como build/dev server para módulos ES e dependências; nã
 .
 ├── .github/workflows/ci.yml
 ├── database/
-│   ├── migrations/0001...0016
+│   ├── migrations/0001...0019
 │   ├── seeds/
 │   └── README.md
 ├── docs/
-│   ├── architecture.md
-│   ├── architecture-review.md
-│   ├── api-contracts.md
-│   ├── data-model.md
-│   ├── implementation-plan.md
-│   ├── runbook-supabase-dev.md
-│   └── security.md
-├── public/
-│   └── app-config.example.js
+├── public/app-config.example.js
 ├── src/
-│   ├── config/
-│   ├── lib/
-│   ├── mappers/
-│   ├── repositories/
-│   ├── rules/
-│   └── services/
 ├── tests/unit/
 ├── index.html
 ├── package.json
@@ -80,64 +66,56 @@ Vite é usado apenas como build/dev server para módulos ES e dependências; nã
 
 ## Banco
 
-PostgreSQL, inicialmente via Supabase DEV.
+PostgreSQL via **Supabase DEV** ativo na região `sa-east-1`.
 
 Entidades principais: Gerências, Comunidades, Squads, Ferramentas, Iniciativas, Avaliações, Dependências, Riscos/Impedimentos, Capacidade, Financeiro, Fóruns, Decisões, Snapshots, Histórico, Parâmetros e Segurança.
 
-## Desenvolvimento
-
-```bash
-npm install
-npm run check
-npm test
-npm run dev
-```
-
-Para build:
-
-```bash
-npm run build
-```
-
 ## Runtime config e acesso ao banco
 
-A configuração pode vir de variáveis de ambiente ou de `globalThis.__APP_CONFIG__` no navegador. Use `public/app-config.example.js` como referência e mantenha `public/app-config.js` fora do Git.
+A configuração pode vir de variáveis `VITE_*` ou de `globalThis.__APP_CONFIG__` no navegador.
 
-`SUPABASE_URL` e a anon/publishable key podem existir no frontend. Elas **não** substituem autenticação nem autorização. A proteção dos dados depende de sessão autenticada, grants mínimos e RLS corretamente configurada.
+Preferência atual:
+- `VITE_APP_ENV=development`
+- `VITE_DATA_PROVIDER=supabase`
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+
+A publishable key pode existir no frontend. Ela **não** concede acesso aos dados por si só: a proteção depende de sessão autenticada, grants mínimos e RLS.
 
 Nunca colocar no frontend: `service_role`, senha PostgreSQL, token administrativo ou segredo de integração.
 
-O papel `anon` não recebe acesso aos dados do schema público. O papel `authenticated` recebe somente os privilégios mínimos necessários e continua sujeito às policies RLS por linha/escopo.
-
 ## Hardening incorporado
 
-- policies de leitura por escopo para cadastros mestres e tabelas filhas;
-- acesso anônimo a dados explicitamente revogado;
-- privilégios mínimos para `authenticated`;
+- `anon` sem leitura dos dados corporativos;
+- `authenticated` com grants mínimos e RLS;
+- views executivas com `security_invoker`;
+- helpers de autorização movidos para schema `private`;
+- RPC pública intencional apenas onde necessária;
 - escrita pelo browser atualmente limitada a Iniciativas;
 - `DELETE` físico bloqueado no frontend;
 - arquivamento por RPC validando ação + gerência;
 - validação Gerência → Comunidade → Squad no banco;
-- snapshot fechado imutável sem bloquear exclusão de snapshot aberto;
-- horizonte 30/60/90 calculável com data de referência explícita para reprodutibilidade histórica;
-- runtime config compatível com HTML/JS sem exigir framework;
-- controle de concorrência por `row_version` monotônico, sem depender de timestamp.
+- snapshot fechado protegido;
+- horizonte 30/60/90 reproduzível por data de referência;
+- concorrência por `row_version` monotônico;
+- índices de suporte às FKs identificados pelo Performance Advisor.
 
 ## Estado atual
 
 Concluído:
 - repositório privado;
-- arquitetura e documentação técnica revisadas;
-- migrations `0001` a `0016`;
-- seeds seguros;
-- RLS e hardening para acesso pelo browser;
+- Supabase DEV criado e ativo;
+- migrations `0001` a `0019` aplicadas;
+- seeds mínimos aplicados: 4 gerências, 7 perfis provisórios e 15 ações técnicas;
+- RLS e hardening revisados pelo Supabase Advisor;
+- smoke test de hierarquia e `row_version` aprovado;
+- `anon` sem `SELECT` em Iniciativas;
+- `authenticated` com `SELECT/INSERT/UPDATE` e sem `DELETE` em Iniciativas;
 - Repository Pattern;
 - Local e Supabase Initiative Repository;
-- mapper, rules e service de iniciativa;
-- runtime config para HTML puro;
-- Vite sem framework;
-- CI inicial;
-- testes unitários iniciais;
-- optimistic locking por `row_version`.
+- runtime config com publishable key e suporte a Vite;
+- CI verde.
 
-Próximo bloqueio externo: criar/conectar o **Supabase DEV**, aplicar migrations, configurar usuário de teste e executar o runbook de RLS/smoke tests. Depois disso, integrar a baseline HTML funcional ao Repository Pattern já preparado.
+## Próxima etapa
+
+Criar o primeiro usuário DEV autenticado pelo fluxo normal do Supabase Auth e vincular explicitamente perfil/ações de QA. Depois disso, executar o teste E2E pelo browser e integrar a baseline visual/funcional completa do HTML ao Repository Pattern.
