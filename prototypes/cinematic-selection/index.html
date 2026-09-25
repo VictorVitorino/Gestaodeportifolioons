@@ -1,0 +1,1550 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cineverse — Choose Your Universe</title>
+<meta name="description" content="Cinematic 4-card movie selection screen with holographic 3D cards." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@500;700&family=Cormorant+Garamond:ital,wght@1,500;1,600&family=Inter:wght@400;500;600;700&family=Orbitron:wght@600;800&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&family=Syne:wght@600;800&display=swap" rel="stylesheet" />
+<style>
+/* ==========================================================================
+   Tokens
+   ========================================================================== */
+@property --angle   { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@property --scene-a { syntax: '<color>'; inherits: true;  initial-value: #2a1f55; }
+@property --scene-b { syntax: '<color>'; inherits: true;  initial-value: #0b2f4a; }
+
+:root {
+  --scene-a: #2a1f55;
+  --scene-b: #0b2f4a;
+  --focus-a: #ffffff;
+  --px: 0;
+  --py: 0;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --ease-cine: cubic-bezier(.77, 0, .18, 1);
+  --ease-pull: cubic-bezier(.55, -0.32, .2, 1);
+  --card-w: clamp(200px, min(19.5vw, calc((100dvh - 250px) / 1.5)), 380px);
+  --bg: #04050a;
+  --text: #eef1f8;
+  --muted: #8b93a8;
+  transition: --scene-a 1.2s ease, --scene-b 1.2s ease;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+button { font: inherit; color: inherit; }
+
+/* ==========================================================================
+   Cinematic backdrop
+   ========================================================================== */
+.scene { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+
+.aurora {
+  position: absolute; inset: -12%;
+  background:
+    radial-gradient(45% 40% at 28% 32%, color-mix(in srgb, var(--scene-a) 60%, transparent), transparent 70%),
+    radial-gradient(50% 45% at 74% 68%, color-mix(in srgb, var(--scene-b) 55%, transparent), transparent 72%),
+    radial-gradient(80% 60% at 50% 110%, color-mix(in srgb, var(--scene-a) 30%, transparent), transparent 70%);
+  filter: blur(20px) saturate(1.2);
+  transform: translate3d(calc(var(--px) * -24px), calc(var(--py) * -18px), 0);
+  transition: opacity 1.2s ease;
+}
+
+.rays {
+  position: absolute; left: 50%; top: -30%;
+  width: 160vmax; height: 160vmax;
+  transform: translateX(calc(-50% + var(--px) * 30px));
+  background: repeating-conic-gradient(from var(--angle) at 50% 50%, rgba(255,255,255,.035) 0deg 2deg, transparent 2deg 11deg);
+  -webkit-mask: radial-gradient(circle at 50% 50%, #000 0%, transparent 42%);
+          mask: radial-gradient(circle at 50% 50%, #000 0%, transparent 42%);
+  animation: spin 140s linear infinite;
+  opacity: .7;
+}
+
+#dust { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.floor {
+  position: absolute; left: 50%; bottom: -22vh;
+  width: 130vw; height: 55vh;
+  transform: translateX(-50%);
+  background: radial-gradient(50% 50% at 50% 50%, color-mix(in srgb, var(--scene-a) 38%, transparent), transparent 70%);
+  filter: blur(30px);
+  opacity: .8;
+}
+
+.vignette {
+  position: absolute; inset: 0;
+  background: radial-gradient(120% 90% at 50% 45%, transparent 45%, rgba(0,0,0,.85) 100%);
+}
+
+.dim { position: absolute; inset: 0; background: #000; opacity: 0; transition: opacity 1.1s ease; }
+
+.grain {
+  position: absolute; inset: -50%;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.9'/></svg>");
+  opacity: .07;
+  mix-blend-mode: overlay;
+  animation: grain 1.2s steps(6) infinite;
+}
+
+/* ==========================================================================
+   Layout
+   ========================================================================== */
+.app {
+  position: relative; z-index: 1;
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+}
+
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 22px clamp(20px, 3vw, 44px) 0;
+  font-size: 11px; letter-spacing: .28em; text-transform: uppercase; color: var(--muted);
+  transition: opacity .8s ease, transform .8s var(--ease-out), filter .8s ease;
+}
+.brand { display: flex; align-items: center; gap: 12px; color: var(--text); font-weight: 700; letter-spacing: .38em; }
+.brand-mark {
+  width: 22px; height: 22px; position: relative;
+  background: conic-gradient(from var(--angle), #ff4fd8, #ffe45c, #3ce0ff, #b56bff, #ff4fd8);
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  animation: spin 8s linear infinite;
+}
+.brand-sub { color: var(--muted); font-weight: 500; letter-spacing: .28em; }
+.status { display: flex; align-items: center; gap: 10px; }
+.status .dot { width: 7px; height: 7px; border-radius: 50%; background: #4dffb5; box-shadow: 0 0 10px #4dffb5; animation: pulse 2s ease-in-out infinite; }
+
+.hero {
+  text-align: center;
+  padding: clamp(10px, 2.2vh, 26px) 20px 0;
+  transform: translate3d(calc(var(--px) * -8px), calc(var(--py) * -5px), 0);
+  transition: opacity .8s ease, filter .8s ease;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 14px;
+  font-size: 11px; letter-spacing: .5em; text-transform: uppercase; color: var(--muted);
+}
+.hero-eyebrow::before, .hero-eyebrow::after { content: ''; width: 42px; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.4)); }
+.hero-eyebrow::after { transform: scaleX(-1); }
+.hero h1 {
+  margin: 8px 0 0;
+  font-family: 'Syne', 'Inter', sans-serif; font-weight: 800;
+  font-size: clamp(26px, 3.4vw, 50px);
+  letter-spacing: -.02em; line-height: 1;
+  background: linear-gradient(180deg, #ffffff 20%, #9aa3bb 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.hero h1 em {
+  font-style: normal;
+  background: linear-gradient(90deg, #ff4fd8, #ffe45c, #3ce0ff, #b56bff, #ff4fd8);
+  background-size: 300% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: holoText 8s linear infinite;
+}
+
+.stage { position: relative; display: grid; place-items: center; min-height: 0; }
+
+.deck {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  gap: clamp(18px, 2.4vw, 42px);
+}
+
+.hints {
+  display: flex; justify-content: center; flex-wrap: wrap; gap: 10px 26px;
+  padding: 0 20px 22px;
+  font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted);
+  transition: opacity .8s ease, transform .8s var(--ease-out);
+}
+.hints span { display: inline-flex; align-items: center; gap: 8px; }
+kbd {
+  font-family: 'Share Tech Mono', ui-monospace, monospace; font-size: 10px; letter-spacing: 0;
+  padding: 3px 6px; border-radius: 4px;
+  border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.05); color: var(--text);
+}
+
+/* ==========================================================================
+   Card structure
+   slot (layout, measured) → shell (focus transform) → floater (idle float)
+   → card (3D tilt) → layers
+   ========================================================================== */
+.slot {
+  --rx: 0; --ry: 0; --mx: .5; --my: .5; --hov: 0; --s: 1;
+  --tx: 0px; --ty: 0px; --ts: 1; --dx: 0px; --dry: 0deg; --delay: 0s;
+  position: relative;
+  width: var(--card-w);
+  animation: deal 1.2s var(--ease-out) both;
+  animation-delay: calc(.2s + var(--i) * .12s);
+}
+
+.shell {
+  position: relative;
+  transform: perspective(1600px) translate3d(0, 0, 0) rotateY(0deg) scale(1);
+  transition:
+    transform 1.2s var(--ease-pull) var(--delay),
+    opacity .9s ease var(--delay),
+    filter .9s ease var(--delay);
+}
+
+.floater {
+  animation: float 6.5s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -1.6s);
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: calc(var(--card-w) * .066);
+  transform-style: preserve-3d;
+  transform: perspective(1000px) rotateX(calc(var(--ry) * 1deg)) rotateY(calc(var(--rx) * 1deg)) scale(var(--s));
+  will-change: transform;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ground {
+  position: absolute; left: 12%; right: 12%; bottom: -34px; height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0,0,0,.85), transparent);
+  filter: blur(6px);
+  animation: ground 6.5s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -1.6s);
+  transition: opacity .6s ease;
+}
+.ground::after {
+  content: ''; position: absolute; inset: -6px -20%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--accent), transparent);
+  opacity: calc(var(--hov) * .45);
+  filter: blur(10px);
+}
+
+/* Animated conic glow border ------------------------------------------------ */
+.card-glow, .card-border {
+  position: absolute; border-radius: inherit; pointer-events: none;
+  background: conic-gradient(from var(--angle), var(--c1), var(--c2), var(--c3), var(--c2), var(--c1));
+  animation: spin 7s linear infinite;
+}
+.card-glow  { inset: -3px; filter: blur(22px); opacity: calc(.18 + var(--hov) * .7); transform: translateZ(-24px); }
+.card-border {
+  inset: 0; padding: 1.5px; transform: translateZ(1px);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: calc(.5 + var(--hov) * .5);
+}
+
+/* Clipped art stack ---------------------------------------------------------- */
+.card-clip {
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  container-type: size;
+  background: var(--shade);
+  box-shadow:
+    0 calc(30px + var(--hov) * 30px) calc(60px + var(--hov) * 40px) -20px rgba(0,0,0,.9),
+    inset 0 0 0 1px rgba(255,255,255,.06);
+}
+
+.layer {
+  position: absolute; inset: -8%;
+  transform: translate3d(calc((var(--mx) - .5) * var(--d) * -1px), calc((var(--my) - .5) * var(--d) * -1px), 0);
+}
+.layer > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.layer-bg  { --d: 10; }
+.layer-mid { --d: 22; }
+.layer-fg  { --d: 40; }
+
+.card-shade {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.55) 0%, transparent 16%),
+    linear-gradient(180deg, transparent 38%, color-mix(in srgb, var(--shade) 70%, transparent) 58%, var(--shade) 84%);
+}
+
+.card-foil {
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(115deg, #ff0080 0%, #ffd200 6%, #00ffa3 12%, #00c8ff 18%, #a600ff 24%, #ff0080 30%);
+  background-size: 260% 260%;
+  background-position: calc(var(--mx) * 100%) calc(var(--my) * 100%);
+  mix-blend-mode: color-dodge;
+  opacity: calc(var(--hov) * var(--foil, .2));
+  filter: saturate(1.3);
+}
+
+.card-glare {
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at calc(var(--mx) * 100%) calc(var(--my) * 100%),
+    rgba(255,255,255,.6) 0%, rgba(255,255,255,.14) 22%, transparent 55%);
+  mix-blend-mode: overlay;
+  opacity: calc(.12 + var(--hov) * .8);
+}
+
+.card-sweep {
+  position: absolute; inset: -40% -60%;
+  background: linear-gradient(105deg, transparent 42%, rgba(255,255,255,.08) 46%, rgba(255,255,255,.55) 50%, rgba(255,255,255,.08) 54%, transparent 58%);
+  mix-blend-mode: overlay;
+  transform: translateX(-60%);
+  animation: sweep 8s var(--ease-cine) infinite;
+  animation-delay: calc(1.6s + var(--i) * 1.4s);
+}
+.slot.is-hover .card-sweep { animation: sweepHover 2.6s var(--ease-cine) infinite; }
+
+/* Particles ------------------------------------------------------------------ */
+.particles { position: absolute; inset: 0; pointer-events: none; }
+.particles i {
+  position: absolute; left: var(--x); bottom: -8px;
+  width: var(--sz); height: var(--sz); border-radius: 50%;
+  background: var(--pc);
+  box-shadow: 0 0 6px 1px var(--pc);
+  opacity: 0;
+  animation: rise var(--dur) linear infinite;
+  animation-delay: var(--del);
+}
+
+/* Frame + content (true 3D depth, above clip) -------------------------------- */
+.card-frame {
+  position: absolute; inset: calc(var(--card-w) * .03);
+  border-radius: calc(var(--card-w) * .045);
+  border: 1px solid color-mix(in srgb, var(--accent) 26%, transparent);
+  transform: translateZ(14px);
+  pointer-events: none;
+  --k: calc(var(--card-w) * .06);
+  background:
+    linear-gradient(var(--accent), var(--accent)) top left / var(--k) 1.5px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) top left / 1.5px var(--k) no-repeat,
+    linear-gradient(var(--accent), var(--accent)) top right / var(--k) 1.5px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) top right / 1.5px var(--k) no-repeat,
+    linear-gradient(var(--accent), var(--accent)) bottom left / var(--k) 1.5px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) bottom left / 1.5px var(--k) no-repeat,
+    linear-gradient(var(--accent), var(--accent)) bottom right / var(--k) 1.5px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) bottom right / 1.5px var(--k) no-repeat;
+  opacity: calc(.55 + var(--hov) * .45);
+}
+
+.card-top {
+  position: absolute; top: 0; left: 0; right: 0;
+  padding: calc(var(--card-w) * .065) calc(var(--card-w) * .068) 0;
+  display: flex; align-items: center; justify-content: space-between;
+  transform: translateZ(34px);
+  pointer-events: none;
+}
+.rarity {
+  display: inline-flex; align-items: center; gap: .6em;
+  padding: .55em .85em;
+  font: 700 calc(var(--card-w) * .03)/1 'Inter', sans-serif;
+  letter-spacing: .22em; text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(0,0,0,.45);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: 999px;
+}
+.rarity::before {
+  content: ''; width: .75em; height: .75em;
+  background: var(--accent);
+  transform: rotate(45deg);
+  box-shadow: 0 0 8px var(--accent);
+}
+.num {
+  font: 500 calc(var(--card-w) * .032)/1 'Share Tech Mono', monospace;
+  letter-spacing: .12em; color: rgba(255,255,255,.7);
+}
+
+.card-body {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 0 calc(var(--card-w) * .075) calc(var(--card-w) * .075);
+  transform: translateZ(58px);
+}
+.eyebrow {
+  font: 600 calc(var(--card-w) * .033)/1.2 'Inter', sans-serif;
+  letter-spacing: .26em; text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: calc(var(--card-w) * .025);
+}
+.title { margin: 0; }
+.subtitle {
+  margin: calc(var(--card-w) * .028) 0 0;
+  font-size: calc(var(--card-w) * .045);
+  line-height: 1.35;
+  color: rgba(255,255,255,.78);
+}
+
+.stats {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(var(--card-w) * .03);
+  margin-top: calc(var(--card-w) * .04);
+}
+.stat span {
+  display: flex; justify-content: space-between;
+  font: 600 calc(var(--card-w) * .026)/1 'Inter', sans-serif;
+  letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.6);
+  margin-bottom: 5px;
+}
+.stat span b { color: #fff; font-weight: 700; letter-spacing: 0; }
+.stat i {
+  display: block; height: 3px; border-radius: 3px; background: rgba(255,255,255,.12); overflow: hidden;
+}
+.stat i::after {
+  content: ''; display: block; height: 100%; width: var(--v);
+  background: linear-gradient(90deg, var(--c2), var(--accent));
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.cta {
+  margin-top: calc(var(--card-w) * .05);
+  display: inline-flex; align-items: center; gap: .8em;
+  padding: 1em 1.5em;
+  font: 700 calc(var(--card-w) * .034)/1 'Inter', sans-serif;
+  letter-spacing: .18em; text-transform: uppercase;
+  border: 0; cursor: pointer;
+  position: relative; overflow: hidden;
+  color: var(--ink); background: var(--accent);
+  border-radius: 999px;
+  transition: box-shadow .35s ease, transform .35s var(--ease-out), filter .35s;
+}
+.cta svg { width: 1.2em; height: 1.2em; transition: transform .35s var(--ease-out); }
+.cta::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,.55) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform .8s var(--ease-out);
+}
+.slot.is-hover .cta { box-shadow: 0 0 26px color-mix(in srgb, var(--accent) 70%, transparent); }
+.slot.is-hover .cta::after { transform: translateX(120%); }
+.slot.is-hover .cta svg { transform: translateX(3px); }
+.cta:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+/* SVG helpers */
+.spin-slow, .spin, .spin-rev, .orbit { transform-origin: 0 0; }
+.spin      { animation: spinT 18s linear infinite; }
+.spin-slow { animation: spinT 34s linear infinite; }
+.spin-rev  { animation: spinT 24s linear infinite reverse; }
+.orbit     { animation: spinT 26s linear infinite; }
+
+/* ==========================================================================
+   THEME · The Lord of the Rings — molten gold, ancient serif, embers
+   ========================================================================== */
+.theme-lotr {
+  --accent: #f0c35a; --c1: #fbe3a0; --c2: #8a5a12; --c3: #ff8a2a;
+  --ink: #1c1204; --shade: #080503; --pc: #ffae42; --foil: .14;
+}
+.theme-lotr .eyebrow { font-family: 'Cinzel', serif; letter-spacing: .3em; }
+.theme-lotr .title {
+  font-family: 'Cinzel Decorative', 'Cinzel', Georgia, serif; font-weight: 700;
+  font-size: calc(var(--card-w) * .098); line-height: 1.04; letter-spacing: .01em;
+  background: linear-gradient(180deg, #fff6d6 0%, #f3c65c 42%, #9a6214 72%, #f7d27a 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 2px 0 rgba(0,0,0,.7)) drop-shadow(0 0 14px rgba(255,170,60,.35));
+}
+.theme-lotr .title small { display: block; font-size: .5em; letter-spacing: .32em; }
+.theme-lotr .subtitle { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: calc(var(--card-w) * .054); line-height: 1.25; color: #efe2c4; }
+.theme-lotr .cta {
+  font-family: 'Cinzel', serif; letter-spacing: .16em;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #fbe3a0, #c48a26 55%, #8a5a12);
+  box-shadow: inset 0 0 0 1px rgba(255,240,200,.6), inset 0 -2px 0 rgba(0,0,0,.25);
+}
+.theme-lotr .smoke { animation: smoke 9s ease-in-out infinite; transform-origin: 150px 230px; }
+.theme-lotr .inscription { animation: spinT 40s linear infinite; filter: drop-shadow(0 0 3px #ff8a1a); }
+.theme-lotr .eye { animation: eye 4s ease-in-out infinite; transform-origin: 247px 158px; transform-box: view-box; }
+
+/* ==========================================================================
+   THEME · The Avengers — chrome, crimson & arc-blue energy
+   ========================================================================== */
+.theme-avengers {
+  --accent: #ff3b3b; --c1: #ff3b3b; --c2: #ffd35c; --c3: #3d8bff;
+  --ink: #fff; --shade: #050818; --pc: #a8e8ff; --foil: .22;
+}
+.theme-avengers .eyebrow { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: calc(var(--card-w) * .038); letter-spacing: .3em; color: #7fc4ff; }
+.theme-avengers .title {
+  font-family: 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; font-weight: 400;
+  font-size: calc(var(--card-w) * .2); line-height: .86; letter-spacing: .02em;
+  background: linear-gradient(180deg, #ffffff 0%, #dfe8ff 38%, #6c82b4 52%, #f1f5ff 68%, #9fb2da 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 3px 0 #8a0f16) drop-shadow(0 0 18px rgba(61,139,255,.45));
+}
+.theme-avengers .title small { display: block; font-size: .34em; letter-spacing: .6em; line-height: 1.2; }
+.theme-avengers .subtitle { font-family: 'Rajdhani', sans-serif; font-weight: 600; font-size: calc(var(--card-w) * .048); line-height: 1.25; letter-spacing: .03em; color: #d9e4ff; }
+.theme-avengers .cta {
+  font-family: 'Rajdhani', sans-serif; font-size: calc(var(--card-w) * .042); letter-spacing: .2em;
+  border-radius: 0; padding: .9em 1.8em .9em 1.4em;
+  clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%);
+  background: linear-gradient(90deg, #ff3b3b, #a3131f);
+}
+.theme-avengers .bolt { animation: bolt 3.4s steps(1) infinite; }
+.theme-avengers .bolt.b2 { animation-delay: -1.7s; }
+.av-rays {
+  position: absolute; inset: 0;
+  background: repeating-conic-gradient(from var(--angle) at 50% 33%, rgba(150,210,255,.2) 0deg 1.4deg, transparent 1.4deg 12deg);
+  -webkit-mask: radial-gradient(circle at 50% 33%, #000 0%, transparent 62%);
+          mask: radial-gradient(circle at 50% 33%, #000 0%, transparent 62%);
+  animation: spin 50s linear infinite;
+  mix-blend-mode: screen;
+}
+
+/* ==========================================================================
+   THEME · Mission: Impossible — black ops, red lasers, lit fuse
+   ========================================================================== */
+.theme-mi {
+  --accent: #ff1f3d; --c1: #ff1f3d; --c2: #45000a; --c3: #ff8a96;
+  --ink: #fff; --shade: #040001; --pc: #ff2a47; --foil: .12;
+}
+.theme-mi .eyebrow, .theme-mi .num, .theme-mi .rarity { font-family: 'Share Tech Mono', monospace; letter-spacing: .2em; }
+.theme-mi .rarity { border-radius: 2px; }
+.theme-mi .rarity::before { transform: none; border-radius: 50%; animation: pulse 1.2s ease-in-out infinite; }
+.theme-mi .title {
+  font-family: 'Orbitron', 'Arial Black', sans-serif; font-weight: 800; text-transform: uppercase;
+  font-size: calc(var(--card-w) * .075); line-height: 1.12; letter-spacing: .06em;
+  color: #fff;
+}
+.theme-mi .title .glitch {
+  position: relative; display: inline-block;
+  color: var(--accent);
+  text-shadow: 0 0 16px rgba(255,31,61,.75);
+}
+.glitch::before, .glitch::after {
+  content: attr(data-text); position: absolute; inset: 0;
+  clip-path: inset(0 0 100% 0);
+}
+.glitch::before { color: #00f0ff; animation: glitchA 3.6s steps(1) infinite; }
+.glitch::after  { color: #fff;    animation: glitchB 3.6s steps(1) infinite; }
+.theme-mi .subtitle { font-family: 'Share Tech Mono', monospace; font-size: calc(var(--card-w) * .043); color: #ffc7ce; }
+.theme-mi .cta {
+  font-family: 'Share Tech Mono', monospace; letter-spacing: .2em;
+  background: rgba(255,31,61,.08); color: #ff4d62;
+  border-radius: 2px; box-shadow: inset 0 0 0 1px #ff1f3d;
+}
+.slot.theme-mi.is-hover .cta { background: #ff1f3d; color: #fff; }
+.theme-mi .laser { animation: laser 2.2s ease-in-out infinite; }
+.theme-mi .laser:nth-child(2) { animation-delay: -.6s; }
+.theme-mi .laser:nth-child(3) { animation-delay: -1.3s; }
+.theme-mi .laser:nth-child(4) { animation-delay: -1.8s; }
+.theme-mi .particles i {
+  width: auto; height: auto; background: none; box-shadow: none; border-radius: 0;
+  top: -14px; bottom: auto;
+  font: calc(var(--card-w) * .032)/1 'Share Tech Mono', monospace;
+  color: rgba(255,42,71,.55);
+  animation-name: fall;
+}
+.scan {
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(180deg, rgba(255,255,255,.035) 0 1px, transparent 1px 3px);
+  mix-blend-mode: overlay;
+}
+.scan::after {
+  content: ''; position: absolute; left: 0; right: 0; height: 22%;
+  background: linear-gradient(180deg, transparent, rgba(255,31,61,.12), transparent);
+  animation: scanline 4.5s linear infinite;
+}
+
+/* ==========================================================================
+   THEME · Mix of Movies — prismatic holo, spotlights, film reel
+   ========================================================================== */
+.theme-mix {
+  --accent: #c58bff; --c1: #ff4fd8; --c2: #3ce0ff; --c3: #ffe45c;
+  --ink: #0d0524; --shade: #0b0420; --pc: #ffffff; --foil: .38;
+}
+.theme-mix .eyebrow { color: #7ff0ff; }
+.theme-mix .title {
+  font-family: 'Syne', 'Inter', sans-serif; font-weight: 800;
+  font-size: calc(var(--card-w) * .15); line-height: .9; letter-spacing: -.03em;
+  background: linear-gradient(100deg, #ff4fd8, #ffe45c, #3ce0ff, #b56bff, #ff4fd8);
+  background-size: 300% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: holoText 6s linear infinite;
+  filter: drop-shadow(0 0 16px rgba(181,107,255,.5));
+}
+.theme-mix .subtitle { color: #e7dcff; }
+.theme-mix .cta {
+  background: linear-gradient(100deg, #ff4fd8, #ffe45c, #3ce0ff, #b56bff, #ff4fd8);
+  background-size: 300% 100%;
+  animation: holoText 5s linear infinite;
+}
+.theme-mix .stat i::after { background: linear-gradient(90deg, #ff4fd8, #3ce0ff); }
+.theme-mix .spot  { transform-box: fill-box; transform-origin: 50% 100%; animation: spotL 7s ease-in-out infinite; }
+.theme-mix .spot.r { animation-name: spotR; }
+.theme-mix .strip-frames { animation: dash 3s linear infinite; }
+.theme-mix .twinkle { animation: pulse 2.4s ease-in-out infinite; }
+.theme-mix .twinkle:nth-of-type(2n) { animation-delay: -1.2s; }
+.theme-mix .particles i { top: var(--y); bottom: auto; animation-name: twinkle; }
+.theme-mix .card-border { padding: 2px; }
+
+/* ==========================================================================
+   Focus transition (card → center stage)
+   ========================================================================== */
+.slot.is-selected { z-index: 20; }
+.slot.is-selected .shell {
+  transform: perspective(1600px) translate3d(var(--tx), var(--ty), 140px) rotateY(0deg) scale(var(--ts));
+  transition: transform 1.35s var(--ease-pull) .05s, opacity .6s ease, filter .6s ease;
+}
+.slot.is-selected .ground { opacity: 0; }
+.deck.is-focusing .slot:not(.is-selected) .shell {
+  transform: perspective(1600px) translate3d(var(--dx), 60px, -620px) rotateY(var(--dry)) scale(.92);
+  opacity: 0;
+  filter: blur(10px) saturate(.3) brightness(.6);
+  transition: transform 1.1s var(--ease-cine) var(--delay), opacity .8s ease calc(var(--delay) + .15s), filter .8s ease var(--delay);
+}
+
+body.is-focused { overflow: hidden; }
+body.is-focused .topbar { opacity: 0; transform: translateY(-16px); filter: blur(6px); }
+body.is-focused .hero   { opacity: 0; filter: blur(8px); }
+body.is-focused .hints  { opacity: 0; transform: translateY(16px); }
+body.is-focused .dim    { opacity: .5; }
+body.is-focused .aurora { opacity: 1.2; }
+
+.focus-flare {
+  position: fixed; left: 50%; top: 50%; z-index: 0;
+  width: 140vmax; height: 140vmax;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(.5);
+  opacity: 0;
+  background:
+    radial-gradient(circle, color-mix(in srgb, var(--focus-a) 45%, transparent) 0%, color-mix(in srgb, var(--focus-a) 12%, transparent) 16%, transparent 34%),
+    repeating-conic-gradient(from var(--angle), rgba(255,255,255,.07) 0deg 2.5deg, transparent 2.5deg 13deg);
+  -webkit-mask: radial-gradient(circle, #000 0%, #000 12%, transparent 40%);
+          mask: radial-gradient(circle, #000 0%, #000 12%, transparent 40%);
+  transition: opacity 1.2s ease .3s, transform 1.8s var(--ease-out) .2s;
+  animation: spin 90s linear infinite;
+}
+body.is-focused .focus-flare { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+.letterbox {
+  position: fixed; left: 0; right: 0; z-index: 50;
+  height: max(56px, 10vh);
+  background: #000;
+  display: flex; align-items: center;
+  transition: transform .9s var(--ease-cine);
+}
+.letterbox.top    { top: 0;    transform: translateY(-100%); box-shadow: 0 10px 40px rgba(0,0,0,.6); }
+.letterbox.bottom { bottom: 0; transform: translateY(100%);  box-shadow: 0 -10px 40px rgba(0,0,0,.6); }
+body.is-focused .letterbox { transform: none; transition-delay: .2s; }
+
+.lb-inner {
+  width: 100%; max-width: 1400px; margin: 0 auto;
+  padding: 0 clamp(20px, 3vw, 44px);
+  display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  font-size: 11px; letter-spacing: .28em; text-transform: uppercase; color: var(--muted);
+  opacity: 0; transition: opacity .4s ease;
+}
+body.is-focused .lb-inner { opacity: 1; transition: opacity .6s ease .8s; }
+.lb-title b { color: var(--text); font-weight: 600; letter-spacing: .2em; }
+
+.back {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 10px 16px; border-radius: 999px;
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.14);
+  font-size: 11px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase;
+  cursor: pointer; transition: background .3s, border-color .3s;
+}
+.back:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.3); }
+.back:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.back svg { width: 14px; height: 14px; }
+
+.progress { flex: 1; max-width: 460px; height: 2px; background: rgba(255,255,255,.1); border-radius: 2px; overflow: hidden; }
+.progress i {
+  display: block; height: 100%; width: 0;
+  background: linear-gradient(90deg, transparent, var(--focus-a));
+  box-shadow: 0 0 12px var(--focus-a);
+}
+body.is-focused .progress i { width: 100%; transition: width 2.2s var(--ease-cine) .9s; }
+.loading-label .ready { display: none; color: var(--text); }
+body.is-ready .loading-label .wait { display: none; }
+body.is-ready .loading-label .ready { display: inline; }
+.loading-label .wait::after { content: ''; animation: dots 1.4s steps(4) infinite; }
+
+/* ==========================================================================
+   Keyframes
+   ========================================================================== */
+@keyframes spin     { to { --angle: 360deg; } }
+@keyframes spinT    { to { transform: rotate(360deg); } }
+@keyframes float    { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(0, -14px, 0); } }
+@keyframes ground   { 0%, 100% { transform: scale(1); opacity: .75; } 50% { transform: scale(.82); opacity: .45; } }
+@keyframes deal {
+  from { opacity: 0; transform: perspective(1400px) translate3d(0, 120px, -200px) rotateX(28deg); }
+  to   { opacity: 1; transform: perspective(1400px) translate3d(0, 0, 0) rotateX(0deg); }
+}
+@keyframes sweep      { 0%, 72% { transform: translateX(-60%); } 100% { transform: translateX(60%); } }
+@keyframes sweepHover { 0% { transform: translateX(-60%); } 55%, 100% { transform: translateX(60%); } }
+@keyframes holoText { to { background-position: 300% 0; } }
+@keyframes grain {
+  0% { transform: translate(0, 0); } 20% { transform: translate(-5%, 3%); } 40% { transform: translate(4%, -4%); }
+  60% { transform: translate(-3%, -2%); } 80% { transform: translate(3%, 5%); } 100% { transform: translate(0, 0); }
+}
+@keyframes pulse    { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+@keyframes rise {
+  0%   { transform: translate(0, 0); opacity: 0; }
+  12%  { opacity: 1; }
+  80%  { opacity: .8; }
+  100% { transform: translate(var(--drift), -105cqh); opacity: 0; }
+}
+@keyframes fall     { 0% { transform: translateY(0); opacity: 0; } 10% { opacity: 1; } 100% { transform: translateY(105cqh); opacity: 0; } }
+@keyframes twinkle  { 0%, 100% { opacity: 0; transform: scale(.3); } 50% { opacity: 1; transform: scale(1); } }
+@keyframes smoke    { 0%, 100% { transform: translate(0, 0) scale(1); opacity: .35; } 50% { transform: translate(6px, -10px) scale(1.08); opacity: .5; } }
+@keyframes eye      { 0%, 100% { transform: scaleY(1); } 46%, 54% { transform: scaleY(.2); } }
+@keyframes bolt     { 0%, 100% { opacity: .15; } 8% { opacity: 1; } 10% { opacity: .3; } 12% { opacity: 1; } 22% { opacity: .15; } }
+@keyframes laser    { 0%, 100% { opacity: .9; } 50% { opacity: .35; } }
+@keyframes scanline { from { top: -22%; } to { top: 100%; } }
+@keyframes dash     { to { stroke-dashoffset: -50; } }
+@keyframes spotL    { 0%, 100% { transform: rotate(-10deg); } 50% { transform: rotate(8deg); } }
+@keyframes spotR    { 0%, 100% { transform: rotate(10deg); } 50% { transform: rotate(-8deg); } }
+@keyframes dots     { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
+@keyframes glitchA {
+  0%, 86%, 100% { clip-path: inset(0 0 100% 0); transform: none; }
+  87% { clip-path: inset(12% 0 58% 0); transform: translate(-3px, -1px); }
+  90% { clip-path: inset(62% 0 12% 0); transform: translate(3px, 1px); }
+  93% { clip-path: inset(34% 0 40% 0); transform: translate(-2px, 0); }
+}
+@keyframes glitchB {
+  0%, 88%, 100% { clip-path: inset(0 0 100% 0); transform: none; }
+  89% { clip-path: inset(48% 0 30% 0); transform: translate(2px, 0); }
+  92% { clip-path: inset(8% 0 76% 0); transform: translate(-3px, 1px); }
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+@media (max-width: 1000px) {
+  :root { --card-w: min(40vw, 300px); }
+  body { overflow-y: auto; }
+  .app { height: auto; min-height: 100dvh; }
+  .deck { display: grid; grid-template-columns: repeat(2, var(--card-w)); gap: 56px 32px; padding: 40px 0 70px; }
+  .brand-sub { display: none; }
+}
+@media (max-width: 560px) {
+  :root { --card-w: min(78vw, 320px); }
+  .deck { grid-template-columns: var(--card-w); }
+  .status { display: none; }
+  .lb-title { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floater, .ground, .card-sweep, .rays, .grain, .smoke, .spin, .spin-slow, .spin-rev, .orbit,
+  .card-glow, .card-border, .av-rays, .focus-flare { animation: none !important; }
+  .slot { animation-duration: .01s; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================ BACKDROP ============================ -->
+<div class="scene" aria-hidden="true">
+  <div class="aurora"></div>
+  <div class="rays"></div>
+  <canvas id="dust"></canvas>
+  <div class="floor"></div>
+  <div class="dim"></div>
+  <div class="vignette"></div>
+  <div class="grain"></div>
+</div>
+
+<!-- ============================ LETTERBOX (focus mode) ============================ -->
+<div class="letterbox top" inert>
+  <div class="lb-inner">
+    <button class="back" id="backBtn" type="button">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg>
+      Back to selection
+    </button>
+    <span class="lb-title">Now entering — <b id="lbName">—</b></span>
+    <span><kbd>Esc</kbd></span>
+  </div>
+</div>
+<div class="letterbox bottom" inert>
+  <div class="lb-inner">
+    <span class="loading-label"><span class="wait">Preparing synopsis</span><span class="ready">Synopsis ready</span></span>
+    <div class="progress"><i></i></div>
+    <span id="lbTag">Scene 01</span>
+  </div>
+</div>
+
+<main class="app">
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true"></span>CINEVERSE <span class="brand-sub">· Premium Collection</span></div>
+    <div class="status"><span class="dot"></span>04 Universes Unlocked</div>
+  </header>
+
+  <div class="hero">
+    <div class="hero-eyebrow">Season Pass · Vol. I</div>
+    <h1>Choose your <em>universe</em></h1>
+  </div>
+
+  <section class="stage" aria-label="Movie selection">
+    <div class="focus-flare" aria-hidden="true"></div>
+
+    <ul class="deck">
+
+      <!-- ============================ 01 · THE LORD OF THE RINGS ============================ -->
+      <li class="slot theme-lotr" data-id="lotr" data-title="The Lord of the Rings" data-a="#c8781e" data-b="#1d4a2a">
+        <div class="shell">
+          <div class="floater">
+            <article class="card" aria-labelledby="t-lotr">
+              <div class="card-glow"></div>
+              <div class="card-clip">
+                <div class="layer layer-bg">
+                  <svg viewBox="0 0 300 460" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="lotrSky" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#030806"/>
+                        <stop offset=".3" stop-color="#0f2217"/>
+                        <stop offset=".5" stop-color="#3b1a09"/>
+                        <stop offset=".62" stop-color="#7a300b"/>
+                        <stop offset="1" stop-color="#120605"/>
+                      </linearGradient>
+                      <radialGradient id="lotrHalo" cx=".5" cy=".5" r=".55">
+                        <stop offset="0" stop-color="#ff8a2a" stop-opacity=".6"/>
+                        <stop offset=".5" stop-color="#b2410f" stop-opacity=".18"/>
+                        <stop offset="1" stop-color="#000" stop-opacity="0"/>
+                      </radialGradient>
+                    </defs>
+                    <rect width="300" height="460" fill="url(#lotrSky)"/>
+                    <rect width="300" height="460" fill="url(#lotrHalo)"/>
+                    <g fill="#fff3d6">
+                      <circle cx="24" cy="54" r=".9" opacity=".8"/><circle cx="62" cy="88" r=".6" opacity=".6"/>
+                      <circle cx="96" cy="40" r=".7" opacity=".7"/><circle cx="212" cy="46" r=".9" opacity=".8"/>
+                      <circle cx="248" cy="96" r=".6" opacity=".5"/><circle cx="276" cy="58" r=".8" opacity=".7"/>
+                      <circle cx="40" cy="130" r=".5" opacity=".5"/><circle cx="266" cy="140" r=".6" opacity=".5"/>
+                    </g>
+                    <path d="M0 236 L30 208 L52 222 L84 188 L118 216 L140 200 L170 222 L204 184 L236 214 L262 196 L300 218 V460 H0Z" fill="#0c1a12" opacity=".9"/>
+                    <path d="M0 262 L46 236 L80 252 L122 230 L160 250 L208 226 L252 246 L300 232 V460 H0Z" fill="#09120c"/>
+                  </svg>
+                </div>
+                <div class="layer layer-mid">
+                  <svg viewBox="0 0 300 460" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="lotrLava" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#ffd27a"/>
+                        <stop offset=".35" stop-color="#ff5a0a"/>
+                        <stop offset="1" stop-color="#7a1a04" stop-opacity="0"/>
+                      </linearGradient>
+                      <filter id="lotrSoft" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="4"/></filter>
+                    </defs>
+                    <g class="smoke" fill="#3a2418">
+                      <ellipse cx="150" cy="218" rx="24" ry="10"/>
+                      <ellipse cx="160" cy="198" rx="34" ry="13"/>
+                      <ellipse cx="144" cy="176" rx="46" ry="15"/>
+                    </g>
+                    <path d="M36 460 L126 236 Q150 224 174 236 L264 460Z" fill="#1c0b06"/>
+                    <path d="M126 236 Q150 224 174 236 L186 262 Q150 250 114 262Z" fill="#2e1309"/>
+                    <ellipse cx="150" cy="234" rx="28" ry="7" fill="#ff6a12" filter="url(#lotrSoft)"/>
+                    <ellipse cx="150" cy="234" rx="16" ry="2.4" fill="#ffd27a"/>
+                    <path d="M146 236 C140 262 158 282 148 310 C142 330 154 350 150 390" stroke="url(#lotrLava)" stroke-width="2.4" fill="none"/>
+                    <path d="M160 238 C170 258 164 276 178 296" stroke="url(#lotrLava)" stroke-width="1.4" fill="none" opacity=".8"/>
+                    <!-- dark tower -->
+                    <path d="M236 460 L239 256 L233 244 L240 230 L238 208 L243 180 L246 166 L249 180 L254 208 L252 230 L259 244 L253 256 L256 460Z" fill="#050302"/>
+                    <path d="M241 170 L235 146 L245 164Z M253 170 L259 146 L249 164Z" fill="#050302"/>
+                    <g class="eye">
+                      <ellipse cx="247" cy="158" rx="10" ry="3.5" fill="#ff7a1a" filter="url(#lotrSoft)"/>
+                      <ellipse cx="247" cy="158" rx="4.5" ry="1.8" fill="#ffe0a0"/>
+                    </g>
+                    <!-- foreground ridge with a tiny fellowship -->
+                    <path d="M0 330 Q70 300 140 318 T300 306 V460 H0Z" fill="#040705"/>
+                    <g fill="#040705">
+                      <path d="M52 316 l2 -9 l2 9z"/><circle cx="54" cy="305" r="1.4"/>
+                      <path d="M61 314 l2 -8 l2 8z"/><circle cx="63" cy="304.5" r="1.3"/>
+                      <path d="M69 313 l1.6 -6 l1.6 6z"/><circle cx="70.6" cy="305.6" r="1.1"/>
+                      <path d="M75 312 l1.6 -6 l1.6 6z"/><circle cx="76.6" cy="304.6" r="1.1"/>
+                      <path d="M83 311 l2.2 -10 l2.2 10z"/><circle cx="85.2" cy="299.6" r="1.5"/>
+                      <path d="M88 311 l.6 -15" stroke="#040705" stroke-width=".8"/>
+                    </g>
+                  </svg>
+                </div>
+                <div class="layer layer-fg">
+                  <svg viewBox="0 0 300 460" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="lotrGold" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="#fff6d0"/>
+                        <stop offset=".3" stop-color="#f4c24f"/>
+                        <stop offset=".55" stop-color="#8f5a0e"/>
+                        <stop offset=".8" stop-color="#f0c35a"/>
+                        <stop offset="1" stop-color="#fff0b8"/>
+                      </linearGradient>
+                      <filter id="lotrBloom" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="7"/></filter>
+                    </defs>
+                    <g transform="translate(150 128)">
+                      <circle r="92" fill="#ffb347" opacity=".14" filter="url(#lotrBloom)"/>
+                      <circle r="56" fill="none" stroke="#ff9f3a" stroke-width="20" opacity=".45" filter="url(#lotrBloom)"/>
+                      <circle r="56" fill="none" stroke="url(#lotrGold)" stroke-width="12"/>
+                      <circle r="56" class="inscription" fill="none" stroke="#ffd27a" stroke-width="1.6" stroke-dasharray="2 3 7 2 1 4 4 2 9 3 3 2" opacity=".95"/>
+                      <path d="M-42 -37 A56 56 0 0 1 20 -52" fill="none" stroke="#fffbe8" stroke-width="2.2" stroke-linecap="round" opacity=".85"/>
+                      <circle r="62.5" fill="none" stroke="#fff1c2" stroke-width=".6" opacity=".45"/>
+                      <circle r="49.5" fill="none" stroke="#5a3606" stroke-width="1" opacity=".7"/>
+                    </g>
+                  </svg>
+                </div>
+                <div class="particles"></div>
+                <div class="card-shade"></div>
+                <div class="card-foil"></div>
+                <div class="card-glare"></div>
+                <div class="card-sweep"></div>
+              </div>
+              <div class="card-border"></div>
+              <div class="card-frame"></div>
+              <header class="card-top">
+                <span class="rarity">Legendary</span>
+                <span class="num">No.01/04</span>
+              </header>
+              <div class="card-body">
+                <div class="eyebrow">✦ Middle-earth Saga ✦</div>
+                <h2 class="title" id="t-lotr"><small>The Lord</small>of the Rings</h2>
+                <p class="subtitle">One Ring. Nine walkers. A journey that will decide the fate of every age.</p>
+                <div class="stats">
+                  <div class="stat"><span>Magic <b>96</b></span><i style="--v:96%"></i></div>
+                  <div class="stat"><span>Epic <b>99</b></span><i style="--v:99%"></i></div>
+                  <div class="stat"><span>Heart <b>92</b></span><i style="--v:92%"></i></div>
+                </div>
+                <button class="cta" type="button">View Synopsis
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+                </button>
+              </div>
+            </article>
+          </div>
+          <div class="ground"></div>
+        </div>
+      </li>
+
+      <!-- ============================ 02 · THE AVENGERS ============================ -->
+      <li class="slot theme-avengers" data-id="avengers" data-title="The Avengers" data-a="#b3152a" data-b="#1a47c9">
+        <div class="shell">
+          <div class="floater">
+            <article class="card" aria-labelledby="t-av">
+              <div class="card-glow"></div>
+              <div class="card-clip">
+                <div class="layer layer-bg">
+                  <svg viewBox="0 0 300 460" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="avSky" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#030616"/>
+                        <stop offset=".42" stop-color="#0c1d55"/>
+                        <stop offset=".72" stop-color="#3a0c2a"/>
+                        <stop offset="1" stop-color="#07030e"/>
+                      </linearGradient>
+                      <radialGradient id="avBurst" cx=".5" cy=".3" r=".6">
+                        <stop offset="0" stop-color="#c8f0ff" stop-opacity=".9"/>
+                        <stop offset=".14" stop-color="#4fb6ff" stop-opacity=".5"/>
+                        <stop offset=".42" stop-color="#1f3fbf" stop-opacity=".2"/>
+                        <stop offset="1" stop-color="#000" stop-opacity="0"/>
+                      </radialGradient>
+                    </defs>
+                    <rect width="300" height="460" fill="url(#avSky)"/>
+                    <rect width="300" height="460" fill="url(#avBurst)"/>
+                    <path d="M-20 330 L320 190 L320 214 L-20 354Z" fill="#d11a2a" opacity=".32"/>
+                    <path d="M-20 362 L320 222 L320 228 L-20 368Z" fill="#ffd35c" opacity=".35"/>
+                  </svg>
+                  <div class="av-rays"></div>
+                </div>
+                <div class="layer layer-mid">
+                  <svg viewBox="0 0 300 460" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <defs>
+                      <filter id="avSoft" x="-100%" y="-20%" width="300%" height="140%"><feGaussianBlur stdDeviation="2.5"/></filter>
+                    </defs>
+                    <!-- beam from tower to the sky portal -->
+                    <rect x="129" y="128" width="4" height="148" fill="#9fe6ff" opacity=".6" filter="url(#avSoft)"/>
+                    <rect x="130.3" y="128" width="1.4" height="148" fill="#f2fdff"/>
+                    <path fill="#050814" d="M0 460 V330 H18 V310 H30 V338 H44 V296 H58 V320 H70 V286 H84 V328 H96 V304 H108 V340 H120 V262 L126 254 V236 H136 V254 L142 262 V340 H158 V312 H172 V294 H184 V324 H198 V278 H214 V312 H226 V300 H240 V332 H254 V290 H268 V320 H282 V304 H300 V460Z"/>
+                    <g fill="#ffd98a" opacity=".55">
+                      <rect x="22" y="318" width="2" height="2"/><rect x="48" y="304" width="2" height="2"/><rect x="52" y="312" width="2" height="2"/>
+                      <rect x="74" y="296" width="2" height="2"/><rect x="78" y="308" width="2" height="2"/><rect x="100" y="314" width="2" height="2"/>
+                      <rect x="126" y="270" width="2" height="2"/><rect x="132" y="282" width="2" height="2"/><rect x="128" y="298" width="2" height="2"/>
+                      <rect x="176" y="302" width="2" height="2"/><rect x="202" y="288" width="2" height="2"/><rect x="208" y="300" width="2" height="2"/>
+                      <rect x="230" y="310" width="2" height="2"/><rect x="258" y="298" width="2" height="2"/><rect x="286" y="312" width="2" height="2"/>
+                    </g>
+                    <circle cx="131" cy="236" r="4" fill="#bff3ff" filter="url(#avSoft)"/>
+                  </svg>
+                </div>
+                <div class="layer layer-fg">
+                  <svg viewBox="0 0 300 460" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <defs>
+                      <radialGradient id="avCore">
+                        <stop offset="0" stop-color="#ffffff" stop-opacity=".95"/>
+                        <stop offset=".2" stop-color="#9fe6ff" stop-opacity=".7"/>
+                        <stop offset=".55" stop-color="#2f7dff" stop-opacity=".22"/>
+                        <stop offset="1" stop-color="#2f7dff" stop-opacity="0"/>
+                      </radialGradient>
+                      <filter id="avGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    </defs>
+                    <path class="bolt" d="M14 40 L60 96 L48 99 L104 128" stroke="#ffe27a" stroke-width="2" fill="none" filter="url(#avGlow)" stroke-linejoin="round"/>
+                    <path class="bolt b2" d="M290 30 L238 88 L252 92 L196 128" stroke="#bfe9ff" stroke-width="2" fill="none" filter="url(#avGlow)" stroke-linejoin="round"/>
+                    <g transform="translate(150 128)" filter="url(#avGlow)">
+                      <circle r="88" fill="url(#avCore)"/>
+                      <circle r="62" fill="none" stroke="#6fd3ff" stroke-width="1.6" opacity=".8"/>
+                      <circle r="54" class="spin" fill="none" stroke="#c9f2ff" stroke-width="5" stroke-dasharray="14 7"/>
+                      <circle r="43" fill="none" stroke="#3aa6ff" stroke-width="1.2"/>
+                      <circle r="39" class="spin-rev" fill="none" stroke="#ffd35c" stroke-width="1.6" stroke-dasharray="2 5"/>
+                      <path d="M0 -28 L24.2 14 L-24.2 14Z" fill="none" stroke="#eaf9ff" stroke-width="3.2" stroke-linejoin="round"/>
+                      <circle r="10" fill="#ffffff"/>
+                    </g>
+                  </svg>
+                </div>
+                <div class="particles"></div>
+                <div class="card-shade"></div>
+                <div class="card-foil"></div>
+                <div class="card-glare"></div>
+                <div class="card-sweep"></div>
+              </div>
+              <div class="card-border"></div>
+              <div class="card-frame"></div>
+              <header class="card-top">
+                <span class="rarity">Mythic</span>
+                <span class="num">No.02/04</span>
+              </header>
+              <div class="card-body">
+                <div class="eyebrow">Earth's Mightiest</div>
+                <h2 class="title" id="t-av"><small>The</small>Avengers</h2>
+                <p class="subtitle">When no single hero is enough, legends assemble as one.</p>
+                <div class="stats">
+                  <div class="stat"><span>Power <b>98</b></span><i style="--v:98%"></i></div>
+                  <div class="stat"><span>Action <b>97</b></span><i style="--v:97%"></i></div>
+                  <div class="stat"><span>Team <b>100</b></span><i style="--v:100%"></i></div>
+                </div>
+                <button class="cta" type="button">View Synopsis
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+                </button>
+              </div>
+            </article>
+          </div>
+          <div class="ground"></div>
+        </div>
+      </li>
+
+      <!-- ============================ 03 · MISSION: IMPOSSIBLE ============================ -->
+      <li class="slot theme-mi" data-id="mi" data-title="Mission: Impossible" data-a="#c20f2a" data-b="#2a0008">
+        <div class="shell">
+          <div class="floater">
+            <article class="card" aria-labelledby="t-mi">
+              <div class="card-glow"></div>
+              <div class="card-clip">
+                <div class="layer layer-bg">
+                  <svg viewBox="0 0 300 460" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="miBg" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#000"/>
+                        <stop offset=".55" stop-color="#0e0103"/>
+                        <stop offset="1" stop-color="#2a0207"/>
+                      </linearGradient>
+                      <radialGradient id="miSpot" cx=".5" cy=".3" r=".5">
+                        <stop offset="0" stop-color="#ff1f3d" stop-opacity=".3"/>
+                        <stop offset="1" stop-color="#ff1f3d" stop-opacity="0"/>
+                      </radialGradient>
+                    </defs>
+                    <rect width="300" height="460" fill="url(#miBg)"/>
+                    <rect width="300" height="460" fill="url(#miSpot)"/>
+                    <g stroke="#ff1f3d" stroke-width=".6" opacity=".3" fill="none">
+                      <path d="M150 230 L-300 460 M150 230 L-150 460 M150 230 L-40 460 M150 230 L50 460 M150 230 L150 460 M150 230 L250 460 M150 230 L340 460 M150 230 L450 460 M150 230 L600 460"/>
+                      <path d="M-20 240 H320 M-20 254 H320 M-20 274 H320 M-20 302 H320 M-20 340 H320 M-20 392 H320"/>
+                    </g>
+                    <g font-family="'Share Tech Mono', monospace" font-size="7" fill="#ff4d62" opacity=".7">
+                      <text x="34" y="70">LAT 48.8584 N</text>
+                      <text x="34" y="80">LON 02.2945 E</text>
+                      <text x="266" y="70" text-anchor="end">IMF // OP-07</text>
+                      <text x="266" y="80" text-anchor="end">REC ●</text>
+                    </g>
+                  </svg>
+                </div>
+                <div class="layer layer-mid">
+                  <svg viewBox="0 0 300 460" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <defs>
+                      <filter id="miGlow" x="-10%" y="-50%" width="120%" height="200%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    </defs>
+                    <g stroke="#ff1f3d" stroke-width="1.1" filter="url(#miGlow)">
+                      <line class="laser" x1="-10" y1="96"  x2="310" y2="200"/>
+                      <line class="laser" x1="-10" y1="214" x2="310" y2="112"/>
+                      <line class="laser" x1="-10" y1="150" x2="310" y2="250"/>
+                      <line class="laser" x1="-10" y1="258" x2="310" y2="160"/>
+                    </g>
+                  </svg>
+                </div>
+                <div class="layer layer-fg">
+                  <svg viewBox="0 0 300 460" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <defs>
+                      <filter id="miSpark" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    </defs>
+                    <g transform="translate(150 128)" stroke="#ff2a47" fill="none">
+                      <circle r="60" stroke-width="1" opacity=".55"/>
+                      <circle r="53" class="spin" stroke-width="3" stroke-dasharray="36 47" opacity=".95"/>
+                      <circle r="44" class="spin-rev" stroke-width="1" stroke-dasharray="2 4" opacity=".8"/>
+                      <path d="M-74 0 H-22 M22 0 H74 M0 -70 V-22 M0 22 V66" stroke-width="1" opacity=".8"/>
+                      <path d="M-60 -6 V6 M60 -6 V6 M-6 -60 H6 M-6 60 H6" stroke-width="1.6"/>
+                      <path d="M-32 -22 V-32 H-22 M22 -32 H32 V-22 M32 22 V32 H22 M-22 32 H-32 V22" stroke="#fff" stroke-width="1.2" opacity=".8"/>
+                      <circle r="3.5" fill="#ff2a47" stroke="none"/>
+                      <text x="36" y="-44" font-size="7" fill="#ff6b7d" stroke="none" font-family="'Share Tech Mono', monospace">TARGET LOCK</text>
+                    </g>
+                    <!-- burning fuse -->
+                    <path d="M24 208 H276" stroke="#3a0a0f" stroke-width="1.6"/>
+                    <path d="M24 208 H276" stroke="#d9b27a" stroke-width="1.6" stroke-dasharray="252 252">
+                      <animate attributeName="stroke-dashoffset" from="0" to="-252" dur="7s" repeatCount="indefinite"/>
+                    </path>
+                    <g filter="url(#miSpark)">
+                      <circle r="3.2" fill="#fff3c4">
+                        <animateMotion dur="7s" repeatCount="indefinite" path="M24 208 H276"/>
+                      </circle>
+                      <circle r="6" fill="#ff7a1a" opacity=".6">
+                        <animateMotion dur="7s" repeatCount="indefinite" path="M24 208 H276"/>
+                        <animate attributeName="r" values="4;7;5;8;4" dur=".4s" repeatCount="indefinite"/>
+                      </circle>
+                    </g>
+                  </svg>
+                </div>
+                <div class="particles"></div>
+                <div class="scan"></div>
+                <div class="card-shade"></div>
+                <div class="card-foil"></div>
+                <div class="card-glare"></div>
+                <div class="card-sweep"></div>
+              </div>
+              <div class="card-border"></div>
+              <div class="card-frame"></div>
+              <header class="card-top">
+                <span class="rarity">Top Secret</span>
+                <span class="num">No.03/04</span>
+              </header>
+              <div class="card-body">
+                <div class="eyebrow">// IMF Directive 07</div>
+                <h2 class="title" id="t-mi">Mission:<br><span class="glitch" data-text="Impossible">Impossible</span></h2>
+                <p class="subtitle">Your mission, should you choose to accept it…</p>
+                <div class="stats">
+                  <div class="stat"><span>Stealth <b>97</b></span><i style="--v:97%"></i></div>
+                  <div class="stat"><span>Stunts <b>100</b></span><i style="--v:100%"></i></div>
+                  <div class="stat"><span>Tech <b>93</b></span><i style="--v:93%"></i></div>
+                </div>
+                <button class="cta" type="button">View Synopsis
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+                </button>
+              </div>
+            </article>
+          </div>
+          <div class="ground"></div>
+        </div>
+      </li>
+
+      <!-- ============================ 04 · MIX OF MOVIES ============================ -->
+      <li class="slot theme-mix" data-id="mix" data-title="Mix of Movies" data-a="#8a2be2" data-b="#0fa3c9">
+        <div class="shell">
+          <div class="floater">
+            <article class="card" aria-labelledby="t-mix">
+              <div class="card-glow"></div>
+              <div class="card-clip">
+                <div class="layer layer-bg">
+                  <svg viewBox="0 0 300 460" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="mxBg" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="#1a0440"/>
+                        <stop offset=".5" stop-color="#34095f"/>
+                        <stop offset="1" stop-color="#062247"/>
+                      </linearGradient>
+                      <radialGradient id="mxGlowA" cx=".18" cy=".22" r=".55">
+                        <stop offset="0" stop-color="#ff4fd8" stop-opacity=".55"/><stop offset="1" stop-color="#ff4fd8" stop-opacity="0"/>
+                      </radialGradient>
+                      <radialGradient id="mxGlowB" cx=".85" cy=".5" r=".55">
+                        <stop offset="0" stop-color="#3ce0ff" stop-opacity=".45"/><stop offset="1" stop-color="#3ce0ff" stop-opacity="0"/>
+                      </radialGradient>
+                      <linearGradient id="mxBeam" x1="0" y1="1" x2="0" y2="0">
+                        <stop offset="0" stop-color="#ffffff" stop-opacity=".45"/>
+                        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+                      </linearGradient>
+                    </defs>
+                    <rect width="300" height="460" fill="url(#mxBg)"/>
+                    <rect width="300" height="460" fill="url(#mxGlowA)"/>
+                    <rect width="300" height="460" fill="url(#mxGlowB)"/>
+                    <polygon class="spot"   points="30,470 64,470 170,-30 104,-30" fill="url(#mxBeam)" opacity=".55"/>
+                    <polygon class="spot r" points="236,470 270,470 196,-30 130,-30" fill="url(#mxBeam)" opacity=".55"/>
+                  </svg>
+                </div>
+                <div class="layer layer-mid">
+                  <svg viewBox="0 0 300 460" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="mxHolo" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0" stop-color="#ff4fd8"/><stop offset=".33" stop-color="#ffe45c"/>
+                        <stop offset=".66" stop-color="#3ce0ff"/><stop offset="1" stop-color="#b56bff"/>
+                      </linearGradient>
+                    </defs>
+                    <path d="M-20 208 C 60 148, 120 238, 200 168 S 300 108, 330 128" stroke="#0a0518" stroke-width="32" fill="none" opacity=".92"/>
+                    <path class="strip-frames" d="M-20 208 C 60 148, 120 238, 200 168 S 300 108, 330 128" stroke="url(#mxHolo)" stroke-width="18" stroke-dasharray="20 5" fill="none" opacity=".55"/>
+                    <path class="strip-frames" d="M-20 196 C 60 136, 120 226, 200 156 S 300 96, 330 116" stroke="#fff" stroke-width="3" stroke-dasharray="4 6" fill="none" opacity=".6"/>
+                    <path class="strip-frames" d="M-20 220 C 60 160, 120 250, 200 180 S 300 120, 330 140" stroke="#fff" stroke-width="3" stroke-dasharray="4 6" fill="none" opacity=".6"/>
+                    <g fill="#fff">
+                      <path class="twinkle" d="M40 70 l1.6 5 l5 1.6 l-5 1.6 l-1.6 5 l-1.6 -5 l-5 -1.6 l5 -1.6z"/>
+                      <path class="twinkle" d="M258 104 l1.2 3.8 l3.8 1.2 l-3.8 1.2 l-1.2 3.8 l-1.2 -3.8 l-3.8 -1.2 l3.8 -1.2z"/>
+                      <path class="twinkle" d="M232 44 l1 3 l3 1 l-3 1 l-1 3 l-1 -3 l-3 -1 l3 -1z"/>
+                      <path class="twinkle" d="M62 176 l1 3 l3 1 l-3 1 l-1 3 l-1 -3 l-3 -1 l3 -1z"/>
+                    </g>
+                  </svg>
+                </div>
+                <div class="layer layer-fg">
+                  <svg viewBox="0 0 300 460" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="mxHolo2" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="#ff4fd8"/><stop offset=".33" stop-color="#ffe45c"/>
+                        <stop offset=".66" stop-color="#3ce0ff"/><stop offset="1" stop-color="#b56bff"/>
+                      </linearGradient>
+                      <radialGradient id="mxReelGlow">
+                        <stop offset="0" stop-color="#e3c8ff" stop-opacity=".5"/>
+                        <stop offset="1" stop-color="#b56bff" stop-opacity="0"/>
+                      </radialGradient>
+                      <filter id="mxGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    </defs>
+                    <g transform="translate(150 128)">
+                      <circle r="96" fill="url(#mxReelGlow)"/>
+                      <g class="spin-slow" filter="url(#mxGlow)">
+                        <circle r="56" fill="#140733" opacity=".7"/>
+                        <circle r="56" fill="none" stroke="url(#mxHolo2)" stroke-width="5"/>
+                        <circle r="48" fill="none" stroke="url(#mxHolo2)" stroke-width="1" opacity=".6"/>
+                        <g fill="#0b0420" stroke="url(#mxHolo2)" stroke-width="1.6">
+                          <circle cx="0" cy="-29" r="12"/>
+                          <circle cx="27.6" cy="-9" r="12"/>
+                          <circle cx="17" cy="23.5" r="12"/>
+                          <circle cx="-17" cy="23.5" r="12"/>
+                          <circle cx="-27.6" cy="-9" r="12"/>
+                        </g>
+                        <circle r="7" fill="url(#mxHolo2)"/>
+                        <circle r="2.5" fill="#0b0420"/>
+                      </g>
+                      <!-- orbiting emblems: a nod to every other universe -->
+                      <g class="orbit" filter="url(#mxGlow)">
+                        <circle cx="0" cy="-82" r="6" fill="none" stroke="#f0c35a" stroke-width="2.4"/>
+                        <path d="M68 38 l-6 10 h5 l-4 9 l10 -12 h-5 l4 -7z" fill="#7fd4ff"/>
+                        <g transform="translate(-71 41)" stroke="#ff2a47" stroke-width="1.4" fill="none">
+                          <circle r="6"/><path d="M-9 0 H9 M0 -9 V9"/>
+                        </g>
+                      </g>
+                    </g>
+                  </svg>
+                </div>
+                <div class="particles"></div>
+                <div class="card-shade"></div>
+                <div class="card-foil"></div>
+                <div class="card-glare"></div>
+                <div class="card-sweep"></div>
+              </div>
+              <div class="card-border"></div>
+              <div class="card-frame"></div>
+              <header class="card-top">
+                <span class="rarity">Ultra Holo</span>
+                <span class="num">No.04/04</span>
+              </header>
+              <div class="card-body">
+                <div class="eyebrow">◈ Wildcard Universe</div>
+                <h2 class="title" id="t-mix">Mix of<br>Movies</h2>
+                <p class="subtitle">Every universe. One ticket. Endless stories.</p>
+                <div class="stats">
+                  <div class="stat"><span>Variety <b>100</b></span><i style="--v:100%"></i></div>
+                  <div class="stat"><span>Twist <b>94</b></span><i style="--v:94%"></i></div>
+                  <div class="stat"><span>Fun <b>98</b></span><i style="--v:98%"></i></div>
+                </div>
+                <button class="cta" type="button">View Synopsis
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+                </button>
+              </div>
+            </article>
+          </div>
+          <div class="ground"></div>
+        </div>
+      </li>
+
+    </ul>
+  </section>
+
+  <footer class="hints">
+    <span>Move cursor to explore</span>
+    <span>Click a card to enter</span>
+    <span><kbd>←</kbd><kbd>→</kbd> Navigate</span>
+    <span><kbd>Esc</kbd> Back</span>
+  </footer>
+</main>
+
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const root = document.documentElement;
+  const body = document.body;
+  const deck = document.querySelector('.deck');
+  const lbName = document.getElementById('lbName');
+  const lbTag = document.getElementById('lbTag');
+  const backBtn = document.getElementById('backBtn');
+  const letterboxes = document.querySelectorAll('.letterbox');
+
+  const MAX_TILT = reduce ? 5 : 14;
+  const PERSP = 1600;   // must match .shell perspective()
+  const LIFT = 140;     // must match translateZ in .is-selected
+  const PROPS = ['rx', 'ry', 'mx', 'my', 'hov', 's'];
+
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const lerp = (a, b, k) => a + (b - a) * k;
+
+  const cards = [...document.querySelectorAll('.slot')].map((slot, i) => {
+    slot.style.setProperty('--i', i);
+    const rest = { rx: 0, ry: 0, mx: .5, my: .5, hov: 0, s: 1 };
+    return {
+      slot, i,
+      card: slot.querySelector('.card'),
+      cta: slot.querySelector('.cta'),
+      id: slot.dataset.id,
+      title: slot.dataset.title,
+      rest, t: { ...rest }, v: { ...rest }
+    };
+  });
+
+  let focused = null;
+  let lockUntil = 0;
+  let readyTimer = 0;
+  const page = { tx: 0, ty: 0, x: 0, y: 0 };
+
+  /* ---------- scene tint follows the hovered universe ---------- */
+  function setScene(c) {
+    if (c) {
+      root.style.setProperty('--scene-a', c.slot.dataset.a);
+      root.style.setProperty('--scene-b', c.slot.dataset.b);
+    } else {
+      root.style.removeProperty('--scene-a');
+      root.style.removeProperty('--scene-b');
+    }
+  }
+
+  /* ---------- hover / tilt ---------- */
+  function activate(c) {
+    if (focused || performance.now() < lockUntil) return;
+    c.slot.classList.add('is-hover');
+    c.t.hov = 1;
+    c.t.s = 1.045;
+    setScene(c);
+  }
+
+  function deactivate(c) {
+    if (focused) return;
+    c.slot.classList.remove('is-hover');
+    Object.assign(c.t, c.rest);
+    if (!cards.some(o => o.slot.classList.contains('is-hover'))) setScene(null);
+  }
+
+  function track(c, e) {
+    if (focused) return;
+    if (!c.slot.classList.contains('is-hover')) activate(c);
+    if (!c.slot.classList.contains('is-hover')) return;
+    // measure the untransformed layout box so the tilt never feeds back into itself
+    const r = c.slot.getBoundingClientRect();
+    const x = clamp((e.clientX - r.left) / r.width);
+    const y = clamp((e.clientY - r.top) / r.height);
+    c.t.mx = x;
+    c.t.my = y;
+    c.t.rx = (x - .5) * 2 * MAX_TILT;
+    c.t.ry = -(y - .5) * 2 * MAX_TILT;
+  }
+
+  cards.forEach(c => {
+    c.slot.addEventListener('pointerenter', () => activate(c));
+    c.slot.addEventListener('pointermove', e => track(c, e));
+    c.slot.addEventListener('pointerleave', () => deactivate(c));
+    c.slot.addEventListener('click', () => select(c));
+    c.cta.addEventListener('focus', () => activate(c));
+    c.cta.addEventListener('blur', () => deactivate(c));
+  });
+
+  addEventListener('pointermove', e => {
+    page.tx = (e.clientX / innerWidth - .5) * 2;
+    page.ty = (e.clientY / innerHeight - .5) * 2;
+  }, { passive: true });
+
+  /* ---------- render loop (all motion is lerped for buttery easing) ---------- */
+  function tick(now) {
+    page.x = lerp(page.x, focused ? 0 : page.tx, .05);
+    page.y = lerp(page.y, focused ? 0 : page.ty, .05);
+    root.style.setProperty('--px', page.x.toFixed(4));
+    root.style.setProperty('--py', page.y.toFixed(4));
+
+    for (const c of cards) {
+      if (focused === c) {
+        // hero idle: a slow, breathing tilt while the card owns the stage
+        const k = now / 1000;
+        c.t.rx = Math.sin(k * .8) * 6;
+        c.t.ry = Math.cos(k * .6) * 4;
+        c.t.mx = .5 + Math.sin(k * .8) * .35;
+        c.t.my = .5 - Math.cos(k * .6) * .3;
+        c.t.hov = 1;
+        c.t.s = 1;
+      }
+      let changed = false;
+      for (const p of PROPS) {
+        const target = c.t[p];
+        let nv = lerp(c.v[p], target, p === 'hov' ? .08 : .11);
+        if (Math.abs(nv - target) < 1e-4) nv = target;
+        if (nv !== c.v[p]) { c.v[p] = nv; changed = true; }
+      }
+      if (changed) {
+        const st = c.card.style;
+        st.setProperty('--rx', c.v.rx.toFixed(3));
+        st.setProperty('--ry', c.v.ry.toFixed(3));
+        st.setProperty('--mx', c.v.mx.toFixed(4));
+        st.setProperty('--my', c.v.my.toFixed(4));
+        st.setProperty('--hov', c.v.hov.toFixed(4));
+        st.setProperty('--s', c.v.s.toFixed(4));
+        c.slot.style.setProperty('--hov', c.v.hov.toFixed(4)); // ground glow
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  /* ---------- cinematic focus ---------- */
+  function place(c) {
+    const r = c.slot.getBoundingClientRect();
+    const f = PERSP / (PERSP - LIFT);
+    const tx = (innerWidth / 2 - (r.left + r.width / 2)) / f;
+    const ty = (innerHeight / 2 - (r.top + r.height / 2)) / f;
+    const lb = Math.max(56, innerHeight * .1) * 2;
+    const s = clamp(Math.min(((innerHeight - lb) * .9) / (r.height * f), (innerWidth * .86) / (r.width * f)), .8, 1.7);
+    c.slot.style.setProperty('--tx', tx.toFixed(1) + 'px');
+    c.slot.style.setProperty('--ty', ty.toFixed(1) + 'px');
+    c.slot.style.setProperty('--ts', s.toFixed(3));
+  }
+
+  function select(c) {
+    if (focused) return;
+    focused = c;
+    place(c);
+
+    cards.forEach(o => {
+      if (o === c) return;
+      const d = o.i - c.i;
+      const side = Math.sign(d);
+      o.slot.style.setProperty('--dx', side * (180 + Math.abs(d) * 90) + 'px');
+      o.slot.style.setProperty('--dry', side * 32 + 'deg');
+      o.slot.style.setProperty('--delay', ((Math.abs(d) - 1) * .07).toFixed(2) + 's');
+      o.slot.classList.remove('is-hover');
+      Object.assign(o.t, o.rest);
+    });
+
+    c.slot.classList.add('is-selected', 'is-hover');
+    deck.classList.add('is-focusing');
+    body.classList.add('is-focused');
+    body.dataset.universe = c.id;
+    setScene(c);
+    root.style.setProperty('--focus-a', getComputedStyle(c.slot).getPropertyValue('--accent').trim() || '#fff');
+    lbName.textContent = c.title;
+    lbTag.textContent = 'Scene ' + String(c.i + 1).padStart(2, '0');
+
+    deck.inert = true;
+    letterboxes.forEach(l => (l.inert = false));
+    setTimeout(() => { if (focused === c) backBtn.focus({ preventScroll: true }); }, 900);
+
+    clearTimeout(readyTimer);
+    readyTimer = setTimeout(() => {
+      if (focused !== c) return;
+      body.classList.add('is-ready');
+      // Hook for the upcoming synopsis screen.
+      dispatchEvent(new CustomEvent('cineverse:select', { detail: { id: c.id, title: c.title } }));
+    }, 3100);
+  }
+
+  function reset() {
+    if (!focused) return;
+    const c = focused;
+    focused = null;
+    lockUntil = performance.now() + 900;
+    clearTimeout(readyTimer);
+
+    cards.forEach(o => o.slot.style.setProperty('--delay', (o.i * .05).toFixed(2) + 's'));
+    c.slot.classList.remove('is-selected', 'is-hover');
+    Object.assign(c.t, c.rest);
+    deck.classList.remove('is-focusing');
+    body.classList.remove('is-focused', 'is-ready');
+    delete body.dataset.universe;
+    setScene(null);
+
+    deck.inert = false;
+    letterboxes.forEach(l => (l.inert = true));
+    backBtn.blur();
+  }
+
+  backBtn.addEventListener('click', reset);
+
+  addEventListener('keydown', e => {
+    if (e.key === 'Escape') { reset(); return; }
+    if (focused) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      const idx = cards.findIndex(c => c.cta === document.activeElement);
+      const next = idx < 0 ? 0 : (idx + (e.key === 'ArrowRight' ? 1 : -1) + cards.length) % cards.length;
+      cards[next].cta.focus();
+      e.preventDefault();
+    }
+  });
+
+  addEventListener('resize', () => { if (focused) place(focused); });
+
+  /* ---------- per-universe particles ---------- */
+  if (!reduce) {
+    const counts = { lotr: 18, avengers: 16, mi: 12, mix: 22 };
+    cards.forEach(c => {
+      const box = c.slot.querySelector('.particles');
+      for (let k = 0; k < counts[c.id]; k++) {
+        const p = document.createElement('i');
+        const dur = 4 + Math.random() * 6;
+        p.style.cssText =
+          `--x:${(Math.random() * 100).toFixed(1)}%;--y:${(Math.random() * 100).toFixed(1)}%;` +
+          `--sz:${(1 + Math.random() * 2.2).toFixed(1)}px;--dur:${dur.toFixed(2)}s;` +
+          `--del:${(-Math.random() * dur).toFixed(2)}s;--drift:${Math.round(Math.random() * 40 - 20)}px`;
+        if (c.id === 'mi') p.textContent = Math.random() > .5 ? '1' : '0';
+        box.appendChild(p);
+      }
+    });
+  }
+
+  /* ---------- ambient dust (canvas) ---------- */
+  const cvs = document.getElementById('dust');
+  const ctx = cvs.getContext('2d');
+  let W = 0, H = 0, DPR = 1;
+  const motes = [];
+
+  function size() {
+    DPR = Math.min(devicePixelRatio || 1, 2);
+    W = cvs.width = innerWidth * DPR;
+    H = cvs.height = innerHeight * DPR;
+  }
+  size();
+  addEventListener('resize', size);
+
+  const N = reduce ? 30 : 90;
+  for (let k = 0; k < N; k++) {
+    motes.push({
+      x: Math.random(), y: Math.random(),
+      z: .2 + Math.random() * .8,
+      r: .4 + Math.random() * 1.5,
+      vy: .00005 + Math.random() * .00022,
+      ph: Math.random() * Math.PI * 2
+    });
+  }
+
+  function dust(now) {
+    ctx.clearRect(0, 0, W, H);
+    for (const m of motes) {
+      if (!reduce) {
+        m.y -= m.vy * m.z;
+        if (m.y < -.02) { m.y = 1.02; m.x = Math.random(); }
+      }
+      const px = (m.x + Math.sin(now / 4000 + m.ph) * .004) * W - page.x * 40 * m.z * DPR;
+      const py = m.y * H - page.y * 26 * m.z * DPR;
+      const a = (.12 + .5 * m.z) * (.6 + .4 * Math.sin(now / 900 + m.ph));
+      ctx.beginPath();
+      ctx.arc(px, py, m.r * m.z * DPR, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,240,220,${a.toFixed(3)})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(dust);
+  }
+  requestAnimationFrame(dust);
+})();
+</script>
+</body>
+</html>
