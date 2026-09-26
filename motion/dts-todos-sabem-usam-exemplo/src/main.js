@@ -1,0 +1,39 @@
+import * as THREE from 'three';
+import { TTFLoader } from 'three/addons/loaders/TTFLoader.js';
+import { Font } from 'three/addons/loaders/FontLoader.js';
+import { World } from './world.js';
+import { buildFilm } from './timeline.js';
+
+const W = 1920, H = 1080;
+// ?q=0.5 renders the 3D at half resolution for fast motion previews (HUD stays 1080p)
+const Q = +(new URLSearchParams(location.search).get('q') || 1);
+const world = new World(document.getElementById('gl'), Math.round(W * Q), Math.round(H * Q));
+const cam = world.camera;
+const loadImg = (src) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('img ' + src)); i.src = src; });
+
+export function project(p) {
+  const v = new THREE.Vector3(p[0], p[1], p[2]);
+  const d = v.clone().applyMatrix4(cam.matrixWorldInverse);
+  v.project(cam);
+  return { x: (v.x * 0.5 + 0.5) * W, y: (-v.y * 0.5 + 0.5) * H, depth: -d.z, vis: -d.z > 1 };
+}
+
+async function boot() {
+  await Promise.all(['500 20px Inter', '600 20px Inter', '700 20px Inter', '800 20px Inter', '900 20px Inter', '500 20px "JetBrains Mono"', '700 20px "JetBrains Mono"'].map((f) => document.fonts.load(f)));
+  const manifest = await (await fetch('tex/manifest.json')).json();
+  const texNames = Object.keys(manifest).filter((k) => !k.startsWith('_'));
+  const imgs = {};
+  await Promise.all(texNames.map(async (n) => { imgs[n] = await loadImg(`tex/${n}.png`); }));
+  imgs.screen_inicio = await loadImg('tex/screen_inicio.webp'); // print da tela Início do FLOWS
+  const fontJson = await new Promise((res, rej) => new TTFLoader().load('fonts/Nunito-900.ttf', res, undefined, rej));
+  const font = new Font(fontJson);
+  const tex = (n) => { const t = new THREE.Texture(imgs[n]); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = world.maxAniso; t.needsUpdate = true; return t; };
+  const ctx = { THREE, world, cam, project, font, imgs, tex, manifest, W, H, hud: document.getElementById('hud') };
+  const film = buildFilm(ctx);
+  window.DURATION = film.duration;
+  window.__world = world; window.__THREE = THREE;
+  window.seek = (t) => { film.update(t); world.render(); return true; };
+  window.seek(0);
+  window.ready = true;
+}
+boot().catch((e) => { console.error(e); window.bootError = String((e && e.stack) || e); });
