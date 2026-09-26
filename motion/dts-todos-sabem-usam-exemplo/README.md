@@ -56,7 +56,7 @@ npm run preview                    # quadros avulsos em out/preview (PNG)
 Q=0.5 node render.mjs frames 4 0 1 out/lr          # prévia rápida: 3D em meia resolução, 4 fps
 node render.mjs frames 24 0 3 out/frames & node render.mjs frames 24 1 3 out/frames & node render.mjs frames 24 2 3 out/frames
 ffmpeg -framerate 24 -i out/frames/f_%05d.jpg -i audio/soundtrack.wav \
-       -vf "scale=out_color_matrix=bt709:out_range=tv,format=yuv420p" -c:v libx264 -preset slow -crf 19 \
+       -vf "scale=out_color_matrix=bt709:out_range=tv,format=yuv420p" -c:v libx264 -preset slow -crf 20 \
        -profile:v high -colorspace bt709 -color_primaries bt709 -color_trc bt709 -movflags +faststart \
        -c:a aac -b:a 192k -ar 48000 -shortest video/DTS_Todos_Sabem_Usam_Exemplo_3D.mp4
 npm run storyboard
