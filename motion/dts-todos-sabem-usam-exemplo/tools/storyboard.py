@@ -6,7 +6,7 @@ F = lambda s, w=700: ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVu
 BLUE, ORANGE, GOLD = (61, 139, 255), (255, 138, 31), (242, 181, 68)
 # (tempo, cena, pilar)
 beats = [(1.6, 'Abertura: céu dourado e praça', None), (3.75, 'Emblema DTS 3D', None), (8.0, 'Como a DTS compartilha conhecimento', None),
-         (11.0, 'Pilar 1 · Todos Sabem', BLUE), (14.2, 'Início do FLOWS', BLUE), (18.6, '441 skills na Biblioteca', BLUE),
+         (11.0, 'Pilar 1 · Todos Sabem', BLUE), (14.2, 'Início do FLOWS', BLUE), (19.3, '441 skills na Biblioteca', BLUE),
          (22.0, 'Skills prontas para reuso', BLUE), (25.0, 'Pilar 2 · Todos Usam', ORANGE), (28.1, 'Passo 1 · Compartilhar Skill', ORANGE),
          (33.6, 'Passo 2 · nome digitado', ORANGE), (36.6, 'Prefixo da área [DTS]', ORANGE), (40.0, 'Passo 3 · Flows / Claude', ORANGE),
          (45.2, 'Passo 4 · tambor de modelos', ORANGE), (47.9, 'Tempo manual (opcional)', ORANGE), (51.6, 'Passo 5 · arquivos → ZIP', ORANGE),
