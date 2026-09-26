@@ -1,0 +1,16 @@
+{
+  "name": "flows-compartilhar-skill-motion",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Curta 3D (motion graphics) do fluxo Compartilhar Skill do FLOWS — composição em three.js + CSS3D renderizada quadro a quadro",
+  "scripts": {
+    "audio": "python3 audio/soundtrack.py audio/soundtrack.wav",
+    "preview": "node render.mjs preview 4.2,12,25,33.5,45.5,53.2,61.3,68.5 out/preview",
+    "frames": "node render.mjs frames 24 0 1 out/frames"
+  },
+  "dependencies": {
+    "playwright-core": "1.56.0",
+    "three": "0.160.0"
+  }
+}
