@@ -8,7 +8,10 @@ cues on the film clock, from the same schedules as src/timeline.js. v6: Fabio's 
 between the ident and the film; its sound is replaced by this same score (same key, tempo and
 instruments), written on his gestures, so the intro flows into the film as one piece of music.
 v6 (final): the A&M ident is off and the intro keeps Fabio's own sound (his finger snap, DTS
-appearing); it hands over to the score at the cut with a short crossfade (both in D major)."""
+appearing); it hands over to the score at the cut with a short crossfade (both in D major).
+v7: on the reading-paced clock (src/pace.js): the insert cues come from the same schedules as the
+picture (SCHED), the opening holds its chord while the title is read over the pillar, then moves
+to the IV as the camera comes down and resolves as the Pilar 01 lockup settles."""
 import subprocess, tempfile
 import numpy as np, wave, sys, math, json, re, os
 from scipy.signal import butter, sosfilt, fftconvolve
@@ -46,7 +49,9 @@ def T(s):
     """global time of story time s"""
     return FILM0 + float(np.interp(s, _st, _nt))
 # inserts: flat segments of PACE -> (global start, global end), in order tour / name / det
-DESIGN = json.loads(re.search(r'INSERT_DESIGN = (\{.*?\});', open(os.path.join(HERE, '..', 'src', 'pace.js')).read()).group(1))
+PACE_SRC = open(os.path.join(HERE, '..', 'src', 'pace.js')).read()
+DESIGN = json.loads(re.search(r'INSERT_DESIGN = (\{.*?\});', PACE_SRC).group(1))
+SCHED = json.loads(re.search(r'SCHED = (\{.*?\});', PACE_SRC, re.S).group(1))   # insert schedules (shared with the picture)
 INS = [(FILM0 + PACE[i][0], FILM0 + PACE[i + 1][0]) for i in range(len(PACE) - 1) if PACE[i][1] == PACE[i + 1][1]]
 INS = [(a, b, DESIGN[n] / (b - a)) for (a, b), n in zip(INS, ['tour', 'name', 'det'])]   # (start, end, design seconds per film second)
 I_TOUR, I_NAME, I_DET = INS
@@ -372,12 +377,19 @@ if INTRO['sound'] == 'clip':
     # the clip) as the Todos Sabem letters form: our strings bloom out of that hit, on the same chord,
     # and carry the hold; nothing rhythmic of ours starts until the clip's music has rung out
     HIT = ID + 10.0
+    OUT = FILM0 + INTRO['out'][0]              # the title starts to leave; the camera then comes down (story 11.0 -> 11.2)
+    CR0, CR1 = G(11.0), G(11.2)
     d = P1e - HIT + 1.2
-    for m in CH['Dmaj9']:
-        s_ = strings(midi(m), d + 2.4, 0.46) * env_adsr(int((d + 2.4) * SR), 0.45, 0.4, 0.9, 2.4)
-        add(mus, HIT - 0.06, s_, 0.052 * (1.3 if m < 48 else 1.0), pan=(m % 5 - 2) / 5)
+    # a low D pedal under the whole pillar moment
     add(mus, HIT - 0.06, lp(saw_pad(midi(38), d + 2.4, 0.3) * env_adsr(int((d + 2.4) * SR), 0.5, 0.4, 0.9, 2.4), 600), 0.12)
-    cue(P1h - 0.3, shimmer(1.8, 21), 0.04)   # a soft glint as the camera settles
+    for (c, a, b, g) in (('Dmaj9', HIT - 0.06, CR0 + 0.5, 0.052), ('Gmaj7', CR0 - 0.2, CR1 + 1.0, 0.044), ('Dadd9', CR1 + 0.6, P1e + 1.2, 0.05)):
+        dd = b - a + 1.6
+        for m in CH[c]:
+            s_ = strings(midi(m), dd, 0.46) * env_adsr(int(dd * SR), 0.45 if c == 'Dmaj9' else 0.9, 0.4, 0.9, 1.6)
+            add(mus, a, s_, g * (1.3 if m < 48 else 1.0), pan=(m % 5 - 2) / 5)
+    cue(OUT, whoosh(1.1, 2600, 700, 0.35), 0.035, 0.1)            # the title lifts away
+    cue(CR0 + 0.1, whoosh(1.5, 700, 220, 0.5), 0.05, -0.1)        # the camera comes down onto the pillar
+    cue(P1h - 0.35, shimmer(1.8, 21), 0.045); cue(P1h - 0.3, bell(midi(86), 2.8, 1.0, 2.0), 0.035)   # the lockup settles
 else:
     pillar_swell(P1m, P1h, 'Dadd9', 0.05, 0.45)
     cue(P1h - 0.35, shimmer(1.8, 21), 0.06); cue(P1h - 0.3, bell(midi(86), 2.8, 1.0, 2.0), 0.06); cue(P1h - 0.3, sub_boom(2.0, 70, 36), 0.12)
@@ -434,7 +446,7 @@ if INTRO['sound'] != 'clip':   # with the clip's sound, its own music already ca
     for k, (t0, n, g) in enumerate([(-0.06, 11, 0.035), (0.3, 10, 0.02)]):
         for i in range(n): add(sfx, FILM0 + t0 + i * 0.05 + 0.22, pizz(midi(74 + [0, 2, 4, 7, 9][i % 5] + (i // 5) * 12 - 12), 0.35), g, -0.5 + k * 0.9)
     add(sfx, FILM0 + 0.02, thump(0.3), 0.1, -0.4)
-scue(11.4, whoosh(1.0, 1200, 200, 0.3), 0.07); scue(12.3, whoosh(1.2, 200, 1600, 0.6), 0.1); scue(13.1, thump(0.3), 0.12)
+scue(11.55, whoosh(1.0, 1200, 200, 0.3), 0.07); scue(12.3, whoosh(1.2, 200, 1600, 0.6), 0.1); scue(13.1, thump(0.3), 0.12)
 scue(15.9, whoosh(1.0, 1600, 200, 0.4), 0.08)
 for i in range(24): scue(16.2 + (i / 24) * 2.6, pizz(midi(86 + [0, 2, 4, 7, 9][i % 5]), 0.3), 0.018, math.sin(i) * 0.8)
 ticks_for(16.7, 19.3, 18, 2200, 0.06)
@@ -506,40 +518,45 @@ scue(75.9, whoosh(1.0, 1400, 150, 0.35), 0.1)
 scue(76.5, whoosh(1.2, 150, 1300, 0.6), 0.12); scue(77.2, thump(0.35), 0.18); scue(77.22, sub_boom(1.6, 76, 40), 0.14)
 for k in range(3): scue(76.7 + k * 0.25, shimmer(0.8, 50 + k), 0.03, -0.6 + k * 0.6)
 for i, tt in enumerate([78.1, 78.52, 78.94]): scue(tt, bell(midi(81 + i * 4), 2.6), 0.06, -0.5 + i * 0.5)
-scue(79.0, bell(midi(86), 2.4), 0.035); scue(79.8, bell(midi(93), 2.2), 0.03)
+scue(79.1, bell(midi(86), 2.4), 0.035); scue(79.45, bell(midi(93), 2.2), 0.03)
 # motion-graphics layer: step tracker ticks and completion notes, focus frame, counters
 for s in [26.0, 30.6, 37.5, 42.5, 48.5, 55.5]: scue(s + 0.02, click(3400, 0.02, 0.15), 0.06, 0.7)
 for i, s in enumerate([30.6, 37.5, 42.5, 48.5, 55.5, 58.2]): scue(s, glock(midi(86 + [0, 2, 4, 5, 7, 9][i]), 1.2), 0.03, 0.7)
 for s in [31.25, 37.6, 42.6, 47.2, 54.5, 55.7]: scue(s, click(2900, 0.025, 0.25), 0.07)
-for s in [16.65, 60.35]: scue(s, bell(midi(90), 1.8), 0.04)
+for s in [16.65, 60.3]: scue(s, bell(midi(90), 1.8), 0.04)
 
 # ================================================================== v5 inserts (film clock)
 def icue(ins, u, sig, g=1.0, pan=0.0): add(sfx, ins[0] + u / ins[2], sig, g, pan)
 def uiclick(ins, u, g=0.16): icue(ins, u, click(2500, 0.035, 0.6), g, 0.1); icue(ins, u + 0.005, pop(1100, 420, 0.06), 0.03, 0.1)
+ST, SN, SD = SCHED['tour'], SCHED['name'], SCHED['det']
 # FLOWS tour: cursor, clicks, page dissolves, highlight rings, the trophies
-icue(I_TOUR, 0.45, whoosh(0.6, 1200, 3200, 0.5), 0.025, 0.4)
-for u in (1.75, 3.2, 5.6, 7.05): uiclick(I_TOUR, u)
-for u in (1.85, 5.7, 7.15): icue(I_TOUR, u, whoosh(0.55, 700, 3000, 0.45), 0.06, -0.1)
-for u, m in ((1.25, 86), (3.15, 88), (3.95, 90), (6.55, 86)): icue(I_TOUR, u, glock(midi(m), 1.2), 0.028, 0.3)
-for i in range(5): icue(I_TOUR, 7.85 + i * 0.15, tink(2600 + i * 260), 0.035, -0.5 + i * 0.25)
+icue(I_TOUR, ST['curVis'][0], whoosh(0.6, 1200, 3200, 0.5), 0.025, 0.4)
+for u in ST['clk']: uiclick(I_TOUR, u)
+for u0, u1, a, b in ST['scr']: icue(I_TOUR, u0 + 0.02, whoosh(0.55, 700, 3000, 0.45), 0.06, -0.1)
+for k, m in ((0, 86), (1, 88), (2, 88), (3, 90), (5, 86)): icue(I_TOUR, ST['rings'][k][1][0] + 0.1, glock(midi(m), 1.2), 0.028, 0.3)
+for i, (r, e) in enumerate(ST['rings'][6:]): icue(I_TOUR, e[0] + 0.1, tink(2600 + i * 260), 0.035, -0.5 + i * 0.25)
 # name anatomy: one note per part of the name, then a small chord for the whole pattern
-for u, m in ((0.25, 81), (1.65, 85), (3.05, 88)): icue(I_NAME, u, marker(0.24), 0.06); icue(I_NAME, u + 0.02, glock(midi(m), 1.4), 0.045)
-for i, m in enumerate((81, 85, 88, 93)): icue(I_NAME, 4.35 + i * 0.05, celesta(midi(m), 1.8), 0.03, -0.3 + i * 0.2)
-icue(I_NAME, 4.35, shimmer(1.2, 61), 0.04)
+for u, m in zip(SN['t0'], (81, 85, 88)): icue(I_NAME, u, marker(0.24), 0.06); icue(I_NAME, u + 0.02, glock(midi(m), 1.4), 0.045)
+for i, m in enumerate((81, 85, 88, 93)): icue(I_NAME, SN['all'] + i * 0.05, celesta(midi(m), 1.8), 0.03, -0.3 + i * 0.2)
+icue(I_NAME, SN['all'], shimmer(1.2, 61), 0.04)
 # Detalhes: the page dissolves in, clicks, the area list, typing, chips, description, share
+TL = {}
+for u, n in SD['tl']: TL.setdefault(n, u)
 icue(I_DET, 0.05, whoosh(0.6, 600, 3000, 0.5), 0.07)
-for u in (1.95, 3.05, 3.75, 5.65, 7.0, 8.0, 9.15): uiclick(I_DET, u)
-icue(I_DET, 1.99, glock(midi(86), 1.0), 0.025)                       # Template selected
-icue(I_DET, 3.1, pop(800, 400, 0.08), 0.04); icue(I_DET, 3.8, tink(2900), 0.04)   # list opens, DTS chosen
-for a, b in ((4.6, 5.6), (8.1, 9.1)): icue(I_DET, a, whoosh((b - a) / I_DET[2], 1500, 900, 0.5, 0.6), 0.025, 0.2)   # scroll
-for i in range(9): icue(I_DET, 5.75 + i * 0.083, key(700 + i), 0.16, -0.1)                 # domingues
-for i in range(6): icue(I_DET, 7.1 + i * 0.075, key(720 + i), 0.16, -0.1)                  # talita
-for u in (6.55, 7.6): icue(I_DET, u, pop(1300, 700, 0.07), 0.03)                          # suggestion
-for u in (7.02, 8.02): icue(I_DET, u, pop(900, 300, 0.12), 0.06); icue(I_DET, u + 0.03, tink(3200), 0.03)   # chip
+for u in SD['clk'][:-1]: uiclick(I_DET, u)
+icue(I_DET, TL['d_tpl'] + 0.02, glock(midi(86), 1.0), 0.025)                                     # Template selected
+icue(I_DET, TL['d_area_hi0'], pop(800, 400, 0.08), 0.04); icue(I_DET, TL['d_area_act'] + 0.02, tink(2900), 0.04)   # list opens, DTS chosen
+for a, b in SD['scroll']: icue(I_DET, a, whoosh((b - a) / I_DET[2], 1500, 900, 0.5, 0.6), 0.025, 0.2)   # scroll
 R5 = np.random.default_rng(55)
-for i in range(38): icue(I_DET, 9.25 + i * 0.045 + R5.random() * 0.012, key(800 + i), 0.09 + R5.random() * 0.04, 0.05)   # description
-for u in (11.0, 11.45): icue(I_DET, u, marker(0.26), 0.06)
-icue(I_DET, 12.85, click(2200, 0.05, 0.7), 0.34); icue(I_DET, 12.87, bell(midi(86), 1.8), 0.05); icue(I_DET, 12.9, shimmer(1.0, 63), 0.04)
+for pre, i0_, i1_, t0, dt, pad in SD['typ']:
+    for i in range(i1_ - i0_ + 1):
+        if pre == 'd_desc_':   # a word per step: two soft keys each
+            for h in (0.0, 0.5): icue(I_DET, t0 + (i + h) * dt - 0.02 + R5.random() * 0.012, key(800 + 2 * i + int(h * 2)), 0.08 + R5.random() * 0.035, 0.05)
+        else: icue(I_DET, t0 + i * dt - 0.01, key(700 + i + (20 if pre == 'd_p2_' else 0)), 0.16, -0.1)
+for n in ('d_p1_sugg', 'd_p2_sugg'): icue(I_DET, TL[n], pop(1300, 700, 0.07), 0.03)                  # suggestion
+for n in ('d_p2_0', 'd_people'): icue(I_DET, TL[n], pop(900, 300, 0.12), 0.06); icue(I_DET, TL[n] + 0.03, tink(3200), 0.03)   # chip
+for n in ('d_desc_hl1', 'd_desc_hl2'): icue(I_DET, TL[n], marker(0.26), 0.06)
+u = SD['clk'][-1]; icue(I_DET, u, click(2200, 0.05, 0.7), 0.34); icue(I_DET, u + 0.02, bell(midi(86), 1.8), 0.05); icue(I_DET, u + 0.05, shimmer(1.0, 63), 0.04)
 
 # ================================================================== mix & master
 def reverb_ir(d=3.0, seed=3):

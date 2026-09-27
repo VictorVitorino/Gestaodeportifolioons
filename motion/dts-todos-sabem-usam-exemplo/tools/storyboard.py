@@ -33,21 +33,21 @@ TOUR, NAME, DET = [(lambda a, b, n: (lambda u: FILM0 + a + u * (b - a) / DESIGN[
 # (global time, scene, act colour): ident beats in global time, film beats placed from story time
 beats = ([(3.4, 'Vinheta A&M: trilhas de luz no palco', AMB), (5.3, 'O monograma nasce da luz', AMB), (8.2, 'Alvarez & Marsal apresenta', AMB)] if INTRO['ident'] else []) + [
          (IU(1.2), 'Fabio abre o filme', None), (IU(3.1), 'Um estalo de dedo...', None), (IU(4.6), '...e o emblema DTS surge', None), (IU(5.6), 'A praça do filme', None),
-         (IU(8.0), 'Como DTS compartilha conhecimento', None), (G(11.4), 'Pilar 01 · Todos Sabem', BLUE), (G(14.0), 'Início do FLOWS', BLUE),
-         (TOUR(1.6), 'Tour: Catálogo de Métodos', BLUE), (TOUR(4.4), 'Os métodos de DTS', BLUE), (TOUR(8.8), 'Biblioteca: cada skill com sua pontuação', BLUE),
+         (IU(8.0), 'Como DTS compartilha conhecimento', None), (FILM0 + 2.6, 'O título segue sobre o pilar', BLUE), (G(11.4), 'Pilar 01 · Todos Sabem', BLUE), (G(14.0), 'Início do FLOWS', BLUE),
+         (TOUR(2.2), 'Tour: métodos e skills no Início', BLUE), (TOUR(5.8), 'Catálogo de Métodos: os métodos de DTS', BLUE), (TOUR(11.6), 'Biblioteca: cada skill com sua pontuação', BLUE),
          (G(19.6), '441 skills na Biblioteca', BLUE), (G(25.3), 'Pilar 02 · Todos Usam', ORANGE), (G(28.0), 'Passo 1 · Compartilhar Skill', ORANGE),
-         (G(34.0), 'Passo 2 · o nome digitado', ORANGE), (NAME(4.6), 'Prefixo · Service Line · Entregável', ORANGE), (G(40.0), 'Passo 3 · Flows / Claude', ORANGE),
-         (G(45.3), 'Passo 4 · modelo testado', ORANGE), (G(51.5), 'Passo 5 · arquivos → ZIP', ORANGE), (DET(2.3), 'Passo 6 · Detalhes: Template', ORANGE),
-         (DET(4.0), 'Área responsável: DTS — Performance', ORANGE), (DET(7.9), 'Co-responsáveis', ORANGE), (DET(11.3), 'Descrição: entregável e resultado', ORANGE),
-         (G(59.2), 'O voo da skill (troféu 95)', ORANGE), (G(61.0), 'Publicada: 442 skills', ORANGE), (G(63.3), 'Pilar 03 · Somos Exemplo', GOLD),
-         (G(71.6), 'Ranking de áreas: pódio', GOLD), (G(74.3), 'DTS nº 1 · 1.557 pontos', GOLD), (G(80.4), 'Todos Sabem. Todos Usam. Somos Exemplo.', GOLD)]
+         (G(34.0), 'Passo 2 · o nome digitado', ORANGE), (NAME(5.6), 'Prefixo · Service Line · Entregável', ORANGE), (G(40.0), 'Passo 3 · Flows / Claude', ORANGE),
+         (G(45.3), 'Passo 4 · modelo testado', ORANGE), (G(51.5), 'Passo 5 · arquivos → ZIP', ORANGE), (DET(2.4), 'Passo 6 · Detalhes: Template', ORANGE),
+         (DET(5.2), 'Área responsável: DTS — Performance', ORANGE), (DET(10.4), 'Co-responsáveis', ORANGE), (DET(16.6), 'Descrição: entregável e resultado', ORANGE),
+         (G(59.2), 'O voo da skill (troféu 95)', ORANGE), (G(61.2), 'Publicada: 442 skills', ORANGE), (G(63.3), 'Pilar 03 · Somos Exemplo', GOLD),
+         (G(71.6), 'Ranking de áreas: pódio', GOLD), (G(74.6), 'DTS nº 1 · 1.557 pontos', GOLD), (G(80.8), 'Todos Sabem. Todos Usam. Somos Exemplo.', GOLD)]
 cols, w = 3, 620; h = int(w * 1080 / 1920); pad = 16
 rows = (len(beats) + cols - 1) // cols
 W = cols * w + (cols + 1) * pad; H = 120 + rows * (h + 44 + pad) + pad
 sh = Image.new('RGB', (W, H), (14, 12, 38)); dr = ImageDraw.Draw(sh)
-dur = IDENT + x[-1]
-dr.text((pad, 26), f'DTS · Todos Sabem, Todos Usam, Somos Exemplo — storyboard do curta 3D v6 ({int(dur) // 60}:{int(dur) % 60:02d})', fill=GOLD, font=F(32))
-dr.text((pad, 72), '1920×1080 · 24 fps · entrada do Fabio · tour do FLOWS · anatomia do nome · etapa Detalhes · ranking de áreas', fill=(196, 190, 222), font=F(20, 400))
+dur = FILM0 + x[-1]
+dr.text((pad, 26), f'DTS · Todos Sabem, Todos Usam, Somos Exemplo — storyboard do curta 3D v7 ({int(dur) // 60}:{int(dur) % 60:02d})', fill=GOLD, font=F(32))
+dr.text((pad, 72), '1920×1080 · 24 fps · ritmo de leitura · entrada do Fabio · tour do FLOWS · anatomia do nome · etapa Detalhes · ranking de áreas', fill=(196, 190, 222), font=F(20, 400))
 for k, (t, name, col) in enumerate(beats):
     f = os.path.join(fr, f'f_{int(round(t * 24)):05d}.jpg')
     X = pad + (k % cols) * (w + pad); Y = 120 + (k // cols) * (h + 44 + pad)
