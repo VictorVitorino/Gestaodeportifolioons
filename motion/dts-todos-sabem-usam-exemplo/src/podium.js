@@ -18,7 +18,18 @@ function cup({ scale = 1, body = O.brightGold(), base = 0x14264f } = {}) {
   const g = new THREE.Group();
   const prof = [[0, 0], [30, 0], [30, 6], [12, 12], [9, 40], [14, 48], [40, 70], [52, 112], [54, 128], [48, 128], [44, 116], [34, 80], [0, 74]].map(([x, y]) => new THREE.Vector2(x, y));
   const c = new THREE.Mesh(new THREE.LatheGeometry(prof, 64), body); c.position.y = 34; g.add(c);
-  for (const s of [-1, 1]) { const hnd = new THREE.Mesh(new THREE.TorusGeometry(20, 5.5, 14, 40, Math.PI * 1.25), body); hnd.position.set(s * 50, 34 + 96, 0); hnd.rotation.set(0, 0, s > 0 ? -Math.PI * 0.62 : Math.PI * 1.62); g.add(hnd); }
+  // handles: an ear-shaped loop on each side, from just under the rim (HA) down to the bowl (HB), both
+  // ends buried in the cup's wall and capped; the left one is the exact mirror of the right one
+  // (v7 fix: the left handle was rotated the wrong way and read as a broken hook)
+  const HA = [49, 116], HB = [38, 78], HR = 22, HT = 5; // lathe-profile coordinates [radius, height]
+  const hdx = HB[0] - HA[0], hdy = HB[1] - HA[1], hcl = Math.hypot(hdx, hdy), hoff = Math.sqrt(HR * HR - hcl * hcl / 4);
+  const HC = [(HA[0] + HB[0]) / 2 - hdy / hcl * hoff, (HA[1] + HB[1]) / 2 + hdx / hcl * hoff]; // loop centre, outside the chord
+  const aB = Math.atan2(HB[1] - HC[1], HB[0] - HC[0]), aA = Math.atan2(HA[1] - HC[1], HA[0] - HC[0]);
+  for (const s of [-1, 1]) {
+    const hnd = new THREE.Mesh(new THREE.TorusGeometry(HR, HT, 16, 64, aA - aB), body);
+    hnd.position.set(s * HC[0], 34 + HC[1], 0); hnd.rotation.z = s > 0 ? aB : Math.PI - aA; g.add(hnd);
+    for (const p of [HA, HB]) { const cap = new THREE.Mesh(new THREE.SphereGeometry(HT, 16, 12), body); cap.position.set(s * p[0], 34 + p[1], 0); g.add(cap); }
+  }
   const b = new THREE.Mesh(new RoundedBoxGeometry(84, 34, 64, 4, 8), O.glossy(base, { roughness: 0.3 })); b.position.y = 17; g.add(b);
   O.shadowed(g); g.scale.setScalar(scale);
   return g;
