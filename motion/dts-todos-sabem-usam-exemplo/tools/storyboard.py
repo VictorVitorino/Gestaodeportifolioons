@@ -21,17 +21,18 @@ def S(t):
 nt = np.linspace(0, x[-1], 200001); st = S(nt)
 IDENT = float(re.search(r'export const IDENT = ([0-9.]+)', open(os.path.join(HERE, '..', 'src', 'ident.js')).read()).group(1))
 INTRO = json.loads(re.search(r'INTRO = (\{.*?\});', open(os.path.join(HERE, '..', 'src', 'pace.js')).read()).group(1))
-FILM0 = IDENT + INTRO['dur']   # Fabio's intro clip plays in [IDENT, FILM0)
+ID = IDENT if INTRO['ident'] else 0.0   # the A&M ident is optional (off in v6)
+FILM0 = ID + INTRO['dur']   # Fabio's intro clip plays in [ID, FILM0)
 G = lambda s: FILM0 + float(np.interp(s, st, nt))
-IU = lambda u: IDENT + u
+IU = lambda u: ID + u
 # inserts (v5): flat segments of PACE, in order: FLOWS tour, name anatomy, Detalhes page
 DESIGN = json.loads(re.search(r'INSERT_DESIGN = (\{.*?\});', open(os.path.join(HERE, '..', 'src', 'pace.js')).read()).group(1))
 INS = [(PACE[i][0], PACE[i + 1][0]) for i in range(len(PACE) - 1) if PACE[i][1] == PACE[i + 1][1]]
 # insert beats are given on each insert's design clock
 TOUR, NAME, DET = [(lambda a, b, n: (lambda u: FILM0 + a + u * (b - a) / DESIGN[n]))(a, b, n) for (a, b), n in zip(INS, ['tour', 'name', 'det'])]
 # (global time, scene, act colour): ident beats in global time, film beats placed from story time
-beats = [(3.4, 'Vinheta A&M: trilhas de luz no palco', AMB), (5.3, 'O monograma nasce da luz', AMB), (8.2, 'Alvarez & Marsal apresenta', AMB),
-         (IU(1.2), 'Fabio abre o filme', None), (IU(2.5), 'Uma piscadela e o convite', None), (IU(5.3), 'O emblema DTS na praça', None),
+beats = ([(3.4, 'Vinheta A&M: trilhas de luz no palco', AMB), (5.3, 'O monograma nasce da luz', AMB), (8.2, 'Alvarez & Marsal apresenta', AMB)] if INTRO['ident'] else []) + [
+         (IU(1.2), 'Fabio abre o filme', None), (IU(3.1), 'Um estalo de dedo...', None), (IU(4.6), '...e o emblema DTS surge', None), (IU(5.6), 'A praça do filme', None),
          (IU(8.0), 'Como DTS compartilha conhecimento', None), (G(11.4), 'Pilar 01 · Todos Sabem', BLUE), (G(14.0), 'Início do FLOWS', BLUE),
          (TOUR(1.6), 'Tour: Catálogo de Métodos', BLUE), (TOUR(4.4), 'Os métodos de DTS', BLUE), (TOUR(8.8), 'Biblioteca: cada skill com sua pontuação', BLUE),
          (G(19.6), '441 skills na Biblioteca', BLUE), (G(25.3), 'Pilar 02 · Todos Usam', ORANGE), (G(28.0), 'Passo 1 · Compartilhar Skill', ORANGE),
@@ -46,7 +47,7 @@ W = cols * w + (cols + 1) * pad; H = 120 + rows * (h + 44 + pad) + pad
 sh = Image.new('RGB', (W, H), (14, 12, 38)); dr = ImageDraw.Draw(sh)
 dur = IDENT + x[-1]
 dr.text((pad, 26), f'DTS · Todos Sabem, Todos Usam, Somos Exemplo — storyboard do curta 3D v6 ({int(dur) // 60}:{int(dur) % 60:02d})', fill=GOLD, font=F(32))
-dr.text((pad, 72), '1920×1080 · 24 fps · abertura Alvarez & Marsal · entrada do Fabio · tour do FLOWS · anatomia do nome · etapa Detalhes · ranking', fill=(196, 190, 222), font=F(20, 400))
+dr.text((pad, 72), '1920×1080 · 24 fps · entrada do Fabio · tour do FLOWS · anatomia do nome · etapa Detalhes · ranking de áreas', fill=(196, 190, 222), font=F(20, 400))
 for k, (t, name, col) in enumerate(beats):
     f = os.path.join(fr, f'f_{int(round(t * 24)):05d}.jpg')
     X = pad + (k % cols) * (w + pad); Y = 120 + (k // cols) * (h + 44 + pad)

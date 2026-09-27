@@ -6,7 +6,10 @@ written on the new clock: calmer, broader, with a swell into each pillar. v5: th
 inserts (flat segments of PACE: FLOWS tour, name anatomy, Detalhes page) get their own
 cues on the film clock, from the same schedules as src/timeline.js. v6: Fabio's intro clip plays
 between the ident and the film; its sound is replaced by this same score (same key, tempo and
-instruments), written on his gestures, so the intro flows into the film as one piece of music."""
+instruments), written on his gestures, so the intro flows into the film as one piece of music.
+v6 (final): the A&M ident is off and the intro keeps Fabio's own sound (his finger snap, DTS
+appearing); it hands over to the score at the cut with a short crossfade (both in D major)."""
+import subprocess, tempfile
 import numpy as np, wave, sys, math, json, re, os
 from scipy.signal import butter, sosfilt, fftconvolve
 
@@ -15,7 +18,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 PACE = json.loads(re.search(r'PACE = (\[.*?\]);', open(os.path.join(HERE, '..', 'src', 'pace.js')).read(), re.S).group(1))
 IDENT = float(re.search(r'export const IDENT = ([0-9.]+)', open(os.path.join(HERE, '..', 'src', 'ident.js')).read()).group(1))
 INTRO = json.loads(re.search(r'INTRO = (\{.*?\});', open(os.path.join(HERE, '..', 'src', 'pace.js')).read()).group(1))
-FILM0 = IDENT + INTRO['dur']          # the film joins the intro clip here (story time PACE[0][1])
+ID = IDENT if INTRO['ident'] else 0.0   # the A&M ident is optional (off in v6)
+FILM0 = ID + INTRO['dur']             # the film joins the intro clip here (story time PACE[0][1])
 DUR = FILM0 + PACE[-1][0]
 N = int(SR * DUR)
 rng = np.random.default_rng(7)
@@ -266,29 +270,33 @@ def swell(d, f0=180, f1=900):
 def shimmer(d=1.6, seed=1, lo=3500, hi=9500, n=16):
     return sparkle(d, n, lo, hi, seed) * np.linspace(1, 0.4, int(d * SR))
 
-# ================================================================== IDENT (0-IDENT s): Alvarez & Marsal
-add(mus, 0.0, lp(saw_pad(midi(38), IDENT, 0.25) * env_adsr(int(IDENT * SR), 2.5, 0.5, 0.9, 1.4), 520), 0.15)
-add(mus, 0.0, lp(pink(int(IDENT * SR)), 1800) * env_adsr(int(IDENT * SR), 3.0, 0.5, 0.8, 1.2) * 0.25, 0.08)
-R0 = np.random.default_rng(3)
-for i in range(22):  # slow "data" arpeggio: sparse plucks from the D major pentatonic
-    tt = 0.9 + i * 0.36 + R0.random() * 0.05
-    if tt > 7.6: break
-    cue(tt, pluck(midi(74 + [0, 2, 4, 7, 9, 12, 14][int(R0.random() * 7)]), 0.9, 0.2), 0.022 + 0.01 * (i % 3 == 0), R0.uniform(-0.7, 0.7))
-for k, t0 in enumerate([1.2, 1.35, 1.55, 1.75, 1.95]):   # light trails gliding over the floor
-    cue(t0 - 0.9, whoosh(2.0, 900, 3800, 0.75, 0.8), 0.05, [-0.8, 0.8, -0.5, 0.6, 0.2][k])
-cue(2.05, bell(midi(81), 3.0, 1.2, 2.0), 0.04); cue(2.1, sub_boom(2.4, 60, 34), 0.1)   # the ring forms
-cue(2.45, swell(2.4, 120, 700), 0.1)                                                      # the mark materializes
-for m in [50, 57, 62, 66, 69]: add(mus, 2.4, strings(midi(m), 6.6, 0.38) * env_adsr(int(6.6 * SR), 2.2, 0.8, 0.85, 2.2), 0.032 if m > 55 else 0.05, pan=(m % 5 - 2) / 5)
-cue(4.7, whoosh(1.3, 3200, 1100, 0.5, 0.8), 0.03, 0.35)                                                  # a line of light runs down the letters
-for k, (tt, m) in enumerate([(5.0, 86), (5.3, 90), (5.62, 93)]): cue(tt, bell(midi(m), 2.6, 0.9, 2.0), 0.045, 0.3 + k * 0.1)   # A, &, M
-cue(5.4, whoosh(1.6, 2500, 6000, 0.5, 0.7), 0.035, 0.2); cue(5.5, shimmer(1.6, 7), 0.05)            # light sweep
-for m in [55, 59, 62, 66, 71]: add(mus, 5.8, strings(midi(m), 3.4, 0.4) * env_adsr(int(3.4 * SR), 0.8, 0.5, 0.8, 1.6), 0.034, pan=(m % 5 - 2) / 5)   # Gmaj7 under the type
-for m in [50, 57, 62, 66, 69, 74]: add(mus, 7.0, strings(midi(m), 2.8, 0.42) * env_adsr(int(2.8 * SR), 0.6, 0.4, 0.85, 1.4), 0.034, pan=(m % 5 - 2) / 5)   # resolve (D)
-for i, m in enumerate([74, 78, 81, 86]): cue(6.0 + i * 0.22, celesta(midi(m + 12), 2.2), 0.025, -0.3 + i * 0.2)
+# ================================================================== IDENT (0-IDENT s): Alvarez & Marsal (optional)
+def ident_score():
+    add(mus, 0.0, lp(saw_pad(midi(38), IDENT, 0.25) * env_adsr(int(IDENT * SR), 2.5, 0.5, 0.9, 1.4), 520), 0.15)
+    add(mus, 0.0, lp(pink(int(IDENT * SR)), 1800) * env_adsr(int(IDENT * SR), 3.0, 0.5, 0.8, 1.2) * 0.25, 0.08)
+    R0 = np.random.default_rng(3)
+    for i in range(22):  # slow "data" arpeggio: sparse plucks from the D major pentatonic
+        tt = 0.9 + i * 0.36 + R0.random() * 0.05
+        if tt > 7.6: break
+        cue(tt, pluck(midi(74 + [0, 2, 4, 7, 9, 12, 14][int(R0.random() * 7)]), 0.9, 0.2), 0.022 + 0.01 * (i % 3 == 0), R0.uniform(-0.7, 0.7))
+    for k, t0 in enumerate([1.2, 1.35, 1.55, 1.75, 1.95]):   # light trails gliding over the floor
+        cue(t0 - 0.9, whoosh(2.0, 900, 3800, 0.75, 0.8), 0.05, [-0.8, 0.8, -0.5, 0.6, 0.2][k])
+    cue(2.05, bell(midi(81), 3.0, 1.2, 2.0), 0.04); cue(2.1, sub_boom(2.4, 60, 34), 0.1)   # the ring forms
+    cue(2.45, swell(2.4, 120, 700), 0.1)                                                      # the mark materializes
+    for m in [50, 57, 62, 66, 69]: add(mus, 2.4, strings(midi(m), 6.6, 0.38) * env_adsr(int(6.6 * SR), 2.2, 0.8, 0.85, 2.2), 0.032 if m > 55 else 0.05, pan=(m % 5 - 2) / 5)
+    cue(4.7, whoosh(1.3, 3200, 1100, 0.5, 0.8), 0.03, 0.35)                                                  # a line of light runs down the letters
+    for k, (tt, m) in enumerate([(5.0, 86), (5.3, 90), (5.62, 93)]): cue(tt, bell(midi(m), 2.6, 0.9, 2.0), 0.045, 0.3 + k * 0.1)   # A, &, M
+    cue(5.4, whoosh(1.6, 2500, 6000, 0.5, 0.7), 0.035, 0.2); cue(5.5, shimmer(1.6, 7), 0.05)            # light sweep
+    for m in [55, 59, 62, 66, 71]: add(mus, 5.8, strings(midi(m), 3.4, 0.4) * env_adsr(int(3.4 * SR), 0.8, 0.5, 0.8, 1.6), 0.034, pan=(m % 5 - 2) / 5)   # Gmaj7 under the type
+    for m in [50, 57, 62, 66, 69, 74]: add(mus, 7.0, strings(midi(m), 2.8, 0.42) * env_adsr(int(2.8 * SR), 0.6, 0.4, 0.85, 1.4), 0.034, pan=(m % 5 - 2) / 5)   # resolve (D)
+    for i, m in enumerate([74, 78, 81, 86]): cue(6.0 + i * 0.22, celesta(midi(m + 12), 2.2), 0.025, -0.3 + i * 0.2)
+
+
+if INTRO['ident']: ident_score()
 
 # ================================================================== SCORE on the new clock: D major, 84 bpm
 BPM = 84; beat = 60 / BPM; bar = beat * 4
-CH = {'D': [50, 57, 62, 66, 69], 'Bm': [47, 54, 59, 62, 66], 'G': [43, 50, 55, 59, 62], 'A': [45, 52, 57, 61, 64], 'Em': [40, 47, 52, 55, 59], 'F#m': [42, 49, 54, 57, 61], 'Gmaj7': [43, 50, 54, 59, 62], 'Asus': [45, 52, 57, 62, 64], 'Dadd9': [50, 57, 62, 64, 66]}
+CH = {'D': [50, 57, 62, 66, 69], 'Bm': [47, 54, 59, 62, 66], 'G': [43, 50, 55, 59, 62], 'A': [45, 52, 57, 61, 64], 'Em': [40, 47, 52, 55, 59], 'F#m': [42, 49, 54, 57, 61], 'Gmaj7': [43, 50, 54, 59, 62], 'Asus': [45, 52, 57, 62, 64], 'Dadd9': [50, 57, 62, 64, 66], 'Dmaj9': [50, 57, 61, 64, 66]}
 def pads(t0, t1, prog, gain, bright=0.42):
     t = t0; i = 0
     while t < t1 - 0.01:
@@ -337,28 +345,42 @@ FOLD, FLY, LAND = G(57.4), G(58.3), G(60.2)
 P3m, P3h, P3e = G(62.0), G(62.9), G(63.7)
 POD, REVEAL, SINK, FIN = G(68.5), G(72.9), G(75.9), G(78.1)
 PROG_A = ['D', 'Bm', 'G', 'A']; PROG_B = ['D', 'A', 'Bm', 'G']; PROG_C = ['G', 'A', 'F#m', 'Bm', 'Em', 'Asus', 'D', 'D']
-# ---- Fabio's intro (clip clock u = T - IDENT): the film's own score, written on his acting.
-# D pedal from the ident, then four bars (84 bpm) D - G - D - Asus that lift into the pillar swell.
-IU = lambda u: IDENT + u
-add(mus, IDENT - 0.2, lp(saw_pad(midi(38), INTRO['dur'] + 3.0, 0.3) * env_adsr(int((INTRO['dur'] + 3.0) * SR), 1.6, 0.5, 0.9, 2.4), 700), 0.17)
-for i, m in enumerate([74, 78, 81, 86]): add(mus, IU(0.35) + i * 0.28, celesta(midi(m), 2.2), 0.045, pan=-0.3 + i * 0.2)   # he looks at us
-pads(IU(0.2), IU(INTRO['dur']) + 0.3, ['D', 'G', 'D', 'Asus'], 0.065, 0.36)
-pizz_bass(IU(0.2 + bar), IU(INTRO['dur']), ['G', 'D', 'Asus'], 0.1)
-for u, m, g in [(1.05, 69, 0.04), (1.4, 74, 0.035)]: add(mus, IU(u), pizz(midi(m), 0.6), g, pan=0.2)     # the smile
-add(mus, IU(2.45), glock(midi(98), 1.4), 0.05, pan=0.35); add(sfx, IU(2.47), shimmer(0.7, 71, 5000, 10000, 8) * 0.8, 0.035, pan=0.35)   # the wink
-for i, m in enumerate([69, 71, 74, 78]): add(mus, IU(2.75 + i * 0.16), pizz(midi(m + 12), 0.5), 0.04, pan=-0.2 + i * 0.12)   # "come on" gesture
-add(sfx, IU(3.62), pop(700, 300, 0.1), 0.04)                                                                   # hands together
-add(sfx, IU(3.55), whoosh(1.6, 180, 1800, 0.7), 0.09, pan=-0.1); add(sfx, IU(3.8), riser(1.0, 200, 1400), 0.05)   # the camera pulls back
-add(sfx, IU(4.25), whoosh(0.7, 150, 900, 0.6), 0.08); add(sfx, IU(4.62), thump(0.35), 0.2); add(sfx, IU(4.64), sub_boom(1.8, 70, 36), 0.14)   # the emblem rises
-add(sfx, IU(4.66), shimmer(1.4, 72), 0.05); add(mus, IU(4.68), bell(midi(86), 2.4), 0.05)
-for m in [50, 57, 62, 66, 69, 74]: add(mus, IU(5.05), strings(midi(m), 3.6, 0.5) * env_adsr(int(3.6 * SR), 0.5, 0.6, 0.8, 1.6), 0.032 if m > 55 else 0.05, pan=(m % 5 - 2) / 5)   # the plaza opens up
-for i, m in enumerate([81, 86, 90]): add(mus, IU(5.15 + i * 0.14), celesta(midi(m), 2.0), 0.035, pan=0.3 - i * 0.2)  # presenting DTS
-add(sfx, IU(6.45), reverse_swell(0.45), 0.035); add(sfx, IU(6.9), whoosh(1.0, 700, 3500, 0.5), 0.07)          # the title panel and headline
-add(sfx, IU(INTRO['hud'][0] + 0.02), click(3400, 0.02, 0.15), 0.05, pan=0.7)
-add(sfx, IU(8.35), whoosh(1.5, 260, 2200, 0.8), 0.1, pan=-0.3)                                                 # the pan to the pillar
+# ---- Fabio's intro: by default it keeps the clip's own sound (mixed in at the master, below); this
+# alternative scores it with the film's instruments instead (INTRO.sound != "clip").
+IU = lambda u: ID + u
+def intro_score():
+    add(mus, ID - 0.2, lp(saw_pad(midi(38), INTRO['dur'] + 3.0, 0.3) * env_adsr(int((INTRO['dur'] + 3.0) * SR), 1.6, 0.5, 0.9, 2.4), 700), 0.17)
+    for i, m in enumerate([74, 78, 81, 86]): add(mus, IU(0.35) + i * 0.28, celesta(midi(m), 2.2), 0.045, pan=-0.3 + i * 0.2)   # he looks at us
+    pads(IU(0.2), IU(INTRO['dur']) + 0.3, ['D', 'G', 'D', 'Asus'], 0.065, 0.36)
+    pizz_bass(IU(0.2 + bar), IU(INTRO['dur']), ['G', 'D', 'Asus'], 0.1)
+    for u, m, g in [(1.05, 69, 0.04), (1.4, 74, 0.035)]: add(mus, IU(u), pizz(midi(m), 0.6), g, pan=0.2)     # the smile
+    add(mus, IU(2.45), glock(midi(98), 1.4), 0.05, pan=0.35); add(sfx, IU(2.47), shimmer(0.7, 71, 5000, 10000, 8) * 0.8, 0.035, pan=0.35)   # the wink
+    for i, m in enumerate([69, 71, 74, 78]): add(mus, IU(2.75 + i * 0.16), pizz(midi(m + 12), 0.5), 0.04, pan=-0.2 + i * 0.12)   # "come on" gesture
+    add(sfx, IU(3.62), pop(700, 300, 0.1), 0.04)                                                                   # hands together
+    add(sfx, IU(3.55), whoosh(1.6, 180, 1800, 0.7), 0.09, pan=-0.1); add(sfx, IU(3.8), riser(1.0, 200, 1400), 0.05)   # the camera pulls back
+    add(sfx, IU(4.25), whoosh(0.7, 150, 900, 0.6), 0.08); add(sfx, IU(4.62), thump(0.35), 0.2); add(sfx, IU(4.64), sub_boom(1.8, 70, 36), 0.14)   # the emblem rises
+    add(sfx, IU(4.66), shimmer(1.4, 72), 0.05); add(mus, IU(4.68), bell(midi(86), 2.4), 0.05)
+    for m in [50, 57, 62, 66, 69, 74]: add(mus, IU(5.05), strings(midi(m), 3.6, 0.5) * env_adsr(int(3.6 * SR), 0.5, 0.6, 0.8, 1.6), 0.032 if m > 55 else 0.05, pan=(m % 5 - 2) / 5)   # the plaza opens up
+    for i, m in enumerate([81, 86, 90]): add(mus, IU(5.15 + i * 0.14), celesta(midi(m), 2.0), 0.035, pan=0.3 - i * 0.2)  # presenting DTS
+    add(sfx, IU(6.45), reverse_swell(0.45), 0.035); add(sfx, IU(6.9), whoosh(1.0, 700, 3500, 0.5), 0.07)          # the title panel and headline
+    add(sfx, IU(INTRO['hud'][0] + 0.02), click(3400, 0.02, 0.15), 0.05, pan=0.7)
+    add(sfx, IU(8.35), whoosh(1.5, 260, 2200, 0.8), 0.1, pan=-0.3)                                                 # the pan to the pillar
+if INTRO['sound'] != 'clip': intro_score()
 # pillar 1 (blue): swell into the hold
-pillar_swell(P1m, P1h, 'Dadd9', 0.05, 0.45)
-cue(P1h - 0.35, shimmer(1.8, 21), 0.06); cue(P1h - 0.3, bell(midi(86), 2.8, 1.0, 2.0), 0.06); cue(P1h - 0.3, sub_boom(2.0, 70, 36), 0.12)
+if INTRO['sound'] == 'clip':
+    # the clip's own music runs past the picture cut and lands on its hit (a D major 7 chord, 10.0 s into
+    # the clip) as the Todos Sabem letters form: our strings bloom out of that hit, on the same chord,
+    # and carry the hold; nothing rhythmic of ours starts until the clip's music has rung out
+    HIT = ID + 10.0
+    d = P1e - HIT + 1.2
+    for m in CH['Dmaj9']:
+        s_ = strings(midi(m), d + 2.4, 0.46) * env_adsr(int((d + 2.4) * SR), 0.45, 0.4, 0.9, 2.4)
+        add(mus, HIT - 0.06, s_, 0.052 * (1.3 if m < 48 else 1.0), pan=(m % 5 - 2) / 5)
+    add(mus, HIT - 0.06, lp(saw_pad(midi(38), d + 2.4, 0.3) * env_adsr(int((d + 2.4) * SR), 0.5, 0.4, 0.9, 2.4), 600), 0.12)
+    cue(P1h - 0.3, shimmer(1.8, 21), 0.04)   # a soft glint as the camera settles
+else:
+    pillar_swell(P1m, P1h, 'Dadd9', 0.05, 0.45)
+    cue(P1h - 0.35, shimmer(1.8, 21), 0.06); cue(P1h - 0.3, bell(midi(86), 2.8, 1.0, 2.0), 0.06); cue(P1h - 0.3, sub_boom(2.0, 70, 36), 0.12)
 # act 1: Todos Sabem
 pads(P1e - 0.6, P2m, PROG_A, 0.1, 0.42)
 pizz_bass(P1e + bar, P2m, PROG_A, 0.16)
@@ -408,9 +430,10 @@ for i, m in enumerate([74, 78, 81, 86, 90, 93]): add(mus, FIN + i * 0.16, celest
 # ================================================================== SOUND DESIGN on story time (v3 cues, calmer)
 # (the v5 opening cues are gone: the intro clip covers story < 10.) The Todos Sabem letters pop at the
 # cut on the film clock (as in src/timeline.js), Todos Usam a beat later, softly.
-for k, (t0, n, g) in enumerate([(-0.06, 11, 0.035), (0.3, 10, 0.02)]):
-    for i in range(n): add(sfx, FILM0 + t0 + i * 0.05 + 0.22, pizz(midi(74 + [0, 2, 4, 7, 9][i % 5] + (i // 5) * 12 - 12), 0.35), g, -0.5 + k * 0.9)
-add(sfx, FILM0 + 0.02, thump(0.3), 0.1, -0.4)
+if INTRO['sound'] != 'clip':   # with the clip's sound, its own music already carries the letters and the cut
+    for k, (t0, n, g) in enumerate([(-0.06, 11, 0.035), (0.3, 10, 0.02)]):
+        for i in range(n): add(sfx, FILM0 + t0 + i * 0.05 + 0.22, pizz(midi(74 + [0, 2, 4, 7, 9][i % 5] + (i // 5) * 12 - 12), 0.35), g, -0.5 + k * 0.9)
+    add(sfx, FILM0 + 0.02, thump(0.3), 0.1, -0.4)
 scue(11.4, whoosh(1.0, 1200, 200, 0.3), 0.07); scue(12.3, whoosh(1.2, 200, 1600, 0.6), 0.1); scue(13.1, thump(0.3), 0.12)
 scue(15.9, whoosh(1.0, 1600, 200, 0.4), 0.08)
 for i in range(24): scue(16.2 + (i / 24) * 2.6, pizz(midi(86 + [0, 2, 4, 7, 9][i % 5]), 0.3), 0.018, math.sin(i) * 0.8)
@@ -536,11 +559,30 @@ env = np.abs(lp(np.abs(sfx).sum(axis=0), 8))
 duck = 1 / (1 + 0.9 * env / (env.max() + 1e-9))
 mix = mus_mix * duck * 0.95 + sfx_mix * 0.9
 mix = hp(mix, 28)
-# ident dips to black in its last 0.65 s: the sound breathes with it
-dip = np.ones(N); a0, a1, a2 = int((IDENT - 0.65) * SR), int(IDENT * SR), int((IDENT + 0.8) * SR)
-dip[a0:a1] = np.linspace(1, 0.55, a1 - a0); dip[a1:a2] = np.linspace(0.55, 1, a2 - a1)
-mix *= dip
-fi = int(0.8 * SR); fo = int(2.2 * SR)
+if INTRO['ident']:
+    # ident dips to black in its last 0.65 s: the sound breathes with it
+    dip = np.ones(N); a0, a1, a2 = int((IDENT - 0.65) * SR), int(IDENT * SR), int((IDENT + 0.8) * SR)
+    dip[a0:a1] = np.linspace(1, 0.55, a1 - a0); dip[a1:a2] = np.linspace(0.55, 1, a2 - a1)
+    mix *= dip
+if INTRO['sound'] == 'clip':
+    # Fabio's own sound (the finger snap at 3.0 s, DTS appearing at 4.2-4.8 s) keeps playing over the picture
+    # cut (at 9.5 s) until its musical hit at 10.0 s and the clip's end (10.45 s): the cut is never heard.
+    # The hit then rings out in the film's reverb, and the score's strings bloom out of it (same chord).
+    with tempfile.TemporaryDirectory() as td:
+        wav = os.path.join(td, 'clip.wav')
+        subprocess.run(['ffmpeg', '-hide_banner', '-loglevel', 'error', '-y', '-i', os.path.join(HERE, '..', 'media', 'entrada_fabio.mp4'), '-vn', '-ac', '2', '-ar', str(SR), wav], check=True)
+        with wave.open(wav) as cw: clip = np.frombuffer(cw.readframes(cw.getnframes()), np.int16).astype(float).reshape(-1, 2).T / 32768
+    L = clip.shape[1]; u = np.arange(L) / SR; end = L / SR
+    clip = clip * np.where(u < end - 0.12, 1.0, np.cos(0.5 * np.pi * np.clip((u - (end - 0.12)) / 0.12, 0, 1)))   # no click at the file end
+    tail_src = clip * (u > 9.85)                                   # the hit, sent to the film's reverb so it decays naturally
+    tail = np.vstack([fftconvolve(tail_src[c], ir[c]) for c in range(2)]) * 0.55
+    ref = mix[:, int((FILM0 + 1.2) * SR):int((FILM0 + 6.0) * SR)]
+    lvl = np.sqrt(np.mean(ref ** 2)) / (np.sqrt(np.mean(clip[:, int(4.0 * SR):int(9.4 * SR)] ** 2)) + 1e-9)
+    i0 = int(ID * SR)
+    n = min(L, N - i0); mix[:, i0:i0 + n] += clip[:, :n] * lvl
+    n = min(tail.shape[1], N - i0); mix[:, i0:i0 + n] += tail[:, :n] * lvl
+    print('clip level x%.2f' % lvl)
+fi = int((0.8 if INTRO['ident'] else 0.05) * SR); fo = int(2.2 * SR)
 mix[:, :fi] *= np.linspace(0, 1, fi); mix[:, -fo:] *= np.linspace(1, 0, fo) ** 1.5
 def limiter(x, ceil=0.89):
     peak = np.max(np.abs(x), axis=0)

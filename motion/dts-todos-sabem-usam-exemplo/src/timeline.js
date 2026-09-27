@@ -15,8 +15,9 @@ import { IDENT, ID_TYPE } from './ident.js';
 import { PACE, PILLAR_SEQ, INSERTS, INTRO } from './pace.js';
 
 export const FILM = PACE[PACE.length - 1][0];
-// global clock: A&M ident [0, IDENT) -> Fabio's intro clip [IDENT, FILM0) -> the film (nt = T - FILM0)
-export const FILM0 = IDENT + INTRO.dur;
+// global clock: [A&M ident [0, ID)] -> Fabio's intro clip [ID, FILM0) -> the film (nt = T - FILM0)
+export const ID = INTRO.ident ? IDENT : 0; // the A&M ident is optional (off in v6)
+export const FILM0 = ID + INTRO.dur;
 export const DURATION = FILM0 + FILM;
 const SHUTTER = 1 / 64; // ~135° shutter: motion reads smooth without smearing
 const S = warp(PACE);
@@ -961,7 +962,7 @@ export function buildFilm(ctx) {
   }
   // ident typography (A&M): masked reveals, a drawn rule, then it simply stays
   const identHud = (T) => {
-    const on = T < IDENT && T > ID_TYPE.a - 0.1;
+    const on = INTRO.ident && T < IDENT && T > ID_TYPE.a - 0.1;
     MG.vis(idCap, on);
     if (!on) return;
     const a = ID_TYPE.a;
@@ -972,7 +973,7 @@ export function buildFilm(ctx) {
     idCap.style.opacity = 1 - E.inQuad(seg(T, ID_TYPE.out, IDENT));
   };
   function update(T) {
-    if (T < IDENT) {
+    if (T < ID) {
       MG.vis(clipWrap, false); MG.vis(introT, false);
       updateFilm(-1, -1);
       world.useScene(ident.scene);
@@ -987,7 +988,7 @@ export function buildFilm(ctx) {
     if (T < FILM0) {
       // Fabio's intro: the clip fills the frame (no 3D this frame); our HUD fades in exactly where
       // the clip's own overlay would, and our corrected headline rises over the clip's
-      const u = T - IDENT;
+      const u = T - ID;
       updateFilm(-1, -1); identHud(T);
       bars.set(0);
       MG.vis(clipWrap, true);
@@ -1011,8 +1012,8 @@ export function buildFilm(ctx) {
   }
   // the modal image a frame needs (loaded on demand by main.js before rendering it)
   const needs = (T) => {
-    if (T < IDENT) return null;
-    if (T < FILM0) return { clip: clipIndex(T - IDENT) };
+    if (T < ID) return null;
+    if (T < FILM0) return { clip: clipIndex(T - ID) };
     const nt = T - FILM0, t = S(nt);
     if (!(t > 28.5 && t < 58.1)) return null;
     const p = modalPlan(t, nt); return { tex: p.under ? [p.under, p.img] : [p.img] };

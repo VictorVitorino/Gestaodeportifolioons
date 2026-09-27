@@ -31,8 +31,10 @@ const IDS = ['tour', 'name', 'det'];
 export const INSERTS = PACE.slice(1).map((k, i) => [PACE[i], k]).filter(([a, b]) => a[1] === b[1])
   .map(([a, b], i) => ({ id: IDS[i], at: a[1], a: a[0], b: b[0], d: INSERT_DESIGN[IDS[i]], k: INSERT_DESIGN[IDS[i]] / (b[0] - a[0]) }));
 // Fabio's intro (the user's clip, 30 fps, extracted at 24 fps into tex/fabio by tools/intro.sh):
-// it plays between the A&M ident and the film. dur = seconds used (the film takes over during its
+// it opens the film. dur = seconds used (the film takes over during its
 // final pan); zoom = [start, end, scale]: a slow push-in, anchored bottom-centre, that also keeps
 // the clip's own (older) overlay graphics out of frame; title = when our corrected headline
 // rises (over the clip's), cover = the frosted panel that hides the clip's baked-in headline.
-export const INTRO = {"frames": "tex/fabio/c_%03d.jpg", "fps": 24, "dur": 9.5, "fadeIn": 0.55, "zoom": [5.9, 7.1, 1.12], "hud": [7.25, 7.85], "title": 6.9, "cover": [6.5, 6.85]};
+// ident: the Alvarez & Marsal opening before the clip (removed at the team's request: false);
+// sound: "clip" keeps Fabio's own sound (his finger snap, DTS appearing) until the cut.
+export const INTRO = {"ident": false, "sound": "clip", "frames": "tex/fabio/c_%03d.jpg", "fps": 24, "dur": 9.5, "fadeIn": 0.55, "zoom": [5.9, 7.1, 1.12], "hud": [7.25, 7.85], "title": 6.9, "cover": [6.5, 6.85]};

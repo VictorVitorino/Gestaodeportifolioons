@@ -3,7 +3,7 @@ import { TTFLoader } from 'three/addons/loaders/TTFLoader.js';
 import { Font } from 'three/addons/loaders/FontLoader.js';
 import { World } from './world.js';
 import { buildFilm } from './timeline.js';
-import { buildIdent, IDENT } from './ident.js';
+import { buildIdent } from './ident.js';
 
 const W = 1920, H = 1080;
 // ?q=0.5 renders the 3D at half resolution for fast motion previews (HUD stays 1080p)
@@ -42,7 +42,7 @@ async function boot() {
   const svgText = await (await fetch('tex/am_mark.svg')).text();
   const ident = buildIdent({ world, svgText, cam });
   const film = buildFilm({ ...ctx, ident, svgText });
-  window.DURATION = film.duration; window.__IDENT = IDENT; window.__FILM0 = film.film0;
+  window.DURATION = film.duration; window.__FILM0 = film.film0;
   window.__world = world; window.__THREE = THREE;
   window.seek = async (t) => {
     const n = film.needs(t);
