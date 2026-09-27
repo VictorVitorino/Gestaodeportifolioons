@@ -1,13 +1,13 @@
 {
   "name": "dts-todos-sabem-usam-exemplo-motion",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
-  "description": "Curta 3D cinematográfico DTS · Todos Sabem, Todos Usam, Somos Exemplo — o fluxo Compartilhar Skill do FLOWS em three.js (PBR, DOF, bloom), renderizado quadro a quadro",
+  "description": "Curta 3D cinematográfico DTS · Todos Sabem, Todos Usam, Somos Exemplo — vinheta Alvarez & Marsal, fluxo Compartilhar Skill do FLOWS e ranking de áreas em three.js (PBR, DOF, motion blur, bloom) com camada de motion graphics, renderizado quadro a quadro",
   "scripts": {
     "bake": "node bake.mjs",
     "audio": "python3 audio/soundtrack.py audio/soundtrack.wav",
-    "preview": "node render.mjs preview 3.75,11,18.5,33.5,45,51.5,59.3,66.5,75.5 out/preview",
+    "preview": "node render.mjs preview 3.8,16.1,39.5,50.5,70.8,79.3,86 out/preview",
     "frames": "node render.mjs frames 24 0 1 out/frames",
     "storyboard": "python3 tools/storyboard.py out/frames video/storyboard.jpg"
   },

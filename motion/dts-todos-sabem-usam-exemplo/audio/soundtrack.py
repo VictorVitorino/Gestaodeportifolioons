@@ -1,10 +1,11 @@
-"""DTS · Todos Sabem, Todos Usam, Somos Exemplo — original score and sound design,
-synthesized from scratch and placed on the same timeline as src/timeline.js."""
+"""DTS · Todos Sabem, Todos Usam, Somos Exemplo (v3) — original score and sound design,
+synthesized from scratch on the same clock as src/timeline.js: a 6 s Alvarez & Marsal
+studio ident, then the film (film time + OFF)."""
 import numpy as np, wave, sys, math
 from scipy.signal import butter, sosfilt, fftconvolve
 
 SR = 48000
-DUR = 78.0
+DUR = 88.2
 N = int(SR * DUR)
 rng = np.random.default_rng(7)
 mus = np.zeros((2, N)); sfx = np.zeros((2, N))
@@ -14,8 +15,9 @@ def bp(x, lo, hi, order=2):
     return sosfilt(butter(order, [lo, hi], btype='band', fs=SR, output='sos'), x)
 def lp(x, f, order=2): return sosfilt(butter(order, f, btype='low', fs=SR, output='sos'), x)
 def hp(x, f, order=2): return sosfilt(butter(order, f, btype='high', fs=SR, output='sos'), x)
+OFF = 0.0  # 0 for the ident, 6.0 (IDENT) for film-time cues
 def add(buf, t0, sig, gain=1.0, pan=0.0):
-    i0 = int(t0 * SR)
+    i0 = int((t0 + OFF) * SR)
     if sig.ndim == 1:
         l, r = np.cos((pan + 1) * np.pi / 4), np.sin((pan + 1) * np.pi / 4)
         sig = np.vstack([sig * l * 1.414, sig * r * 1.414])
@@ -186,6 +188,61 @@ def boing(f0=180, f1=420, d=0.35):
     f = f0 + (f1 - f0) * (1 - np.exp(-t * 12)) + 40 * np.sin(2 * np.pi * 14 * t) * np.exp(-t * 8)
     return np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 9) * np.minimum(1, t / 0.004)
 
+# ------------------------------------------------------------------ v3 instruments (ranking fanfare, UI motion)
+def snare_roll(d, dens=16.0, seed=5):
+    r = np.random.default_rng(seed); out = np.zeros(int(d * SR)); t = 0.0
+    while t < d:
+        u = t / d; h = t_arr(0.06)
+        hit = bp(r.standard_normal(len(h)), 900, 6000) * np.exp(-h * 60) + np.sin(2 * np.pi * 190 * h) * np.exp(-h * 50) * 0.4
+        i0 = int(t * SR); m = min(len(hit), len(out) - i0); out[i0:i0 + m] += hit[:m] * (0.25 + 0.75 * u ** 1.5) * (0.8 + 0.4 * r.random())
+        t += 1.0 / (dens * (1 + 1.3 * u))
+    return out
+def crash(d=2.8):
+    t = t_arr(d)
+    return (hp(noise(d), 4500) * np.exp(-t * 1.6) + bp(noise(d), 2500, 9000) * np.exp(-t * 3.5) * 0.6) * np.minimum(1, t / 0.003)
+def brass(freq, d=1.6):
+    t = t_arr(d); out = np.zeros_like(t)
+    for dt in (-0.06, 0.0, 0.07):
+        f = freq * 2 ** (dt / 12)
+        for k in range(1, 16):
+            if f * k > 8000: break
+            out += np.sin(2 * np.pi * f * k * t + rng.random() * 6) / k
+    a = np.exp(-t * 3.0) * np.minimum(1, t / 0.04)
+    y = lp(out, 900) * (1 - a) + lp(out, 4200) * a
+    return y / 4 * env_adsr(len(t), 0.03, 0.25, 0.7, 0.45)
+def timpani(freq=55.0, d=1.4):
+    t = t_arr(d); f = freq * (1 + 0.06 * np.exp(-t * 8))
+    return (np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 2.8) + lp(noise(d), 500) * np.exp(-t * 25) * 0.4) * np.minimum(1, t / 0.003)
+def tink(freq=3200, d=0.5): return bell(freq, d, 1.4, 2.76) * 0.8
+def marker(d=0.28):
+    t = t_arr(d); return bp(noise(d), 2500, 8000) * np.sin(np.pi * np.minimum(1, t / d)) ** 0.8 * 0.6
+def stamp():
+    return thump(0.35) * 1.2 + np.pad(bp(noise(0.12), 400, 3000) * np.exp(-t_arr(0.12) * 40) * 0.8, (0, int(0.35 * SR) - int(0.12 * SR)))
+def confetti_pop(seed):
+    r = np.random.default_rng(seed); d = 0.4; t = t_arr(d)
+    return bp(r.standard_normal(len(t)), 300, 5000) * np.exp(-t * 18) * 1.2 + sub_boom(d, 140, 60) * 0.5
+def ticks_for(c0, c1, n, f0=2200, g=0.12, pan=0.0, p=3):
+    # ticks at equal value steps of an outCubic count-up between c0 and c1
+    for i in range(1, n + 1):
+        u = 1 - (1 - i / n) ** (1 / p)
+        cue(c0 + u * (c1 - c0), click(f0 + i * 25, 0.024, 0.15), g, pan)
+def cue(t0, sig, g=1.0, pan=0.0): add(sfx, t0, sig, g, pan)
+
+# ------------------------------------------------------------------ STUDIO IDENT (global 0-6 s): Alvarez & Marsal
+OFF = 0.0
+add(mus, 0.2, lp(saw_pad(midi(38), 5.8, 0.28) * env_adsr(int(5.8 * SR), 1.8, 0.4, 0.9, 1.4), 600), 0.2)
+for m in [50, 57, 62, 66]: add(mus, 1.2, strings(midi(m), 4.6, 0.4) * env_adsr(int(4.6 * SR), 1.2, 0.6, 0.85, 1.6), 0.065, pan=(m % 5 - 2) / 5)
+for i in range(14): cue(0.45 + i * 0.05, pluck(midi(62 + [0, 2, 4, 7, 9, 11, 12][i % 7] + (i // 7) * 12), 0.8, 0.3), 0.06, -0.8 + i * 0.1)
+cue(0.35, whoosh(0.9, 800, 5000, 0.6), 0.1, -0.6)
+for k, (t0, m) in enumerate([(1.2, 74), (1.45, 78), (1.75, 81)]):
+    cue(t0, whoosh(0.5, 180, 1400, 0.7), 0.14, -0.4 + k * 0.4); cue(t0 + 0.42, thump(0.3), 0.3, -0.4 + k * 0.4); cue(t0 + 0.42, bell(midi(m), 1.8), 0.08, -0.4 + k * 0.4)
+cue(1.88, sub_boom(1.6, 80, 38), 0.35)
+for k, (t0, m) in enumerate([(2.45, 86), (2.62, 90), (2.8, 93)]):
+    cue(t0, click(3000 + k * 400, 0.03, 0.3), 0.3, 0.4); cue(t0 + 0.02, glock(midi(m), 1.0), 0.06, 0.4)
+cue(3.3, sparkle(1.2, 34, 3500, 10000, seed=90), 0.14); cue(3.32, bell(midi(98), 2.4), 0.07); cue(3.3, whoosh(1.1, 1200, 6000, 0.5), 0.08, 0.3)
+for m in [62, 66, 69, 74]: add(mus, 3.5, celesta(midi(m + 12), 2.4), 0.045, pan=(m % 5 - 2) / 5)
+OFF = 6.0
+
 # ------------------------------------------------------------------ SCORE: D major, 96 bpm
 BPM = 96; beat = 60 / BPM; bar = beat * 4
 CH = {'D': [50, 57, 62, 66, 69], 'Bm': [47, 54, 59, 62, 66], 'G': [43, 50, 55, 59, 62], 'A': [45, 52, 57, 61, 64], 'Em': [40, 47, 52, 55, 59], 'F#m': [42, 49, 54, 57, 61], 'Gmaj7': [43, 50, 54, 59, 62], 'Asus': [45, 52, 57, 62, 64]}
@@ -245,18 +302,33 @@ melody(26.0, 57.0, 0.035, inst=piano, octave=0)
 # publish lift 57.3-60.2
 pads(57.3, 60.2, ['G', 'Asus'], 0.13, 0.6)
 for i in range(16): add(mus, 57.4 + i * 0.17, pizz(midi(62 + [0, 4, 7, 12][i % 4] + (i // 4) * 2), 0.4), 0.08 + i * 0.006)
-# Somos Exemplo 60.2-74
-pads(60.2, 74.0, PROG_C, 0.14, 0.62)
-pizz_bass(60.2, 74.0, PROG_C, 0.2)
-melody(62.3, 73.5, 0.06, inst=glock, octave=12)
-perc(64.0, 72.2, 0.4)
-# finale 74-78
+# Somos Exemplo 60.2-68.8 (threads of reuse)
+pads(60.2, 68.8, PROG_C, 0.14, 0.62)
+pizz_bass(60.2, 68.8, PROG_C, 0.2)
+melody(62.3, 68.6, 0.06, inst=glock, octave=12)
+perc(64.0, 68.4, 0.4)
+# ranking build 68.8-72.95: A pedal, timpani pulses, snare roll into the reveal
+pads(68.8, 72.95, ['Asus', 'A'], 0.12, 0.5)
+for i, tt in enumerate(np.arange(69.3, 71.9, beat)): add(mus, tt, timpani(midi(33), 1.2), 0.2 + i * 0.012)
+add(mus, 71.0, snare_roll(1.95, 16, 7), 0.22)
+add(mus, 71.9, riser(1.05, 250, 3000), 0.14)
+# reveal 72.95: fanfare hit + crash, then a triumphant groove
+add(mus, 72.95, crash(3.2), 0.2)
+for m in [50, 57, 62, 66, 69, 74]: add(mus, 72.95, brass(midi(m), 1.3), 0.1 if m > 55 else 0.14, pan=(m % 5 - 2) / 5)
+for m in [52, 59, 64, 68]: add(mus, 73.57, brass(midi(m), 0.45), 0.07, pan=(m % 5 - 2) / 5)
+for m in [54, 62, 66, 69, 74, 78]: add(mus, 73.88, brass(midi(m), 1.8), 0.09, pan=(m % 5 - 2) / 5)
+pads(73.0, 76.4, ['D', 'G', 'A', 'D'], 0.12, 0.6)
+pizz_bass(73.0, 76.4, ['D', 'G', 'A', 'D'], 0.2)
+perc(73.3, 76.2, 0.5)
+melody(74.2, 76.3, 0.05, inst=glock, octave=12)
+# emblem return 76.4-78.1
+pads(76.4, 78.1, ['G', 'Asus'], 0.12, 0.55)
+# finale 78.1-82.2
 for m in [38, 50, 57, 62, 66, 69, 74]:
-    add(mus, 74.0, strings(midi(m), 5.0, 0.55) * env_adsr(5 * SR, 0.4, 0.8, 0.85, 3.0), 0.12 if m > 45 else 0.22, pan=(m % 5 - 2) / 5)
-for i, m in enumerate([74, 78, 81, 86, 90, 93]): add(mus, 74.0 + i * 0.12, celesta(midi(m), 2.6), 0.06, pan=-0.5 + i * 0.2)
+    add(mus, 78.1, strings(midi(m), 5.0, 0.55) * env_adsr(5 * SR, 0.4, 0.8, 0.85, 3.0), 0.12 if m > 45 else 0.22, pan=(m % 5 - 2) / 5)
+for i, m in enumerate([74, 78, 81, 86, 90, 93]): add(mus, 78.1 + i * 0.12, celesta(midi(m), 2.6), 0.06, pan=-0.5 + i * 0.2)
 
 # ------------------------------------------------------------------ SFX cues (same clock as src/timeline.js)
-def cue(t0, sig, g=1.0, pan=0.0): add(sfx, t0, sig, g, pan)
 cue(0.1, reverse_swell(1.2), 0.08)
 for i in range(3):
     a = 1.4 + i * 0.18
@@ -338,11 +410,52 @@ for i in range(34):
     t0 = 64.4 + R2.random() * 1.6
     cue(t0, whoosh(0.9, 2000, 6000, 0.6), 0.03, R2.uniform(-0.8, 0.8))
     cue(t0 + 1.4, glock(midi([74, 76, 78, 81, 83, 86, 88, 90][i % 8]), 1.2), 0.035, R2.uniform(-0.8, 0.8))
-cue(68.9, whoosh(0.9, 200, 1600, 0.6), 0.2); cue(69.5, thump(0.3), 0.16)
-cue(72.2, whoosh(0.8, 1600, 200, 0.4), 0.16); cue(72.4, whoosh(0.9, 150, 1300, 0.6), 0.24); cue(73.0, thump(0.35), 0.4); cue(73.02, sub_boom(1.4, 80, 40), 0.35)
-for k in range(3): cue(72.6 + k * 0.25, sparkle(0.6, 10, seed=50 + k), 0.06, -0.6 + k * 0.6)
-for i, tt in enumerate([74.0, 74.35, 74.7]): cue(tt, bell(midi(81 + i * 4), 2.2), 0.1, -0.5 + i * 0.5); cue(tt, sub_boom(0.8, 110, 60), 0.12)
-cue(75.2, pop(1000, 420, 0.12), 0.12); cue(75.7, pop(1200, 500, 0.12), 0.12); cue(75.72, sparkle(0.8, 14, seed=60), 0.06)
+# ---- ranking de áreas (68.5-76.6)
+cue(68.5, whoosh(1.0, 3000, 300, 0.45), 0.2)
+cue(69.1, pop(1000, 420, 0.1), 0.16); cue(69.12, click(2800, 0.03, 0.3), 0.18); cue(69.35, pop(1100, 460, 0.1), 0.16); cue(69.37, click(3000, 0.03, 0.3), 0.16)
+for k, (t0, pan) in enumerate([(69.3, 0.5), (70.2, -0.5)]):
+    cue(t0, whoosh(0.7, 150, 1200, 0.65), 0.2, pan); cue(t0 + 0.45, thump(0.35), 0.35, pan); cue(t0 + 0.45, sparkle(0.5, 10, seed=70 + k), 0.06, pan)
+    ticks_for(t0 + 0.45, t0 + 1.3, 16, 2000, 0.1, pan)
+cue(70.3, tink(2600), 0.12, 0.5); cue(70.46, tink(2900, 0.3), 0.06, 0.5)
+cue(71.25, tink(3400), 0.1, -0.5); cue(71.4, tink(3700, 0.3), 0.05, -0.5)
+cue(71.9, whoosh(1.0, 120, 1400, 0.6), 0.28); cue(72.45, thump(0.4), 0.45); cue(72.45, sub_boom(1.6, 90, 40), 0.4)
+ticks_for(72.35, 73.35, 26, 2300, 0.12)
+cue(72.9, confetti_pop(1), 0.4, -0.7); cue(72.93, confetti_pop(2), 0.4, 0.7); cue(72.95, sparkle(2.0, 60, seed=80), 0.2); cue(72.97, tink(2200, 0.8), 0.15)
+cue(73.18, whoosh(0.25, 2000, 500, 0.8), 0.14, 0.5); cue(73.22, stamp(), 0.5, 0.5); cue(73.23, sub_boom(0.9, 110, 55), 0.25)
+cue(73.3, marker(0.45), 0.12, 0.4)
+cue(73.7, pop(1000, 420, 0.1), 0.15, 0.5); cue(73.85, pop(1150, 480, 0.1), 0.15, 0.5)
+ticks_for(73.8, 74.9, 10, 2600, 0.07, 0.5); ticks_for(74.0, 75.1, 12, 2900, 0.07, 0.5)
+cue(75.9, whoosh(0.8, 1400, 150, 0.35), 0.2)
+# ---- emblem returns, letterbox, end card, A&M signature
+cue(76.3, whoosh(0.8, 1600, 200, 0.4), 0.16); cue(76.5, whoosh(0.9, 150, 1300, 0.6), 0.24); cue(77.1, thump(0.35), 0.4); cue(77.12, sub_boom(1.4, 80, 40), 0.35)
+for k in range(3): cue(76.7 + k * 0.25, sparkle(0.6, 10, seed=50 + k), 0.06, -0.6 + k * 0.6)
+cue(77.7, whoosh(1.0, 300, 900, 0.7), 0.08)
+for i, tt in enumerate([78.1, 78.45, 78.8]): cue(tt, bell(midi(81 + i * 4), 2.2), 0.1, -0.5 + i * 0.5); cue(tt, sub_boom(0.8, 110, 60), 0.12)
+cue(79.0, bell(midi(86), 2.0), 0.05); cue(79.3, pop(1000, 420, 0.12), 0.12); cue(79.8, pop(1200, 500, 0.12), 0.12); cue(79.82, sparkle(0.8, 14, seed=60), 0.06)
+# ---- motion-graphics layer (After Effects): medallions + iris wipes
+for k, b in enumerate([10.05, 24.05, 62.05]):
+    cue(b - 0.62, pop(900, 380, 0.12), 0.2); cue(b - 0.6, click(2600, 0.03, 0.3), 0.2); cue(b - 0.5, sparkle(0.5, 12, seed=100 + k), 0.08)
+    cue(b - 0.32, whoosh(0.35, 400, 3000, 0.9), 0.2); cue(b + 0.2, whoosh(0.5, 3000, 500, 0.2), 0.16)
+    cue(b + 0.62, whoosh(0.5, 900, 3000, 0.5), 0.07, 0.6); cue(b + 1.12, click(3200, 0.03, 0.2), 0.2, 0.7); cue(b + 1.13, glock(midi(88 + k * 2), 0.9), 0.05, 0.7)
+# step tracker: activation ticks and completion checks
+for tt in [26.0, 30.6, 37.5, 42.5, 48.5, 55.5]: cue(tt + 0.02, click(3400, 0.02, 0.15), 0.12, 0.7)
+for i, tt in enumerate([30.6, 37.5, 42.5, 48.5, 55.5, 58.2]): cue(tt, glock(midi(86 + [0, 2, 4, 5, 7, 9][i]), 1.0), 0.06, 0.7); cue(tt, pop(1300, 600, 0.08), 0.08, 0.7)
+# focus frame snaps
+for tt in [31.25, 37.6, 42.6, 47.2, 54.5, 55.7]: cue(tt, click(2900, 0.025, 0.25), 0.16); cue(tt + 0.02, whoosh(0.25, 2500, 5000, 0.5), 0.04)
+# counter icons
+for tt in [16.65, 60.35]: cue(tt, pop(1000, 420, 0.12), 0.16); cue(tt + 0.02, sparkle(0.5, 10, seed=int(tt * 10)), 0.06)
+# highlighter swipes on the first key term of each subtitle
+SUBS = [(12.6, 'Todos sabem onde encontrar: tudo começa no *Início do FLOWS*.'), (16.3, 'Na Biblioteca, a comunidade já reúne *441 skills* prontas para reuso.'),
+        (20.7, 'E todos sabem como contribuir: compartilhar uma skill leva *6 passos*.'), (26.2, 'Clique em *Compartilhar Skill*.'), (30.8, 'Dê à skill um nome claro, com o *prefixo da área*.'),
+        (37.7, 'Informe *onde ela foi testada*.'), (42.7, 'Escolha o modelo testado. O campo é *obrigatório*.'), (48.7, 'Envie tudo em um *único ZIP*, com o *SKILL.md na raiz*.'),
+        (55.7, 'Avance em *Próximo* e publique para o time.'), (64.2, 'Uma skill compartilhada vira *referência* para todo o time.'), (69.3, 'No FLOWS, quem *publica e é adotado* sobe no placar.'),
+        (73.1, 'E a DTS lidera: *nº 1 entre 12 áreas*, com *1.557 pontos*.')]
+for t0, txt in SUBS:
+    words = txt.replace('*', ' * ').split(); i = 0; hl = False
+    for w in words:
+        if w == '*': hl = not hl; continue
+        if hl: cue(t0 + 0.45 + i * 0.05, marker(0.32), 0.05); break
+        i += 1
 # ------------------------------------------------------------------ mix & master
 def reverb_ir(d=2.6, seed=3):
     r = np.random.default_rng(seed); n = int(d * SR); t = np.arange(n) / SR

@@ -7,6 +7,7 @@ import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 export const glossy = (color, o = {}) => new THREE.MeshPhysicalMaterial({ color, roughness: 0.3, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.12, envMapIntensity: 0.85, ...o });
 export const matte = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.75, metalness: 0, envMapIntensity: 0.5, ...o });
 export const gold = (o = {}) => new THREE.MeshPhysicalMaterial({ color: 0xe8a93c, roughness: 0.3, metalness: 0.7, clearcoat: 0.5, clearcoatRoughness: 0.2, envMapIntensity: 0.65, ...o });
+export const brightGold = (o = {}) => new THREE.MeshPhysicalMaterial({ color: 0xffc24a, roughness: 0.2, metalness: 0.85, clearcoat: 0.8, clearcoatRoughness: 0.1, envMapIntensity: 1.25, emissive: 0x5a3000, emissiveIntensity: 0.35, ...o });
 export const shadowed = (m, cast = true, recv = true) => { m.traverse((o) => { if (o.isMesh) { o.castShadow = cast; o.receiveShadow = recv; } }); return m; };
 
 export function canvasTex(w, h, draw, aniso = 8) {
@@ -300,5 +301,14 @@ export function thread(a, b, lift = 400, color = 0xffc46e) {
 export function glowRing(color = 0xffc46e) {
   const m = new THREE.Mesh(new THREE.TorusGeometry(100, 3, 12, 128), new THREE.MeshBasicMaterial({ color, transparent: true, toneMapped: false, depthWrite: false }));
   m.rotation.x = -Math.PI / 2; m.userData.noDepth = true;
+  return m;
+}
+
+// soft contact shadow (ambient-occlusion decal) that grounds props on the plaza
+let _aoTex = null;
+export function contactShadow(w, d, strength = 0.55) {
+  if (!_aoTex) _aoTex = canvasTex(256, 256, (x, W, H) => { const g = x.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W / 2); g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(0.45, 'rgba(0,0,0,0.6)'); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, W, H); });
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshBasicMaterial({ map: _aoTex, color: 0x05030f, transparent: true, opacity: strength, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, fog: false }));
+  m.rotation.x = -Math.PI / 2; m.position.y = 0.6; m.renderOrder = 3; m.userData.noDepth = true; m.userData.k = strength;
   return m;
 }

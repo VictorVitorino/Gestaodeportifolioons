@@ -61,6 +61,8 @@ S.push(['m_step2', { ...afterTime, mode: 1, file: 'SKILL.zip', stepP: 1 }]);
   manifest.libhead_442 = await snap(pg, 'libhead_442', 'libhead', '442');
   manifest.rank = await snap(pg, 'rank', 'rank');
   manifest.sharebtn = await snap(pg, 'sharebtn', 'sharebtn');
+  for (const a of [{ rank: 1, code: 'DTS', name: 'DTS' }, { rank: 2, code: 'MA_SERVICES', name: 'M&amp;A Services' }, { rank: 3, code: 'OPERATIONS', name: 'Operations' }]) manifest[`rank_${a.rank}`] = await snap(pg, `rank_${a.rank}`, 'rankcard', a);
+  manifest._rankNum = await pg.evaluate(() => { const c = document.querySelector('.rkc'), n = c.querySelector('[data-num]'); const a = c.getBoundingClientRect(), b = n.getBoundingClientRect(); return { x: b.left - a.left, y: b.top - a.top, w: b.width, h: b.height, W: a.width, H: a.height }; });
   await pg.close();
 }
 {

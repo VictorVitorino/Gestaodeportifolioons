@@ -210,3 +210,12 @@ export function fileChip(name, kind = 'file', gold = false) {
   const ic = kind === 'dir' ? icon('folder') : icon('filetext');
   return h(`<div class="fchip3 ${gold ? 'gold' : ''}">${ic}${name}${gold ? '<span class="root">RAIZ</span>' : ''}</div>`);
 }
+
+// ---------- Ranking de áreas (podium cards; the points number is drawn live in 3D) ----------
+export function rankCard({ rank, code, name }) {
+  const ic = rank === 2 ? 'award' : 'trophy';
+  return h(`<div class="rkc r${rank}"><div class="badge">${icon(ic)}<b>${rank}</b></div>
+    <span class="code">${code}</span><div class="nm">${name}</div><div class="sc">${code}</div>
+    <div class="num" data-num></div><div class="pt">Pontos</div>
+    <span class="new">${icon('sparkles')}Novo na temporada</span></div>`);
+}

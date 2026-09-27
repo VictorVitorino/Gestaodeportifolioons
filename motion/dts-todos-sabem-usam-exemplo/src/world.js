@@ -6,6 +6,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { DOFPass } from './dofpass.js';
+import { MotionBlurPass } from './mblur.js';
 import { rng } from './util.js';
 
 const NOISE = `
@@ -56,9 +57,12 @@ export class World {
     const rt = new THREE.WebGLRenderTarget(W, H, { samples: 4, type: THREE.HalfFloatType });
     const comp = (this.composer = new EffectComposer(r, rt));
     comp.setPixelRatio(1); comp.setSize(W, H);
-    comp.addPass(new RenderPass(sc, this.camera));
+    this.renderPass = new RenderPass(sc, this.camera); comp.addPass(this.renderPass);
     this.dof = new DOFPass(sc, this.camera, { focus: 800, aperture: 0.00006, maxblur: 0.009 });
     comp.addPass(this.dof);
+    this.mblur = new MotionBlurPass(sc, this.camera, this.dof, W, H);
+    comp.addPass(this.mblur);
+    this.prevCam = this.camera.clone();
     this.bloom = new UnrealBloomPass(new THREE.Vector2(W, H), 0.38, 0.35, 1.4);
     comp.addPass(this.bloom);
     comp.addPass(new OutputPass());
@@ -196,6 +200,14 @@ export class World {
     this.grade.uniforms.uFade.value = fade; this.grade.uniforms.uFlash.value = flash; this.grade.uniforms.uVig.value = vig;
     this.renderer.toneMappingExposure = exposure;
     this.rayMat.uniforms.uA.value = rays;
+  }
+  // swap the rendered scene (studio ident uses its own stage, lights and environment)
+  useScene(s) { this.renderPass.scene = s; this.dof.scene = s; this.mblur.scene = s; }
+  // camera pose half a frame earlier (180° shutter) for the motion blur pass
+  setPrevCamera(P, T, fov, amount = 1) {
+    const c = this.prevCam; c.aspect = this.camera.aspect; c.near = this.camera.near; c.far = this.camera.far;
+    c.position.set(...P); c.up.set(0, 1, 0); c.lookAt(...T); c.fov = fov; c.updateProjectionMatrix(); c.updateMatrixWorld(true);
+    this.mblur.setPrev(c); this.mblur.amount = amount;
   }
   render() { this.composer.render(); }
 }

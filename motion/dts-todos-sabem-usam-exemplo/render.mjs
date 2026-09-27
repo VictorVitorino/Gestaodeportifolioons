@@ -4,7 +4,7 @@
 import { chromium } from 'playwright-core';
 import http from 'http'; import fs from 'fs'; import path from 'path';
 const root = path.dirname(new URL(import.meta.url).pathname);
-const types = { '.htm': 'text/html', '.webp': 'image/webp', '.ttf': 'font/ttf', '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.json': 'application/json', '.woff2': 'font/woff2', '.jpg': 'image/jpeg' };
+const types = { '.svg': 'image/svg+xml', '.htm': 'text/html', '.webp': 'image/webp', '.ttf': 'font/ttf', '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.json': 'application/json', '.woff2': 'font/woff2', '.jpg': 'image/jpeg' };
 const mode = process.argv[2];
 const port = 9000 + Math.floor(Math.random() * 900);
 const srv = http.createServer((req, res) => {

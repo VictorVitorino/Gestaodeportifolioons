@@ -2,12 +2,17 @@
 import * as THREE from 'three';
 import { E, clamp, lerp, seg, spline, env as envl, pulse, rng, deg } from './util.js';
 import * as O from './objects.js';
+import * as MG from './mg.js';
+import { buildPodium, AREAS } from './podium.js';
 
-export const DURATION = 78;
+import { IDENT } from './ident.js';
+export const FILM = 82.2;
+export const DURATION = IDENT + FILM;
+const SHUTTER = 1 / 48; // 180° shutter at 24 fps
 const BLUE = 0x3d8bff, ORANGE = 0xff8a1f, GOLD = 0xf2b544;
 
 export function buildFilm(ctx) {
-  const { world, cam, project, font, tex, manifest, hud, imgs } = ctx;
+  const { world, cam, project, font, tex, manifest, hud, imgs, ident } = ctx;
   const scene = world.scene;
   const add = (o) => { scene.add(o); return o; };
   const V3 = (a) => new THREE.Vector3(a[0], a[1], a[2]);
@@ -52,7 +57,6 @@ export function buildFilm(ctx) {
   hl.userData.noDepth = true; inicio.add(hl);
   // Biblioteca card region in the 1672x941 screenshot: x 318..748, y 248..403
   { const fw = 780, fh = 439; const cx = ((318 + 748) / 2 / 1672 - 0.5) * fw, cy = -((248 + 403) / 2 / 941 - 0.5) * fh; hl.position.set(cx, cy, 8.2); hl.scale.set((440 / 1672) * fw * 1.06, (165 / 941) * fh * 1.12, 1); }
-  const rankF = add(O.uiFrame(tex('rank'), { w: 420, h: 292, bezel: 12, depth: 12, body: 0xf3efe8, alpha: true, glass: false }));
 
   const MR = manifest._modalRects;
   const MODAL = { c: [0, 330, -40], w: 330 };
@@ -79,11 +83,18 @@ export function buildFilm(ctx) {
   const fileDefs = [['SKILL.md', { gold: true }], ['README.md', { tint: 0xd8e6ff }], ['LICENSE', { tint: 0xd9f3e6 }], ['scripts/', { dir: true }], ['references/', { dir: true }], ['assets/', { dir: true }]];
   const files = fileDefs.map(([n, o]) => add(O.docFile(n, o)));
   const newCard = add(O.skillSlab(tex('card_new'), { w: 172, h: 120, depth: 6 }));
+  // the fly-along camera rides with the new card: it is masked out of the motion blur during the flight
   const heroCards = [4, 5, 2].map((k) => add(O.skillSlab(tex(`card_${k}`), { w: 250, h: 174, depth: 7 })));
   const threads = [];
   { const R = rng(5); const picks = new Set(); while (picks.size < 34) { const i = Math.floor(R() * ring.N); const a = ring.slots[i].a; const da = Math.abs(Math.atan2(Math.sin(a), Math.cos(a))); if (!ring.holeSet.has(i) && Math.abs(i - TARGET) > 2 && da < 1.9 && da > 0.08) picks.add(i); }
     for (const i of picks) { const th = O.thread(slotPos.clone(), ring.slots[i].pos.clone(), 250 + R() * 500); th.userData.tile = i; th.userData.delay = R() * 1.6; add(th); threads.push(th); } }
   const shock = add(O.glowRing(0xffc46e));
+  const podium = buildPodium({ scene, imgs, manifest });
+  // contact shadows (fade in as each prop reaches the floor)
+  const ao = (w, d, k) => add(O.contactShadow(w, d, k));
+  const aoEmb = ao(820, 820, 0.5), aoPil = PILLARS.map((p) => { const m = ao(700, 380, 0.55); m.position.set(p.g.position.x, 0.6, p.g.position.z); m.rotation.z = -p.g.rotation.y; return m; });
+  const aoBtn = ao(330, 330, 0.55), aoBox = ao(360, 360, 0.55);
+  const aoSet = (m, restY, x, z) => { const k = clamp(1 - Math.abs(restY) / 90); m.visible = k > 0.01; m.material.opacity = m.userData.k * k; if (x !== undefined) m.position.set(x, 0.6, z); };
 
   // sparks (3D points) and trail
   const mkPoints = (n, size, color) => {
@@ -113,52 +124,77 @@ export function buildFilm(ctx) {
 
   // ------------------------------------------------------------ HUD (motion graphics)
   hud.innerHTML = `<div class="band"></div>
-    <div class="bug"><div class="m">DTS</div><div class="t"><small>Digital &amp; Technology Services</small>Todos Sabem · Todos Usam · Somos Exemplo</div></div>
+    <div class="bug"><div class="am"><img src="tex/am_mark.svg" alt=""><i></i></div><div class="m">DTS</div><div class="t"><small>Digital &amp; Technology Services</small>Todos Sabem · Todos Usam · Somos Exemplo</div></div>
     <div class="pillars"><div class="pill" style="--c:#3d8bff"><i></i>Todos Sabem<em></em></div><div class="pill" style="--c:#ff8a1f"><i></i>Todos Usam<em></em></div><div class="pill" style="--c:#f2b544"><i></i>Somos Exemplo<em></em></div></div>
-    <div class="steps"><span class="sl">PASSO 1/6</span>${'<b></b>'.repeat(6)}</div>
     <div class="sub"><div class="k"></div><div class="s"></div></div>
     <div class="tag t-dts" style="top:835px;font-size:30px">Digital &amp; Technology Services</div>
     <div class="headline h-open" style="top:360px"></div>
     <div class="tag t-open" style="top:450px">Compartilhar uma Skill no FLOWS · 6 passos</div>
     <div class="kin k-pillar" style="top:170px"><div class="tag" style="position:static;letter-spacing:.5em"></div><div class="lbl" style="font-size:52px;font-weight:800;margin-top:10px"></div></div>
-    <div class="kin k-count" style="top:250px"><div class="big">0</div><div class="lbl"></div></div>
+    <div class="kin k-count" style="top:210px"><div class="kic"></div><div class="big">0</div><div class="lbl"></div></div>
     <div class="callout c-pfx"><span class="dot">✦</span>prefixo da área</div>
     <div class="callout soft c-where"><span class="dot">✓</span>contexto da validação</div>
     <div class="callout c-req"><span class="dot">*</span>obrigatório</div>
     <div class="callout soft c-opt"><span class="dot">⏱</span>opcional · minutos na mão</div>
     <div class="callout c-root"><span class="dot">★</span>SKILL.md na raiz</div>
-    <div class="endcard" style="top:120px"><div class="l1"><span class="c1">Todos Sabem.</span> <span class="c2">Todos Usam.</span> <span class="c3">Somos Exemplo.</span></div>
+    <div class="endcard" style="top:170px"><div class="l1"><span class="c1">Todos Sabem.</span> <span class="c2">Todos Usam.</span> <span class="c3">Somos Exemplo.</span></div>
       <div class="l2">DTS · Digital &amp; Technology Services</div>
-      <div class="l3"><img src="tex/logo.png" alt="">Compartilhe sua skill no FLOWS</div></div>`;
+      <div class="l3"><img src="tex/logo.png" alt="">Compartilhe sua skill no FLOWS</div></div>
+    <div class="pd-head"><span class="c1">${MG.ico('chart')}Ranking de Áreas · Todos os tempos</span><span class="c2">${MG.ico('users')}12 áreas no placar</span></div>
+    <div class="pd-stamp">${MG.ico('crown', '', 2.2)}<div><b>Nº 1</b><small>entre 12 áreas no placar</small></div></div>
+    <div class="pd-stats"><div class="s1">${MG.ico('upload')}<b>0</b><small>publicações</small></div><div class="s2">${MG.ico('download')}<b>0</b><small>adoções</small></div></div>
+    <div class="id-cap"><div class="n">ALVAREZ &amp; MARSAL</div><div class="ln"></div><div class="s">Digital &amp; Technology Services · apresenta</div></div>
+    <div class="am-sign"><img src="tex/am_mark.svg" alt=""><span>Alvarez &amp; Marsal</span><i></i><span class="d">DTS · Digital &amp; Technology Services</span></div>`;
   const $ = (s) => hud.querySelector(s);
   const bug = $('.bug'), pills = [...hud.querySelectorAll('.pill')], pillFill = pills.map((p) => p.querySelector('em'));
-  const steps = $('.steps'), stepBars = [...steps.querySelectorAll('b')], stepLbl = steps.querySelector('.sl');
   const subK = $('.sub .k'), subS = $('.sub .s'), band = $('.band');
   const tDts = $('.t-dts'), hOpen = $('.h-open'), tOpen = $('.t-open');
   hOpen.innerHTML = 'Como a DTS compartilha conhecimento'.split(' ').map((w) => `<span class="w">${w} </span>`).join('');
   const hOpenW = [...hOpen.querySelectorAll('.w')];
   const kP = $('.k-pillar'), kPTag = kP.querySelector('.tag'), kPLbl = kP.querySelector('.lbl');
   const kC = $('.k-count'), kCBig = kC.querySelector('.big'), kCLbl = kC.querySelector('.lbl');
+  const kIc = kC.querySelector('.kic');
   const cPfx = $('.c-pfx'), cWhere = $('.c-where'), cReq = $('.c-req'), cOpt = $('.c-opt'), cRoot = $('.c-root');
   const endc = $('.endcard'), endSpans = [...endc.querySelectorAll('.l1 span')], endL2 = endc.querySelector('.l2'), endL3 = endc.querySelector('.l3');
   const show = (el, op, x = null, y = null, ax = 0, ay = 0, sc = 1) => {
     el.style.opacity = op; el.style.display = op > 0.003 ? '' : 'none';
     if (op > 0.003 && x !== null) el.style.transform = `translate(${x}px,${y}px) translate(${-ax * 100}%,${-ay * 100}%) scale(${sc})`;
   };
+  // ---- motion-graphics layer (After Effects style)
+  const PCOL = ['#3d8bff', '#ff8a1f', '#f2b544'], HLC = ['rgba(47,112,240,.92)', 'rgba(246,118,10,.9)', 'rgba(214,146,22,.92)'];
+  const BEATS = [10.05, 24.05, 62.05];
+  const iris = MG.irisWipe(hud);
+  const badges = [['bulb', 'Todos Sabem'], ['pointer', 'Todos Usam'], ['trophy', 'Somos Exemplo']].map(([icon, label], k) => MG.pillarBadge(hud, { icon, color: PCOL[k], label }));
+  const tracker = MG.stepTracker(hud, [
+    { icon: 'upload', name: 'Compartilhar', a: 26.0, b: 30.6 }, { icon: 'type', name: 'Nome', a: 30.6, b: 37.5 }, { icon: 'flask', name: 'Onde testou', a: 37.5, b: 42.5 },
+    { icon: 'cpu', name: 'Modelo', a: 42.5, b: 48.5 }, { icon: 'folderzip', name: 'Arquivos', a: 48.5, b: 55.5 }, { icon: 'rocket', name: 'Publicar', a: 55.5, b: 58.2 }]);
+  const focus = MG.focusFrame(hud);
+  const FOCUS = [['name', 31.25, 37.3], ['where', 37.6, 42.3], ['model', 42.6, 46.9], ['time', 47.2, 48.5], ['file', 54.5, 55.5], ['next', 55.7, 57.0]];
+  const bars = MG.letterbox(hud);
+  const pdHead = $('.pd-head'), pdStamp = $('.pd-stamp'), pdStats = $('.pd-stats');
+  const pdLink = MG.el('<svg class="pd-link" width="1920" height="1080" viewBox="0 0 1920 1080"><path fill="none" stroke="#ffd27a" stroke-width="4" stroke-linecap="round" stroke-dasharray="1 0"/><circle r="9" fill="#ffd27a" stroke="#fff" stroke-width="3"/></svg>');
+  hud.appendChild(pdLink); const pdLinkD = MG.drawable(pdLink);
+  const pdFx = AREAS.map((a) => MG.burstFx(hud, { n: 12, color: a.rank === 1 ? '#ffd27a' : '#bcd6ff', size: 460 }));
+  const stampFx = MG.burstFx(hud, { n: 16, color: '#ffd27a', size: 560 });
+  const cntFx = MG.burstFx(hud, { n: 10, color: '#ffd27a', size: 420 });
+  const idCap = $('.id-cap'), idLine = idCap.querySelector('.ln'), amSign = $('.am-sign');
+  const fmt = (n) => n.toLocaleString('pt-BR');
   const SUBS = [
-    [12.6, 15.9, '', 'Todos sabem onde encontrar: tudo começa no Início do FLOWS.'],
-    [16.3, 20.4, '', 'Na Biblioteca, a comunidade já reúne 441 skills prontas para reuso.'],
-    [20.7, 23.8, '', 'E todos sabem como contribuir: compartilhar uma skill leva 6 passos.'],
-    [26.2, 30.3, 'Passo 1', 'Clique em Compartilhar Skill.'],
-    [30.8, 37.3, 'Passo 2', 'Dê à skill um nome claro, com o prefixo da área.'],
-    [37.7, 42.3, 'Passo 3', 'Informe onde ela foi testada.'],
-    [42.7, 48.3, 'Passo 4', 'Escolha o modelo testado. O campo é obrigatório.'],
-    [48.7, 55.3, 'Passo 5', 'Envie tudo em um único ZIP, com o SKILL.md na raiz.'],
-    [55.7, 61.8, 'Passo 6', 'Avance em Próximo e publique para o time.'],
-    [64.2, 68.8, '', 'Uma skill compartilhada vira referência para todo o time.'],
-    [69.2, 72.3, '', 'Cada contribuição conta: o conhecimento da DTS cresce com cada skill.'],
+    [12.6, 15.9, '', 'Todos sabem onde encontrar: tudo começa no *Início do FLOWS*.'],
+    [16.3, 20.4, '', 'Na Biblioteca, a comunidade já reúne *441 skills* prontas para reuso.'],
+    [20.7, 23.6, '', 'E todos sabem como contribuir: compartilhar uma skill leva *6 passos*.'],
+    [26.2, 30.3, 'Passo 1', 'Clique em *Compartilhar Skill*.'],
+    [30.8, 37.3, 'Passo 2', 'Dê à skill um nome claro, com o *prefixo da área*.'],
+    [37.7, 42.3, 'Passo 3', 'Informe *onde ela foi testada*.'],
+    [42.7, 48.3, 'Passo 4', 'Escolha o modelo testado. O campo é *obrigatório*.'],
+    [48.7, 55.3, 'Passo 5', 'Envie tudo em um *único ZIP*, com o *SKILL.md na raiz*.'],
+    [55.7, 61.6, 'Passo 6', 'Avance em *Próximo* e publique para o time.'],
+    [64.2, 68.6, '', 'Uma skill compartilhada vira *referência* para todo o time.'],
+    [69.3, 72.6, '', 'No FLOWS, quem *publica e é adotado* sobe no placar.'],
+    [73.1, 76.3, '', 'E a DTS lidera: *nº 1 entre 12 áreas*, com *1.557 pontos*.'],
+    [76.5, 77.9, '', 'Cada contribuição conta.'],
   ];
-  const PILLAR_BEATS = [[10.1, 12.1, 'Pilar 1 · Todos Sabem', 'onde está o conhecimento', '#8fc0ff'], [24.1, 26.1, 'Pilar 2 · Todos Usam', 'o passo a passo no dia a dia', '#ffb15c'], [62.1, 64.1, 'Pilar 3 · Somos Exemplo', 'quem compartilha, lidera pelo exemplo', '#ffd27a']];
+  const PILLAR_BEATS = [[10.5, 12.4, 'Pilar 1 · Todos Sabem', 'onde está o conhecimento', '#8fc0ff'], [24.5, 26.4, 'Pilar 2 · Todos Usam', 'o passo a passo no dia a dia', '#ffb15c'], [62.5, 64.4, 'Pilar 3 · Somos Exemplo', 'quem compartilha, lidera pelo exemplo', '#ffd27a']];
   let subKey = '', pillarKey = '';
 
   // ------------------------------------------------------------ helpers
@@ -180,9 +216,9 @@ export function buildFilm(ctx) {
   const vis = (o, v) => { o.visible = v; return v; };
 
   // ------------------------------------------------------------ update
-  function update(t) {
-    // ============ CAMERA (computed first: projections below depend on it)
-    let P, T, fov = 30, focusD = null, aperture = 0.000018, maxblur = 0.008;
+  // camera pose as a pure function of film time (also sampled at t - 1/48 for motion blur)
+  function camPose(t) {
+    let P, T, fov = 30, aperture = 0.000018;
     const podCam = (p, back = p === P_E ? 1080 : 800) => { const dir = [Math.sin(p.g.rotation.y), 0, Math.cos(p.g.rotation.y)]; const o = p.g.position; return [[o.x + dir[0] * back, 190, o.z + dir[2] * back], [o.x + dir[0] * 10, 100, o.z + dir[2] * 10]]; };
     if (t < 10) {
       P = spline([[0, [70, 26, 860]], [2.6, [0, 90, 720]], [5.2, [-260, 380, 1400]], [8.2, [-70, 500, 1760]], [10, [-420, 240, 520]]], t, 'linear');
@@ -234,34 +270,42 @@ export function buildFilm(ctx) {
       }
     } else {
       const [ep, et] = podCam(P_E);
-      P = spline([[62, [140, 380, 860]], [62.9, ep], [63.5, mixv(ep, [ep[0] - 12, ep[1] + 4, ep[2] - 16], 1)], [64.0, mixv(ep, [ep[0] - 24, ep[1] + 8, ep[2] - 32], 1)], [65.2, [0, 520, 200]], [68.8, [-260, 560, 120]], [69.8, [60, 300, 560]], [72.2, [110, 290, 480]], [73.3, [40, 420, 1150]], [74.8, [0, 540, 1700]], [78, [0, 760, 2250]]], t, 'linear');
-      T = spline([[62, [90, 250, -1700]], [62.9, et], [63.5, et], [64.0, et], [65.2, [0, 330, -2000]], [68.8, [60, 360, -2000]], [69.8, [0, 250, -80]], [72.2, [0, 250, -80]], [73.3, [0, 260, -200]], [74.8, [0, 360, -400]], [78, [0, 420, -500]]], t, 'linear');
-      aperture = t > 64.5 && t < 69.5 ? 0.000007 : 0.000016;
-      fov = 30 + seg(t, 72.5, 78) * 4;
+      P = spline([[62, [140, 380, 860]], [62.9, ep], [63.5, mixv(ep, [ep[0] - 12, ep[1] + 4, ep[2] - 16], 1)], [64.0, mixv(ep, [ep[0] - 24, ep[1] + 8, ep[2] - 32], 1)], [65.2, [0, 520, 200]], [68.5, [-260, 560, 120]],
+        [69.5, [0, 330, 1480]], [71.4, [-60, 300, 1330]], [72.6, [20, 215, 1080]], [73.5, [-40, 235, 1120]], [75.7, [-290, 290, 1220]], [77.3, [40, 420, 1150]], [78.8, [0, 540, 1700]], [82.2, [0, 760, 2250]]], t, 'linear');
+      T = spline([[62, [90, 250, -1700]], [62.9, et], [63.5, et], [64.0, et], [65.2, [0, 330, -2000]], [68.5, [60, 360, -2000]],
+        [69.5, [0, 215, 60]], [71.4, [0, 225, 60]], [72.6, [0, 285, 60]], [73.5, [0, 280, 60]], [75.7, [0, 255, 60]], [77.3, [0, 250, -200]], [78.8, [0, 270, -400]], [82.2, [0, 320, -500]]], t, 'linear');
+      aperture = t > 64.5 && t < 68.8 ? 0.000007 : t < 76 ? 0.000012 : 0.000016;
+      fov = 30 + seg(t, 76.6, 82.2) * 4;
     }
-    let shake = pulse(t, 28.0, 0.03, 0.16) * 3 + pulse(t, 60.2, 0.03, 0.25) * 4 + pulse(t, 1.9, 0.03, 0.2) * 1.5;
+    let shake = pulse(t, 28.0, 0.03, 0.16) * 3 + pulse(t, 60.2, 0.03, 0.25) * 4 + pulse(t, 1.9, 0.03, 0.2) * 1.5 + pulse(t, 72.95, 0.03, 0.22) * 4 + pulse(t, 73.2, 0.02, 0.16) * 3;
     if (shake > 0.01) { P = [P[0] + Math.sin(t * 93) * shake, P[1] + Math.cos(t * 71) * shake, P[2]]; }
+    return { P, T, fov, aperture };
+  }
+  function updateFilm(t) {
+    // ============ CAMERA (computed first: projections below depend on it)
+    let { P, T, fov, aperture } = camPose(t), focusD = null, maxblur = 0.008;
     setCam(P, T, fov);
     focusD = Math.hypot(T[0] - P[0], T[1] - P[1], T[2] - P[2]);
 
     // ============ ENVIRONMENT + global light
     let fade = 1 - E.outQuad(seg(t, 0, 1.4)), flash = 0, bloom = 0.38;
-    fade = Math.max(fade, E.inQuad(seg(t, 76.8, 78)));
-    flash = Math.max(envl(t, 9.7, 10.0, 10.05, 10.5, 'inQuad', 'outQuad') * 0.6, envl(t, 23.7, 24.0, 24.05, 24.5, 'inQuad', 'outQuad') * 0.6, envl(t, 61.8, 62.05, 62.1, 62.5, 'inQuad', 'outQuad') * 0.6, envl(t, 60.1, 60.2, 60.25, 60.8, 'inQuad', 'outQuad') * 0.35);
-    const flashCol = t < 17 ? [0.62, 0.8, 1.0] : t < 40 ? [1.0, 0.72, 0.45] : [1.0, 0.88, 0.58];
+    fade = Math.max(fade, E.inQuad(seg(t, 81.0, 82.2)));
+    flash = Math.max(envl(t, 60.1, 60.2, 60.25, 60.8, 'inQuad', 'outQuad') * 0.35, envl(t, 72.85, 72.95, 73.0, 73.5, 'inQuad', 'outQuad') * 0.28);
+    const flashCol = [1.0, 0.88, 0.58];
 
     // ============ EMBLEM
     {
-      const up1 = seg(t, 1.2, 1.9), down = t > 11.4 && t < 72.4 ? 1 : 0;
+      const up1 = seg(t, 1.2, 1.9);
       let y = riseY(t, 1.2, 0.8, -240);
       if (t > 11.4) y = sinkY(t, 11.4, 0.8, -300);
-      if (t > 72.4) y = riseY(t, 72.4, 0.9, -300);
-      emblem.position.y = y; vis(emblem, t > 1.15 && !(t > 12.3 && t < 72.4));
+      if (t > 76.5) y = riseY(t, 76.5, 0.9, -300);
+      emblem.position.y = y; vis(emblem, t > 1.15 && !(t > 12.3 && t < 76.5));
+      aoSet(aoEmb, emblem.visible ? y : 999, 0, 60);
       dts.letters.forEach((l, i) => {
         const a = 1.4 + i * 0.18; const u = seg(t, a, a + 0.6);
         const sq = squash(t, a + 0.36, 0.3, 0.2);
         let ly = 170 * (1 - E.outBack(u, 2.4)) - (u <= 0 ? 400 : 0);
-        if (t > 72.4) { const a2 = 72.8 + i * 0.12; const u2 = seg(t, a2, a2 + 0.6); ly = u2 <= 0 ? 0 : Math.sin(u2 * Math.PI) * 40; }
+        if (t > 76.5) { const a2 = 76.9 + i * 0.12; const u2 = seg(t, a2, a2 + 0.6); ly = u2 <= 0 ? 0 : Math.sin(u2 * Math.PI) * 40; }
         l.holder.position.y = ly + Math.sin(t * 1.6 + i) * 2.5 * up1;
         l.holder.scale.set(sq[0], sq[1], sq[0]);
         l.holder.rotation.y = (1 - E.outCubic(u)) * 0.9 * (i - 1);
@@ -272,12 +316,13 @@ export function buildFilm(ctx) {
       const t0 = 4.2 + k * 0.3;
       p.g.position.y = riseY(t, t0, 0.8, -200);
       vis(p.g, t > t0);
+      aoSet(aoPil[k], p.g.visible ? p.g.position.y : 999);
       letterPop(p.word.letters, t, t0 + 0.6, 0.06, 0.5, 80);
       const beat = k === 0 ? 10.3 : k === 1 ? 24.3 : 62.3;
       letterWave(p.word.letters, t, beat, 26);
-      const glow = 0.8 + envl(t, beat - 0.3, beat, beat + 1.5, beat + 2.2) * 2.4 + (t > 72.6 ? E.outCubic(seg(t, 72.6 + k * 0.25, 73.4 + k * 0.25)) * 1.4 : 0) + (t > 4.5 && t < 7.5 ? pulse(t, t0 + 0.9, 0.05, 0.6) * 2 : 0);
+      const glow = 0.8 + envl(t, beat - 0.3, beat, beat + 1.5, beat + 2.2) * 2.4 + (t > 76.7 ? E.outCubic(seg(t, 76.7 + k * 0.25, 77.5 + k * 0.25)) * 1.4 : 0) + (t > 4.5 && t < 7.5 ? pulse(t, t0 + 0.9, 0.05, 0.6) * 2 : 0);
       p.pod.userData.strip.material.emissiveIntensity = 1.2 + glow;
-      p.light.intensity = Math.max(0, glow - 0.8) * 2600;
+      p.light.intensity = Math.max(0, glow - 0.8) * 2600; p.light.visible = p.light.intensity > 20;
     });
 
     // ============ TODOS SABEM: Início frame + ring wave + hero cards
@@ -322,9 +367,11 @@ export function buildFilm(ctx) {
     // Passo 1: pedestal + capsule button + cursor press
     {
       const on = t > 26.3 && t < 31.2; vis(btnPed, on); vis(btn, on);
+      if (!on) aoBtn.visible = false;
       if (on) {
         const y = riseY(t, 26.35, 0.8, -300) + (t > 30.2 ? sinkY(t, 30.2, 0.8, -300) : 0);
         btnPed.position.set(0, y, 80);
+        aoSet(aoBtn, y, 0, 80);
         const press = pulse(t, 28.0, 0.05, 0.28), sq = squash(t, 28.02, 0.2, 0.2);
         btn.position.set(0, y + 110 + 50 - press * 14 + Math.sin(t * 2.2) * 2, 80);
         btn.rotation.set(-0.32, Math.sin(t * 0.9) * 0.05, 0);
@@ -428,10 +475,12 @@ export function buildFilm(ctx) {
     // box + files (Passo 5)
     {
       const on = t > 48.6 && t < 54.7; vis(boxPed, on); vis(box, on);
+      if (!on) aoBox.visible = false;
       const bp = [-330, 0, 70];
       if (on) {
         const y = riseY(t, 48.6, 0.8, -300);
         boxPed.position.set(bp[0], y, bp[2]);
+        aoSet(aoBox, y, bp[0], bp[2]);
         let land = 0; for (let i = 0; i < 6; i++) land += pulse(t, 50.35 + i * 0.5, 0.03, 0.14);
         const close = E.inOutBack(seg(t, 52.9, 53.5));
         const sqc = squash(t, 53.5, 0.16, 0.2);
@@ -457,7 +506,8 @@ export function buildFilm(ctx) {
     }
     // new card: born from the folded modal, flies into the ring slot
     {
-      const on = t > 57.95 && t < 76.9; vis(newCard, on);
+      const on = t > 57.95 && t < 81.2; vis(newCard, on);
+      newCard.userData.mbHold = t > 58.2 && t < 60.8;
       if (on) {
         const u = E.inOutCubic(seg(t, 58.3, 60.2));
         const from = new THREE.Vector3(...MODAL.c), mid = from.clone().lerp(slotPos, 0.5); mid.y += 520;
@@ -490,43 +540,73 @@ export function buildFilm(ctx) {
       burst(arr, t, 57.95, [0, 330, -20], { n: 60, seed: 9, speed: 300 });
       burst(arr, t, 60.2, [slotPos.x, slotPos.y, slotPos.z + 20], { n: 90, seed: 11, speed: 520, life: 1.4 });
       burst(arr, t, 1.9, [0, 60, 60], { n: 40, seed: 13, speed: 260, life: 0.9 });
+      podium.update(t, arr, burst);
       sparks.geometry.attributes.position.needsUpdate = true; sparks.geometry.attributes.a.needsUpdate = true;
     }
     // threads (Somos Exemplo)
     threads.forEach((th) => {
       const t0 = 64.4 + th.userData.delay, u = E.inOutCubic(seg(t, t0, t0 + 1.4));
-      th.visible = t > t0 && t < 76.8;
+      th.visible = t > t0 && t < 81.2;
       th.material.uniforms.uP.value = u; th.material.uniforms.uA.value = 0.6 + 0.4 * Math.sin(t * 3 + th.userData.delay * 7);
       if (u >= 1) { const i = th.userData.tile; const g = pulse(t, t0 + 1.4, 0.05, 0.8) * 1.2 + 0.25; ring.set(i, 1, g * 30, g); }
     });
     ring.commit();
-    // ranking frame (Somos Exemplo)
-    {
-      const on = t > 68.9 && t < 73.0; vis(rankF, on);
-      if (on) { const y = 250 + riseY(t, 68.9, 0.9, -460) + (t > 72.2 ? sinkY(t, 72.2, 0.8, -520) : 0); rankF.position.set(0, y, -80); rankF.rotation.set(-0.05, Math.sin(t * 0.6) * 0.05, 0); }
-    }
 
     // ============ HUD
-    const hudIn = E.outCubic(seg(t, 7.4, 8.2)) * (1 - E.inCubic(seg(t, 73.6, 74.2)));
+    const hudIn = E.outCubic(seg(t, 7.4, 8.2)) * (1 - E.inCubic(seg(t, 77.7, 78.3)));
     bug.style.opacity = hudIn; pills.forEach((p) => (p.style.opacity = hudIn));
+    bars.set(t < 0 ? 1 : (1 - E.inOutCubic(seg(t, 1.2, 2.3))) + E.inOutCubic(seg(t, 77.7, 78.5)));
     const active = t < 24 ? 0 : t < 62 ? 1 : 2;
     pills.forEach((p, k) => {
-      p.classList.toggle('on', k === active && t > 10);
-      const f = k < active ? 1 : k === active ? (k === 0 ? seg(t, 10, 24) : k === 1 ? seg(t, 24, 62) : seg(t, 62, 73)) : 0;
+      p.classList.toggle('on', k === active && t > BEATS[k] + 1.1);
+      const f = k < active ? 1 : k === active ? (k === 0 ? seg(t, 10.6, 24) : k === 1 ? seg(t, 25.1, 62) : seg(t, 63.1, 77.5)) : 0;
       pillFill[k].style.width = `${f * 100}%`;
+      p.style.transform = `scale(${1 + pulse(t, BEATS[k] + 1.12, 0.04, 0.22) * 0.16})`;
     });
-    const stepN = t < 26 ? 0 : t < 30.6 ? 1 : t < 37.5 ? 2 : t < 42.5 ? 3 : t < 48.5 ? 4 : t < 55.5 ? 5 : 6;
-    const stepsOn = envl(t, 25.8, 26.3, 61.6, 62.1);
-    steps.style.opacity = stepsOn * hudIn; steps.style.display = stepsOn > 0.003 ? '' : 'none';
-    stepLbl.textContent = `PASSO ${Math.max(1, stepN)}/6`;
-    stepBars.forEach((b, k) => { b.className = k + 1 < stepN ? 'done' : k + 1 === stepN ? 'on' : ''; });
-    // subtitles
+    // pillar medallions ride an iris wipe in the pillar colour, then land on their pill
+    {
+      const bi = BEATS.findIndex((b) => t > b - 0.35 && t < b + 0.7);
+      if (bi >= 0) iris.set(t, BEATS[bi], PCOL[bi]); else MG.vis(iris.node, false);
+      badges.forEach((b, k) => { const d = pills[k].querySelector('i').getBoundingClientRect(); b.set(t, BEATS[k], { x: d.left + d.width / 2, y: d.top + d.height / 2 }); });
+    }
+    tracker.set(t, envl(t, 25.8, 26.3, 61.6, 62.1) * hudIn);
+    // focus frame: brackets track the active modal field and snap to the next one
+    {
+      const fr = (f) => { const r = MR[f]; return MG.rectOf([project(mpt(r.x, r.y)), project(mpt(r.x + r.w, r.y)), project(mpt(r.x, r.y + r.h)), project(mpt(r.x + r.w, r.y + r.h))]); };
+      const i = FOCUS.findIndex(([, a, b]) => t >= a && t < b);
+      if (i >= 0) {
+        const [f, a, b] = FOCUS[i];
+        let rect = fr(f), k = 1;
+        const prev = FOCUS[i - 1], chained = prev && a - prev[2] < 0.6;
+        const u = seg(t, a, a + 0.38);
+        if (chained && u < 1) rect = MG.lerpRect(fr(prev[0]), rect, E.outBack(u, 1.6));
+        else k = 1 + (1 - E.outCubic(seg(t, a, a + 0.3))) * 1.8;
+        const next = FOCUS[i + 1], chainedNext = next && next[1] - b < 0.6;
+        const op = (chained ? 1 : E.outCubic(seg(t, a, a + 0.25))) * (chainedNext ? 1 : 1 - seg(t, b - 0.2, b));
+        focus.set(rect, op * hudIn, k);
+      } else {
+        const j = FOCUS.findIndex(([, , b], n) => FOCUS[n + 1] && t >= b && t < FOCUS[n + 1][1] && FOCUS[n + 1][1] - b < 0.6);
+        if (j >= 0) focus.set(fr(FOCUS[j][0]), hudIn, 1); else focus.set(null, 0);
+      }
+    }
+    // subtitles: word-by-word, with a highlighter swipe on *key terms*
     {
       let cur = null; for (const s of SUBS) if (t >= s[0] && t <= s[1]) cur = s;
       const key = cur ? cur[3] : '';
-      if (key !== subKey) { subKey = key; subS.innerHTML = key ? key.split(' ').map((w) => `<span class="w">${w} </span>`).join('') : ''; subK.textContent = cur ? cur[2] : ''; }
+      if (key !== subKey) {
+        subKey = key; const toks = [];
+        key.split(/(\*[^*]+\*)/).forEach((part) => {
+          if (!part) return; const h = part.startsWith('*') && part.endsWith('*'); const txt = h ? part.slice(1, -1) : part;
+          txt.split(' ').forEach((w, i) => { if (!w) return; if (i === 0 && !h && toks.length && !txt.startsWith(' ')) { toks[toks.length - 1][0] += w; return; } toks.push([w, h]); });
+        });
+        subS.innerHTML = toks.map(([w, h]) => `<span class="w${h ? ' hl' : ''}">${w} </span>`).join(''); subK.textContent = cur ? cur[2] : '';
+      }
       if (cur) {
-        [...subS.querySelectorAll('.w')].forEach((w, i) => { const u = E.outCubic(seg(t, cur[0] + i * 0.04, cur[0] + 0.35 + i * 0.04)); w.style.opacity = u * (1 - seg(t, cur[1] - 0.25, cur[1])); w.style.transform = `translateY(${(1 - u) * 14}px)`; });
+        subS.style.setProperty('--hl', HLC[cur[0] < 24 ? 0 : cur[0] < 62 ? 1 : 2]);
+        [...subS.querySelectorAll('.w')].forEach((w, i) => {
+          const u = E.outCubic(seg(t, cur[0] + i * 0.04, cur[0] + 0.35 + i * 0.04)); w.style.opacity = u * (1 - seg(t, cur[1] - 0.25, cur[1])); w.style.transform = `translateY(${(1 - u) * 14}px)`;
+          if (w.classList.contains('hl')) w.style.backgroundSize = `${E.inOutCubic(seg(t, cur[0] + 0.45 + i * 0.05, cur[0] + 0.8 + i * 0.05)) * 100}% 84%`;
+        });
         subK.style.opacity = E.outCubic(seg(t, cur[0], cur[0] + 0.4)) * (1 - seg(t, cur[1] - 0.25, cur[1]));
       }
       band.style.opacity = cur ? 1 : 0.6;
@@ -534,9 +614,9 @@ export function buildFilm(ctx) {
     // opening typography
     show(tDts, envl(t, 2.5, 3.1, 4.4, 5.0), 0, (1 - E.outCubic(seg(t, 2.5, 3.2))) * 20);
     tDts.style.letterSpacing = `${0.42 + (1 - E.outCubic(seg(t, 2.5, 3.8))) * 0.35}em`;
-    { const o = envl(t, 6.8, 7.2, 9.3, 9.7); hOpen.style.display = o > 0.003 ? '' : 'none'; hOpen.style.opacity = o;
+    { const o = envl(t, 6.8, 7.2, 8.95, 9.35); hOpen.style.display = o > 0.003 ? '' : 'none'; hOpen.style.opacity = o;
       hOpenW.forEach((w, i) => { const u = E.outBack(seg(t, 6.8 + i * 0.08, 7.3 + i * 0.08)); w.style.opacity = clamp(u); w.style.transform = `translateY(${(1 - u) * 40}px)`; }); }
-    show(tOpen, envl(t, 7.4, 7.9, 9.3, 9.7), 0, (1 - E.outCubic(seg(t, 7.4, 8.0))) * 16);
+    show(tOpen, envl(t, 7.4, 7.9, 8.95, 9.35), 0, (1 - E.outCubic(seg(t, 7.4, 8.0))) * 16);
     // pillar title beats
     {
       let cur = null; for (const b of PILLAR_BEATS) if (t >= b[0] && t <= b[1]) cur = b;
@@ -545,36 +625,85 @@ export function buildFilm(ctx) {
       show(kP, o, 0, (1 - o) * 20);
       if (cur) kPTag.style.letterSpacing = `${0.5 + (1 - E.outCubic(seg(t, cur[0], cur[0] + 0.9))) * 0.4}em`;
     }
-    // counters
+    // counters with an icon that pops and bursts
     {
-      let o = 0, n = 0, lbl = '';
-      if (t > 16.6 && t < 20.4) { o = envl(t, 16.6, 17.0, 19.9, 20.4); n = Math.round(441 * E.outExpo(seg(t, 16.7, 19.0))); lbl = 'skills prontas para <b>reuso</b>'; }
-      if (t > 60.3 && t < 62.0) { o = envl(t, 60.3, 60.6, 61.6, 62.0); n = 442; lbl = '<b>+1</b> skill da DTS na Biblioteca'; }
+      let o = 0, n = 0, lbl = '', icn = '', t0 = 0;
+      if (t > 16.6 && t < 20.4) { o = envl(t, 16.6, 17.0, 19.9, 20.4); n = Math.round(441 * E.outExpo(seg(t, 16.7, 19.0))); lbl = 'skills prontas para <b>reuso</b>'; icn = 'library'; t0 = 16.6; }
+      if (t > 60.3 && t < 62.0) { o = envl(t, 60.3, 60.6, 61.6, 62.0); n = 442; lbl = '<b>+1</b> skill da DTS na Biblioteca'; icn = 'sparkles'; t0 = 60.3; }
       show(kC, o, 0, (1 - o) * 30, 0, 0, 0.92 + 0.08 * o);
-      if (o > 0) { kCBig.textContent = n; if (kCLbl.innerHTML !== lbl) kCLbl.innerHTML = lbl; }
+      if (o > 0) {
+        kCBig.textContent = n; if (kCLbl.innerHTML !== lbl) kCLbl.innerHTML = lbl;
+        if (kIc.dataset.n !== icn) { kIc.innerHTML = MG.ico(icn, '', 1.8); kIc.dataset.n = icn; }
+        kIc.style.transform = `scale(${Math.max(0.001, E.outBack(seg(t, t0, t0 + 0.45), 2.4))}) rotate(${(1 - E.outCubic(seg(t, t0, t0 + 0.5))) * -30}deg)`;
+      }
+      cntFx.set(t, t < 40 ? 16.65 : 60.35, 960, 250, { r0: 46, r1: 170, w: 6 });
     }
-    // callouts anchored to 3D points
+    // callouts anchored to 3D points (pop in)
     {
+      const pop = (el, o, x, y, ax = 0, ay = 0) => show(el, o, x, y, ax, ay, 0.6 + 0.4 * E.outBack(clamp(o), 2.6));
       const nm = project(mpt(MR.name.x + 34, MR.name.y + MR.name.h + 6));
-      show(cPfx, envl(t, 35.7, 36.1, 37.0, 37.4), nm.x - 36, nm.y + 22);
+      pop(cPfx, envl(t, 35.7, 36.1, 37.0, 37.4), nm.x - 36, nm.y + 22);
       const wh = project(mpt(MR.where.x + 60, MR.where.y + MR.where.h + 40));
-      show(cWhere, envl(t, 40.7, 41.1, 41.9, 42.3), wh.x - 36, wh.y + 22);
+      pop(cWhere, envl(t, 40.7, 41.1, 41.9, 42.3), wh.x - 36, wh.y + 22);
       const rq = project(mpt(MR.model.x + 128, MR.model.y - 14));
-      show(cReq, envl(t, 42.8, 43.2, 43.6, 44.0), rq.x + 18, rq.y, 0, 0.5);
+      pop(cReq, envl(t, 42.8, 43.2, 43.6, 44.0), rq.x + 18, rq.y, 0, 0.5);
       const tm = project(mpt(MR.time.x + 60, MR.time.y + MR.time.h + 6));
-      show(cOpt, envl(t, 47.5, 47.9, 48.1, 48.45), tm.x - 36, tm.y + 22);
+      pop(cOpt, envl(t, 47.5, 47.9, 48.1, 48.45), tm.x - 36, tm.y + 22);
       const rb = project([-330, 215, 70]);
-      show(cRoot, envl(t, 50.35, 50.7, 51.8, 52.2), rb.x, rb.y - 40, 0.5, 1);
+      pop(cRoot, envl(t, 50.35, 50.7, 51.8, 52.2), rb.x, rb.y - 40, 0.5, 1);
     }
-    // end card
+    // ranking (Somos Exemplo): header chips, tags with counters, Nº 1 stamp, stats
     {
-      const o = envl(t, 74.0, 74.5, 77.3, 77.9);
+      const hOn = envl(t, 69.1, 69.5, 75.7, 76.1);
+      show(pdHead, hOn, 0, (1 - hOn) * -20);
+      pdHead.querySelectorAll('span').forEach((sp, i) => { sp.style.transform = `scale(${Math.max(0.001, E.outBack(seg(t, 69.1 + i * 0.25, 69.55 + i * 0.25), 2))})`; });
+      // burst on each card as its points start counting (tracked to the card centre)
+      AREAS.forEach((a, k) => { const c = project(podium.cardPt(k, 0.5, 0.62)); pdFx[k].set(t, a.t + 0.45, c.x, c.y, { r0: 40, r1: a.rank === 1 ? 230 : 150, w: a.rank === 1 ? 8 : 5 }); });
+      // Nº 1 stamp slams in at the upper right; a connector line tracks the DTS card
+      const sx = 1480, sy = 268;
+      const so = envl(t, 73.0, 73.08, 75.7, 76.1), sIn = seg(t, 73.0, 73.22);
+      show(pdStamp, so, sx, sy, 0.5, 0.5, lerp(1.9, 1, E.inQuad(sIn)) * (1 + pulse(t, 73.22, 0.03, 0.12) * 0.08));
+      if (so > 0) pdStamp.style.transform += ` rotate(${lerp(-14, -5, E.outCubic(sIn))}deg)`;
+      stampFx.set(t, 73.2, sx, sy, { r0: 90, r1: 300, w: 9 });
+      { const cr = project(podium.cardPt(1, 0.92, 0.1)); const u = E.inOutCubic(seg(t, 73.3, 73.75)) * so;
+        MG.vis(pdLink, u > 0.01); if (u > 0.01) { const x0 = sx - 150, y0 = sy + 40; pdLink.querySelector('path').setAttribute('d', `M${x0},${y0} C${x0 - 60},${y0 + 90} ${cr.x + 80},${cr.y - 60} ${cr.x},${cr.y}`); pdLink.querySelector('circle').setAttribute('cx', cr.x); pdLink.querySelector('circle').setAttribute('cy', cr.y); MG.draw(pdLinkD, u, 0); pdLink.style.opacity = so; } }
+      const st = envl(t, 73.7, 74.0, 75.7, 76.1);
+      show(pdStats, st, sx - 110, sy + 92, 0, 0, 0.7 + 0.3 * E.outBack(seg(t, 73.7, 74.1), 2));
+      if (st > 0) { pdStats.querySelector('.s1 b').textContent = Math.round(87 * E.outCubic(seg(t, 73.8, 74.9))); pdStats.querySelector('.s2 b').textContent = Math.round(142 * E.outCubic(seg(t, 74.0, 75.1))); }
+    }
+    // end card + A&M signature inside the letterbox
+    {
+      const o = envl(t, 78.1, 78.6, 81.4, 82.0);
       endc.style.display = o > 0.003 ? '' : 'none'; endc.style.opacity = o;
-      endSpans.forEach((s, i) => { const u = E.outBack(seg(t, 74.0 + i * 0.35, 74.6 + i * 0.35)); s.style.opacity = clamp(u); s.style.transform = `translateY(${(1 - u) * 36}px) scale(${0.9 + 0.1 * u})`; });
-      endL2.style.opacity = E.outCubic(seg(t, 75.2, 75.8)); endL3.style.opacity = E.outCubic(seg(t, 75.7, 76.3));
+      endSpans.forEach((s, i) => { const u = E.outBack(seg(t, 78.1 + i * 0.35, 78.7 + i * 0.35)); s.style.opacity = clamp(u); s.style.transform = `translateY(${(1 - u) * 36}px) scale(${0.9 + 0.1 * u})`; });
+      endL2.style.opacity = E.outCubic(seg(t, 79.3, 79.9)); endL3.style.opacity = E.outCubic(seg(t, 79.8, 80.4));
+      show(amSign, envl(t, 79.0, 79.6, 81.5, 82.1), 0, 0);
     }
 
     world.set({ time: t, focus: focusD, aperture, maxblur, bloom, fade, flash, flashCol, exposure: 1.0, rays: 1 });
+  }
+  // global clock: studio ident first, then the film on its own clock (t - IDENT)
+  const identHud = (T) => {
+    const o = T < IDENT ? envl(T, 3.5, 4.0, 5.1, 5.6) : 0;
+    show(idCap, o, 0, (1 - E.outCubic(seg(T, 3.5, 4.2))) * 18);
+    if (o > 0) { idCap.querySelector('.n').style.letterSpacing = `${0.34 + (1 - E.outCubic(seg(T, 3.5, 4.6))) * 0.3}em`; idLine.style.width = `${E.inOutCubic(seg(T, 3.8, 4.5)) * 620}px`; idCap.querySelector('.s').style.opacity = E.outCubic(seg(T, 4.1, 4.6)); }
+  };
+  function update(T) {
+    if (T < IDENT) {
+      updateFilm(-1);
+      world.useScene(ident.scene);
+      const r = ident.update(T);
+      world.set({ time: T, focus: r.focus, aperture: 0.000016, maxblur: 0.007, bloom: 0.5, fade: r.fade, flash: 0, vig: 0.42, exposure: 1.0, rays: 0 });
+      identHud(T);
+      const pc = ident.camAt(Math.max(0, T - SHUTTER));
+      world.setPrevCamera(pc.P, pc.T, 30, T > 0.02 ? 1 : 0);
+      return;
+    }
+    world.useScene(world.scene);
+    identHud(T);
+    updateFilm(T - IDENT);
+    const pp = camPose(T - IDENT - SHUTTER);
+    world.setPrevCamera(pp.P, pp.T, pp.fov, T - IDENT > 0.02 ? 1 : 0);
   }
   return { duration: DURATION, update };
 }

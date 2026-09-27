@@ -3,22 +3,22 @@ import sys, os
 from PIL import Image, ImageDraw, ImageFont
 fr, out = sys.argv[1], sys.argv[2]
 F = lambda s, w=700: ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf' if w >= 700 else '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', s)
-BLUE, ORANGE, GOLD = (61, 139, 255), (255, 138, 31), (242, 181, 68)
-# (tempo, cena, pilar)
-beats = [(1.6, 'Abertura: céu dourado e praça', None), (3.75, 'Emblema DTS 3D', None), (8.0, 'Como a DTS compartilha conhecimento', None),
-         (11.0, 'Pilar 1 · Todos Sabem', BLUE), (14.2, 'Início do FLOWS', BLUE), (19.3, '441 skills na Biblioteca', BLUE),
-         (22.0, 'Skills prontas para reuso', BLUE), (25.0, 'Pilar 2 · Todos Usam', ORANGE), (28.1, 'Passo 1 · Compartilhar Skill', ORANGE),
-         (33.6, 'Passo 2 · nome digitado', ORANGE), (36.6, 'Prefixo da área [DTS]', ORANGE), (40.0, 'Passo 3 · Flows / Claude', ORANGE),
-         (45.2, 'Passo 4 · tambor de modelos', ORANGE), (47.9, 'Tempo manual (opcional)', ORANGE), (51.6, 'Passo 5 · arquivos → ZIP', ORANGE),
-         (54.3, 'SKILL.zip no modal', ORANGE), (56.6, 'Passo 6 · Próximo', ORANGE), (59.3, 'O card NOVA voa para o anel', ORANGE),
-         (61.0, 'Publicada: 442 skills', ORANGE), (63.0, 'Pilar 3 · Somos Exemplo', GOLD), (66.6, 'Referência para todo o time', GOLD),
-         (70.6, 'Cada contribuição conta', GOLD), (72.9, 'O emblema retorna', GOLD), (75.8, 'Todos Sabem. Todos Usam. Somos Exemplo.', GOLD)]
+BLUE, ORANGE, GOLD, AMB = (61, 139, 255), (255, 138, 31), (242, 181, 68), (0, 133, 202)
+# (tempo global, cena, cor do ato)
+beats = [(2.1, 'Vinheta A&M: o skyline sobe', AMB), (4.6, 'Alvarez & Marsal apresenta', AMB), (9.8, 'Emblema DTS 3D', None),
+         (14.0, 'Como a DTS compartilha conhecimento', None), (16.1, 'Íris azul · Todos Sabem', BLUE), (20.2, 'Início do FLOWS', BLUE),
+         (25.3, '441 skills na Biblioteca', BLUE), (28.0, 'Skills prontas para reuso', BLUE), (30.1, 'Íris laranja · Todos Usam', ORANGE),
+         (34.1, 'Passo 1 · Compartilhar Skill', ORANGE), (39.6, 'Passo 2 · nome + prefixo [DTS]', ORANGE), (46.0, 'Passo 3 · Flows / Claude', ORANGE),
+         (51.2, 'Passo 4 · tambor de modelos', ORANGE), (57.6, 'Passo 5 · arquivos → ZIP', ORANGE), (62.6, 'Passo 6 · Próximo', ORANGE),
+         (65.3, 'Voo da skill (motion blur)', ORANGE), (67.0, 'Publicada: 442 skills', ORANGE), (68.1, 'Íris dourada · Somos Exemplo', GOLD),
+         (72.6, 'Referência para todo o time', GOLD), (76.8, 'Ranking de áreas: pódio', GOLD), (79.3, 'DTS nº 1 · 1.557 pontos', GOLD),
+         (81.0, '87 publicações · 142 adoções', GOLD), (83.5, 'O emblema retorna', GOLD), (86.0, 'Todos Sabem. Todos Usam. Somos Exemplo.', GOLD)]
 cols, w = 3, 620; h = int(w * 1080 / 1920); pad = 16; lab = 44
 rows = (len(beats) + cols - 1) // cols
 W = cols * w + (cols + 1) * pad; H = 120 + rows * (h + lab + pad) + pad
 sh = Image.new('RGB', (W, H), (14, 12, 38)); d = ImageDraw.Draw(sh)
-d.text((pad, 26), 'DTS · Todos Sabem, Todos Usam, Somos Exemplo — storyboard do curta 3D (78 s)', fill=GOLD, font=F(32))
-d.text((pad, 72), '1920×1080 · 24 fps · PBR + profundidade de campo + bloom · fluxo Compartilhar Skill do FLOWS · trilha original', fill=(196, 190, 222), font=F(20, 400))
+d.text((pad, 26), 'DTS · Todos Sabem, Todos Usam, Somos Exemplo — storyboard do curta 3D (88 s)', fill=GOLD, font=F(32))
+d.text((pad, 72), '1920×1080 · 24 fps · vinheta Alvarez & Marsal · PBR, DOF, motion blur e bloom · motion graphics · trilha original', fill=(196, 190, 222), font=F(20, 400))
 for k, (t, name, col) in enumerate(beats):
     n = int(round(t * 24)); f = os.path.join(fr, f'f_{n:05d}.jpg')
     x = pad + (k % cols) * (w + pad); y = 120 + (k // cols) * (h + lab + pad)

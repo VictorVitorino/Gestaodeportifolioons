@@ -3,6 +3,7 @@ import { TTFLoader } from 'three/addons/loaders/TTFLoader.js';
 import { Font } from 'three/addons/loaders/FontLoader.js';
 import { World } from './world.js';
 import { buildFilm } from './timeline.js';
+import { buildIdent, IDENT } from './ident.js';
 
 const W = 1920, H = 1080;
 // ?q=0.5 renders the 3D at half resolution for fast motion previews (HUD stays 1080p)
@@ -19,7 +20,7 @@ export function project(p) {
 }
 
 async function boot() {
-  await Promise.all(['500 20px Inter', '600 20px Inter', '700 20px Inter', '800 20px Inter', '900 20px Inter', '500 20px "JetBrains Mono"', '700 20px "JetBrains Mono"'].map((f) => document.fonts.load(f)));
+  await Promise.all(['500 20px Inter', '600 20px Inter', '700 20px Inter', '800 20px Inter', '900 20px Inter', '500 20px "JetBrains Mono"', '700 20px "JetBrains Mono"', '400 20px "Liberation Sans"', '700 20px "Liberation Sans"'].map((f) => document.fonts.load(f)));
   const manifest = await (await fetch('tex/manifest.json')).json();
   const texNames = Object.keys(manifest).filter((k) => !k.startsWith('_'));
   const imgs = {};
@@ -29,7 +30,9 @@ async function boot() {
   const font = new Font(fontJson);
   const tex = (n) => { const t = new THREE.Texture(imgs[n]); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = world.maxAniso; t.needsUpdate = true; return t; };
   const ctx = { THREE, world, cam, project, font, imgs, tex, manifest, W, H, hud: document.getElementById('hud') };
-  const film = buildFilm(ctx);
+  const svgText = await (await fetch('tex/am_mark.svg')).text();
+  const ident = buildIdent({ world, svgText, cam });
+  const film = buildFilm({ ...ctx, ident, svgText });
   window.DURATION = film.duration;
   window.__world = world; window.__THREE = THREE;
   window.seek = (t) => { film.update(t); world.render(); return true; };
