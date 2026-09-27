@@ -83,6 +83,7 @@ pessoas o vídeo mostra apenas o nome (sem e-mail). Os textos de apoio, as notas
 | Sem cortes/zooms durante a leitura | movimentos de câmera acontecem entre frases; nos planos de leitura só há um avanço lento (≤1,5%) |
 | Elementos saem aos poucos | pilares: o texto sobe enquanto a câmera assenta e só sai quando o próximo movimento começa; notas (*obrigatório*, *opcional*, *SKILL.md na raiz*, *contexto da validação*), contador 442 e cartela final ganharam 0,3–2 s de permanência |
 | Ritmo equilibrado | o tempo extra foi para a leitura; as ações do passo a passo mantiveram a velocidade da v6. Filme 2:14 → **2:54** |
+| Troféu do ranking com a alça quebrada | as alças das taças do pódio (ouro e prata) foram refeitas: cada uma é um laço que sai logo abaixo da borda e volta ao bojo, com as pontas presas na parede da taça; a esquerda é o espelho exato da direita (antes estava girada ao contrário e parecia um gancho solto) |
 
 ## O que mudou da v4 para a v5
 
