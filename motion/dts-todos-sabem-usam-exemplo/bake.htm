@@ -1,10 +1,13 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
-<link rel="stylesheet" href="fonts/fonts.css"><link rel="stylesheet" href="ui.css">
-<style>html,body{background:transparent!important;width:auto;height:auto;overflow:visible} #stage{position:absolute;left:0;top:0;padding:0} #stage>*{margin:0}</style>
+<link rel="stylesheet" href="fonts/fonts.css"><link rel="stylesheet" href="ui.css"><link rel="stylesheet" href="rank.css">
+<style>html,body{background:transparent!important;width:auto;height:auto;overflow:visible} #stage{position:absolute;left:0;top:0;padding:0} #stage>*{margin:0}
+/* ranking screen: one layer at a time (nested layers stay hidden) */
+.rks.iso{visibility:hidden} .rks.iso .solo{visibility:visible} .rks.iso .solo [data-l]{visibility:hidden}</style>
 </head><body><div id="stage"></div>
 <script type="module">
 import * as UI from './src/ui.js';
 import { icon } from './src/icons.js';
+import * as RS from './src/rankscreen.js';
 const stage = document.getElementById('stage');
 window.UI = UI; window.icon = icon;
 window.show = (kind, arg) => {
@@ -22,7 +25,13 @@ window.show = (kind, arg) => {
   else if (kind === 'rank') { el = UI.ranking(); el.style.width = '760px'; stage.appendChild(el); }
   else if (kind === 'sharebtn') { el = UI.shareButton(); el.style.boxShadow = 'none'; el.style.background = 'transparent'; el.style.textShadow = 'none'; stage.appendChild(el); }
   else if (kind === 'logo') { el = UI.logo(arg || 120); stage.appendChild(el); }
-  else if (kind === 'rankcard') { el = UI.rankCard(arg); stage.appendChild(el); }
+  else if (kind === 'rks') {
+    // v5.1: the FLOWS Ranking screen; arg.layer isolates one data-l layer, arg.nums fills the card figures
+    el = window._rks || (window._rks = RS.rankingScreen()); stage.appendChild(el);
+    el.classList.toggle('iso', !!arg.layer);
+    el.querySelectorAll('[data-l]').forEach((n) => n.classList.toggle('solo', n.dataset.l === arg.layer));
+    RS.RK_CARDS.forEach((c) => { el.querySelector(`[data-num="${c.k}"]`).textContent = arg.nums ? c.pts : ''; });
+  }
   const r = el.getBoundingClientRect();
   return { w: Math.ceil(r.width), h: Math.ceil(r.height) };
 };

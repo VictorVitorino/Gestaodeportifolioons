@@ -5,6 +5,10 @@
 // v5: the step-by-step runs ~22% faster than v4 (the typing of the name keeps its v4
 // speed), and three flat segments freeze the story for new scenes played on the film
 // clock ("inserts"): the FLOWS tour, the anatomy of the skill name and the Detalhes page.
+// v5.1: the ranking is the real FLOWS Ranking screen (story 68.5 -> 75.9, played on the film
+// clock). Its reveal (story 72.9, the fanfare) comes one bar of the 84 bpm score later than in
+// v5, and the screen then stays up for three full bars before the emblem returns: the keys
+// after story 72.9 are the v5 keys shifted by 1 + (3 bars - 5.4 s) = 6.0286 s.
 // audio/soundtrack.py reads these same arrays (keep them plain JSON).
 export const PACE = [
   [0, 0], [6.0, 5.2], [9.8, 8.2], [11.0, 8.35], [12.0, 9.35],
@@ -17,8 +21,8 @@ export const PACE = [
   [90.5, 49.8], [93.3, 52.9], [94.4, 53.9], [95.4, 54.8], [96.4, 55.6], [98.4, 56.9], [99.3, 57.2],
   [113.9, 57.2], [114.4, 57.4], [115.6, 58.3], [121.0, 60.2], [123.4, 62.0],
   [127.8, 62.9], [132.6, 63.7], [134.8, 65.2],
-  [139.0, 68.5], [142.2, 69.6], [147.0, 72.9], [148.0, 73.4], [151.0, 75.2], [152.4, 75.9], [154.4, 77.3],
-  [156.2, 78.8], [161.8, 81.0], [163.2, 82.2]
+  [139.0, 68.5], [142.2, 69.6], [149.8571, 72.9], [154.0286, 73.4], [157.0286, 75.2], [158.4286, 75.9], [160.4286, 77.3],
+  [162.2286, 78.8], [167.8286, 81.0], [169.2286, 82.2]
 ];
 // the three pillar moments, anchored on story time: camera travel, then the settled hold
 const PILLAR_STORY = [[9.35, 11.2, 11.5], [24.0, 24.9, 25.6], [62.0, 62.9, 63.7]];
@@ -28,3 +32,6 @@ export const PILLAR_SEQ = PILLAR_STORY.map(([a, b, c]) => ({ move: [at(a), at(b)
 const IDS = ['tour', 'name', 'det'];
 export const INSERTS = PACE.slice(1).map((k, i) => [PACE[i], k]).filter(([a, b]) => a[1] === b[1])
   .map(([a, b], i) => ({ id: IDS[i], at: a[1], a: a[0], b: b[0] }));
+// v5.1: the FLOWS Ranking scene, on the film clock: a = its start (story 68.5), reveal = the
+// fanfare (story 72.9), sink = the screen leaves as the emblem returns (story 75.9)
+export const RANK = { a: at(68.5), reveal: at(72.9), sink: at(75.9) };

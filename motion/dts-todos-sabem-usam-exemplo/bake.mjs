@@ -105,15 +105,42 @@ D.push(['d_press', { ...dD, press: 1 }]);
   await pg.close();
 }
 {
-  // ranking cards are repainted live while their points count up: keep them lighter
-  const pg = await page(2.5);
-  for (const a of [{ rank: 1, code: 'DTS', name: 'DTS' }, { rank: 2, code: 'MA_SERVICES', name: 'M&amp;A Services' }, { rank: 3, code: 'OPERATIONS', name: 'Operations' }]) manifest[`rank_${a.rank}`] = await snap(pg, `rank_${a.rank}`, 'rankcard', a);
-  manifest._rankNum = await pg.evaluate(() => { const c = document.querySelector('.rkc'), n = c.querySelector('[data-num]'); const a = c.getBoundingClientRect(), b = n.getBoundingClientRect(); return { x: b.left - a.left, y: b.top - a.top, w: b.width, h: b.height, W: a.width, H: a.height }; });
+  const pg = await page(4);
+  manifest.logo = await snap(pg, 'logo', 'logo', 120);
   await pg.close();
 }
 {
-  const pg = await page(4);
-  manifest.logo = await snap(pg, 'logo', 'logo', 120);
+  // v5.1: the FLOWS Ranking screen (Áreas · Todos os tempos). Each data-l element becomes a
+  // transparent layer at 2x, cropped to its box (+ room for shadows and glows); the film
+  // assembles the screen from these layers, one reveal at a time.
+  const RS = 2, PAD = 40;
+  const pg = await b.newPage({ viewport: { width: 1680, height: 960 }, deviceScaleFactor: RS });
+  pg.on('pageerror', (e) => console.log('PAGEERR', e.message));
+  await pg.goto('http://localhost:9602/bake.htm'); await pg.waitForFunction(() => window.ready === true);
+  await pg.evaluate(() => window.show('rks', {}));
+  const lay = await pg.evaluate((PAD) => {
+    const root = document.querySelector('.rks'), O = root.getBoundingClientRect(), W = O.width, H = O.height;
+    const painted = (e) => { const cs = getComputedStyle(e); return cs.backgroundImage !== 'none' || cs.backgroundColor !== 'rgba(0, 0, 0, 0)' || cs.boxShadow !== 'none'; };
+    const L = {};
+    for (const el of root.querySelectorAll('[data-l]')) {
+      let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+      const acc = (r) => { if (r.width <= 0 || r.height <= 0) return; x0 = Math.min(x0, r.left); y0 = Math.min(y0, r.top); x1 = Math.max(x1, r.right); y1 = Math.max(y1, r.bottom); };
+      if (painted(el) || !el.children.length) acc(el.getBoundingClientRect());
+      for (const d of el.querySelectorAll('*')) { const own = d.closest('[data-l]'); if (own === el) acc(d.getBoundingClientRect()); }
+      const p = ['page', 'sb', 'main'].includes(el.dataset.l) ? 0 : PAD;
+      const x = Math.max(0, Math.floor(x0 - O.left - p)), y = Math.max(0, Math.floor(y0 - O.top - p));
+      L[el.dataset.l] = { x, y, w: Math.min(W, Math.ceil(x1 - O.left + p)) - x, h: Math.min(H, Math.ceil(y1 - O.top + p)) - y };
+    }
+    const num = {};
+    for (const n of root.querySelectorAll('[data-num]')) { const r = n.getBoundingClientRect(); num[n.dataset.num] = { x: r.left - O.left, y: r.top - O.top, w: r.width, h: r.height }; }
+    return { W, H, L, num };
+  }, PAD);
+  for (const [name, r] of Object.entries(lay.L)) {
+    await pg.evaluate((l) => window.show('rks', { layer: l }), name);
+    await pg.screenshot({ path: path.join(out, `rk_${name}.png`), clip: { x: r.x, y: r.y, width: r.w, height: r.h }, omitBackground: true });
+    manifest[`rk_${name}`] = { w: r.w, h: r.h };
+  }
+  manifest._rks = { ...lay, S: RS };
   await pg.close();
 }
 fs.writeFileSync(path.join(out, 'manifest.json'), JSON.stringify(manifest, null, 1));

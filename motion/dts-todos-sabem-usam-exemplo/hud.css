@@ -63,34 +63,6 @@ html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#000;fo
 .bug .am img{height:44px;display:block;filter:drop-shadow(0 4px 12px rgba(0,0,30,.45))}
 .bug .am i{width:1.5px;height:40px;background:rgba(255,255,255,.45)}
 .kin .kic{width:58px;height:58px;margin:0 auto 10px;color:#ffd27a;filter:drop-shadow(0 4px 14px rgba(255,170,60,.45))}
-/* ranking (areas) */
-/* v5: under the DTS bug (top left), clear of the podium's medals and trophies */
-.pd-head{position:absolute;left:64px;top:124px;display:flex;justify-content:flex-start;gap:10px}
-.pd-head span{display:inline-flex;align-items:center;gap:10px;height:44px;padding:0 18px 0 12px;border-radius:22px;font-size:18px;font-weight:800;letter-spacing:.02em;color:#0d1e46;background:rgba(255,255,255,.95);box-shadow:0 8px 24px rgba(0,0,40,.3)}
-.pd-head span .mgi{width:24px;height:24px;color:#1f5fd6}
-.pd-head .c2{background:rgba(10,14,44,.62);color:#fff;border:1.5px solid rgba(255,255,255,.3)}
-.pd-head .c2 .mgi{color:#ffd27a}
-.pd-tag{position:absolute;left:0;top:0;display:flex;align-items:center;gap:14px;padding:12px 22px 12px 12px;border-radius:22px;background:rgba(255,255,255,.96);color:#0d1e46;box-shadow:0 16px 40px rgba(0,0,40,.35);white-space:nowrap;transform-origin:50% 100%}
-.pd-tag .rk{display:flex;align-items:center;gap:6px;height:48px;padding:0 14px 0 10px;border-radius:24px;color:#fff;font-weight:900;font-size:24px}
-.pd-tag .rk .mgi{width:26px;height:26px}
-.pd-tag.r1 .rk{background:linear-gradient(180deg,#ffb84d,#ff8a1f)}
-.pd-tag.r2 .rk{background:linear-gradient(180deg,#5a9cff,#2f6fe0)}
-.pd-tag.r3 .rk{background:linear-gradient(180deg,#2b4f9e,#132f6e)}
-.pd-tag .tx{display:flex;flex-direction:column;font-size:24px;font-weight:800;line-height:1.1}
-.pd-tag .tx small{font-size:12px;font-weight:800;letter-spacing:.14em;color:#6a7aa5}
-.pd-tag .pt{display:flex;align-items:baseline;gap:6px;margin-left:10px;padding-left:16px;border-left:2px solid #e6eaf4}
-.pd-tag .pt b{font-size:40px;font-weight:900;letter-spacing:-.02em;min-width:90px;text-align:right}
-.pd-tag .pt small{font-size:15px;font-weight:700;color:#6a7aa5}
-.pd-tag.r1{border:3px solid #ffb13b;box-shadow:0 0 0 6px rgba(255,177,59,.25),0 20px 50px rgba(120,60,0,.4)}
-.pd-stamp{position:absolute;left:0;top:0;display:flex;align-items:center;gap:18px;padding:16px 32px 16px 22px;border-radius:24px;color:#3a2204;background:linear-gradient(180deg,#ffd98a,#f2ab40);border:2px solid rgba(255,243,214,.9);box-shadow:0 18px 50px rgba(120,60,0,.38),0 0 60px -10px rgba(255,200,90,.55),inset 0 2px 0 rgba(255,255,255,.6);transform-origin:50% 50%}
-.pd-stamp .mgi{width:56px;height:56px}
-.pd-stamp b{display:block;font-size:64px;font-weight:900;line-height:.95;letter-spacing:-.02em}
-.pd-stamp small{display:block;font-size:20px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
-.pd-stats{position:absolute;left:0;top:0;display:flex;flex-direction:column;gap:12px;transform-origin:50% 0}
-.pd-stats>div{display:flex;align-items:center;gap:14px;height:62px;padding:0 26px 0 16px;border-radius:31px;background:rgba(10,14,44,.62);border:1.5px solid rgba(255,255,255,.3);color:#fff;backdrop-filter:blur(8px)}
-.pd-stats .mgi{width:32px;height:32px;color:#ffd27a}
-.pd-stats b{font-size:36px;font-weight:900;min-width:64px;text-align:right}
-.pd-stats small{font-size:22px;font-weight:700;color:#ffe2b8}
 /* ident caption (A&M typography: Helvetica-like), masked reveals + a drawn rule */
 .id-cap{position:absolute;left:0;right:0;top:748px;text-align:center;color:#fff;z-index:21}
 .id-cap .n{font-family:'Liberation Sans',Arial,sans-serif;font-weight:700;font-size:40px;letter-spacing:.34em;padding-left:.34em;text-shadow:0 4px 24px rgba(0,30,70,.6)}
@@ -102,7 +74,6 @@ html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#000;fo
 .am-sign img{height:50px}
 .am-sign i{width:1.5px;height:34px;background:rgba(255,255,255,.4)}
 .am-sign .d{font-size:16px;letter-spacing:.32em;color:#9fd4f5}
-.pd-link{position:absolute;left:0;top:0;pointer-events:none;filter:drop-shadow(0 0 5px rgba(255,190,80,.6))}
 .endcard .l3{background:rgba(255,255,255,.94);color:#0d1e46;border-color:rgba(255,255,255,.9);box-shadow:0 12px 30px rgba(0,0,40,.35)}
 /* pillar lockup (v4): kicker, drawn rule, one line; rests while it is read */
 .lockup{position:absolute;left:0;right:0;top:806px;text-align:center;color:#fff;--c:#8fc0ff;--c2:#3d8bff}

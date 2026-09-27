@@ -4,7 +4,9 @@ ident, then the film. Story-time cues (the v3 choreography) are placed through t
 pacing curve as src/pace.js, so every sound lands on its picture; the score itself is
 written on the new clock: calmer, broader, with a swell into each pillar. v5: the three
 inserts (flat segments of PACE: FLOWS tour, name anatomy, Detalhes page) get their own
-cues on the film clock, from the same schedules as src/timeline.js."""
+cues on the film clock, from the same schedules as src/timeline.js. v5.1: the ranking is the
+FLOWS Ranking screen; the score keeps its build-up and fanfare (one bar later) and holds three
+full bars on the screen, and the sound design follows the screen (src/rankfilm.js, RKT)."""
 import numpy as np, wave, sys, math, json, re, os
 from scipy.signal import butter, sosfilt, fftconvolve
 
@@ -449,20 +451,33 @@ for i in range(14):
     t0 = 64.4 + R2.random() * 1.6
     scue(t0, whoosh(1.2, 2000, 6000, 0.6), 0.02, R2.uniform(-0.8, 0.8))
     scue(t0 + 1.4, glock(midi([74, 76, 78, 81, 83, 86, 88, 90][i % 8]), 1.4), 0.022, R2.uniform(-0.8, 0.8))
-# ranking de áreas
-scue(68.5, whoosh(D(68.5, 69.6), 2400, 300, 0.45), 0.08)
-scue(69.12, click(2800, 0.03, 0.3), 0.08); scue(69.37, click(3000, 0.03, 0.3), 0.07)
-for k, (t0, pan) in enumerate([(69.3, 0.5), (70.2, -0.5)]):
-    scue(t0, whoosh(1.0, 150, 1200, 0.65), 0.1, pan); scue(t0 + 0.5, thump(0.35), 0.16, pan)
-    ticks_for(t0 + 0.45, t0 + 1.3, 10, 2000, 0.05, pan)
-scue(70.65, tink(2600), 0.06, 0.5); scue(71.6, tink(3400), 0.05, -0.5)
-scue(71.9, whoosh(1.3, 120, 1400, 0.6), 0.13); scue(72.5, thump(0.4), 0.22); scue(72.5, sub_boom(1.8, 84, 40), 0.18)
-ticks_for(72.35, 73.35, 14, 2300, 0.06)
-scue(72.9, confetti_pop(1), 0.12, -0.7); scue(72.93, confetti_pop(2), 0.12, 0.7); scue(72.95, shimmer(2.4, 80, 3000, 9000, 40), 0.07)
-scue(73.0, bell(midi(86), 2.6), 0.06); scue(73.05, click(2400, 0.04, 0.2), 0.12, 0.5)   # the Nº 1 plate settles
-scue(73.4, whoosh(0.8, 1500, 4000, 0.5), 0.04, 0.3)                                 # connector draws
-ticks_for(73.8, 75.0, 8, 2600, 0.04, 0.5); ticks_for(74.0, 75.2, 10, 2900, 0.04, 0.5)
-scue(75.9, whoosh(1.0, 1400, 150, 0.35), 0.1)
+# v5.1: the FLOWS Ranking screen, on its own clock (u = seconds since story 68.5); schedule = RKT in src/rankfilm.js
+RA, RV, RS = T(68.5), T(72.9), T(75.9)
+def rcue(u, sig, g=1.0, pan=0.0): add(sfx, RA + u, sig, g, pan)
+def rticks(c0, c1, n, f0=2200, g=0.05, pan=0.0, p=3):
+    # soft ticks at equal value steps of an outCubic count-up between film times c0 and c1 (u)
+    for i in range(1, n + 1): rcue(c0 + (1 - (1 - i / n) ** (1 / p)) * (c1 - c0), click(f0 + i * 20, 0.022, 0.12), g, pan)
+rcue(0.0, whoosh(2.2, 2400, 300, 0.45), 0.08)                                              # the camera leaves the threads
+rcue(1.5, whoosh(1.2, 150, 1200, 0.65), 0.1); rcue(2.35, thump(0.35), 0.14); rcue(2.37, sub_boom(1.4, 76, 40), 0.1)   # the screen rises
+rcue(2.5, swell(1.0, 300, 2400), 0.07); rcue(3.0, shimmer(1.4, 71), 0.05); rcue(3.4, bell(midi(86), 2.2), 0.045)       # it powers on
+for i in range(13): rcue(3.0 + i * 0.07, click(3200 + i * 30, 0.02, 0.1), 0.028, -0.8 + i * 0.05)                      # side menu
+rcue(4.0, whoosh(0.5, 900, 3200, 0.5), 0.05); rcue(4.05, glock(midi(86), 1.4), 0.03)                                     # Ranking
+for u in (4.35, 4.65): rcue(u, whoosh(0.45, 1200, 3600, 0.5), 0.025)                                                     # lead, meta
+rcue(5.5, pop(900, 380, 0.08), 0.04); rcue(5.52, tink(3000), 0.03); rcue(6.0, click(2900, 0.025, 0.25), 0.07)            # #12 Você
+rcue(5.9, click(2600, 0.03, 0.3), 0.05); rcue(6.3, marker(0.3), 0.05)                                                    # tabs, underline
+for c, t0, c1, n, pan in (('c3', 7.5, 8.75, 10, 0.5), ('c2', 8.1, 9.35, 10, -0.5), ('c1', 9.1, RV - RA, 14, 0.0)):       # the cards land and count
+    rcue(t0, whoosh(0.8, 300, 1800, 0.6), 0.07, pan); rcue(t0 + 0.5, thump(0.3), 0.12, pan)
+    rticks(t0 + 0.2, c1, n, 2000 if c != 'c1' else 2300, 0.05 if c != 'c1' else 0.06, pan)
+rcue(RV - RA, shimmer(2.4, 80, 3000, 9000, 40), 0.07); rcue(RV - RA, sub_boom(1.8, 84, 40), 0.14)                       # DTS: nº 1
+rcue(RV - RA + 0.05, bell(midi(86), 2.6), 0.06); rcue(RV - RA + 0.08, whoosh(0.9, 2500, 6000, 0.5), 0.03, 0.2)           # its glint
+rcue(10.95, click(2900, 0.025, 0.25), 0.06)
+rcue(11.9, whoosh(1.2, 1600, 500, 0.5), 0.04)                                                                           # down to the table
+rcue(12.6, whoosh(0.6, 400, 1600, 0.5), 0.04); rcue(12.75, thump(0.25), 0.06); rcue(12.8, pop(800, 360, 0.08), 0.035)
+rcue(13.1, tink(3000), 0.03); rcue(13.4, marker(0.5), 0.05); rcue(13.9, click(2900, 0.025, 0.25), 0.06)                 # publications, adoptions
+rcue(14.9, whoosh(1.4, 1800, 300, 0.4), 0.05)                                                                           # the whole screen
+for i, (u, m) in enumerate(((15.3, 86), (15.5, 90), (15.65, 93), (15.8, 98))): rcue(u, celesta(midi(m), 1.8), 0.03, -0.5 + i * 0.33)   # Novo na temporada
+rcue(15.3, shimmer(1.2, 73), 0.04)
+rcue(RS - RA, whoosh(1.0, 1400, 150, 0.35), 0.1)                                                                        # the screen sinks
 # emblem returns, letterbox, end card, signature
 scue(76.5, whoosh(1.2, 150, 1300, 0.6), 0.12); scue(77.2, thump(0.35), 0.18); scue(77.22, sub_boom(1.6, 76, 40), 0.14)
 for k in range(3): scue(76.7 + k * 0.25, shimmer(0.8, 50 + k), 0.03, -0.6 + k * 0.6)
@@ -517,7 +532,8 @@ def verb(x, wet):
 mus_mix = mus + verb(mus, 0.6)
 sfx_mix = sfx + verb(sfx, 0.4)
 env = np.abs(lp(np.abs(sfx).sum(axis=0), 8))
-duck = 1 / (1 + 0.9 * env / (env.max() + 1e-9))
+ENV_MAX = 0.3543584152569441   # v5 reference, pinned: the ranking cues must not re-duck the rest of the film
+duck = 1 / (1 + 0.9 * env / ENV_MAX)
 mix = mus_mix * duck * 0.95 + sfx_mix * 0.9
 mix = hp(mix, 28)
 # ident dips to black at 8.9-9.6: the sound breathes with it
@@ -534,7 +550,7 @@ def limiter(x, ceil=0.89):
         gs[i] = g[i] if g[i] < gs[i - 1] else a * gs[i - 1] + (1 - a) * g[i]
     return x * gs
 rms = np.sqrt(np.mean(mix ** 2))
-mix *= 0.15 / (rms + 1e-9)
+mix *= 2.7990515139662517   # v5 master gain (0.15 / rms of v5), pinned so the film keeps its level
 mix = np.tanh(mix * 1.05) / np.tanh(1.05)
 mix = limiter(mix, 0.89)
 out = (np.clip(mix, -1, 1).T * 32767).astype(np.int16)

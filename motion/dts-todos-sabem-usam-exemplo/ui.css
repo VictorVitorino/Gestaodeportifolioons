@@ -262,22 +262,6 @@ html,body{margin:0;padding:0;background:#000;width:1920px;height:1080px;overflow
 .obj.bf *{backface-visibility:hidden}
 .pfx{border-radius:6px;transition:none}
 .pfx.on{background:rgba(255,200,90,.45);box-shadow:0 0 0 3px rgba(242,169,59,.9)}
-/* ranking de áreas cards */
-.rkc{width:520px;height:400px;border-radius:30px;position:relative;display:flex;flex-direction:column;align-items:center;padding-top:26px;box-sizing:border-box;font-family:Inter,system-ui,sans-serif;color:#0d1e46;
-  background:radial-gradient(120% 60% at 15% 110%,rgba(255,255,255,.9),rgba(255,255,255,0) 60%),radial-gradient(90% 55% at 100% 0%,rgba(214,226,246,.9),rgba(214,226,246,0) 70%),linear-gradient(165deg,#ffffff 0%,#f1f5fc 55%,#e6edf8 100%);border:2px solid #dde5f2;box-shadow:inset 0 2px 0 #fff,inset 0 -6px 18px rgba(30,60,120,.06)}
-.rkc.r1{background:radial-gradient(120% 60% at 15% 110%,rgba(255,255,255,.85),rgba(255,255,255,0) 60%),radial-gradient(90% 60% at 100% 0%,rgba(255,214,140,.75),rgba(255,214,140,0) 70%),linear-gradient(165deg,#fffaf1 0%,#fff1d8 55%,#ffe3b2 100%);border:4px solid #ffbf45;box-shadow:inset 0 0 0 3px rgba(255,255,255,.7),inset 0 -10px 30px rgba(255,150,20,.18)}
-.rkc .badge{display:flex;align-items:center;gap:10px;height:58px;padding:0 24px 0 18px;border-radius:29px;color:#fff;font-size:32px;font-weight:900;box-shadow:0 8px 18px rgba(20,40,90,.25),inset 0 2px 0 rgba(255,255,255,.35)}
-.rkc .badge .ic{width:32px;height:32px}
-.rkc.r1 .badge{background:linear-gradient(180deg,#ffbe55,#ff8a1f)}
-.rkc.r2 .badge{background:linear-gradient(180deg,#5d9dff,#2f6fe0)}
-.rkc.r3 .badge{background:linear-gradient(180deg,#2d52a3,#10275e)}
-.rkc .code{margin-top:14px;height:38px;padding:0 18px;border-radius:19px;display:flex;align-items:center;background:rgba(255,255,255,.9);border:1.5px solid #e1e7f2;font-size:18px;font-weight:800;letter-spacing:.03em;color:#1a2b55}
-.rkc .nm{margin-top:10px;font-size:32px;font-weight:800;letter-spacing:-.01em}
-.rkc .sc{font-size:16px;font-weight:600;letter-spacing:.04em;color:#6a7aa5}
-.rkc .num{height:92px;width:100%}
-.rkc .pt{font-size:22px;font-weight:600;color:#48536d;margin-top:-4px}
-.rkc .new{margin-top:12px;display:flex;align-items:center;gap:10px;height:42px;padding:0 20px;border-radius:21px;background:rgba(255,255,255,.92);border:1.5px solid #e1e7f2;font-size:19px;font-weight:600;color:#2556c9}
-.rkc .new .ic{width:22px;height:22px}
 
 /* ===== v5: name anatomy (step 1) ===== */
 .sg{border-radius:6px;padding:1px 3px;margin:0 -3px}

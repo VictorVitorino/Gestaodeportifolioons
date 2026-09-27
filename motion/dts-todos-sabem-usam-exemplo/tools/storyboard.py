@@ -24,6 +24,8 @@ G = lambda s: IDENT + float(np.interp(s, st, nt))
 # inserts (v5): flat segments of PACE, in order: FLOWS tour, name anatomy, Detalhes page
 INS = [IDENT + PACE[i][0] for i in range(len(PACE) - 1) if PACE[i][1] == PACE[i + 1][1]]
 TOUR, NAME, DET = INS
+# v5.1: the FLOWS Ranking scene starts at story 68.5 (its clock u: RKT in src/rankfilm.js)
+RK = G(68.5)
 # (global time, scene, act colour): ident beats in global time, film beats placed from story time
 beats = [(3.4, 'Vinheta A&M: trilhas de luz no palco', AMB), (5.3, 'O monograma nasce da luz', AMB), (8.2, 'Alvarez & Marsal apresenta', AMB),
          (G(7.9), 'Como DTS compartilha conhecimento', None), (G(11.4), 'Pilar 01 · Todos Sabem', BLUE), (G(14.0), 'Início do FLOWS', BLUE),
@@ -33,14 +35,15 @@ beats = [(3.4, 'Vinheta A&M: trilhas de luz no palco', AMB), (5.3, 'O monograma 
          (G(45.3), 'Passo 4 · modelo testado', ORANGE), (G(51.5), 'Passo 5 · arquivos → ZIP', ORANGE), (DET + 2.3, 'Passo 6 · Detalhes: Template', ORANGE),
          (DET + 4.0, 'Área responsável: DTS — Performance', ORANGE), (DET + 7.9, 'Co-responsáveis', ORANGE), (DET + 11.3, 'Descrição: entregável e resultado', ORANGE),
          (G(59.2), 'O voo da skill (troféu 95)', ORANGE), (G(61.0), 'Publicada: 442 skills', ORANGE), (G(63.3), 'Pilar 03 · Somos Exemplo', GOLD),
-         (G(71.6), 'Ranking de áreas: pódio', GOLD), (G(74.3), 'DTS nº 1 · 1.557 pontos', GOLD), (G(80.4), 'Todos Sabem. Todos Usam. Somos Exemplo.', GOLD)]
+         (RK + 2.2, 'A tela do FLOWS sobe da praça', GOLD), (RK + 6.9, 'Ranking: título, #12 Você e abas', GOLD), (RK + 11.6, 'DTS nº 1 · 1557 pontos', GOLD),
+         (RK + 14.6, 'Publicações: 87 · Adoções: 142', GOLD), (RK + 17.6, 'Ranking · Áreas · Todos os tempos', GOLD), (G(80.4), 'Todos Sabem. Todos Usam. Somos Exemplo.', GOLD)]
 cols, w = 3, 620; h = int(w * 1080 / 1920); pad = 16
 rows = (len(beats) + cols - 1) // cols
 W = cols * w + (cols + 1) * pad; H = 120 + rows * (h + 44 + pad) + pad
 sh = Image.new('RGB', (W, H), (14, 12, 38)); dr = ImageDraw.Draw(sh)
 dur = IDENT + x[-1]
-dr.text((pad, 26), f'DTS · Todos Sabem, Todos Usam, Somos Exemplo — storyboard do curta 3D v5 ({int(dur) // 60}:{int(dur) % 60:02d})', fill=GOLD, font=F(32))
-dr.text((pad, 72), '1920×1080 · 24 fps · abertura Alvarez & Marsal · tour do FLOWS · anatomia do nome · etapa Detalhes · ranking de áreas', fill=(196, 190, 222), font=F(20, 400))
+dr.text((pad, 26), f'DTS · Todos Sabem, Todos Usam, Somos Exemplo — storyboard do curta 3D v5.1 ({int(dur) // 60}:{int(dur) % 60:02d})', fill=GOLD, font=F(32))
+dr.text((pad, 72), '1920×1080 · 24 fps · abertura Alvarez & Marsal · tour do FLOWS · anatomia do nome · etapa Detalhes · Ranking do FLOWS', fill=(196, 190, 222), font=F(20, 400))
 for k, (t, name, col) in enumerate(beats):
     f = os.path.join(fr, f'f_{int(round(t * 24)):05d}.jpg')
     X = pad + (k % cols) * (w + pad); Y = 120 + (k // cols) * (h + 44 + pad)

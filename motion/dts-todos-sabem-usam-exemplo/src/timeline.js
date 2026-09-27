@@ -6,13 +6,15 @@
 // v5: three "inserts" (flat segments of PACE) freeze the story while new scenes play on the
 // film clock: a short FLOWS tour (Início -> Catálogo de Métodos -> Início -> Biblioteca),
 // the anatomy of the skill name and the real step 2 of the form (Detalhes).
+// v5.1: the ranking is the real FLOWS Ranking screen (src/rankfilm.js) instead of the podium.
 import * as THREE from 'three';
 import { E, clamp, lerp, seg, path, track, env as envl, pulse, rng, deg, warp } from './util.js';
 import * as O from './objects.js';
 import * as MG from './mg.js';
-import { buildPodium, AREAS } from './podium.js';
+import { buildRankScreen } from './rankfilm.js';
+import { RK_CARDS } from './rankscreen.js';
 import { IDENT, ID_TYPE } from './ident.js';
-import { PACE, PILLAR_SEQ, INSERTS } from './pace.js';
+import { PACE, PILLAR_SEQ, INSERTS, RANK } from './pace.js';
 
 export const FILM = PACE[PACE.length - 1][0];
 export const DURATION = IDENT + FILM;
@@ -159,7 +161,8 @@ export function buildFilm(ctx) {
   { const R = rng(5); const picks = new Set(); while (picks.size < 34) { const i = Math.floor(R() * ring.N); const a = ring.slots[i].a; const da = Math.abs(Math.atan2(Math.sin(a), Math.cos(a))); if (!ring.holeSet.has(i) && Math.abs(i - TARGET) > 2 && da < 1.9 && da > 0.08) picks.add(i); }
     for (const i of picks) { const th = O.thread(slotPos.clone(), ring.slots[i].pos.clone(), 250 + R() * 500); th.userData.tile = i; th.userData.delay = R() * 1.6; add(th); threads.push(th); } }
   const shock = add(O.glowRing(0xffc46e));
-  const podium = buildPodium({ scene, imgs, manifest });
+  const rks = buildRankScreen({ scene, imgs, manifest, world });
+  const RU = { reveal: RANK.reveal - RANK.a, sink: RANK.sink - RANK.a }; // the ranking scene's clock (u = nt - RANK.a)
   // contact shadows (fade in as each prop reaches the floor)
   const ao = (w, d, k) => add(O.contactShadow(w, d, k));
   const aoEmb = ao(820, 820, 0.5), aoPil = PILLARS.map((p) => { const m = ao(700, 380, 0.55); m.position.set(p.g.position.x, 0.6, p.g.position.z); m.rotation.z = -p.g.rotation.y; return m; });
@@ -215,9 +218,6 @@ export function buildFilm(ctx) {
     <div class="endcard" style="top:170px"><div class="l1"><span class="mk"><span class="c1">Todos Sabem.</span></span> <span class="mk"><span class="c2">Todos Usam.</span></span> <span class="mk"><span class="c3">Somos Exemplo.</span></span></div>
       <div class="l2">DTS · Digital &amp; Technology Services</div>
       <div class="l3"><img src="tex/logo.png" alt="">Compartilhe sua skill no FLOWS</div></div>
-    <div class="pd-head"><span class="c1">${MG.ico('chart')}Ranking de Áreas · Todos os tempos</span><span class="c2">${MG.ico('users')}12 áreas no placar</span></div>
-    <div class="pd-stamp">${MG.ico('crown', '', 2)}<div><b>Nº 1</b><small>entre 12 áreas no placar</small></div></div>
-    <div class="pd-stats"><div class="s1">${MG.ico('upload')}<b>0</b><small>publicações</small></div><div class="s2">${MG.ico('download')}<b>0</b><small>adoções</small></div></div>
     <div class="id-cap"><div class="n mk"><span>ALVAREZ &amp; MARSAL</span></div><div class="ln"></div><div class="s mk"><span>Digital &amp; Technology Services · apresenta</span></div></div>
     <div class="am-sign"><img src="tex/am_mark.svg" alt=""><span>Alvarez &amp; Marsal</span><i></i><span class="d">DTS · Digital &amp; Technology Services</span></div>`;
   const $ = (s) => hud.querySelector(s);
@@ -245,9 +245,6 @@ export function buildFilm(ctx) {
   const FOCUS = [['name', 31.25, 37.3], ['where', 37.6, 42.3], ['model', 42.6, 46.9], ['time', 47.2, 48.5], ['file', 54.5, 55.5], ['next', 55.7, 57.0]];
   const DFOCUS = [[['tpl'], 1.6, 2.6], [['area'], 2.75, 3.8], [['area', 'areaHint'], 3.8, 4.7], [['people', 'pin'], 5.5, 8.15], [['desc'], 9.0, 11.95], [['share'], 12.3, 13.1]];
   const bars = MG.letterbox(hud);
-  const pdHead = $('.pd-head'), pdStamp = $('.pd-stamp'), pdStats = $('.pd-stats');
-  const pdLink = MG.el('<svg class="pd-link" width="1920" height="1080" viewBox="0 0 1920 1080"><path fill="none" stroke="#ffd27a" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 0"/><circle r="7" fill="#ffd27a" stroke="#fff" stroke-width="2.5"/></svg>');
-  hud.appendChild(pdLink); const pdLinkD = MG.drawable(pdLink); pdLinkD[1].e.style.strokeDasharray = 'none';
   const segLn = MG.el('<svg class="seg-ln" width="1920" height="1080" viewBox="0 0 1920 1080"><g fill="none" stroke-width="2.5" stroke-linecap="round"><path stroke="#f2a93b"/><path stroke="#3d8bff"/><path stroke="#20aa64"/></g></svg>');
   hud.appendChild(segLn); const segPath = [...segLn.querySelectorAll('path')];
   const idCap = $('.id-cap'), idN = idCap.querySelector('.n span'), idLine = idCap.querySelector('.ln'), idS = idCap.querySelector('.s span'), amSign = $('.am-sign');
@@ -267,8 +264,6 @@ export function buildFilm(ctx) {
     [55.7, 57.2, 'Passo 6', 'Avance em *Próximo* para os *Detalhes*.'],
     [57.25, 61.6, '', 'Pronto: a skill está *publicada na Biblioteca*.'],
     [64.2, 68.6, '', 'Uma skill compartilhada vira *referência* para todo o time.'],
-    [69.3, 72.6, '', 'No FLOWS, quem *publica e é adotado* sobe no placar.'],
-    [73.1, 76.3, '', 'E DTS lidera: *nº 1 entre 12 áreas*, com *1.557 pontos*.'],
     [76.5, 77.9, '', 'Cada contribuição conta.'],
   ].map(([a, b, k, txt]) => ({ a: NT(a), b: NT(b), k, s: txt, c: a < 24 ? 0 : a < 62 ? 1 : 2 }));
   const isub = (q, u0, u1, k, txt, ul, c = 1) => ({ a: q.a + u0, b: q.a + u1, k, s: txt, c, ul: ul && ul.map((x) => q.a + x) });
@@ -282,6 +277,9 @@ export function buildFilm(ctx) {
     isub(INSERTS[2], 4.6, 8.1, 'Passo 6', 'Em *Acesso e colaboração*, inclua os *co-responsáveis*.', [5.2, 5.7]),
     isub(INSERTS[2], 8.1, 11.95, 'Passo 6', 'Na *Descrição*, detalhe o *entregável* e o *resultado final*.', [8.65, 11.0, 11.45]),
     isub(INSERTS[2], 11.95, 14.45, 'Passo 6', 'Clique em *Compartilhar Skill*.'),
+    // v5.1: the ranking lines (same text as v5) on the ranking scene's clock
+    isub(RANK, 4.6, 8.9, '', 'No FLOWS, quem *publica e é adotado* sobe no placar.', [5.2, 5.9], 2),
+    isub(RANK, 11.1, 15.6, '', 'E DTS lidera: *nº 1 entre 12 áreas*, com *1.557 pontos*.', [11.6, 12.3], 2),
   );
   SUBS.sort((x, y) => x.a - y.a);
   for (let i = 1; i < SUBS.length; i++) { const g = SUBS[i].a - SUBS[i - 1].b; if (g >= 0 && g < 0.35) SUBS[i].a = SUBS[i - 1].b; }
@@ -391,8 +389,31 @@ export function buildFilm(ctx) {
     INS_CAM.det = keysOf([[0, [b.P, b.T]], [1.5, mbox(31, 165, 569, 480, 16, 8)], [2.45, mbox(31, 175, 569, 485, 8, 6)], [3.25, mbox(31, 140, 569, 560, 0, 8)], [4.45, mbox(31, 480, 569, 590, -8, 6)],
       [5.6, mbox(31, 470, 569, 775, 8, 6)], [7.9, mbox(31, 475, 569, 780, 0, 4)], [9.1, mbox(31, 775, 569, 945, 0, -6)], [11.6, mbox(31, 780, 569, 945, 0, -6)], [12.6, mbox(20, 790, 580, 1015, 14, -8)], [q.b - q.a, [b.P, b.T]]]);
   }
+  {
+    // FLOWS Ranking (film clock u): leaves the threads at rest, pulls back while the screen rises,
+    // then reads it region by region (header -> podium -> DTS -> indicators) and backs off to the
+    // whole screen; boxes are in screen css px, framed like the inserts (px per unit s)
+    const b = camPose(S(RANK.a));
+    const rbox = (x0, y0, x1, y1, { ox = 0, oy = 0, w = SAFE.w, h = SAFE.h, cy = 500, push = 1 } = {}) => {
+      const U = rks.k, sc = Math.min(w / ((x1 - x0) * U), h / ((y1 - y0) * U)) * push;
+      const T = rks.restPt((x0 + x1) / 2, (y0 + y1) / 2 + (540 - cy) / (sc * U), 0);
+      return [[T[0] + ox, T[1] + oy, T[2] + PXU / sc], T];
+    };
+    const FULL = (o = {}) => rbox(0, 0, 1672, 941, { h: 780, cy: 510, ...o });
+    const TOP = (o) => rbox(262, 36, 1650, 372, o), POD = (o) => rbox(292, 382, 1642, 744, o), DTS = (o) => rbox(600, 382, 1340, 744, o);
+    const TAB = (o) => rbox(322, 700, 1606, 941, { w: 1800, cy: 560, ...o }); // the whole row, as close as it fits
+    // above the plaza while the screen rises from it, then down to the screen
+    const RISE = [[80, 500, 1520], [0, 270, -150]];
+    INS_CAM.rank = keysOf([[0, [b.P, b.T]], [2.1, RISE], [3.4, FULL({ ox: 150, oy: 60 })], [4.3, FULL({ ox: 110, oy: 45, push: 1.02 })], [5.4, TOP({ ox: 40, oy: 10 })], [7.2, TOP({ ox: 25, oy: 5, push: 1.04 })],
+      [8.6, POD()], [9.9, POD({ push: 1.03 })], [11.0, DTS({ ox: -30 })], [11.9, DTS({ ox: -40, push: 1.02 })], [13.2, TAB({ ox: -20 })], [14.9, TAB({ ox: -10, push: 1.03 })], [16.4, FULL()], [19.6, FULL({ push: 1.035 })]]);
+  }
+  const RK_OUT = [19.2, 20.8]; // the story camera takes over again (the emblem returns)
   function poseAt(nt) {
     const pose = camPose(S(nt));
+    if (nt > RANK.a && nt < RANK.a + RK_OUT[1]) {
+      const u = nt - RANK.a, c = INS_CAM.rank, w = 1 - E.inOutSine(seg(u, ...RK_OUT));
+      pose.P = mixv(pose.P, path(c.P, u), w); pose.T = mixv(pose.T, path(c.T, u), w);
+    }
     for (const q of INSERTS) {
       if (nt > q.a && nt < q.b) { const c = INS_CAM[q.id], u = nt - q.a; pose.P = path(c.P, u); pose.T = path(c.T, u); }
       pose.aperture *= 1 - 0.5 * envl(nt, q.a - 0.4, q.a + 0.6, q.b - 0.6, q.b + 0.4, 'inOutSine', 'inOutSine');
@@ -467,6 +488,7 @@ export function buildFilm(ctx) {
     const { P, T, fov, aperture } = poseAt(nt);
     setCam(P, T, fov);
     const focusD = Math.hypot(T[0] - P[0], T[1] - P[1], T[2] - P[2]);
+    rks.update(nt - RANK.a, RU);
 
     // ============ ENVIRONMENT + act light (film clock)
     const fade = Math.max(1 - E.outQuad(seg(t, 0, 1.4)), E.inQuad(seg(t, 81.0, 82.2)));
@@ -734,7 +756,7 @@ export function buildFilm(ctx) {
       burst(arr, t, 57.95, [0, 330, -20], { n: 24, seed: 9, speed: 210 });
       burst(arr, t, 60.2, [slotPos.x, slotPos.y, slotPos.z + 20], { n: 44, seed: 11, speed: 340, life: 1.5 });
       burst(arr, t, 1.9, [0, 60, 60], { n: 18, seed: 13, speed: 190, life: 0.9 });
-      podium.update(t, arr, burst);
+      { const c = RK_CARDS[1]; burst(arr, nt, RANK.reveal, rks.restPt(c.x + c.w / 2, c.y + c.h * 0.3, 30), { n: 40, seed: 17, speed: 250, life: 1.3, up: 0.45 }); }
       sparks.geometry.attributes.position.needsUpdate = true; sparks.geometry.attributes.a.needsUpdate = true;
     }
     // threads of reuse (Somos Exemplo)
@@ -792,7 +814,12 @@ export function buildFilm(ctx) {
         return j >= 0 ? [rectOf(list[j][0]), 1, 1] : null;
       };
       let res;
-      if (nt > I_DET.a && nt < I_DET.b) {
+      const ru = nt - RANK.a;
+      if (ru > 5 && ru < 16) {
+        // ranking: the brackets visit the position bar, the DTS card and the indicators
+        const rr = ([x0, y0, x1, y1, dz]) => MG.rectOf([[x0, y0], [x1, y0], [x0, y1], [x1, y1]].map(([x, y]) => project(rks.livePt(x, y, dz))));
+        res = run([[[300, 212, 1632, 284, 0], 6.0, 7.2], [[750, 390, 1189, 733, 8], 10.95, 12.1], [[486, 866, 722, 890, 0], 13.9, 15.0]], ru, rr);
+      } else if (nt > I_DET.a && nt < I_DET.b) {
         const u = nt - I_DET.a, sc = detScroll(u);
         res = run(DFOCUS, u, (names) => { const rs = names.map((n) => detRect(n, sc)); return proj(Math.min(...rs.map((r) => r.x)), Math.min(...rs.map((r) => r.y)), Math.max(...rs.map((r) => r.x + r.w)), Math.max(...rs.map((r) => r.y + r.h))); });
       } else {
@@ -883,20 +910,6 @@ export function buildFilm(ctx) {
       pop(cOpt, envl(t, 47.5, 47.9, 48.1, 48.45), tm.x - 36, tm.y + 22);
       const rb = project([-330, 215, 70]);
       pop(cRoot, envl(t, 50.35, 50.75, 51.8, 52.2), rb.x, rb.y - 40, 0.5, 1);
-    }
-    // ranking (Somos Exemplo): header chips, Nº 1 plate with a drawn connector, stats
-    {
-      const hOn = envl(t, 69.1, 69.6, 75.7, 76.1);
-      show(pdHead, hOn, 0, 0);
-      pdHead.querySelectorAll('span').forEach((sp2, i) => { const u = E.outCubic(seg(t, 69.1 + i * 0.25, 69.7 + i * 0.25)); sp2.style.opacity = u; sp2.style.transform = `translateY(${(1 - u) * -10}px)`; });
-      const sx = 1480, sy = 268;
-      const so = envl(t, 73.0, 73.4, 75.7, 76.1), sIn = E.outCubic(seg(t, 73.0, 73.55));
-      show(pdStamp, so, sx, sy, 0.5, 0.5, lerp(1.07, 1, sIn));
-      { const cr = project(podium.cardPt(1, 0.92, 0.1)); const u = E.inOutCubic(seg(t, 73.35, 74.05)) * so;
-        MG.vis(pdLink, u > 0.01); if (u > 0.01) { const x0 = sx - 150, y0 = sy + 40; pdLink.querySelector('path').setAttribute('d', `M${x0},${y0} C${x0 - 60},${y0 + 90} ${cr.x + 80},${cr.y - 60} ${cr.x},${cr.y}`); const c = pdLink.querySelector('circle'); c.setAttribute('cx', cr.x); c.setAttribute('cy', cr.y); c.style.opacity = E.outCubic(seg(t, 73.9, 74.2)); MG.draw(pdLinkD.slice(0, 1), u, 0); pdLink.style.opacity = so; } }
-      const stv = envl(t, 73.7, 74.15, 75.7, 76.1);
-      show(pdStats, stv, sx - 110, sy + 92 + (1 - stv) * 10, 0, 0, 1);
-      if (stv > 0) { pdStats.querySelector('.s1 b').textContent = Math.round(87 * E.outCubic(seg(t, 73.8, 75.0))); pdStats.querySelector('.s2 b').textContent = Math.round(142 * E.outCubic(seg(t, 74.0, 75.2))); }
     }
     // end card + A&M signature inside the letterbox
     {
