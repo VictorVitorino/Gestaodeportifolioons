@@ -161,6 +161,8 @@ export function shareModal() {
     };
     setInp(ref.name, ref.nameV, st.name, PH.name, st.focus === 'name', st.caret);
     if (st.name && st.name.startsWith('[DTS]')) ref.nameV.innerHTML = `<span class="pfx${st.pfx ? ' on' : ''}">[DTS]</span>` + esc(st.name.slice(5)) + (st.focus === 'name' && st.caret ? caret : '');
+    // name anatomy (v5): [Prefixo da Área] - [Service Line] - [Produto/Entregável], one at a time
+    if (st.seg !== undefined && st.name.split(' - ').length === 3) ref.nameV.innerHTML = st.name.split(' - ').map((p, i) => `<span class="sg s${i + 1}${st.seg === i + 1 || st.seg === 'all' ? ' on' : ''}">${esc(p)}</span>`).join(' - ');
     setInp(ref.where, ref.whereV, st.where, PH.where, st.focus === 'where', st.caret);
     ref.where.classList.toggle('filled2', !!st.whereFilled);
     ref.whereHint.classList.toggle('hl', !!st.whereHint);
@@ -198,6 +200,93 @@ export function shareModal() {
       return { x: (b.left - r.left) / z, y: (b.top - r.top) / z, w: b.width / z, h: b.height / z };
     };
     return { name: pick('.f-name .inp'), where: pick('.f-where .inp'), model: pick('.f-model .inp'), time: pick('.f-time .inp'), mode: pick('.f-mode'), file: pick('.f-file .file'), next: pick('.btn-n'), stepper: pick('.stepper'), W: el.offsetWidth, H: el.offsetHeight };
+  };
+  // rects of the three name segments (modal CSS px), measured on the text itself
+  el.segRects = () => {
+    const r = el.getBoundingClientRect(), z = r.width / el.offsetWidth || 1;
+    return [...el.querySelectorAll('.f-name .sg')].map((sg) => { const b = sg.getBoundingClientRect(); return { x: (b.left - r.left) / z, y: (b.top - r.top) / z, w: b.width / z, h: b.height / z }; });
+  };
+  return el;
+}
+
+// ---------- Compartilhar Skill · step 2 (Detalhes) ----------
+// Replica of the real FLOWS step 2 (from the screen recording): fixed header and footer, a
+// scrolling body, the area as a native select (options with their codes), people search
+// with suggestions and chips, and "Compartilhar Skill" disabled until the area is chosen.
+export const AREA_OPTS = ['Selecione a especialização', 'CFO Services — Performance (CFO_SERVICES)', 'DnA - Data &amp; Analytics — Performance (DNA_DATA_ANALYTICS)', 'DTS — Performance (DTS)', 'Estratégia e Crescimento — Performance (ESTRATEGIA_CRESCIMENTO)', 'Financial Services — Performance (FINANCIAL_SERVICES)', 'Health — Performance (HEALTH)', 'Legal Optimization — Performance (LEGAL_OPTIMIZATION)', 'M&amp;A Services — Performance (MA_SERVICES)', 'Operations — Performance (OPERATIONS)', 'Transformation &amp; Turnaround — Performance (TRANSFORMATION_TURNAROUND)', 'Varejo — Performance (VAREJO)'];
+export const AREA_DTS = 3;
+export function shareModalDetails() {
+  const tiles = [['template', 'Template'], ['workflow', 'Processo'], ['bookopen', 'Guia /<br>Tutorial'], ['bookmark', 'Referência'], ['listchecks', 'Checklist'], ['network', 'Framework'], ['barsquare', 'Análise'], ['listpen', 'Ata /<br>Registro']];
+  const el = h(`<div class="modal det panel">
+    <div class="d-head"><span class="x">${icon('x')}</span><h2>Compartilhar Skill</h2>
+      <p class="lead">Informe título, classificação e descrição para a biblioteca.</p></div>
+    <div class="d-body">
+      <div class="stepper"><span class="st dn"><span class="c on">1</span>Arquivos</span><span class="ln"></span><span class="st"><span class="c on">2</span>Detalhes</span></div>
+      <div class="banner">${icon('checkcircle')}<div><b>1 arquivo(s) selecionado(s)</b><span class="fn">(SKILL.zip)</span></div><span class="ed">Editar arquivos</span></div>
+      <div class="fld d-title"><label>Título</label><div class="inp"><span class="v"></span></div></div>
+      <div class="fld d-cls"><label>Classificação</label><div class="tiles">${tiles.map(([i, l], k) => `<div class="tile2 t${k}">${icon(i)}<span>${l}</span></div>`).join('')}</div></div>
+      <div class="fld d-area"><label>Área responsável *</label><div class="inp sel2 ph"><span class="v"></span><span class="sel">${icon('chevdown')}</span></div>
+        <div class="hint">A área selecionada receberá os pontos desta skill no ranking.</div>
+        <div class="nsel" style="display:none">${AREA_OPTS.map((a, k) => `<div class="o a${k}">${a}</div>`).join('')}</div></div>
+      <div class="pnl p-acc"><h5>Acesso e colaboração</h5><div class="sm">Opcional. Co-responsáveis podem editar e publicar novas versões desta skill.</div>
+        <div class="sb">Co-responsáveis</div><div class="sm">Podem editar metadados e publicar versões. Distinto de créditos (reconhecimento apenas).</div>
+        <div class="people"></div>
+        <div class="inp pin ph"><span class="v"></span></div>
+        <div class="sugg" style="display:none"><div class="o on"><b class="nm"></b><span class="em"></span></div></div></div>
+      <div class="sec p-cred"><h5>Créditos (colaboradores)</h5><div class="sm">Reconhecimento apenas — não concede acesso, edição nem pontos no ranking.</div>
+        <div class="sm">Nenhum colaborador adicionado.</div>
+        <div class="inp pin ph"><span class="v">Buscar pessoa por nome ou e-mail...</span></div></div>
+      <div class="fld d-desc"><label>Descrição</label><div class="ta ph"><span class="v"></span><i class="grip"></i></div></div>
+    </div>
+    <div class="foot"><span class="lk">Ver biblioteca de skills</span><span class="btn-c">Cancelar</span><span class="btn-c bk">${icon('arrowleft')}Voltar</span><span class="btn-n sh">Compartilhar Skill<i class="shine"></i></span></div>
+  </div>`);
+  const q = (s) => el.querySelector(s);
+  const ref = {
+    titleV: q('.d-title .v'), tiles: [...el.querySelectorAll('.tile2')],
+    area: q('.d-area .inp'), areaV: q('.d-area .v'), nsel: q('.nsel'), opts: [...el.querySelectorAll('.nsel .o')],
+    people: q('.p-acc .people'), pin: q('.p-acc .pin'), pinV: q('.p-acc .pin .v'), sugg: q('.sugg'), sNm: q('.sugg .nm'),
+    ta: q('.d-desc .ta'), taV: q('.d-desc .ta .v'), share: q('.btn-n.sh'),
+  };
+  const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  const caret = '<span class="caret"></span>';
+  let last = '';
+  el.setState = (st) => {
+    const key = JSON.stringify(st);
+    if (key === last) return;
+    last = key;
+    ref.titleV.textContent = st.title || '';
+    ref.tiles.forEach((t, k) => { t.classList.toggle('on', st.tpl === 1 && k === 0); t.classList.toggle('hov', st.tplHover === 1 && k === 0); });
+    ref.area.classList.toggle('ph', !st.area);
+    ref.area.classList.toggle('act', !!st.areaFocus);
+    ref.areaV.innerHTML = st.area || 'Selecione a especialização';
+    ref.nsel.style.display = st.areaOpen ? 'block' : 'none';
+    ref.opts.forEach((o, k) => o.classList.toggle('on', st.areaHi === k));
+    ref.people.innerHTML = (st.people || []).length ? st.people.map((n) => `<span class="pchip">${n}${icon('x')}</span>`).join('') : '<span class="sm">Nenhum co-responsável adicionado.</span>';
+    ref.pin.classList.toggle('ph', !st.pq);
+    ref.pin.classList.toggle('focus', !!st.pfocus);
+    ref.pinV.innerHTML = (st.pq ? esc(st.pq) : 'Buscar pessoa por nome ou e-mail...') + (st.pfocus && st.caret ? caret : '');
+    ref.sugg.style.display = st.sugg ? 'block' : 'none';
+    ref.sugg.classList.toggle('hov', !!st.suggHov);
+    if (st.sugg) ref.sNm.textContent = st.sugg;
+    ref.ta.classList.toggle('ph', !st.desc);
+    ref.ta.classList.toggle('focus', !!st.dfocus);
+    let d = st.desc ? esc(st.desc) : 'Descreva brevemente o propósito desta skill...';
+    if (st.desc && st.dhl) d = d.replace('Entregável:', `<span class="kw${st.dhl === 1 ? ' on' : ''}">Entregável:</span>`).replace('Resultado Final/Produto:', `<span class="kw${st.dhl === 2 ? ' on' : ''}">Resultado Final/Produto:</span>`);
+    ref.taV.innerHTML = d + (st.dfocus && st.caret ? caret : '');
+    ref.share.classList.toggle('dis', !st.area);
+    const pr = st.press || 0;
+    ref.share.style.transform = `translateY(${pr * 3}px) scale(${1 - pr * 0.04})`;
+    ref.share.style.filter = pr ? `brightness(${1 + pr * 0.35})` : '';
+  };
+  // layout (CSS px of the full, unscrolled modal): header and footer stay put, the body scrolls
+  el.detLayout = () => {
+    const r = el.getBoundingClientRect(), z = r.width / el.offsetWidth || 1;
+    const pick = (s) => { const b = el.querySelector(s).getBoundingClientRect(); return { x: (b.left - r.left) / z, y: (b.top - r.top) / z, w: b.width / z, h: b.height / z }; };
+    const body = pick('.d-body'), foot = pick('.foot');
+    return {
+      W: el.offsetWidth, H: el.offsetHeight, head: body.y, foot: el.offsetHeight - foot.y,
+      rects: { stepper: pick('.stepper'), banner: pick('.banner'), title: pick('.d-title .inp'), cls: pick('.d-cls .tiles'), tpl: pick('.tile2.t0'), area: pick('.d-area .inp'), areaHint: pick('.d-area .hint'), acc: pick('.p-acc'), pin: pick('.p-acc .pin'), people: pick('.p-acc .people'), cred: pick('.p-cred'), desc: pick('.d-desc .ta'), share: pick('.btn-n.sh'), optDTS: pick('.nsel .a3'), sugg: pick('.sugg') },
+    };
   };
   return el;
 }

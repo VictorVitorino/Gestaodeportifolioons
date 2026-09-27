@@ -1,15 +1,18 @@
-// DTS · Todos Sabem, Todos Usam, Somos Exemplo (v4) — every value is a pure function of time.
+// DTS · Todos Sabem, Todos Usam, Somos Exemplo (v5) — every value is a pure function of time.
 // The v3 choreography is kept intact on its own clock ("story time" t) and replayed through
 // the pacing curve in pace.js (film time nt): slower moves, reading holds, and a
 // MOVE -> SETTLE -> READ -> ABSORB -> TRANSITION beat for each pillar. Overlays that must stay
 // still while they are read (pillar lockups, act light) run on the film clock.
+// v5: three "inserts" (flat segments of PACE) freeze the story while new scenes play on the
+// film clock: a short FLOWS tour (Início -> Catálogo de Métodos -> Início -> Biblioteca),
+// the anatomy of the skill name and the real step 2 of the form (Detalhes).
 import * as THREE from 'three';
 import { E, clamp, lerp, seg, path, track, env as envl, pulse, rng, deg, warp } from './util.js';
 import * as O from './objects.js';
 import * as MG from './mg.js';
 import { buildPodium, AREAS } from './podium.js';
 import { IDENT, ID_TYPE } from './ident.js';
-import { PACE, PILLAR_SEQ } from './pace.js';
+import { PACE, PILLAR_SEQ, INSERTS } from './pace.js';
 
 export const FILM = PACE[PACE.length - 1][0];
 export const DURATION = IDENT + FILM;
@@ -74,12 +77,31 @@ export function buildFilm(ctx) {
   const PILLARS = [P_S, P_U, P_E];
 
   // ------------------------------------------------------------ UI frames
-  const inicio = add(O.uiFrame(tex('screen_inicio'), { w: 780, h: 439, bezel: 14, depth: 14 }));
-  const hlTex = O.canvasTex(512, 256, (x, w, h) => { x.shadowColor = '#ff9a2e'; x.shadowBlur = 22; x.strokeStyle = '#ffc070'; x.lineWidth = 14; O.roundRect(x, 20, 20, w - 40, h - 40, 36); x.stroke(); x.stroke(); });
-  const hl = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: hlTex, transparent: true, toneMapped: false, depthWrite: false, blending: THREE.AdditiveBlending }));
-  hl.userData.noDepth = true; inicio.add(hl);
-  // Biblioteca card region in the 1672x941 screenshot: x 318..748, y 248..403
-  { const fw = 780, fh = 439; const cx = ((318 + 748) / 2 / 1672 - 0.5) * fw, cy = -((248 + 403) / 2 / 941 - 0.5) * fh; hl.position.set(cx, cy, 8.2); hl.scale.set((440 / 1672) * fw * 1.06, (165 / 941) * fh * 1.12, 1); }
+  // the FLOWS screen in its 3D frame is a canvas: real screenshots (Início, Catálogo de Métodos,
+  // Biblioteca de Skills) cross-dissolve, and highlight rings are drawn in screen pixels
+  const SW = 1672, SH = 941, FW = 780, FH = 439;
+  const scrCanvas = document.createElement('canvas'); scrCanvas.width = SW; scrCanvas.height = SH;
+  const scrCtx = scrCanvas.getContext('2d');
+  const scrTex = new THREE.CanvasTexture(scrCanvas); scrTex.colorSpace = THREE.SRGBColorSpace; scrTex.anisotropy = world.maxAniso;
+  const inicio = add(O.uiFrame(scrTex, { w: FW, h: FH, bezel: 14, depth: 14 }));
+  let scrKey = '';
+  const drawScreen = (a, b, k, rings) => {
+    const key = `${a}|${b}|${k.toFixed(3)}|${rings.map((r) => r.join(',')).join(';')}`;
+    if (key === scrKey) return; scrKey = key;
+    const x = scrCtx; x.globalAlpha = 1; x.drawImage(imgs[a], 0, 0, SW, SH);
+    if (b && k > 0.001) { x.globalAlpha = k; x.drawImage(imgs[b], 0, 0, SW, SH); x.globalAlpha = 1; }
+    for (const [x0, y0, x1, y1, o] of rings) {
+      if (o < 0.01) continue;
+      const p = 7, r = Math.min(18, (y1 - y0) / 2 + p);
+      x.save(); x.globalAlpha = o; x.shadowColor = 'rgba(255,150,40,.95)'; x.shadowBlur = 24; x.strokeStyle = '#ffa733'; x.lineWidth = 6.5;
+      O.roundRect(x, x0 - p, y0 - p, x1 - x0 + 2 * p, y1 - y0 + 2 * p, r); x.stroke(); x.shadowBlur = 0; x.lineWidth = 3; x.strokeStyle = '#ffe2b0'; x.stroke();
+      x.globalAlpha = o * 0.1; x.fillStyle = '#ffb347'; x.fill(); x.restore();
+    }
+    scrTex.needsUpdate = true;
+  };
+  // screen pixel -> frame local -> world (the frame's pose at story time t, or its live pose)
+  const scrLocal = (px, py, dz = 8) => new THREE.Vector3((px / SW - 0.5) * FW, -(py / SH - 0.5) * FH, dz);
+  const framePose = (t) => { const o = new THREE.Object3D(); o.position.set(0, 285, -120); o.rotation.set(-0.04 + Math.sin(t * 0.8) * 0.01, Math.sin(t * 0.5) * 0.03, 0); o.updateMatrixWorld(true); return o; };
 
   const MR = manifest._modalRects;
   const MODAL = { c: [0, 330, -40], w: 330 };
@@ -89,6 +111,33 @@ export function buildFilm(ctx) {
   const modal = add(O.uiFrame(modalTex, { w: MODAL.w, h: MH, bezel: 10, depth: 12, body: 0xe9eef8, alpha: true, glass: true, radius: 18 }));
   const mpt = (u, v, dz = 7) => [MODAL.c[0] + (u - MR.W / 2) * MS, MODAL.c[1] - (v - MR.H / 2) * MS, MODAL.c[2] + dz];
   const fieldC = (f, du = 0) => mpt(MR[f].x + MR[f].w / 2 + du, MR[f].y + MR[f].h / 2);
+  // step 2 (Detalhes): the baked full-height page is composed like the real modal: fixed
+  // header, scrolled body, fixed footer and a thin scrollbar; it dissolves in from step 1
+  const DL = manifest._det, DZ = imgs.m_empty.width / MR.W, DSC = DL.H - MR.H; // DSC: full scroll
+  const mCanvas = document.createElement('canvas'); mCanvas.width = imgs.m_empty.width; mCanvas.height = imgs.m_empty.height;
+  const mCtx = mCanvas.getContext('2d');
+  const mCanvasTex = new THREE.CanvasTexture(mCanvas); mCanvasTex.colorSpace = THREE.SRGBColorSpace; mCanvasTex.anisotropy = world.maxAniso;
+  const scrM = modal.userData.screen.material;
+  const useMap = (tx) => { if (scrM.map !== tx) { scrM.map = tx; scrM.needsUpdate = true; } };
+  let detKey = '';
+  const composeDet = (name, scroll, under, k) => {
+    const img = imgs[name], low = under && imgs[under];
+    const key = `${name}|${scroll.toFixed(2)}|${under}|${k.toFixed(3)}`;
+    if (!img || key === detKey) return; detKey = key;
+    const x = mCtx, W = mCanvas.width, H = mCanvas.height, hd = Math.round(DL.head * DZ), ft = Math.round(DL.foot * DZ), bh = H - hd - ft;
+    x.clearRect(0, 0, W, H); x.globalAlpha = 1;
+    if (low && k < 0.999) x.drawImage(low, 0, 0, W, H);
+    x.globalAlpha = k;
+    x.drawImage(img, 0, 0, W, hd, 0, 0, W, hd);
+    x.drawImage(img, 0, hd + scroll * DZ, W, bh, 0, hd, W, bh);
+    x.drawImage(img, 0, img.height - ft, W, ft, 0, H - ft, W, ft);
+    const total = img.height / DZ - DL.head - DL.foot, vis = MR.H - DL.head - DL.foot, max = total - vis;
+    if (max > 1) { const th = (vis * vis) / total, ty = DL.head + 5 + (scroll / max) * (vis - th - 10); x.fillStyle = 'rgba(112,122,145,.42)'; O.roundRect(x, (MR.W - 9) * DZ, ty * DZ, 4.5 * DZ, th * DZ, 2.25 * DZ); x.fill(); }
+    x.globalAlpha = 1; mCanvasTex.needsUpdate = true;
+  };
+  // a Detalhes element in modal-window CSS px (body scrolls; the footer button stays put)
+  const detRect = (n, scroll) => { const r = DL.rects[n]; return { x: r.x, y: n === 'share' ? r.y - DSC : r.y - scroll, w: r.w, h: r.h }; };
+  const detC = (n, scroll, dz = 7) => { const r = detRect(n, scroll); return mpt(r.x + r.w / 2, r.y + r.h / 2, dz); };
 
   // ------------------------------------------------------------ step props
   const btnPed = add(O.pedestal({ r: 80, h: 110 }));
@@ -147,6 +196,7 @@ export function buildFilm(ctx) {
 
   // ------------------------------------------------------------ HUD (motion graphics)
   hud.innerHTML = `<div class="band"></div>
+    <svg class="spot" width="1920" height="1080" viewBox="0 0 1920 1080"><defs><mask id="spotm"><rect width="1920" height="1080" fill="#fff"/><rect class="hole" rx="22" fill="#000"/></mask></defs><rect width="1920" height="1080" fill="rgba(5,8,30,.62)" mask="url(#spotm)"/></svg>
     <div class="bug"><div class="am"><img src="tex/am_mark.svg" alt=""><i></i></div><div class="m">DTS</div><div class="t"><small>Digital &amp; Technology Services</small>Todos Sabem · Todos Usam · Somos Exemplo</div></div>
     <div class="pillars"><div class="pill" style="--c:#3d8bff"><i></i>Todos Sabem<em></em></div><div class="pill" style="--c:#ff8a1f"><i></i>Todos Usam<em></em></div><div class="pill" style="--c:#f2b544"><i></i>Somos Exemplo<em></em></div></div>
     <div class="sub"><div class="plate"><div class="k"></div><div class="s"><span class="in"></span></div></div></div>
@@ -156,7 +206,8 @@ export function buildFilm(ctx) {
     <div class="tag t-open" style="top:458px">Compartilhar uma Skill no FLOWS · 6 passos</div>
     <div class="lockup"><div class="lk-k mk"><span></span></div><div class="lk-ln"></div><div class="lk-d mk"><span></span></div></div>
     <div class="kin k-count" style="top:200px"><div class="kic"></div><div class="big">0</div><div class="kl"></div><div class="lbl"></div></div>
-    <div class="callout c-pfx"><span class="dot">✦</span>prefixo da área</div>
+    <div class="seg-lbl" style="--c:#f2a93b"><b>1</b>Prefixo da Área</div><div class="seg-lbl" style="--c:#3d8bff"><b>2</b>Service Line</div><div class="seg-lbl" style="--c:#20aa64"><b>3</b>Produto/Entregável</div>
+    <div class="clk"></div>
     <div class="callout soft c-where"><span class="dot">✓</span>contexto da validação</div>
     <div class="callout c-req"><span class="dot">*</span>obrigatório</div>
     <div class="callout soft c-opt"><span class="dot">⏱</span>opcional · minutos na mão</div>
@@ -173,12 +224,12 @@ export function buildFilm(ctx) {
   const bug = $('.bug'), pillBox = $('.pillars'), pills = [...hud.querySelectorAll('.pill')], pillFill = pills.map((p) => p.querySelector('em'));
   const subK = $('.sub .k'), subS = $('.sub .s'), subIn = $('.sub .in'), subP = $('.sub .plate'), band = $('.band');
   const tDts = $('.t-dts'), hOpen = $('.h-open'), tOpen = $('.t-open'), hBd = $('.hbd');
-  hOpen.innerHTML = 'Como a DTS compartilha conhecimento'.split(' ').map((w) => `<span class="mk"><span class="w">${w}</span></span> `).join('');
+  hOpen.innerHTML = 'Como DTS compartilha conhecimento'.split(' ').map((w) => `<span class="mk"><span class="w">${w}</span></span> `).join('');
   const hOpenW = [...hOpen.querySelectorAll('.w')];
   const lock = $('.lockup'), lkK = lock.querySelector('.lk-k span'), lkLn = lock.querySelector('.lk-ln'), lkD = lock.querySelector('.lk-d span');
   const LOCK = [['Pilar 01', 'Onde está o conhecimento', '#d3e6ff', '#3d8bff'], ['Pilar 02', 'O passo a passo no dia a dia', '#ffe1c2', '#ff8a1f'], ['Pilar 03', 'Quem compartilha, lidera pelo exemplo', '#ffecc2', '#f2b544']];
   const kC = $('.k-count'), kCBig = kC.querySelector('.big'), kCLbl = kC.querySelector('.lbl'), kIc = kC.querySelector('.kic'), kL = kC.querySelector('.kl');
-  const cPfx = $('.c-pfx'), cWhere = $('.c-where'), cReq = $('.c-req'), cOpt = $('.c-opt'), cRoot = $('.c-root');
+  const segLbl = [...hud.querySelectorAll('.seg-lbl')], clk = $('.clk'), spot = $('.spot'), spotHole = spot.querySelector('.hole'), cWhere = $('.c-where'), cReq = $('.c-req'), cOpt = $('.c-opt'), cRoot = $('.c-root');
   const endc = $('.endcard'), endSpans = [...endc.querySelectorAll('.l1 .mk > span')], endL2 = endc.querySelector('.l2'), endL3 = endc.querySelector('.l3');
   const show = (el, op, x = null, y = null, ax = 0, ay = 0, sc = 1) => {
     el.style.opacity = op; el.style.display = op > 0.003 ? '' : 'none';
@@ -189,29 +240,52 @@ export function buildFilm(ctx) {
   const HLC = ['#5ea2ff', '#ff9a3c', '#f5b847'];
   const tracker = MG.stepTracker(hud, [
     { icon: 'upload', name: 'Compartilhar', a: 26.0, b: 30.6 }, { icon: 'type', name: 'Nome', a: 30.6, b: 37.5 }, { icon: 'flask', name: 'Onde testou', a: 37.5, b: 42.5 },
-    { icon: 'cpu', name: 'Modelo', a: 42.5, b: 48.5 }, { icon: 'folderzip', name: 'Arquivos', a: 48.5, b: 55.5 }, { icon: 'rocket', name: 'Publicar', a: 55.5, b: 58.2 }]);
+    { icon: 'cpu', name: 'Modelo', a: 42.5, b: 48.5 }, { icon: 'folderzip', name: 'Arquivos', a: 48.5, b: 55.5 }, { icon: 'rocket', name: 'Detalhes · Publicar', a: 55.5, b: 58.2 }]);
   const focus = MG.focusFrame(hud);
   const FOCUS = [['name', 31.25, 37.3], ['where', 37.6, 42.3], ['model', 42.6, 46.9], ['time', 47.2, 48.5], ['file', 54.5, 55.5], ['next', 55.7, 57.0]];
+  const DFOCUS = [[['tpl'], 1.6, 2.6], [['area'], 2.75, 3.8], [['area', 'areaHint'], 3.8, 4.7], [['people', 'pin'], 5.5, 8.15], [['desc'], 9.0, 11.95], [['share'], 12.3, 13.1]];
   const bars = MG.letterbox(hud);
   const pdHead = $('.pd-head'), pdStamp = $('.pd-stamp'), pdStats = $('.pd-stats');
   const pdLink = MG.el('<svg class="pd-link" width="1920" height="1080" viewBox="0 0 1920 1080"><path fill="none" stroke="#ffd27a" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 0"/><circle r="7" fill="#ffd27a" stroke="#fff" stroke-width="2.5"/></svg>');
   hud.appendChild(pdLink); const pdLinkD = MG.drawable(pdLink); pdLinkD[1].e.style.strokeDasharray = 'none';
+  const segLn = MG.el('<svg class="seg-ln" width="1920" height="1080" viewBox="0 0 1920 1080"><g fill="none" stroke-width="2.5" stroke-linecap="round"><path stroke="#f2a93b"/><path stroke="#3d8bff"/><path stroke="#20aa64"/></g></svg>');
+  hud.appendChild(segLn); const segPath = [...segLn.querySelectorAll('path')];
   const idCap = $('.id-cap'), idN = idCap.querySelector('.n span'), idLine = idCap.querySelector('.ln'), idS = idCap.querySelector('.s span'), amSign = $('.am-sign');
+  // subtitles run on the film clock: story lines are placed through the pacing curve, and
+  // the inserts add their own lines; chained lines keep the plate up and swap the text
+  const NT_TAB = []; for (let x = 0; x <= FILM + 1e-6; x += 1 / 96) NT_TAB.push(S(x));
+  const NT = (st) => { let lo = 0, hi = NT_TAB.length - 1; while (lo < hi) { const m = (lo + hi) >> 1; if (NT_TAB[m] < st) lo = m + 1; else hi = m; } return lo / 96; };
   const SUBS = [
-    [12.6, 15.9, '', 'Todos sabem onde encontrar: tudo começa no *Início do FLOWS*.'],
-    [16.3, 20.4, '', 'Na Biblioteca, a comunidade já reúne *441 skills* prontas para reuso.'],
+    [12.6, 15.0, '', 'Todos sabem onde encontrar: tudo começa no *Início do FLOWS*.'],
+    [16.3, 20.4, '', 'Na Biblioteca, a Alvarez já reúne *441 skills* prontas para reuso.'],
     [20.7, 23.6, '', 'E todos sabem como contribuir: compartilhar uma skill leva *6 passos*.'],
     [26.2, 30.3, 'Passo 1', 'Clique em *Compartilhar Skill*.'],
-    [30.8, 37.3, 'Passo 2', 'Dê à skill um nome claro, com o *prefixo da área*.'],
+    [30.8, 36.9, 'Passo 2', 'Dê à skill um nome claro e *padronizado*.'],
     [37.7, 42.3, 'Passo 3', 'Informe *onde ela foi testada*.'],
     [42.7, 48.3, 'Passo 4', 'Escolha o modelo testado. O campo é *obrigatório*.'],
     [48.7, 55.3, 'Passo 5', 'Envie tudo em um *único ZIP*, com o *SKILL.md na raiz*.'],
-    [55.7, 61.6, 'Passo 6', 'Avance em *Próximo* e publique para o time.'],
+    [55.7, 57.2, 'Passo 6', 'Avance em *Próximo* para os *Detalhes*.'],
+    [57.25, 61.6, '', 'Pronto: a skill está *publicada na Biblioteca*.'],
     [64.2, 68.6, '', 'Uma skill compartilhada vira *referência* para todo o time.'],
     [69.3, 72.6, '', 'No FLOWS, quem *publica e é adotado* sobe no placar.'],
-    [73.1, 76.3, '', 'E a DTS lidera: *nº 1 entre 12 áreas*, com *1.557 pontos*.'],
+    [73.1, 76.3, '', 'E DTS lidera: *nº 1 entre 12 áreas*, com *1.557 pontos*.'],
     [76.5, 77.9, '', 'Cada contribuição conta.'],
-  ];
+  ].map(([a, b, k, txt]) => ({ a: NT(a), b: NT(b), k, s: txt, c: a < 24 ? 0 : a < 62 ? 1 : 2 }));
+  const isub = (q, u0, u1, k, txt, ul, c = 1) => ({ a: q.a + u0, b: q.a + u1, k, s: txt, c, ul: ul && ul.map((x) => q.a + x) });
+  SUBS.push(
+    isub(INSERTS[0], 0.25, 2.5, '', 'O FLOWS organiza os *métodos*, as *skills* e os *projetos* da Alvarez.', null, 0),
+    isub(INSERTS[0], 2.5, 5.5, '', 'No *Catálogo de Métodos*, os *métodos de DTS* estão a um clique.', [2.95, 4.2], 0),
+    isub(INSERTS[0], 5.5, 9.95, '', 'E a *Biblioteca de Skills* mostra cada skill com sua *pontuação*.', [7.2, 8.1], 0),
+    isub(INSERTS[1], 0.1, 5.1, 'Passo 2', 'O padrão do nome: *prefixo da área*, *service line* e *entregável*.', [0.3, 1.7, 3.1]),
+    isub(INSERTS[2], 0.3, 2.75, 'Passo 6', 'Na etapa *Detalhes*, classifique a skill: *Template*.', [0.85, 1.95]),
+    isub(INSERTS[2], 2.75, 4.6, 'Passo 6', 'Escolha a *área responsável*: ela recebe os *pontos no ranking*.', [3.3, 3.95]),
+    isub(INSERTS[2], 4.6, 8.1, 'Passo 6', 'Em *Acesso e colaboração*, inclua os *co-responsáveis*.', [5.2, 5.7]),
+    isub(INSERTS[2], 8.1, 11.95, 'Passo 6', 'Na *Descrição*, detalhe o *entregável* e o *resultado final*.', [8.65, 11.0, 11.45]),
+    isub(INSERTS[2], 11.95, 14.45, 'Passo 6', 'Clique em *Compartilhar Skill*.'),
+  );
+  SUBS.sort((x, y) => x.a - y.a);
+  for (let i = 1; i < SUBS.length; i++) { const g = SUBS[i].a - SUBS[i - 1].b; if (g >= 0 && g < 0.35) SUBS[i].a = SUBS[i - 1].b; }
+  const chained = (x, y) => x && y && Math.abs(x.b - y.a) < 1e-6;
   let subKey = null;
 
   // ------------------------------------------------------------ helpers
@@ -287,13 +361,51 @@ export function buildFilm(ctx) {
     } else if (t >= 60.2 && t < 62.9) { P = path(LAND_P, t); T = path(LAND_T, t); }
     return { P, T, fov, aperture };
   }
+  // insert cameras (film clock): each starts and ends on the frozen story pose, at rest.
+  // Shots frame a box of UI inside the frame's safe area (below the top bug, above the
+  // subtitle plate): px per unit s fits the box in 1560x700 px, the box centre sits at y=500.
+  const SAFE = { w: 1560, h: 700, dy: 40 }, PXU = 1080 / (2 * Math.tan(15 * deg)); // distance = PXU / s
+  const INS_CAM = {};
+  const keysOf = (K) => ({ P: K.map(([u, v]) => [u, v[0]]), T: K.map(([u, v]) => [u, v[1]]) });
+  {
+    // FLOWS tour: boxes in screenshot px on the frame at its frozen pose (story 15.0)
+    const q = INSERTS[0], b = camPose(q.at), fr = framePose(q.at), U = FW / SW;
+    const fp = (px, py) => fr.localToWorld(scrLocal(px, py, 0)).toArray();
+    const V = b.P.map((x, i) => x - b.T[i]), L = Math.hypot(...V), dir = V.map((x) => x / L);
+    const box = (x0, y0, x1, y1) => { const sc = Math.min(SAFE.w / ((x1 - x0) * U), SAFE.h / ((y1 - y0) * U)), T = fp((x0 + x1) / 2, (y0 + y1) / 2 + SAFE.dy / (sc * U)); return [T.map((x, i) => x + dir[i] * PXU / sc), T]; };
+    const home = box(260, 120, 1672, 520);
+    INS_CAM.tour = keysOf([[0, [b.P, b.T]], [1.5, home], [3.0, box(290, 280, 1640, 700)], [4.6, box(290, 430, 1640, 720)], [5.6, box(250, 0, 1450, 460)],
+      [6.9, home], [8.5, box(290, 330, 1650, 940)], [q.b - q.a, [b.P, b.T]]]);
+  }
+  // modal boxes (window CSS px): the modal faces +z; small offsets add a little parallax
+  const mbox = (x0, y0, x1, y1, ox = 0, oy = 0) => { const U = MS, sc = Math.min(SAFE.w / ((x1 - x0) * U), SAFE.h / ((y1 - y0) * U)), T = mpt((x0 + x1) / 2, (y0 + y1) / 2 + SAFE.dy / (sc * U), 0); return [[T[0] + ox, T[1] + oy, T[2] + PXU / sc], T]; };
+  {
+    // name anatomy: the whole name, a slow truck from the prefix to the deliverable
+    const q = INSERTS[1], b = camPose(q.at), NS = manifest._nameSegs, n = MR.name;
+    const shot = (k) => { const [P, T] = mbox(n.x - 12, n.y - 30, n.x + n.w + 12, n.y + n.h + 70); const dx = k < 0 ? 0 : (NS[k].x + NS[k].w / 2 - (n.x + n.w / 2)) * MS * 0.22; return [[P[0] + dx, P[1], P[2]], [T[0] + dx, T[1], T[2]]]; };
+    INS_CAM.name = keysOf([[0, [b.P, b.T]], [1.0, shot(0)], [2.5, shot(1)], [3.9, shot(2)], [4.7, shot(-1)], [q.b - q.a, [b.P, b.T]]]);
+  }
+  {
+    // Detalhes: classification -> area -> people -> description -> button, then back
+    const q = INSERTS[2], b = camPose(q.at);
+    INS_CAM.det = keysOf([[0, [b.P, b.T]], [1.5, mbox(31, 165, 569, 480, 16, 8)], [2.45, mbox(31, 175, 569, 485, 8, 6)], [3.25, mbox(31, 140, 569, 560, 0, 8)], [4.45, mbox(31, 480, 569, 590, -8, 6)],
+      [5.6, mbox(31, 470, 569, 775, 8, 6)], [7.9, mbox(31, 475, 569, 780, 0, 4)], [9.1, mbox(31, 775, 569, 945, 0, -6)], [11.6, mbox(31, 780, 569, 945, 0, -6)], [12.6, mbox(20, 790, 580, 1015, 14, -8)], [q.b - q.a, [b.P, b.T]]]);
+  }
+  function poseAt(nt) {
+    const pose = camPose(S(nt));
+    for (const q of INSERTS) {
+      if (nt > q.a && nt < q.b) { const c = INS_CAM[q.id], u = nt - q.a; pose.P = path(c.P, u); pose.T = path(c.T, u); }
+      pose.aperture *= 1 - 0.5 * envl(nt, q.a - 0.4, q.a + 0.6, q.b - 0.6, q.b + 0.4, 'inOutSine', 'inOutSine');
+    }
+    return pose;
+  }
 
   // ------------------------------------------------------------ modal texture state (pure)
   function modalState(t) {
     const NAME = 44;
     let img = 'm_empty';
     if (t > 31.2) img = `m_name_${String(Math.min(NAME, t < 32.6 ? Math.floor(seg(t, 31.4, 32.6) * 5.999) : 5 + Math.floor(seg(t, 32.6, 35.3) * 39))).padStart(2, '0')}`;
-    if (t > 35.4) img = t > 35.7 && t < 37.4 ? 'm_name_pfx' : 'm_name_44';
+    if (t > 35.4) img = t < 36.2 ? 'm_name_44' : 'm_name_done'; // v5: the anatomy insert takes over at 36.9
     if (t > 37.5) img = 'm_where_0';
     if (t > 37.95) img = 'm_where_1'; if (t > 38.15) img = 'm_where_2'; if (t > 38.35) img = 'm_where_3';
     if (t > 38.7) img = 'm_where_dd'; if (t > 39.3) img = 'm_where_ddhi';
@@ -306,14 +418,53 @@ export function buildFilm(ctx) {
     if (t > 49.0) img = 'm_zip';
     if (t > 54.55) img = 'm_zip_file';
     if (t > 56.55 && t < 56.8) img = 'm_next_press';
-    if (t > 56.8) img = 'm_step2';
+    if (t > 56.8) img = 'm_zip_file';
     return img;
   }
+  // ---- inserts (film clock u = nt - insert start)
+  const [I_TOUR, I_NAME, I_DET] = INSERTS;
+  const NAME_TL = [[0, 'm_name_done'], [0.25, 'm_name_seg1'], [1.65, 'm_name_seg2'], [3.05, 'm_name_seg3'], [4.35, 'm_name_segall'], [5.05, 'm_name_done']];
+  const DET_TL = [[0, 'd_base'], [1.75, 'd_tpl_hov'], [1.97, 'd_tpl'], [3.08, 'd_area_hi0'], [3.55, 'd_area_hi3'], [3.78, 'd_area_act'], [4.6, 'd_area'], [5.68, 'd_p1_0']];
+  for (let i = 1; i <= 9; i++) DET_TL.push([5.75 + (i - 1) * 0.083, `d_p1_${i}`]);
+  DET_TL.push([6.55, 'd_p1_sugg'], [6.85, 'd_p1_hov'], [7.02, 'd_p2_0']);
+  for (let i = 1; i <= 6; i++) DET_TL.push([7.1 + (i - 1) * 0.075, `d_p2_${i}`]);
+  DET_TL.push([7.6, 'd_p2_sugg'], [7.85, 'd_p2_hov'], [8.02, 'd_people'], [9.18, 'd_desc_00']);
+  for (let i = 1; i <= DL.words; i++) DET_TL.push([9.25 + (i - 1) * 0.066, `d_desc_${String(i).padStart(2, '0')}`]);
+  DET_TL.push([11.0, 'd_desc_hl1'], [11.45, 'd_desc_hl2'], [11.9, 'd_done'], [12.78, 'd_press'], [13.0, 'd_done']);
+  const stepTL = (tl, u) => { let v = tl[0][1]; for (const [a, n] of tl) if (u >= a) v = n; return v; };
+  const DET_SC1 = 110;
+  const detScroll = (u) => lerp(0, DET_SC1, E.inOutCubic(seg(u, 4.6, 5.6))) + (DSC - DET_SC1) * E.inOutCubic(seg(u, 8.1, 9.1));
+  // what the modal shows: a baked state, or the composed Detalhes page (+ what it dissolves from)
+  function modalPlan(t, nt) {
+    if (nt >= I_NAME.a && nt <= I_NAME.b) return { img: stepTL(NAME_TL, nt - I_NAME.a) };
+    if (nt >= I_DET.a) {
+      const u = Math.min(nt - I_DET.a, I_DET.b - I_DET.a);
+      const k = E.inOutSine(seg(u, 0.05, 0.45));
+      return { det: true, img: nt > I_DET.b ? 'd_done' : stepTL(DET_TL, u), scroll: detScroll(u), under: k < 1 ? 'm_zip_file' : null, k };
+    }
+    return { img: modalState(t) };
+  }
+  // FLOWS tour: screen dissolves, highlight rings (screen px + envelope) and the cursor's path
+  const TOUR_SCR = [[1.85, 2.25, 'screen_inicio', 'screen_catalogo'], [5.7, 6.1, 'screen_catalogo', 'screen_inicio'], [7.15, 7.55, 'screen_inicio', 'screen_biblioteca']];
+  const tourScreen = (u) => { let cur = 'screen_inicio'; for (const [u0, u1, from, to] of TOUR_SCR) { if (u >= u1) cur = to; else if (u > u0) return [from, to, E.inOutSine(seg(u, u0, u1))]; } return [cur, null, 0]; };
+  const TOUR_RINGS = [[[766, 248, 1196, 403], [1.2, 1.45, 1.85, 2.1]], [[538, 318, 621, 355], [3.1, 3.3, 4.3, 4.6]], [[290, 624, 1638, 692], [3.9, 4.2, 5.0, 5.3]],
+    [[441, 20, 497, 52], [5.3, 5.5, 5.65, 5.85]], [[318, 248, 748, 403], [6.5, 6.75, 7.1, 7.35]],
+    ...[[962, 398, 1036, 434], [1411, 414, 1486, 450], [518, 735, 593, 771], [964, 736, 1038, 772], [1416, 738, 1491, 774]].map((r, i) => [r, [7.8 + i * 0.15, 8.05 + i * 0.15, 9.5, 9.85]])];
+  const TOUR_CUR = [[0.5, [1320, 760]], [1.55, [990, 345]], [2.35, [990, 345]], [3.05, [582, 340]], [3.45, [582, 340]], [4.15, [700, 664]], [4.85, [700, 664]], [5.45, [470, 40]], [5.8, [470, 40]], [6.85, [545, 345]], [7.3, [545, 345]], [8.0, [980, 760]]];
+  const TOUR_CLK = [1.75, 3.2, 5.6, 7.05];
+  // Detalhes: cursor in modal-window CSS px (the page scrolls under it)
+  const DET_CUR = [[1.0, [470, 700]], [1.75, [95, 390]], [2.3, [95, 390]], [2.95, [300, 532]], [3.12, [300, 532]], [3.6, [220, 251]], [3.85, [220, 251]], [4.5, [400, 470]], [5.1, [400, 470]],
+    [5.55, [300, 669]], [5.8, [300, 669]], [6.2, [440, 690]], [6.85, [200, 724]], [7.05, [200, 724]], [7.4, [440, 690]], [7.85, [200, 724]], [8.05, [200, 724]], [8.6, [420, 780]],
+    [9.05, [300, 876]], [9.2, [300, 876]], [9.6, [548, 944]], [11.9, [548, 944]], [12.55, [485, 987]], [12.95, [485, 987]], [13.4, [640, 1120]]];
+  const DET_CLK = [1.95, 3.05, 3.75, 5.65, 7.0, 8.0, 9.15, 12.85];
+  const pressAt = (u, clk) => clk.reduce((m, c) => Math.max(m, pulse(u, c - 0.05, 0.05, 0.12)), 0);
+  const tourCurPt = (u, dz = 16) => { const [px, py] = track(TOUR_CUR, u); return inicio.localToWorld(scrLocal(px, py, dz)).toArray(); };
+  const detCurPt = (u, dz = 16) => { const [x, y] = track(DET_CUR, u); return mpt(x, y, dz); };
 
   // ------------------------------------------------------------ update
   function updateFilm(t, nt) {
     // ============ CAMERA (computed first: projections below depend on it)
-    const { P, T, fov, aperture } = camPose(t);
+    const { P, T, fov, aperture } = poseAt(nt);
     setCam(P, T, fov);
     const focusD = Math.hypot(T[0] - P[0], T[1] - P[1], T[2] - P[2]);
 
@@ -387,8 +538,11 @@ export function buildFilm(ctx) {
       if (on) {
         const y = 285 + riseY(t, 12.3, 0.95, -420, 1.15) - (t > 15.9 ? E.inBack(seg(t, 15.9, 16.7), 1.2) * 520 : 0);
         inicio.position.set(0, y, -120); inicio.rotation.set(-0.04 + Math.sin(t * 0.8) * 0.01, Math.sin(t * 0.5) * 0.03, 0);
-        const hp = envl(t, 13.4, 13.9, 15.5, 15.9);
-        hl.visible = hp > 0.01; hl.material.opacity = hp * (0.88 + 0.12 * Math.sin(nt * 2.0)); hl.material.color.setScalar(1.5);
+        inicio.updateMatrixWorld(true);
+        // the tour (insert 1): Início -> Catálogo de Métodos -> Início -> Biblioteca de Skills
+        const u = nt - I_TOUR.a, inTour = u > 0 && nt < I_TOUR.b;
+        const [a, b, k] = nt >= I_TOUR.b ? ['screen_biblioteca', null, 0] : u > 0 ? tourScreen(u) : ['screen_inicio', null, 0];
+        drawScreen(a, b, k, inTour ? TOUR_RINGS.map(([r, e]) => [...r, envl(u, ...e, 'inOutSine', 'inOutSine')]) : []);
       }
       // wave around the ring: tiles lean toward the center and glow as the counter runs
       for (let i = 0; i < ring.N; i++) {
@@ -448,8 +602,19 @@ export function buildFilm(ctx) {
         if (t > 56.8) { const w = E.inCubic(seg(t, 56.8, 57.2)); p = mixv(p, [nc[0] + 240, nc[1] - 160, nc[2] + 260], w); }
         rotZ = 0.2;
       }
-      vis(cursor, on);
-      if (on) { cursor.position.set(...p); cursor.rotation.set(-0.35, 0.3, rotZ); cursor.scale.setScalar(1.25); }
+      let sc = 1.25;
+      // inserts: the cursor visits the FLOWS screens (tour) and the Detalhes fields
+      if (nt > I_TOUR.a + 0.45 && nt < I_TOUR.a + 8.1) {
+        const u = nt - I_TOUR.a; on = true; rotZ = 0.22;
+        p = tourCurPt(u, 16 - pressAt(u, TOUR_CLK) * 8);
+        sc = 1.0 * E.outBack(seg(u, 0.5, 0.85), 1.4) * (1 - E.inBack(seg(u, 7.75, 8.05), 1.2));
+      } else if (nt > I_DET.a + 0.95 && nt < I_DET.a + 13.45) {
+        const u = nt - I_DET.a; on = true; rotZ = 0.2;
+        p = detCurPt(u, 16 - pressAt(u, DET_CLK) * 8);
+        sc = 0.9 * E.outBack(seg(u, 1.0, 1.35), 1.4) * (1 - E.inBack(seg(u, 13.1, 13.4), 1.2));
+      }
+      vis(cursor, on && sc > 0.01);
+      if (on) { cursor.position.set(...p); cursor.rotation.set(-0.35, 0.3, rotZ); cursor.scale.setScalar(Math.max(0.001, sc)); }
     }
     // modal frame lifecycle
     {
@@ -463,8 +628,9 @@ export function buildFilm(ctx) {
       modal.position.set(mPos[0], mPos[1] + Math.sin(t * 0.7) * 1.5, mPos[2]);
       modal.rotation.set(0, mRotY, 0);
       modal.scale.setScalar(Math.max(0.001, mScale));
-      const img = modalState(t);
-      if (img !== modalImg && imgs[img]) { modalTex.image = imgs[img]; modalTex.needsUpdate = true; modalImg = img; }
+      const plan = modalPlan(t, nt);
+      if (plan.det) { useMap(mCanvasTex); composeDet(plan.img, plan.scroll, plan.under, plan.k); }
+      else { useMap(modalTex); if (plan.img !== modalImg && imgs[plan.img]) { modalTex.image = imgs[plan.img]; modalTex.needsUpdate = true; modalImg = plan.img; } }
     }
     // keycaps (Passo 2)
     keys.forEach((k, i) => {
@@ -605,37 +771,82 @@ export function buildFilm(ctx) {
       }
     }
     tracker.set(t, envl(t, 25.8, 26.4, 61.6, 62.1) * hudIn);
-    // focus frame: brackets track the active modal field and glide to the next one
+    // focus frame: brackets track the active field and glide to the next one (step 1 on the
+    // story clock; the Detalhes page on the insert clock, following its scroll)
     {
-      const fr = (f) => { const r = MR[f]; return MG.rectOf([project(mpt(r.x, r.y)), project(mpt(r.x + r.w, r.y)), project(mpt(r.x, r.y + r.h)), project(mpt(r.x + r.w, r.y + r.h))]); };
-      const i = FOCUS.findIndex(([, a, b]) => t >= a && t < b);
-      if (i >= 0) {
-        const [f, a, b] = FOCUS[i];
-        let rect = fr(f), k = 1;
-        const prev = FOCUS[i - 1], chained = prev && a - prev[2] < 0.6;
-        const u = seg(t, a, a + 0.45);
-        if (chained && u < 1) rect = MG.lerpRect(fr(prev[0]), rect, E.inOutCubic(u));
-        else k = 1 + (1 - E.outCubic(seg(t, a, a + 0.45))) * 0.35;
-        const next = FOCUS[i + 1], chainedNext = next && next[1] - b < 0.6;
-        const op = (chained ? 1 : E.outCubic(seg(t, a, a + 0.35))) * (chainedNext ? 1 : 1 - seg(t, b - 0.25, b));
-        focus.set(rect, op * hudIn, k);
+      const proj = (x0, y0, x1, y1) => MG.rectOf([project(mpt(x0, y0)), project(mpt(x1, y0)), project(mpt(x0, y1)), project(mpt(x1, y1))]);
+      const fr = (f) => { const r = MR[f]; return proj(r.x, r.y, r.x + r.w, r.y + r.h); };
+      const run = (list, time, rectOf) => {
+        const i = list.findIndex(([, a, b]) => time >= a && time < b);
+        if (i >= 0) {
+          const [f, a, b] = list[i];
+          let rect = rectOf(f), k = 1;
+          const prev = list[i - 1], ch = prev && a - prev[2] < 0.6;
+          const u = seg(time, a, a + 0.45);
+          if (ch && u < 1) rect = MG.lerpRect(rectOf(prev[0]), rect, E.inOutCubic(u));
+          else k = 1 + (1 - E.outCubic(seg(time, a, a + 0.45))) * 0.35;
+          const next = list[i + 1], chN = next && next[1] - b < 0.6;
+          return [rect, (ch ? 1 : E.outCubic(seg(time, a, a + 0.35))) * (chN ? 1 : 1 - seg(time, b - 0.25, b)), k];
+        }
+        const j = list.findIndex(([, , b], n) => list[n + 1] && time >= b && time < list[n + 1][1] && list[n + 1][1] - b < 0.6);
+        return j >= 0 ? [rectOf(list[j][0]), 1, 1] : null;
+      };
+      let res;
+      if (nt > I_DET.a && nt < I_DET.b) {
+        const u = nt - I_DET.a, sc = detScroll(u);
+        res = run(DFOCUS, u, (names) => { const rs = names.map((n) => detRect(n, sc)); return proj(Math.min(...rs.map((r) => r.x)), Math.min(...rs.map((r) => r.y)), Math.max(...rs.map((r) => r.x + r.w)), Math.max(...rs.map((r) => r.y + r.h))); });
       } else {
-        const j = FOCUS.findIndex(([, , b], n) => FOCUS[n + 1] && t >= b && t < FOCUS[n + 1][1] && FOCUS[n + 1][1] - b < 0.6);
-        if (j >= 0) focus.set(fr(FOCUS[j][0]), hudIn, 1); else focus.set(null, 0);
+        res = run(FOCUS, t, fr);
+        if (res && nt > I_NAME.a - 0.3 && nt < I_NAME.b + 0.3) res[1] *= 1 - 0.7 * envl(nt, I_NAME.a - 0.3, I_NAME.a + 0.2, I_NAME.b - 0.2, I_NAME.b + 0.3, 'inOutSine', 'inOutSine');
       }
+      if (res) focus.set(res[0], res[1] * hudIn, res[2]); else focus.set(null, 0);
     }
-    // subtitles: the line rises out of a mask; key terms get a drawn underline
+    // name anatomy (insert 2): a label under each part of the name, one at a time, then all
     {
-      let cur = null; for (const s of SUBS) if (t >= s[0] && t <= s[1]) cur = s;
-      const key = cur ? cur[3] : '';
-      if (key !== subKey) { subKey = key; subIn.innerHTML = key.replace(/\*([^*]+)\*/g, '<b class="hl">$1</b>'); subK.textContent = cur ? cur[2] : ''; subK.style.display = cur && cur[2] ? '' : 'none'; }
+      const u = nt - I_NAME.a, on = u > 0.1 && nt < I_NAME.b;
+      const NS = manifest._nameSegs, T0 = [0.25, 1.65, 3.05], out = 1 - E.inOutSine(seg(u, 4.95, 5.2));
+      // a soft spotlight on the name field; the labels sit on the dimmed page
+      const so = on ? envl(u, 0.05, 0.45, 4.85, 5.15, 'inOutSine', 'inOutSine') : 0;
+      if (MG.vis(spot, so > 0.01)) {
+        const n = MR.name, r = MG.rectOf([project(mpt(n.x, n.y)), project(mpt(n.x + n.w, n.y)), project(mpt(n.x, n.y + n.h)), project(mpt(n.x + n.w, n.y + n.h))]);
+        spotHole.setAttribute('x', r.x0 - 16); spotHole.setAttribute('y', r.y0 - 16); spotHole.setAttribute('width', r.x1 - r.x0 + 32); spotHole.setAttribute('height', r.y1 - r.y0 + 32); spot.style.opacity = so.toFixed(3);
+      }
+      segLbl.forEach((el, k) => {
+        const a = E.outCubic(seg(u, T0[k], T0[k] + 0.4)), dim = u < 4.35 && k < 2 && u > T0[k + 1];
+        const o = on ? a * out : 0;
+        el.style.filter = dim ? 'saturate(.35) brightness(.72)' : '';
+        const r = NS[k], top = project(mpt(r.x + r.w / 2, r.y + r.h + 4)), bot = project(mpt(r.x + r.w / 2, MR.name.y + MR.name.h + 6));
+        show(el, o, top.x, bot.y + 30 + (1 - a) * 12, 0.5, 0, 1);
+        segPath[k].setAttribute('d', `M${top.x},${top.y} V${bot.y + 30}`); segPath[k].style.opacity = o;
+      });
+      MG.vis(segLn, on);
+    }
+    // click ripple where the cursor clicks (inserts)
+    {
+      let o = 0, x = 0, y = 0, r = 0;
+      for (const [q, list, pt] of [[I_TOUR, TOUR_CLK, tourCurPt], [I_DET, DET_CLK, detCurPt]]) for (const c of list) {
+        const d = nt - q.a - c;
+        if (d >= 0 && d < 0.5) { const p = project(pt(c, 10)); x = p.x; y = p.y; r = d / 0.5; o = 1 - r; }
+      }
+      if (MG.vis(clk, o > 0.01)) { clk.style.opacity = E.outQuad(o).toFixed(3); clk.style.transform = `translate(${x}px,${y}px) scale(${(0.35 + E.outCubic(r) * 1.15).toFixed(3)})`; }
+    }
+    // subtitles (film clock): the line rises out of a mask; key terms get a drawn underline.
+    // Chained lines (one ends where the next begins) keep the plate up and swap the text.
+    {
+      let ci = -1; SUBS.forEach((x, i) => { if (nt >= x.a && nt < x.b) ci = i; });
+      const cur = ci >= 0 ? SUBS[ci] : null, prv = ci > 0 ? SUBS[ci - 1] : null, nxt = ci >= 0 ? SUBS[ci + 1] : null;
+      const cIn = chained(prv, cur), cOut = chained(cur, nxt);
+      const key = cur ? cur.s : '';
+      if (key !== subKey) { subKey = key; subIn.innerHTML = key.replace(/\*([^*]+)\*/g, '<b class="hl">$1</b>'); subK.textContent = cur ? cur.k : ''; subK.style.display = cur && cur.k ? '' : 'none'; }
       let sv = 0;
       if (cur) {
-        subS.style.setProperty('--hl', HLC[cur[0] < 24 ? 0 : cur[0] < 62 ? 1 : 2]);
-        const u = E.outCubic(seg(t, cur[0], cur[0] + 0.6)), o = 1 - E.inCubic(seg(t, cur[1] - 0.3, cur[1]));
-        rise(subIn, u); sv = Math.min(E.outCubic(seg(t, cur[0], cur[0] + 0.35)), o); MG.vis(subP, true); subP.style.opacity = sv;
-        subIn.querySelectorAll('.hl').forEach((h, i) => { h.style.backgroundSize = `${(E.inOutCubic(seg(t, cur[0] + 0.55 + i * 0.3, cur[0] + 1.25 + i * 0.3)) * 100).toFixed(1)}% 3px`; });
-        subK.style.opacity = E.outCubic(seg(t, cur[0], cur[0] + 0.5)) * o;
+        subS.style.setProperty('--hl', HLC[cur.c]);
+        const u = E.outCubic(seg(nt, cur.a, cur.a + 0.6)), o = 1 - E.inCubic(seg(nt, cur.b - 0.3, cur.b));
+        rise(subIn, u); subIn.style.opacity = cOut ? (1 - E.inCubic(seg(nt, cur.b - 0.22, cur.b))).toFixed(3) : 1;
+        sv = Math.min(cIn ? 1 : E.outCubic(seg(nt, cur.a, cur.a + 0.35)), cOut ? 1 : o); MG.vis(subP, true); subP.style.opacity = sv;
+        subIn.querySelectorAll('.hl').forEach((h, i) => { const a = cur.ul && cur.ul[i] !== undefined ? cur.ul[i] : cur.a + 0.55 + i * 0.3; h.style.backgroundSize = `${(E.inOutCubic(seg(nt, a, a + 0.7)) * 100).toFixed(1)}% 3px`; });
+        const kSame = cIn && prv.k === cur.k && cur.k;
+        subK.style.opacity = (kSame ? 1 : E.outCubic(seg(nt, cur.a, cur.a + 0.5))) * (cOut && nxt.k === cur.k ? 1 : cOut ? 1 - seg(nt, cur.b - 0.22, cur.b) : o);
       } else MG.vis(subP, false);
       band.style.opacity = 0.6 + 0.4 * sv;
     }
@@ -652,7 +863,7 @@ export function buildFilm(ctx) {
     {
       let o = 0, n = 0, lbl = '', icn = '', t0 = 0;
       if (t > 16.6 && t < 20.4) { o = envl(t, 16.6, 17.1, 19.9, 20.4); n = Math.round(441 * E.outCubic(seg(t, 16.7, 19.3))); lbl = 'skills prontas para <b>reuso</b>'; icn = 'library'; t0 = 16.6; }
-      if (t > 60.3 && t < 62.0) { o = envl(t, 60.3, 60.7, 61.6, 62.0); n = 442; lbl = '<b>+1</b> skill da DTS na Biblioteca'; icn = 'sparkles'; t0 = 60.3; }
+      if (t > 60.3 && t < 62.0) { o = envl(t, 60.3, 60.7, 61.6, 62.0); n = 442; lbl = '<b>+1</b> skill de DTS na Biblioteca'; icn = 'sparkles'; t0 = 60.3; }
       show(kC, o, 0, (t > 60 ? -60 : 0) + (1 - o) * 14);
       if (o > 0) {
         kCBig.textContent = n; if (kCLbl.innerHTML !== lbl) kCLbl.innerHTML = lbl;
@@ -664,8 +875,6 @@ export function buildFilm(ctx) {
     // callouts anchored to 3D points (soft fade and rise)
     {
       const pop = (el, o, x, y, ax = 0, ay = 0) => show(el, o, x, y + (1 - o) * 8, ax, ay, 0.96 + 0.04 * o);
-      const nm = project(mpt(MR.name.x + 34, MR.name.y + MR.name.h + 6));
-      pop(cPfx, envl(t, 35.7, 36.15, 37.0, 37.4), nm.x - 36, nm.y + 22);
       const wh = project(mpt(MR.where.x + 60, MR.where.y + MR.where.h + 40));
       pop(cWhere, envl(t, 40.7, 41.15, 41.9, 42.3), wh.x - 36, wh.y + 22);
       const rq = project(mpt(MR.model.x + 128, MR.model.y - 14));
@@ -728,10 +937,15 @@ export function buildFilm(ctx) {
     identHud(T);
     const nt = T - IDENT;
     updateFilm(S(nt), nt);
-    const pp = camPose(S(nt - SHUTTER));
+    const pp = poseAt(nt - SHUTTER);
     world.setPrevCamera(pp.P, pp.T, pp.fov, nt > 0.02 ? 1 : 0);
   }
   // the modal image a frame needs (loaded on demand by main.js before rendering it)
-  const needs = (T) => { if (T < IDENT) return null; const t = S(T - IDENT); return t > 28.5 && t < 58.1 ? modalState(t) : null; };
-  return { duration: DURATION, update, needs, cam: (nt) => camPose(S(nt)), story: S };
+  const needs = (T) => {
+    if (T < IDENT) return null;
+    const nt = T - IDENT, t = S(nt);
+    if (!(t > 28.5 && t < 58.1)) return null;
+    const p = modalPlan(t, nt); return p.under ? [p.under, p.img] : [p.img];
+  };
+  return { duration: DURATION, update, needs, cam: (nt) => poseAt(nt), story: S };
 }

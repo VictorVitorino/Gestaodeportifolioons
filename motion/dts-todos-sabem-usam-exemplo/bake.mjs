@@ -27,7 +27,9 @@ const S = [];
 S.push(['m_empty', { ...base }]);
 for (let i = 0; i <= NAME.length; i++) S.push([`m_name_${String(i).padStart(2, '0')}`, { ...base, name: NAME.slice(0, i), focus: 'name' }]);
 const afterName = { ...base, name: NAME };
-S.push(['m_name_pfx', { ...afterName, focus: 'name', pfx: true }]);
+// v5: name anatomy, one segment at a time: [Prefixo da Área] - [Service Line] - [Produto/Entregável]
+for (const k of [1, 2, 3]) S.push([`m_name_seg${k}`, { ...afterName, seg: k }]);
+S.push(['m_name_segall', { ...afterName, seg: 'all' }]);
 S.push(['m_name_done', { ...afterName }]);
 ['', 'F', 'Fl', 'Flo'].forEach((w, i) => S.push([`m_where_${i}`, { ...afterName, where: w, focus: 'where' }]));
 S.push(['m_where_dd', { ...afterName, where: 'Flo', focus: 'where', dd: 1 }]);
@@ -45,13 +47,51 @@ S.push(['m_time_done', { ...afterTime }]);
 S.push(['m_zip', { ...afterTime, mode: 1 }]);
 S.push(['m_zip_file', { ...afterTime, mode: 1, file: 'SKILL.zip' }]);
 S.push(['m_next_press', { ...afterTime, mode: 1, file: 'SKILL.zip', press: 1 }]);
-S.push(['m_step2', { ...afterTime, mode: 1, file: 'SKILL.zip', stepP: 1 }]);
+// ---- v5: step 2 (Detalhes), from the real FLOWS screen recording
+const DESC = 'Entregável: Mapa de Impactos Organizacionais, separando por categoria de impacto, análise organizacional, mapa de riscos, ações de mitigação, heatmap.\nResultado Final/Produto: Arquivo Excel, Apresentação em PPT.';
+const DTS_AREA = 'DTS — Performance (DTS)';
+const P1 = 'domingues', P2 = 'talita', A1 = 'Domingues, Alexandre', A2 = 'Galvao, Talita';
+const D = [];
+const d0 = { title: NAME, tpl: 0, area: '', people: [], pq: '', desc: '', caret: true };
+D.push(['d_base', { ...d0 }]);
+D.push(['d_tpl_hov', { ...d0, tplHover: 1 }]);
+const dT = { ...d0, tpl: 1 };
+D.push(['d_tpl', { ...dT }]);
+for (const k of [0, 1, 2, 3]) D.push([`d_area_hi${k}`, { ...dT, areaOpen: 1, areaHi: k, areaFocus: 1 }]);
+const dA = { ...dT, area: DTS_AREA };
+D.push(['d_area_act', { ...dA, areaFocus: 1 }]);
+D.push(['d_area', { ...dA }]);
+for (let i = 0; i <= P1.length; i++) D.push([`d_p1_${i}`, { ...dA, pq: P1.slice(0, i), pfocus: 1 }]);
+D.push(['d_p1_sugg', { ...dA, pq: P1, pfocus: 1, sugg: A1 }]);
+D.push(['d_p1_hov', { ...dA, pq: P1, pfocus: 1, sugg: A1, suggHov: 1 }]);
+for (let i = 0; i <= P2.length; i++) D.push([`d_p2_${i}`, { ...dA, people: [A1], pq: P2.slice(0, i), pfocus: 1 }]);
+D.push(['d_p2_sugg', { ...dA, people: [A1], pq: P2, pfocus: 1, sugg: A2 }]);
+D.push(['d_p2_hov', { ...dA, people: [A1], pq: P2, pfocus: 1, sugg: A2, suggHov: 1 }]);
+const dP = { ...dA, people: [A1, A2] };
+D.push(['d_people', { ...dP }]);
+// the description is typed word by word (the real field is a textarea)
+const words = DESC.split(/(?<=\s)/);
+D.push(['d_desc_00', { ...dP, dfocus: 1 }]);
+for (let i = 1; i <= words.length; i++) D.push([`d_desc_${String(i).padStart(2, '0')}`, { ...dP, desc: words.slice(0, i).join('').replace(/\s+$/, ''), dfocus: 1 }]);
+D.push(['d_desc_hl1', { ...dP, desc: DESC, dfocus: 1, caret: false, dhl: 1 }]);
+D.push(['d_desc_hl2', { ...dP, desc: DESC, dfocus: 1, caret: false, dhl: 2 }]);
+const dD = { ...dP, desc: DESC };
+D.push(['d_done', { ...dD }]);
+D.push(['d_press', { ...dD, press: 1 }]);
 {
   // 3.2x: the modal fills the frame in the close-ups, so its text must hold at 1080p
   const pg = await page(3.2);
   for (const [name, st] of S) manifest[name] = await snap(pg, name, 'modal', st);
   // field rects (css px) for camera targeting
   manifest._modalRects = await pg.evaluate(() => { const m = window._modal; return m.fieldRects(); });
+  await pg.evaluate((st) => window.show('modal', st), { ...afterName, seg: 1 });
+  manifest._nameSegs = await pg.evaluate(() => window._modal.segRects());
+  // step 2 (Detalhes): full-height images; the film composes header + scrolled body + footer
+  for (const [name, st] of D) manifest[name] = await snap(pg, name, 'det', st);
+  const lay = async (st) => { await pg.evaluate((a) => window.show('det', a), st); return pg.evaluate(() => window._det.detLayout()); };
+  const L0 = await lay(d0), LA = await lay({ ...dT, areaOpen: 1, areaHi: 3, areaFocus: 1 }), LS = await lay({ ...dA, pq: P1, pfocus: 1, sugg: A1 });
+  L0.rects.optDTS = LA.rects.optDTS; L0.rects.sugg = LS.rects.sugg; L0.nsteps = D.length; L0.words = words.length;
+  manifest._det = L0;
   await pg.close();
 }
 {

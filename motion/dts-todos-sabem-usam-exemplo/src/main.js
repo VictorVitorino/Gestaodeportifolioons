@@ -23,7 +23,7 @@ async function boot() {
   await Promise.all(['500 20px Inter', '600 20px Inter', '700 20px Inter', '800 20px Inter', '900 20px Inter', '500 20px "JetBrains Mono"', '700 20px "JetBrains Mono"', '400 20px "Liberation Sans"', '700 20px "Liberation Sans"'].map((f) => document.fonts.load(f)));
   const manifest = await (await fetch('tex/manifest.json')).json();
   // the ~80 modal states are large (sharp close-ups): they load on demand, a few at a time
-  const texNames = Object.keys(manifest).filter((k) => !k.startsWith('_') && !k.startsWith('m_'));
+  const texNames = Object.keys(manifest).filter((k) => !k.startsWith('_') && !k.startsWith('m_') && !k.startsWith('d_'));
   const imgs = {};
   await Promise.all(texNames.map(async (n) => { imgs[n] = await loadImg(`tex/${n}.png`); }));
   imgs.m_empty = await loadImg('tex/m_empty.png');
@@ -31,9 +31,10 @@ async function boot() {
   const ensure = async (n) => {
     if (!imgs[n]) imgs[n] = await loadImg(`tex/${n}.png`);
     const i = lru.indexOf(n); if (i >= 0) lru.splice(i, 1); lru.push(n);
-    while (lru.length > 6) { const old = lru.shift(); if (old !== 'm_empty') delete imgs[old]; }
+    while (lru.length > 8) { const old = lru.shift(); if (old !== 'm_empty') delete imgs[old]; }
   };
-  imgs.screen_inicio = await loadImg('tex/screen_inicio.webp'); // print da tela Início do FLOWS
+  // prints of the real FLOWS screens (Início, Catálogo de Métodos, Biblioteca de Skills) for the tour
+  for (const n of ['screen_inicio', 'screen_catalogo', 'screen_biblioteca']) imgs[n] = await loadImg(`tex/${n}.webp`);
   const fontJson = await new Promise((res, rej) => new TTFLoader().load('fonts/Nunito-900.ttf', res, undefined, rej));
   const font = new Font(fontJson);
   const tex = (n) => { const t = new THREE.Texture(imgs[n]); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = world.maxAniso; t.needsUpdate = true; return t; };
@@ -43,7 +44,7 @@ async function boot() {
   const film = buildFilm({ ...ctx, ident, svgText });
   window.DURATION = film.duration;
   window.__world = world; window.__THREE = THREE;
-  window.seek = async (t) => { const n = film.needs(t); if (n) await ensure(n); film.update(t); world.render(); return true; };
+  window.seek = async (t) => { const n = film.needs(t); if (n) for (const k of [].concat(n)) await ensure(k); film.update(t); world.render(); return true; };
   window.__film = film;
   await window.seek(0);
   window.ready = true;

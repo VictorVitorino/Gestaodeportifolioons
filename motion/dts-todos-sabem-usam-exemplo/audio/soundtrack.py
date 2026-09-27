@@ -1,8 +1,10 @@
-"""DTS · Todos Sabem, Todos Usam, Somos Exemplo (v4) — original score and sound design,
+"""DTS · Todos Sabem, Todos Usam, Somos Exemplo (v5) — original score and sound design,
 synthesized from scratch on the same clock as the film: the 9.6 s Alvarez & Marsal
 ident, then the film. Story-time cues (the v3 choreography) are placed through the same
 pacing curve as src/pace.js, so every sound lands on its picture; the score itself is
-written on the new clock: calmer, broader, with a swell into each pillar."""
+written on the new clock: calmer, broader, with a swell into each pillar. v5: the three
+inserts (flat segments of PACE: FLOWS tour, name anatomy, Detalhes page) get their own
+cues on the film clock, from the same schedules as src/timeline.js."""
 import numpy as np, wave, sys, math, json, re, os
 from scipy.signal import butter, sosfilt, fftconvolve
 
@@ -35,6 +37,9 @@ _nt = np.linspace(0, _x[-1], 400001); _st = _S(_nt)
 def T(s):
     """global time of story time s"""
     return IDENT + float(np.interp(s, _st, _nt))
+# inserts: flat segments of PACE -> (global start, global end), in order tour / name / det
+INS = [(IDENT + PACE[i][0], IDENT + PACE[i + 1][0]) for i in range(len(PACE) - 1) if PACE[i][1] == PACE[i + 1][1]]
+I_TOUR, I_NAME, I_DET = INS
 def D(s0, s1): return T(s1) - T(s0)
 def add(buf, t0, sig, gain=1.0, pan=0.0):
     i0 = int(t0 * SR)
@@ -391,7 +396,6 @@ for k, t0 in enumerate([4.2, 4.5, 4.8]):   # pillars rise
     for i in range([11, 10, 13][k]): scue(t0 + 0.6 + i * 0.06 + 0.3, pizz(midi(74 + [0, 2, 4, 7, 9][i % 5] + (i // 5) * 12 - 12), 0.35), 0.035, -0.6 + k * 0.6)
 scue(6.8, whoosh(1.0, 700, 3500, 0.5), 0.07)
 scue(11.4, whoosh(1.0, 1200, 200, 0.3), 0.07); scue(12.3, whoosh(1.2, 200, 1600, 0.6), 0.1); scue(13.1, thump(0.3), 0.12)
-scue(13.4, bell(midi(90), 1.8), 0.05)
 scue(15.9, whoosh(1.0, 1600, 200, 0.4), 0.08)
 for i in range(24): scue(16.2 + (i / 24) * 2.6, pizz(midi(86 + [0, 2, 4, 7, 9][i % 5]), 0.3), 0.018, math.sin(i) * 0.8)
 ticks_for(16.7, 19.3, 18, 2200, 0.06)
@@ -407,7 +411,6 @@ for i in range(5): scue(30.9 + i * 0.07 + 0.25, pop(900 + i * 60, 360, 0.1), 0.0
 # Passo 2: typing
 for i in range(5): scue(31.4 + (i + 1) * 0.24 - 0.12, key(400 + i), 0.34, -0.4)
 for i in range(39): scue(32.6 + (i + 1) * (2.7 / 39) - 0.01, key(500 + i), 0.18, 0.05)
-scue(35.7, bell(midi(88), 1.8), 0.05)
 # Passo 3: where
 scue(37.5, click(2600, 0.035), 0.16)
 for tt in (37.95, 38.15, 38.35): scue(tt, key(int(tt * 100)), 0.22)
@@ -470,6 +473,34 @@ for s in [26.0, 30.6, 37.5, 42.5, 48.5, 55.5]: scue(s + 0.02, click(3400, 0.02, 
 for i, s in enumerate([30.6, 37.5, 42.5, 48.5, 55.5, 58.2]): scue(s, glock(midi(86 + [0, 2, 4, 5, 7, 9][i]), 1.2), 0.03, 0.7)
 for s in [31.25, 37.6, 42.6, 47.2, 54.5, 55.7]: scue(s, click(2900, 0.025, 0.25), 0.07)
 for s in [16.65, 60.35]: scue(s, bell(midi(90), 1.8), 0.04)
+
+# ================================================================== v5 inserts (film clock)
+def icue(ins, u, sig, g=1.0, pan=0.0): add(sfx, ins[0] + u, sig, g, pan)
+def uiclick(ins, u, g=0.16): icue(ins, u, click(2500, 0.035, 0.6), g, 0.1); icue(ins, u + 0.005, pop(1100, 420, 0.06), 0.03, 0.1)
+# FLOWS tour: cursor, clicks, page dissolves, highlight rings, the trophies
+icue(I_TOUR, 0.45, whoosh(0.6, 1200, 3200, 0.5), 0.025, 0.4)
+for u in (1.75, 3.2, 5.6, 7.05): uiclick(I_TOUR, u)
+for u in (1.85, 5.7, 7.15): icue(I_TOUR, u, whoosh(0.55, 700, 3000, 0.45), 0.06, -0.1)
+for u, m in ((1.25, 86), (3.15, 88), (3.95, 90), (6.55, 86)): icue(I_TOUR, u, glock(midi(m), 1.2), 0.028, 0.3)
+for i in range(5): icue(I_TOUR, 7.85 + i * 0.15, tink(2600 + i * 260), 0.035, -0.5 + i * 0.25)
+# name anatomy: one note per part of the name, then a small chord for the whole pattern
+for u, m in ((0.25, 81), (1.65, 85), (3.05, 88)): icue(I_NAME, u, marker(0.24), 0.06); icue(I_NAME, u + 0.02, glock(midi(m), 1.4), 0.045)
+for i, m in enumerate((81, 85, 88, 93)): icue(I_NAME, 4.35 + i * 0.05, celesta(midi(m), 1.8), 0.03, -0.3 + i * 0.2)
+icue(I_NAME, 4.35, shimmer(1.2, 61), 0.04)
+# Detalhes: the page dissolves in, clicks, the area list, typing, chips, description, share
+icue(I_DET, 0.05, whoosh(0.6, 600, 3000, 0.5), 0.07)
+for u in (1.95, 3.05, 3.75, 5.65, 7.0, 8.0, 9.15): uiclick(I_DET, u)
+icue(I_DET, 1.99, glock(midi(86), 1.0), 0.025)                       # Template selected
+icue(I_DET, 3.1, pop(800, 400, 0.08), 0.04); icue(I_DET, 3.8, tink(2900), 0.04)   # list opens, DTS chosen
+for a, b in ((4.6, 5.6), (8.1, 9.1)): icue(I_DET, a, whoosh(b - a, 1500, 900, 0.5, 0.6), 0.025, 0.2)   # scroll
+for i in range(9): icue(I_DET, 5.75 + i * 0.083, key(700 + i), 0.16, -0.1)                 # domingues
+for i in range(6): icue(I_DET, 7.1 + i * 0.075, key(720 + i), 0.16, -0.1)                  # talita
+for u in (6.55, 7.6): icue(I_DET, u, pop(1300, 700, 0.07), 0.03)                          # suggestion
+for u in (7.02, 8.02): icue(I_DET, u, pop(900, 300, 0.12), 0.06); icue(I_DET, u + 0.03, tink(3200), 0.03)   # chip
+R5 = np.random.default_rng(55)
+for i in range(38): icue(I_DET, 9.25 + i * 0.045 + R5.random() * 0.012, key(800 + i), 0.09 + R5.random() * 0.04, 0.05)   # description
+for u in (11.0, 11.45): icue(I_DET, u, marker(0.26), 0.06)
+icue(I_DET, 12.85, click(2200, 0.05, 0.7), 0.34); icue(I_DET, 12.87, bell(midi(86), 1.8), 0.05); icue(I_DET, 12.9, shimmer(1.0, 63), 0.04)
 
 # ================================================================== mix & master
 def reverb_ir(d=3.0, seed=3):

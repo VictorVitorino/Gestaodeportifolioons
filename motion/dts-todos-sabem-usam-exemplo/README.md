@@ -1,12 +1,14 @@
-# DTS · Todos Sabem, Todos Usam, Somos Exemplo — curta 3D cinematográfico (v4)
+# DTS · Todos Sabem, Todos Usam, Somos Exemplo — curta 3D cinematográfico (v5)
 
-Curta de **2 min 35 s** (1920×1080, 24 fps) que conta o fluxo **Compartilhar Skill** do FLOWS pela lente
+Curta de **2 min 53 s** (1920×1080, 24 fps) que conta o fluxo **Compartilhar Skill** do FLOWS pela lente
 dos três pilares da **DTS — Digital & Technology Services**, da **Alvarez & Marsal**. Abre com uma
-vinheta A&M, segue o roteiro em 3 atos e fecha com o **Ranking de Áreas do FLOWS**, em que a DTS é a nº 1.
+vinheta A&M, segue o roteiro em 3 atos e fecha com o **Ranking de Áreas do FLOWS**, em que DTS é a nº 1.
 Não há personagem: o protagonismo é da própria skill, um objeto 3D que nasce do modal, voa e pousa na Biblioteca.
 
-A v4 é **o mesmo filme da v3** (mesma história, cenas, ordem, objetos, mensagens e identidade visual),
-refinado em ritmo, câmera, motion design, abertura A&M e nitidez.
+A v5 mantém o filme da v4 e acrescenta, a pedido do time: um **tour rápido pelo FLOWS** (Catálogo de Métodos →
+métodos de DTS → Início → Biblioteca de Skills), a **anatomia do nome da skill** (Prefixo da Área · Service Line ·
+Produto/Entregável, um item por vez), a **2ª página do formulário (Detalhes)** fiel ao FLOWS real e o **troféu 95**
+no card publicado. O passo a passo ficou ~22% mais ágil (a digitação do nome segue igual).
 
 | Entrega | Arquivo |
 |---|---|
@@ -18,18 +20,42 @@ refinado em ritmo, câmera, motion design, abertura A&M e nitidez.
 
 | Tempo | Ato | Cena | Motion graphics |
 |---|---|---|---|
-| 0:00 | **Vinheta A&M** | Palco azul-marinho profundo: constelação de dados ao fundo, partículas suaves, trilhas de luz (azuis e uma laranja) deslizam pelo piso e formam um anel; a grade digital se espalha e o monograma **nasce da luz** (faixa de varredura no chão), uma linha de luz desce pelas letras A, & e M e uma única varredura de luz cruza a marca | letterbox 2.39:1, *Alvarez & Marsal · Digital & Technology Services apresenta* com revelação por máscara e fio azul/laranja; a composição completa **repousa ~2 s** antes do fade |
-| 0:10 | Abertura | Céu dourado, praça circular, o emblema **DTS** pousa; as barras do letterbox recolhem | *Como a DTS compartilha conhecimento* (palavras sobem de máscaras) |
-| 0:22 | **Todos Sabem** (azul) | Câmera viaja até o pilar, assenta e **segura 4 s**: um brilho percorre as letras e a luz do ambiente se tinge de azul | *Pilar 01 · Onde está o conhecimento*, parado durante a leitura |
-| 0:29 | | Tela Início do FLOWS em moldura 3D; anel de **441** skills; três skills em destaque | legendas em placa translúcida com sublinhado desenhado, contador com fio dourado |
-| 0:48 | **Todos Usam** (laranja) | Viagem lenta até o pilar; a luz esquenta para laranja; **segura 4 s** | *Pilar 02 · O passo a passo no dia a dia* |
-| 0:55 | | Os 6 passos viram objetos: botão-cápsula, teclas `[DTS]`, sugestão *Flows / Claude*, tambor de modelos (*Claude Sonnet 5*), caixa `SKILL.zip`, *Próximo* → o modal vira o card *NOVA*, que **plana ~6 s** até o anel: **442** | rastreador de passos, moldura de foco que desliza entre os campos, notas presas ao 3D |
-| 1:55 | **Somos Exemplo** (dourado) | Recuo longo e contínuo do anel até o pilar (sem corte); luz dourada, raios e partículas subindo; **segura ~5 s** — o momento mais forte | *Pilar 03 · Quem compartilha, lidera pelo exemplo* |
-| 2:05 | | Fios de luz ligam a skill ao anel; a câmera recua até o **pódio do Ranking de Áreas**: Operations 951 (3º), M&A Services 1.054 (2º) e **DTS 1.557 (1º)** | cards do FLOWS nos blocos com pontos contando, placa **Nº 1 entre 12 áreas** com conector desenhado, *87 publicações · 142 adoções* |
-| 2:27 | Encerramento | O emblema DTS volta ao centro; letterbox | **Todos Sabem. Todos Usam. Somos Exemplo.** por ~4 s · *Compartilhe sua skill no FLOWS* · assinatura Alvarez & Marsal |
+| 0:00 | **Vinheta A&M** | Palco azul-marinho profundo: constelação de dados, trilhas de luz que formam um anel; o monograma **nasce da luz** e uma única varredura cruza a marca | letterbox 2.39:1, *Alvarez & Marsal · Digital & Technology Services apresenta* com revelação por máscara |
+| 0:10 | Abertura | Céu dourado, praça circular, o emblema **DTS** pousa; as barras do letterbox recolhem | *Como DTS compartilha conhecimento* (palavras sobem de máscaras) |
+| 0:22 | **Todos Sabem** (azul) | Câmera viaja até o pilar, assenta e **segura 4 s** | *Pilar 01 · Onde está o conhecimento* |
+| 0:30 | | Tela **Início** do FLOWS em moldura 3D | legendas em placa translúcida com sublinhado desenhado |
+| 0:36 | **Tour do FLOWS** | Cursor abre o **Catálogo de Métodos**, destaca o filtro **DTS (5)** e a seção **DTS · 5 métodos**, volta ao **Início** pelo breadcrumb e entra na **Biblioteca de Skills**, onde as pontuações (troféus) acendem | anéis de destaque desenhados na própria tela, clique com onda, telas reais do FLOWS em dissolução |
+| 0:48 | | Anel de **441** skills; três skills em destaque | *Na Biblioteca, a Alvarez já reúne 441 skills prontas para reuso* |
+| 0:58 | **Todos Usam** (laranja) | Viagem até o pilar; luz laranja; **segura 4 s** | *Pilar 02 · O passo a passo no dia a dia* |
+| 1:07 | | Passos 1–2: botão-cápsula, teclas `[DTS]` e o nome digitado | rastreador de passos, moldura de foco |
+| 1:19 | **Anatomia do nome** | Holofote no campo; um item por vez: **[DTS] → Prefixo da Área**, **Change Management → Service Line**, **Mapa de Impactos → Produto/Entregável** | rótulos numerados com conector, cores por item, legenda com sublinhado sincronizado |
+| 1:25 | | Passos 3–5: *Flows / Claude*, tambor de modelos (*Claude Sonnet 5*), caixa `SKILL.zip` | notas presas ao 3D |
+| 1:49 | **Passo 6 · Detalhes** | *Próximo* → a 2ª página: **Template**, **Área responsável: DTS — Performance (DTS)** (lista real de especializações), co-responsáveis **Domingues, Alexandre** e **Galvao, Talita**, **Descrição** (Entregável e Resultado Final/Produto) e **Compartilhar Skill** | página com cabeçalho e rodapé fixos e corpo que rola como no FLOWS; foco que acompanha a rolagem |
+| 2:04 | | O modal vira o card **NOVA** com **troféu 95**, que plana até o anel: **442** | *Pronto: a skill está publicada na Biblioteca* · *+1 skill de DTS na Biblioteca* |
+| 2:13 | **Somos Exemplo** (dourado) | Recuo contínuo até o pilar; luz dourada; **segura ~5 s** | *Pilar 03 · Quem compartilha, lidera pelo exemplo* |
+| 2:24 | | Fios de luz; pódio do **Ranking de Áreas**: Operations 951, M&A Services 1.054 e **DTS 1.557 (1º)** | cabeçalho do ranking sob o selo DTS (sem cobrir troféus e medalhas), placa **Nº 1 entre 12 áreas** |
+| 2:45 | Encerramento | O emblema DTS volta ao centro; letterbox | **Todos Sabem. Todos Usam. Somos Exemplo.** · assinatura Alvarez & Marsal |
 
 Dados do ranking: tela *Ranking → Áreas → Todos os tempos* do FLOWS (recalculado em 9 set 2026,
-12 áreas no placar). Os textos de apoio dos pilares, as notas e as legendas foram escritos para o vídeo.
+12 áreas no placar). Telas do tour: prints reais do FLOWS (`tex/screen_*.webp`). A 2ª página do formulário
+foi reproduzida a partir da gravação de tela do FLOWS (lista de especializações com códigos, busca de pessoas,
+chips "Sobrenome, Nome", botão *Compartilhar Skill* habilitado só após escolher a área); nas sugestões de
+pessoas o vídeo mostra apenas o nome (sem e-mail). Os textos de apoio, as notas e as legendas foram escritos para o vídeo.
+
+## O que mudou da v4 para a v5
+
+| Pedido | Como ficou |
+|---|---|
+| Passo a passo mais rápido | ~22% menos tempo em cada passo (curva `PACE`); a digitação do nome ficou exatamente como na v4 |
+| "Como DTS" / "a Alvarez" | abertura *Como DTS compartilha conhecimento*; *Na Biblioteca, a Alvarez já reúne…*; também *E DTS lidera…* e *+1 skill de DTS* |
+| Overview do FLOWS (Todos Sabem) | inserto de 10 s: Catálogo de Métodos → métodos de DTS → voltar ao Início → Biblioteca de Skills → fechamento com as 441 skills |
+| Ênfase no nome da skill | inserto de 5 s: Prefixo da Área, Service Line e Produto/Entregável, um de cada vez, depois o padrão completo |
+| 2ª página (Detalhes) | inserto de 14 s com Template, DTS — Performance, co-responsáveis, descrição e *Compartilhar Skill* |
+| Troféu no card | chip com troféu **95**, igual aos cards reais da Biblioteca |
+| Ranking | *Ranking de Áreas · Todos os tempos* e *12 áreas no placar* foram para baixo do selo DTS (canto superior esquerdo) |
+
+Os insertos são trechos planos da curva de ritmo: a história "congela" e a cena nova roda no relógio do filme,
+com câmera própria que sai e volta exatamente ao enquadramento congelado, em repouso (sem saltos).
 
 ## O que mudou da v3 para a v4
 
@@ -85,7 +111,7 @@ Cada valor da cena é função pura do tempo, então qualquer quadro pode ser re
 npm install                        # three + playwright-core; CHROME_PATH=<Chromium/Chrome> fora do Claude Code
 npm run bake                       # gera tex/*.png e tex/manifest.json (estados do modal, cards, ranking, logo)
 python3 -m pip install numpy scipy
-npm run audio                      # audio/soundtrack.wav (155,2 s)
+npm run audio                      # audio/soundtrack.wav (172,8 s)
 npm run preview                    # quadros avulsos em out/preview (PNG)
 Q=0.5 node render.mjs frames 8 0 1 out/lr          # prévia rápida: 3D em meia resolução, 8 fps
 node render.mjs frames 24 0 3 out/frames & node render.mjs frames 24 1 3 out/frames & node render.mjs frames 24 2 3 out/frames
@@ -96,22 +122,27 @@ ffmpeg -framerate 24 -i out/frames/f_%05d.jpg -i audio/soundtrack.wav \
 npm run storyboard
 ```
 
-O render usa WebGL por software (SwiftShader): ~12 s por quadro por processo em 1080p (3 processos ≈ 4 h).
+O render usa WebGL por software (SwiftShader): ~12 s por quadro por processo em 1080p (3 processos ≈ 4 h 40 min).
 Para refazer um trecho, apague os quadros e rode `node render.mjs frames 24 0 1 out/frames <t0> <t1>`
 (tempos globais: a vinheta ocupa 0–9,6 s e o filme começa em 9,6 s).
 
 ## Onde mexer
 
 - **Ritmo**: `PACE` em `src/pace.js` — pares *[tempo do filme, tempo da história]*. Afastar dois pontos
-  deixa aquele trecho mais lento; os três pilares são ancorados na história (`PILLAR_STORY`).
+  deixa aquele trecho mais lento; os três pilares são ancorados na história (`PILLAR_STORY`) e dois pontos
+  com o mesmo tempo de história criam um inserto (`INSERTS`: tour, anatomia do nome, Detalhes).
   A trilha lê o mesmo arquivo; rode `npm run audio` depois de mudar.
-- Legendas (com `*termos*` sublinhados) e textos dos pilares: `SUBS` e `LOCK` em `src/timeline.js` (tempo da história).
+- Insertos: roteiros em `src/timeline.js` — `TOUR_SCR`, `TOUR_RINGS`, `TOUR_CUR` (tour), `NAME_TL` (nome),
+  `DET_TL`, `DET_CUR`, `detScroll` (Detalhes) e as câmeras em `INS_CAM`.
+- Legendas (com `*termos*` sublinhados) e textos dos pilares: `SUBS` e `LOCK` em `src/timeline.js` (a lista
+  principal em tempo da história; as dos insertos em tempo do inserto).
 - Ranking: `AREAS` em `src/podium.js` (pontos, posições, cores); publicações/adoções e textos no HUD em `src/timeline.js`.
 - Vinheta A&M: `src/ident.js` (trilhas de luz, subida das peças, varredura, câmera) e `ID_TYPE` (tipografia).
 - Câmera: `CAM_P`/`CAM_T` em `src/timeline.js` (chaves por tempo da história; interpolação em `path()` de `src/util.js`).
 - Motion graphics: componentes em `src/mg.js`, estilos em `hud.css`.
 - Motion blur: `SHUTTER` em `src/timeline.js` e `src/mblur.js`.
-- Nome da skill e estados do modal: `bake.mjs`; cards e ranking: `src/ui.js` (rode `npm run bake` depois).
+- Nome da skill, estados do modal e da página Detalhes (descrição, pessoas, área): `bake.mjs`; réplicas em
+  `src/ui.js` (`shareModal`, `shareModalDetails`, cards e ranking). Rode `npm run bake` depois.
 - Luz, céu, DOF, luz do ato (`setAccent`) e grade de cor: `src/world.js`. Objetos e materiais: `src/objects.js`.
 - A composição é `film.htm` (extensão `.htm` de propósito, para o Vite do app principal não varrer esta página).
 

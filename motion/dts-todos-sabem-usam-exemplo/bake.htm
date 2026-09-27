@@ -11,10 +11,11 @@ window.show = (kind, arg) => {
   stage.innerHTML = '';
   let el;
   if (kind === 'modal') { el = window._modal || (window._modal = UI.shareModal()); stage.appendChild(el); el.setState(arg); }
+  else if (kind === 'det') { el = window._det || (window._det = UI.shareModalDetails()); stage.appendChild(el); el.setState(arg); }
   else if (kind === 'card') { el = UI.skillCard(UI.SKILLS[arg]); stage.appendChild(el); }
   else if (kind === 'newcard') {
-    el = UI.skillCard({ t: '[DTS] - Change Management - Mapa de Impactos', area: ['network', 'DTS'], sc: 'Nova', d: 'Mapa de impactos da mudança, testada em Flows / Claude com Claude Sonnet 5. Pacote SKILL.zip com SKILL.md na raiz.', a: 'Vitorino, Victor', dt: '26/09/2026', s: [0, 0, 0] }, '<span class="new">NOVA</span>');
-    el.querySelector('.chip.score').innerHTML = icon('sparkles') + 'Nova';
+    // v5: the published skill already carries its quality score (trophy), like the real library cards
+    el = UI.skillCard({ t: '[DTS] - Change Management - Mapa de Impactos', area: ['network', 'DTS'], sc: 95, d: 'Entregável: Mapa de Impactos Organizacionais, separando por categoria de impacto, análise organizacional, mapa de riscos, ações de mitigação, heatmap. Resultado Final/Produto: Arquivo Excel, Apresentação em PPT.', a: 'Vitorino, Victor', dt: '27/09/2026', s: [0, 0, 0] }, '<span class="new">NOVA</span>');
     stage.appendChild(el);
   }
   else if (kind === 'libhead') { el = UI.libHeader(); el.querySelector('.cn').textContent = arg; stage.appendChild(el); }

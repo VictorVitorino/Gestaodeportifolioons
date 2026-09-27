@@ -51,6 +51,15 @@ const P = {
   zap: '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
   link: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
   trendup: '<path d="M22 7 13.5 15.5 8.5 10.5 2 17"/><path d="M16 7h6v6"/>',
+  // Compartilhar Skill · Detalhes (classification tiles)
+  template: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v2M9 9v1M9 14v1M9 19v2"/>',
+  workflow: '<rect width="7" height="7" x="3" y="3" rx="1.5"/><rect width="7" height="7" x="14" y="14" rx="1.5"/><path d="M6.5 10v3.5a2 2 0 0 0 2 2H14"/><path d="M14 6.5h3.5a2 2 0 0 1 2 2V10"/>',
+  bookopen: '<path d="M12 7v14"/><path d="M16 12h2M16 8h2M6 12h2M6 8h2"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+  bookmark: '<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>',
+  listchecks: '<path d="m3 7 2 2 4-4"/><path d="m3 17 2 2 4-4"/><path d="M13 6h8M13 12h8M13 18h8"/>',
+  barsquare: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 17v-4M12 17V8M16 17v-6"/>',
+  arrowleft: '<path d="M19 12H5M11 5l-7 7 7 7"/>',
+  checkcircle: '<circle cx="12" cy="12" r="9.5"/><path d="m8 12.2 2.7 2.7L16.2 9.4"/>',
 };
 export const ICONS = P;
 export function icon(name, cls = '', sw = 2) {
