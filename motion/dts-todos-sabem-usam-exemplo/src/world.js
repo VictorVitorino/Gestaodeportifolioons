@@ -16,9 +16,9 @@ float noise(vec2 p){ vec2 i=floor(p), f=fract(p); vec2 u=f*f*(3.0-2.0*f);
 float fbm(vec2 p){ float v=0.0, a=0.5; for(int i=0;i<5;i++){ v+=a*noise(p); p*=2.03; a*=0.5; } return v; }`;
 
 const GradeShader = {
-  uniforms: { tDiffuse: { value: null }, uVig: { value: 0.32 }, uTime: { value: 0 }, uFade: { value: 0 }, uFlash: { value: 0 }, uFlashCol: { value: new THREE.Vector3(1, 0.95, 0.86) }, uWarm: { value: 1 }, uAberr: { value: 0.0012 } },
+  uniforms: { tDiffuse: { value: null }, uVig: { value: 0.32 }, uTime: { value: 0 }, uFade: { value: 0 }, uFlash: { value: 0 }, uFlashCol: { value: new THREE.Vector3(1, 0.95, 0.86) }, uWarm: { value: 1 }, uAberr: { value: 0.0006 }, uSharp: { value: 0.32 }, uTexel: { value: new THREE.Vector2(1 / 1920, 1 / 1080) } },
   vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
-  fragmentShader: `uniform sampler2D tDiffuse; uniform float uVig, uFade, uFlash, uWarm, uAberr; uniform vec3 uFlashCol; varying vec2 vUv;
+  fragmentShader: `uniform sampler2D tDiffuse; uniform float uVig, uFade, uFlash, uWarm, uAberr, uSharp; uniform vec2 uTexel; uniform vec3 uFlashCol; varying vec2 vUv;
     void main(){
       vec2 d = vUv - 0.5;
       float r2 = dot(d, d);
@@ -26,6 +26,10 @@ const GradeShader = {
       c.r = texture2D(tDiffuse, vUv + d * uAberr * r2 * 4.0).r;
       c.g = texture2D(tDiffuse, vUv).g;
       c.b = texture2D(tDiffuse, vUv - d * uAberr * r2 * 4.0).b;
+      // gentle unsharp mask: restores micro-contrast lost to MSAA resolve and post blurs
+      vec3 nb = (texture2D(tDiffuse, vUv + vec2(uTexel.x, 0.0)).rgb + texture2D(tDiffuse, vUv - vec2(uTexel.x, 0.0)).rgb
+               + texture2D(tDiffuse, vUv + vec2(0.0, uTexel.y)).rgb + texture2D(tDiffuse, vUv - vec2(0.0, uTexel.y)).rgb) * 0.25;
+      c = max(c + (c - nb) * uSharp, 0.0);
       float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
       vec3 shadowTint = vec3(0.92, 0.97, 1.08), highTint = vec3(1.06, 1.0, 0.92);
       c *= mix(shadowTint, highTint, smoothstep(0.15, 0.85, l) * uWarm + (1.0 - uWarm) * 0.5);
@@ -67,7 +71,9 @@ export class World {
     comp.addPass(this.bloom);
     comp.addPass(new OutputPass());
     this.grade = new ShaderPass(GradeShader);
+    this.grade.uniforms.uTexel.value.set(1 / W, 1 / H);
     comp.addPass(this.grade);
+    this.mblur.mat.uniforms.uMaxPx.value = 14 * (W / 1920);
   }
 
   buildSky() {
@@ -151,7 +157,7 @@ export class World {
     const mat = new THREE.MeshPhysicalMaterial({ map: this.plazaTexture(), roughness: 0.5, metalness: 0, clearcoat: 0.35, clearcoatRoughness: 0.35, envMapIntensity: 0.45 });
     const plaza = new THREE.Mesh(new THREE.CircleGeometry(1400, 160), mat);
     plaza.rotation.x = -Math.PI / 2; plaza.receiveShadow = true; this.scene.add(plaza);
-    const rim = new THREE.Mesh(new THREE.TorusGeometry(1400, 7, 16, 256), new THREE.MeshStandardMaterial({ color: 0xffc46e, emissive: 0xffa640, emissiveIntensity: 1.6, roughness: 0.3 }));
+    const rim = (this.rim = new THREE.Mesh(new THREE.TorusGeometry(1400, 7, 16, 256), new THREE.MeshStandardMaterial({ color: 0xffc46e, emissive: 0xffa640, emissiveIntensity: 1.6, roughness: 0.3 })));
     rim.rotation.x = -Math.PI / 2; rim.position.y = 2; this.scene.add(rim);
     const side = new THREE.Mesh(new THREE.CylinderGeometry(1400, 1380, 50, 160, 1, true), new THREE.MeshStandardMaterial({ color: 0x151a4a, roughness: 0.6 }));
     side.position.y = -25; this.scene.add(side);
@@ -177,14 +183,14 @@ export class World {
     const dust = new THREE.Points(g, m); dust.userData.noDepth = true; dust.renderOrder = 20; this.scene.add(dust);
     // soft god rays from the sun, billboarded fans behind the library
     const rayMat = new THREE.ShaderMaterial({
-      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, uniforms: { ...this.uni, uA: { value: 1 } }, fog: false,
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, uniforms: { ...this.uni, uA: { value: 1 }, uTint: { value: new THREE.Color(1, 0.78, 0.5) } }, fog: false,
       vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
-      fragmentShader: `varying vec2 vUv; uniform float uTime; uniform float uA; ${NOISE}
+      fragmentShader: `varying vec2 vUv; uniform float uTime; uniform float uA; uniform vec3 uTint; ${NOISE}
         void main(){ float x = vUv.x - 0.5; float beams = 0.0;
           for (int i=0;i<7;i++){ float fi = float(i); float cx = sin(fi*12.9+uTime*0.05)*0.35; float w = 0.02 + 0.03*fract(fi*0.37);
             beams += exp(-pow((x - cx*(1.0-vUv.y*0.6))/w, 2.0)) * (0.5+0.5*sin(uTime*0.4+fi)); }
           float fade = smoothstep(0.0, 0.25, vUv.y) * (1.0 - smoothstep(0.55, 1.0, vUv.y));
-          gl_FragColor = vec4(vec3(1.0,0.78,0.5) * beams * fade * 0.10 * uA, 1.0); }`,
+          gl_FragColor = vec4(uTint * beams * fade * 0.10 * uA, 1.0); }`,
     });
     this.rayMat = rayMat;
     const rays = new THREE.Mesh(new THREE.PlaneGeometry(5200, 2600), rayMat);
@@ -200,6 +206,16 @@ export class World {
     this.grade.uniforms.uFade.value = fade; this.grade.uniforms.uFlash.value = flash; this.grade.uniforms.uVig.value = vig;
     this.renderer.toneMappingExposure = exposure;
     this.rayMat.uniforms.uA.value = rays;
+  }
+  // act light: the environment leans toward the pillar colour (backlight, plaza rim, sun rays)
+  setAccent(color, amount = 0) {
+    const k = Math.min(1, Math.max(0, amount));
+    if (!this._base) this._base = { sun: this.sun.color.clone(), rim: this.rim.material.emissive.clone(), ray: new THREE.Color(1, 0.78, 0.5), hemi: this.hemi.color.clone() };
+    const B = this._base;
+    this.sun.color.copy(B.sun).lerp(color, k * 0.45); // tint only: brighter backlight blew out its floor glint
+    this.rim.material.emissive.copy(B.rim).lerp(color, k); this.rim.material.emissiveIntensity = 1.6 + k * 0.9;
+    this.rayMat.uniforms.uTint.value.copy(B.ray).lerp(color, k * 0.6);
+    this.hemi.color.copy(B.hemi).lerp(color, k * 0.18);
   }
   // swap the rendered scene (studio ident uses its own stage, lights and environment)
   useScene(s) { this.renderPass.scene = s; this.dof.scene = s; this.mblur.scene = s; }

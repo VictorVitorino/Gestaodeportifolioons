@@ -47,20 +47,26 @@ S.push(['m_zip_file', { ...afterTime, mode: 1, file: 'SKILL.zip' }]);
 S.push(['m_next_press', { ...afterTime, mode: 1, file: 'SKILL.zip', press: 1 }]);
 S.push(['m_step2', { ...afterTime, mode: 1, file: 'SKILL.zip', stepP: 1 }]);
 {
-  const pg = await page(2.2);
+  // 3.2x: the modal fills the frame in the close-ups, so its text must hold at 1080p
+  const pg = await page(3.2);
   for (const [name, st] of S) manifest[name] = await snap(pg, name, 'modal', st);
   // field rects (css px) for camera targeting
   manifest._modalRects = await pg.evaluate(() => { const m = window._modal; return m.fieldRects(); });
   await pg.close();
 }
 {
-  const pg = await page(2);
+  const pg = await page(4);
   for (let i = 0; i < 8; i++) manifest[`card_${i}`] = await snap(pg, `card_${i}`, 'card', i);
   manifest.card_new = await snap(pg, 'card_new', 'newcard');
   manifest.libhead_441 = await snap(pg, 'libhead_441', 'libhead', '441');
   manifest.libhead_442 = await snap(pg, 'libhead_442', 'libhead', '442');
   manifest.rank = await snap(pg, 'rank', 'rank');
   manifest.sharebtn = await snap(pg, 'sharebtn', 'sharebtn');
+  await pg.close();
+}
+{
+  // ranking cards are repainted live while their points count up: keep them lighter
+  const pg = await page(2.5);
   for (const a of [{ rank: 1, code: 'DTS', name: 'DTS' }, { rank: 2, code: 'MA_SERVICES', name: 'M&amp;A Services' }, { rank: 3, code: 'OPERATIONS', name: 'Operations' }]) manifest[`rank_${a.rank}`] = await snap(pg, `rank_${a.rank}`, 'rankcard', a);
   manifest._rankNum = await pg.evaluate(() => { const c = document.querySelector('.rkc'), n = c.querySelector('[data-num]'); const a = c.getBoundingClientRect(), b = n.getBoundingClientRect(); return { x: b.left - a.left, y: b.top - a.top, w: b.width, h: b.height, W: a.width, H: a.height }; });
   await pg.close();

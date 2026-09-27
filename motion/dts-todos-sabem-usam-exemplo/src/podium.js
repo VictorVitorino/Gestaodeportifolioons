@@ -71,14 +71,14 @@ export function buildPodium({ scene, imgs, manifest }) {
   const medal2 = medal(); root.add(medal2);
 
   // confetti: instanced paper chips from two cannons
-  const N = 320, R = rng(31);
+  const N = 150, R = rng(31);
   const cGeo = new THREE.PlaneGeometry(11, 7);
   const cMat = new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, roughness: 0.55, metalness: 0.1, emissive: 0xffffff, emissiveIntensity: 0.12 });
   const conf = new THREE.InstancedMesh(cGeo, cMat, N); conf.frustumCulled = false; root.add(conf);
-  const pal = [0x3d8bff, 0xff8a1f, 0xf2b544, 0xffffff, 0x0085ca, 0xff5d7a];
+  const pal = [0x3d8bff, 0xff8a1f, 0xf2b544, 0xffffff, 0x0085ca, 0xffd27a];
   const seeds = Array.from({ length: N }, (_, i) => {
     const side = i % 2 ? 1 : -1; const c = new THREE.Color(pal[Math.floor(R() * pal.length)]); conf.setColorAt(i, c);
-    return { side, t0: 72.9 + R() * 0.25, vx: -side * (120 + R() * 420), vy: 520 + R() * 520, vz: (R() - 0.3) * 260, spin: 4 + R() * 9, ax: R() * 6, ay: R() * 6, ph: R() * 6, life: 2.6 + R() * 1.4 };
+    return { side, t0: 72.9 + R() * 0.3, vx: -side * (100 + R() * 300), vy: 420 + R() * 360, vz: (R() - 0.3) * 200, spin: 2.5 + R() * 4.5, ax: R() * 6, ay: R() * 6, ph: R() * 6, life: 2.8 + R() * 1.4 };
   });
   conf.instanceColor.needsUpdate = true;
   const M = new THREE.Matrix4(), Q = new THREE.Quaternion(), EU = new THREE.Euler(), P = new THREE.Vector3(), S1 = new THREE.Vector3(1, 1, 1), S0 = new THREE.Vector3(0.0001, 0.0001, 0.0001);
@@ -97,41 +97,42 @@ export function buildPodium({ scene, imgs, manifest }) {
     const sink = E.inBack(seg(t, 75.9, 76.6));
     blocks.forEach((b) => {
       const u = seg(t, b.a.t, b.a.t + (b.a.rank === 1 ? 1.0 : 0.8));
-      const y = -(b.a.h + 40) * (1 - E.outBack(u, b.a.rank === 1 ? 2.2 : 1.6)) - sink * (b.a.h + 60);
+      const y = -(b.a.h + 40) * (1 - E.outBack(u, b.a.rank === 1 ? 1.3 : 1.15)) - sink * (b.a.h + 60);
       b.g.position.y = y; b.g.visible = u > 0;
       { const kk = clamp(1 - Math.abs(y) / 90); b.aoM.visible = u > 0 && kk > 0.01; b.aoM.material.opacity = 0.6 * kk; }
       const land = pulse(t, b.a.t + (b.a.rank === 1 ? 0.55 : 0.45), 0.03, 0.2) * Math.cos((t - b.a.t) * 18);
-      b.g.scale.set(1 + land * 0.05, 1 - land * 0.07, 1 + land * 0.05);
+      b.g.scale.set(1 + land * 0.025, 1 - land * 0.035, 1 + land * 0.025);
       const win = b.a.rank === 1 ? envl(t, 72.8, 73.1, 75.4, 76.0) : 0;
-      b.trim.material.emissiveIntensity = 1.6 + win * 3 + pulse(t, b.a.t + 0.5, 0.05, 0.5) * 2;
-      b.glow.intensity = (b.a.rank === 1 ? win * 3.2e4 : 0) + pulse(t, b.a.t + 0.5, 0.05, 0.6) * 1.2e4;
+      b.trim.material.emissiveIntensity = 1.6 + win * 2.4 + pulse(t, b.a.t + 0.5, 0.1, 0.6) * 1.4;
+      b.glow.intensity = (b.a.rank === 1 ? win * 2.8e4 : 0) + pulse(t, b.a.t + 0.5, 0.1, 0.7) * 0.9e4;
       b.glow.visible = b.glow.intensity > 50; // inactive lights cost every lit fragment
       const c0 = b.a.t + 0.45, c1 = c0 + (b.a.rank === 1 ? 1.0 : 0.85);
       const v = Math.round(b.a.pts * E.outCubic(seg(t, c0, c1)));
       if (v !== b.num.v) { b.num.v = v; b.num.paint(v); }
     });
     // trophies: #3 drops in, #2 medal spins in, #1 gold cup lands with squash
+    // trophies are lowered into place (ease out, one soft settle) instead of bouncing
     const drop = (obj, k, t0, h0 = 420, spin = 0) => {
-      const tp = topOf(k); const u = seg(t, t0, t0 + 0.55);
+      const tp = topOf(k); const u = seg(t, t0, t0 + 0.75);
       obj.visible = t > t0;
-      const y = tp[1] + h0 * (1 - E.outBounce(u));
-      const sq = pulse(t, t0 + 0.3, 0.03, 0.14) * Math.cos((t - t0 - 0.3) * 22);
+      const y = tp[1] + h0 * (1 - E.outCubic(u));
+      const sq = pulse(t, t0 + 0.7, 0.05, 0.16) * Math.cos((t - t0 - 0.7) * 16) * 0.4;
       obj.position.set(tp[0], y, tp[2]); obj.rotation.set(0, spin * (1 - E.outCubic(u)) + Math.sin(t * 1.2 + k) * 0.12, 0);
       obj.userData.s = sq;
     };
-    drop(trophy3, 2, 70.0, 380, 3); trophy3.scale.set(0.72 * (1 + trophy3.userData.s * 0.12), 0.72 * (1 - trophy3.userData.s * 0.16), 0.72 * (1 + trophy3.userData.s * 0.12));
-    drop(medal2, 0, 70.95, 360, 6); medal2.position.y += 58; medal2.rotation.y += Math.sin(t * 0.9) * 0.6;
-    drop(trophy1, 1, 72.7, 520, 4); trophy1.scale.set(0.95 * (1 + trophy1.userData.s * 0.16), 0.95 * (1 - trophy1.userData.s * 0.22), 0.95 * (1 + trophy1.userData.s * 0.16));
+    drop(trophy3, 2, 70.0, 300, 1.2); trophy3.scale.set(0.72 * (1 + trophy3.userData.s * 0.12), 0.72 * (1 - trophy3.userData.s * 0.16), 0.72 * (1 + trophy3.userData.s * 0.12));
+    drop(medal2, 0, 70.95, 300, 2.0); medal2.position.y += 58; medal2.rotation.y += Math.sin(t * 0.9) * 0.25;
+    drop(trophy1, 1, 72.7, 380, 1.6); trophy1.scale.set(0.95 * (1 + trophy1.userData.s * 0.16), 0.95 * (1 - trophy1.userData.s * 0.22), 0.95 * (1 + trophy1.userData.s * 0.16));
     // cones sweep, then converge on #1
     const conv = E.inOutCubic(seg(t, 72.3, 72.9)), aC = envl(t, 69.1, 69.8, 75.6, 76.2);
     cones.forEach((c, k) => {
       const base = [(k - 1) * 520, 1060, Z - 60];
-      const sweep = Math.sin(t * 1.3 + k * 2.1) * 260;
+      const sweep = Math.sin(t * 0.7 + k * 2.1) * 160;
       const tgt = [lerp(AREAS[[0, 1, 2][k]].x + sweep, 0, conv), 0, Z];
       c.position.set((base[0] + tgt[0]) / 2, (base[1] + tgt[1]) / 2, (base[2] + tgt[2]) / 2);
       const dir = new THREE.Vector3(base[0] - tgt[0], base[1] - tgt[1], base[2] - tgt[2]).normalize();
       c.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
-      c.material.uniforms.uA.value = aC * (0.7 + 0.3 * conv) * (1 - sink);
+      c.material.uniforms.uA.value = aC * (0.55 + 0.3 * conv) * (1 - sink);
     });
     spot.intensity = envl(t, 72.8, 73.0, 75.6, 76.2) * 6e5; spot.visible = spot.intensity > 50;
     // confetti
@@ -139,14 +140,14 @@ export function buildPodium({ scene, imgs, manifest }) {
       const s = seeds[i], dt = t - s.t0;
       if (dt < 0 || dt > s.life) { M.compose(P.set(0, -999, 0), Q.identity(), S0); conf.setMatrixAt(i, M); continue; }
       const drag = (1 - Math.exp(-1.6 * dt)) / 1.6;
-      P.set(s.side * 470 + s.vx * drag + Math.sin(dt * 3 + s.ph) * 26, 40 + s.vy * drag - 130 * dt * dt * 0.9, Z + 40 + s.vz * drag);
+      P.set(s.side * 470 + s.vx * drag + Math.sin(dt * 2.2 + s.ph) * 22, 40 + s.vy * drag - 105 * dt * dt, Z + 40 + s.vz * drag);
       if (P.y < 2) P.y = 2;
-      EU.set(s.ax + dt * s.spin, s.ay + dt * s.spin * 0.7, Math.sin(dt * 5 + s.ph)); Q.setFromEuler(EU);
+      EU.set(s.ax + dt * s.spin, s.ay + dt * s.spin * 0.7, Math.sin(dt * 3 + s.ph)); Q.setFromEuler(EU);
       M.compose(P, Q, S1); conf.setMatrixAt(i, M);
     }
     conf.instanceMatrix.needsUpdate = true;
     // dust puffs on landings
-    if (sparksArr) blocks.forEach((b, k) => burst(sparksArr, t, b.a.t + 0.45, [b.a.x, 10, Z + D / 2], { n: 26, seed: 40 + k, speed: 260, life: 0.8, up: 0.2 }));
+    if (sparksArr) blocks.forEach((b, k) => burst(sparksArr, t, b.a.t + 0.45, [b.a.x, 10, Z + D / 2], { n: 12, seed: 40 + k, speed: 170, life: 0.8, up: 0.2 }));
   }
   // world-space anchors for tracked HUD graphics
   const cardPt = (k, u, v) => { const b = blocks[k]; return [b.a.x + (u - 0.5) * CW, b.g.position.y + b.a.h - 16 - v * CH, Z + D / 2 + 6]; };

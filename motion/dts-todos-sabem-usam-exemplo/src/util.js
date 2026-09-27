@@ -91,3 +91,48 @@ export const env = (t, a, b, c, d, ein = 'outCubic', eout = 'inCubic') =>
   t < a || t > d ? 0 : t < b ? E[ein]((t - a) / (b - a)) : t <= c ? 1 : 1 - E[eout]((t - c) / (d - c));
 
 export const deg = Math.PI / 180;
+
+// Monotone time remap (Fritsch–Carlson cubic Hermite) through [newTime, storyTime] keys.
+// Lets the film play its original choreography slower, ease into holds and breathe,
+// without any speed discontinuity (no jolts when a hold starts or ends).
+export function warp(keys) {
+  const n = keys.length, x = keys.map((k) => k[0]), y = keys.map((k) => k[1]);
+  const d = [], m = new Array(n).fill(0);
+  for (let i = 0; i < n - 1; i++) d.push((y[i + 1] - y[i]) / (x[i + 1] - x[i]));
+  m[0] = d[0]; m[n - 1] = d[n - 2];
+  for (let i = 1; i < n - 1; i++) m[i] = d[i - 1] * d[i] <= 0 ? 0 : (d[i - 1] + d[i]) / 2;
+  for (let i = 0; i < n - 1; i++) {
+    if (d[i] === 0) { m[i] = 0; m[i + 1] = 0; continue; }
+    const a = m[i] / d[i], b = m[i + 1] / d[i], s = a * a + b * b;
+    if (s > 9) { const tau = 3 / Math.sqrt(s); m[i] = tau * a * d[i]; m[i + 1] = tau * b * d[i]; }
+  }
+  return (t) => {
+    if (t <= x[0]) return y[0] + (t - x[0]) * m[0];
+    if (t >= x[n - 1]) return y[n - 1] + (t - x[n - 1]) * m[n - 1];
+    let i = 0; while (i < n - 2 && t > x[i + 1]) i++;
+    const h = x[i + 1] - x[i], u = (t - x[i]) / h, u2 = u * u, u3 = u2 * u;
+    return (2 * u3 - 3 * u2 + 1) * y[i] + (u3 - 2 * u2 + u) * h * m[i] + (-2 * u3 + 3 * u2) * y[i + 1] + (u3 - u2) * h * m[i + 1];
+  };
+}
+
+// Camera path through [time, [x,y,z]] keys: monotone cubic Hermite per axis
+// (Steffen). Velocity is continuous in time (no speed jumps at keys), the path
+// never overshoots a key on any axis, and it starts and ends at rest.
+export function path(keys, t) {
+  const n = keys.length;
+  if (t <= keys[0][0]) return keys[0][1].slice();
+  if (t >= keys[n - 1][0]) return keys[n - 1][1].slice();
+  let i = 0; while (i < n - 2 && t > keys[i + 1][0]) i++;
+  const slope = (j, k) => (keys[j + 1][1][k] - keys[j][1][k]) / (keys[j + 1][0] - keys[j][0]);
+  const tan = (j, k) => {
+    if (j === 0 || j === n - 1) return 0;
+    const s0 = slope(j - 1, k), s1 = slope(j, k);
+    if (s0 * s1 <= 0) return 0;
+    const h0 = keys[j][0] - keys[j - 1][0], h1 = keys[j + 1][0] - keys[j][0];
+    const p = (s0 * h1 + s1 * h0) / (h0 + h1);
+    return Math.sign(s0) * Math.min(2 * Math.abs(s0), 2 * Math.abs(s1), Math.abs(p));
+  };
+  const h = keys[i + 1][0] - keys[i][0], u = (t - keys[i][0]) / h, u2 = u * u, u3 = u2 * u;
+  const a = 2 * u3 - 3 * u2 + 1, b = u3 - 2 * u2 + u, c = -2 * u3 + 3 * u2, d = u3 - u2;
+  return keys[i][1].map((y0, k) => a * y0 + b * h * tan(i, k) + c * keys[i + 1][1][k] + d * h * tan(i + 1, k));
+}
