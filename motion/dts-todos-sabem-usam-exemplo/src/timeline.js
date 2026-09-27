@@ -334,9 +334,11 @@ export function buildFilm(ctx) {
   // v7: the pan settles a little high and wide on the pillar (spHi: the word sits clear below the
   // opening title, still up after the cut), drifts in while the title is read, then cranes down onto
   // the pillar's usual framing (sp) once the title has left, and the lockup rises
+  // (the camera keeps descending like the clip's pan and looks a little higher instead, so its speed
+  // and direction at the cut match the clip: see the PACE key at story 10.455)
   const VU = st.map((x, i) => x - sp[i]).map((x, _, v) => x / Math.hypot(...v));
-  const HI = window.__hi || [68, 90, 12]; // [raise, pull back, drift in] in world units
-  const spHi = sp.map((x, i) => x - VU[i] * HI[1] + (i === 1 ? HI[0] : 0)), stHi = off3(st, [0, HI[0], 0]);
+  const HI = window.__hi || [0, 90, 12, 68]; // [raise, pull back, drift in, look up] in world units
+  const spHi = sp.map((x, i) => x - VU[i] * HI[1] + (i === 1 ? HI[0] : 0)), stHi = off3(st, [0, HI[3], 0]);
   const spHi2 = spHi.map((x, i) => x + VU[i] * HI[2]);
   const CAM_P = [
     [9.4, HANDOFF.pre[0]], [10, HANDOFF.at[0]], [10.9, spHi], [11.0, spHi2],

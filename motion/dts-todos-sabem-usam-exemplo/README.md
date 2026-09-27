@@ -20,7 +20,8 @@ A v7 é o mesmo filme, com o mesmo conteúdo e a mesma ordem, **reritmado para l
 texto sai da tela antes de ser lido: cada legenda fica, no mínimo, 0,7 s + o tempo de ler seus caracteres a
 13,5 por segundo (e nunca menos de 2,8 s). Câmera, zoom e troca de tela esperam a leitura terminar. A
 passagem *Como DTS compartilha conhecimento* → *Todos Sabem* ficou contínua: o título atravessa o corte
-sobre o pilar, sai por máscara e só então a câmera desce até o pilar. O tour (métodos e skills) e a
+sobre o pilar, sai por máscara e só então a câmera desce até o pilar (no corte, a câmera 3D mantém a
+velocidade do giro do clipe). O tour (métodos e skills) e a
 etapa Detalhes ganharam tempo próprio, com digitação em ritmo natural (ver *O que mudou da v6 para a v7*).
 
 | Entrega | Arquivo |
@@ -60,7 +61,7 @@ filme: por isso ele termina na mesma praça, com o emblema, o título e o giro a
 | Abertura | o vídeo abre direto no Fabio (fade curto do preto); a vinheta A&M foi retirada |
 | Texto antigo no clipe (*Como **a** DTS…*) | coberto por uma **placa de vidro** com o título correto (*Como DTS compartilha conhecimento*), no mesmo lugar e no mesmo instante em que o texto antigo sobe |
 | HUD antigo gravado no clipe | um **push-in lento** (×1,12, 5,9–7,1 s) tira o HUD antigo do quadro antes que ele apareça; o HUD do filme entra no mesmo ponto |
-| Clipe → filme 3D | corte aos **9,5 s do clipe**, no meio do giro de câmera, depois que o Fabio sai do quadro. A câmera do filme começa **na pose resolvida a partir do último quadro do clipe** (pódio, letra D do emblema e aro dourado alinhados) e continua o movimento, desacelerando até assentar **um pouco acima do pilar**; as letras de *Todos Sabem* seguem se formando como no clipe; um brilho quente carrega o halo do emblema do clipe por meio segundo |
+| Clipe → filme 3D | corte aos **9,5 s do clipe**, no meio do giro de câmera, depois que o Fabio sai do quadro. A câmera do filme começa **na pose resolvida a partir do último quadro do clipe** (pódio, letra D do emblema e aro dourado alinhados) e continua o movimento **na mesma velocidade e direção do giro do clipe**, desacelerando até assentar num enquadramento um pouco mais aberto sobre o pilar (olhando um pouco acima dele); as letras de *Todos Sabem* seguem se formando como no clipe; um brilho quente carrega o halo do emblema do clipe por meio segundo |
 | Título → pilar (v7) | o título *Como DTS compartilha conhecimento* **não sai no corte**: fica ~5,8 s legível (2 s no clipe + 3,8 s sobre o pilar, que se forma logo abaixo dele). Depois sai em cascata (subtítulo, palavras recolhidas pela máscara, placa de vidro); a câmera então desce até o pilar e o *Pilar 01* sobe. Na trilha, o acorde do impacto do clipe sustenta a leitura, passa ao IV quando a câmera desce e resolve quando o *Pilar 01* assenta |
 | Cor | o clipe recebe uma correção suave (sombras menos magenta) e nitidez leve (`tools/intro.sh`) para casar com o 3D |
 | Som | a entrada mantém o **som original do clipe** (o estalo de dedo aos 3 s e o DTS surgindo). O som **não é cortado no corte de imagem**: a música do clipe segue por cima dos primeiros quadros do filme até o seu próprio impacto (10 s, um acorde de Ré maior com sétima), que ressoa na mesma reverberação do filme, e as cordas da trilha nascem de dentro desse impacto, no mesmo acorde, sustentando o pilar Todos Sabem. Nenhum elemento rítmico da trilha entra antes de a música do clipe terminar; o nível do clipe é igualado ao da trilha |

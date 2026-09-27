@@ -5,7 +5,7 @@ import json, os, re
 HERE = os.path.dirname(os.path.abspath(__file__))
 SEGS = [
     # opening: the cut from Fabio's clip, the title read over the pillar, then the pillar and its lockup
-    (10.0, 0), (10.9, 2.2), (11.0, 1.7), (11.2, 1.4), (11.5, 4.3),
+    (10.0, 0), (10.455, 0.7), (10.9, 1.5), (11.0, 1.7), (11.2, 1.4), (11.5, 4.3),   # 10.455: the clip's pan speed at the cut
     # Todos Sabem: the Início frame, the FLOWS tour, the library ring (441), the six steps announced
     (12.0, 1.0), (12.9, 2.4), (15.0, 3.8), (15.0, 14.2), (15.9, 1.0), (18.6, 3.4), (20.4, 2.6), (22.4, 2.6), (23.4, 3.0), (24.0, 1.0),
     # Todos Usam: the pillar, then the six steps (name anatomy and Detalhes are inserts)
