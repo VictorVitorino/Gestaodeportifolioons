@@ -28,7 +28,7 @@ TOUR, NAME, DET = INS
 beats = [(3.4, 'Vinheta A&M: trilhas de luz no palco', AMB), (5.3, 'O monograma nasce da luz', AMB), (8.2, 'Alvarez & Marsal apresenta', AMB),
          (G(7.9), 'Como DTS compartilha conhecimento', None), (G(11.4), 'Pilar 01 · Todos Sabem', BLUE), (G(14.0), 'Início do FLOWS', BLUE),
          (TOUR + 1.6, 'Tour: Catálogo de Métodos', BLUE), (TOUR + 4.4, 'Os métodos de DTS', BLUE), (TOUR + 8.8, 'Biblioteca: cada skill com sua pontuação', BLUE),
-         (G(17.8), '441 skills na Biblioteca', BLUE), (G(25.3), 'Pilar 02 · Todos Usam', ORANGE), (G(28.0), 'Passo 1 · Compartilhar Skill', ORANGE),
+         (G(19.6), '441 skills na Biblioteca', BLUE), (G(25.3), 'Pilar 02 · Todos Usam', ORANGE), (G(28.0), 'Passo 1 · Compartilhar Skill', ORANGE),
          (G(34.0), 'Passo 2 · o nome digitado', ORANGE), (NAME + 4.6, 'Prefixo · Service Line · Entregável', ORANGE), (G(40.0), 'Passo 3 · Flows / Claude', ORANGE),
          (G(45.3), 'Passo 4 · modelo testado', ORANGE), (G(51.5), 'Passo 5 · arquivos → ZIP', ORANGE), (DET + 2.3, 'Passo 6 · Detalhes: Template', ORANGE),
          (DET + 4.0, 'Área responsável: DTS — Performance', ORANGE), (DET + 7.9, 'Co-responsáveis', ORANGE), (DET + 11.3, 'Descrição: entregável e resultado', ORANGE),
