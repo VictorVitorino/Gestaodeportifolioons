@@ -268,7 +268,8 @@ for k, t0 in enumerate([1.2, 1.35, 1.55, 1.75, 1.95]):   # light trails gliding 
 cue(2.05, bell(midi(81), 3.0, 1.2, 2.0), 0.04); cue(2.1, sub_boom(2.4, 60, 34), 0.1)   # the ring forms
 cue(2.45, swell(2.4, 120, 700), 0.1)                                                      # the mark materializes
 for m in [50, 57, 62, 66, 69]: add(mus, 2.4, strings(midi(m), 6.6, 0.38) * env_adsr(int(6.6 * SR), 2.2, 0.8, 0.85, 2.2), 0.032 if m > 55 else 0.05, pan=(m % 5 - 2) / 5)
-for k, (tt, m) in enumerate([(4.75, 86), (4.95, 90), (5.15, 93)]): cue(tt, bell(midi(m), 2.6, 0.9, 2.0), 0.045, 0.3 + k * 0.1)   # A, &, M
+cue(4.7, whoosh(1.3, 3200, 1100, 0.5, 0.8), 0.03, 0.35)                                                  # a line of light runs down the letters
+for k, (tt, m) in enumerate([(5.0, 86), (5.3, 90), (5.62, 93)]): cue(tt, bell(midi(m), 2.6, 0.9, 2.0), 0.045, 0.3 + k * 0.1)   # A, &, M
 cue(5.4, whoosh(1.6, 2500, 6000, 0.5, 0.7), 0.035, 0.2); cue(5.5, shimmer(1.6, 7), 0.05)            # light sweep
 for m in [55, 59, 62, 66, 71]: add(mus, 5.8, strings(midi(m), 3.4, 0.4) * env_adsr(int(3.4 * SR), 0.8, 0.5, 0.8, 1.6), 0.034, pan=(m % 5 - 2) / 5)   # Gmaj7 under the type
 for m in [50, 57, 62, 66, 69, 74]: add(mus, 7.0, strings(midi(m), 2.8, 0.42) * env_adsr(int(2.8 * SR), 0.6, 0.4, 0.85, 1.4), 0.034, pan=(m % 5 - 2) / 5)   # resolve (D)

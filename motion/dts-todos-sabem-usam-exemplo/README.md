@@ -18,7 +18,7 @@ refinado em ritmo, câmera, motion design, abertura A&M e nitidez.
 
 | Tempo | Ato | Cena | Motion graphics |
 |---|---|---|---|
-| 0:00 | **Vinheta A&M** | Palco azul-marinho profundo: constelação de dados ao fundo, partículas suaves, trilhas de luz (azuis e uma laranja) deslizam pelo piso e formam um anel; a grade digital se espalha e o monograma **nasce da luz** (faixa de varredura no chão), as letras A&M surgem por dissolução e uma única varredura de luz cruza a marca | letterbox 2.39:1, *Alvarez & Marsal · Digital & Technology Services apresenta* com revelação por máscara e fio azul/laranja; a composição completa **repousa ~2 s** antes do fade |
+| 0:00 | **Vinheta A&M** | Palco azul-marinho profundo: constelação de dados ao fundo, partículas suaves, trilhas de luz (azuis e uma laranja) deslizam pelo piso e formam um anel; a grade digital se espalha e o monograma **nasce da luz** (faixa de varredura no chão), uma linha de luz desce pelas letras A, & e M e uma única varredura de luz cruza a marca | letterbox 2.39:1, *Alvarez & Marsal · Digital & Technology Services apresenta* com revelação por máscara e fio azul/laranja; a composição completa **repousa ~2 s** antes do fade |
 | 0:10 | Abertura | Céu dourado, praça circular, o emblema **DTS** pousa; as barras do letterbox recolhem | *Como a DTS compartilha conhecimento* (palavras sobem de máscaras) |
 | 0:22 | **Todos Sabem** (azul) | Câmera viaja até o pilar, assenta e **segura 4 s**: um brilho percorre as letras e a luz do ambiente se tinge de azul | *Pilar 01 · Onde está o conhecimento*, parado durante a leitura |
 | 0:29 | | Tela Início do FLOWS em moldura 3D; anel de **441** skills; três skills em destaque | legendas em placa translúcida com sublinhado desenhado, contador com fio dourado |
@@ -39,7 +39,7 @@ Dados do ranking: tela *Ranking → Áreas → Todos os tempos* do FLOWS (recalc
 | Pilares | íris colorida + medalhão (≈1,5 s) | **MOVER → ASSENTAR → LER → ABSORVER → TRANSIÇÃO**: 4–5 s de quadro parado, tipografia imóvel durante a leitura, brilho nas letras e luz do ambiente na cor do pilar |
 | Câmera | Catmull-Rom com saltos de velocidade, cortes escondidos por íris e flashes, tremores | caminho **Hermite monotônico no tempo** (velocidade contínua, sem overshoot); os cortes viraram movimentos reais; sem tremores; pico ≤ ~20°/s (exceto o voo da skill, que plana) |
 | Motion graphics | estouros, íris, carimbo "batendo", marca-texto, contagens rápidas | revelações por máscara, fios desenhados, placas translúcidas, contadores suaves; nada pisca |
-| Abertura A&M | skyline sobe com quique + estrela | ambiente premium (constelação de dados, trilhas de luz, grade, partículas), marca materializada pela luz, tipografia por máscara e pausa final |
+| Abertura A&M | skyline sobe com quique + estrela | ambiente premium (constelação de dados, trilhas de luz, grade, partículas), marca e letras materializadas pela luz, tipografia por máscara e pausa final |
 | Nitidez | modal 2,2×, cards 2× | modal **3,2×** (carregado sob demanda), cards e botão **4×**; nitidez (unsharp) no grade; DOF e motion blur mais contidos (obturador ~135°) |
 | Som | trilha 96 BPM com muitos efeitos | trilha 84 BPM, mais ampla, com crescendos para cada pilar; efeitos mais raros e suaves, posicionados pela mesma curva de tempo |
 
@@ -59,7 +59,7 @@ Dados do ranking: tela *Ranking → Áreas → Todos os tempos* do FLOWS (recalc
 
 - O monograma (`tex/am_mark.svg`) é o arquivo oficial do site alvarezandmarsal.com, na versão
   vazada (branca sobre azul). No 3D ele só é extrudado e iluminado: as peças sobem pelo piso e as letras
-  aparecem por dissolução, mas a forma final mantém as proporções originais.
+  são reveladas por uma linha de luz, mas a forma final mantém as proporções originais.
 - Paleta usada na vinheta: azul A&M `#0085CA`, azul-marinho profundo e um acento laranja discreto.
 - A tipografia da marca é a Helvetica Neue LT Std (licenciada); nos textos da vinheta e da
   assinatura foi usada a Liberation Sans (OFL), de desenho equivalente.

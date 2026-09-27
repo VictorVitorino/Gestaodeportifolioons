@@ -75,8 +75,8 @@ export function buildIdent({ world, svgText, cam }) {
   bg.userData.noDepth = true; scene.add(bg);
 
   // ---------------------------------------------------------------- lights: white key, blue rim, restrained warm rim
-  const key = new THREE.SpotLight(0xffffff, 3.4e6, 0, 0.5, 0.7, 2);
-  key.position.set(-520, 1000, 900); key.target.position.set(0, 150, 0); key.castShadow = true;
+  const key = new THREE.SpotLight(0xffffff, 3.4e6, 0, 0.68, 0.55, 2); // wide enough that the A&M letters sit in full light
+  key.position.set(-520, 1000, 900); key.target.position.set(40, 150, 0); key.castShadow = true;
   key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0002; key.shadow.radius = 6; key.shadow.camera.near = 200; key.shadow.camera.far = 3200;
   scene.add(key, key.target);
   const rimL = new THREE.DirectionalLight(0x3fb4ff, 2.0); rimL.position.set(-900, 300, -700); scene.add(rimL);
@@ -179,25 +179,35 @@ export function buildIdent({ world, svgText, cam }) {
   const S = 5.2, W = 75.667, H = 66.898, DEPTH = 7.5;
   const up = [new THREE.Plane(new THREE.Vector3(0, 1, 0), 0)], down = [new THREE.Plane(new THREE.Vector3(0, -1, 0), 0)];
   const fx = { uSweep: { value: -9999 }, uShineW: { value: 60 }, uShineI: { value: 0 }, uScanI: { value: 0 }, uScanW: { value: 9 } };
-  const markMat = (base, clip, extra = {}) => {
+  // the letters are revealed by a line of light that runs down the stack, A, & then M (opaque, no fade sorting)
+  const rv = { uRevealY: { value: -10 }, uRevealOn: { value: 1 }, uRevealGlow: { value: 0 } };
+  const markMat = (base, clip, extra = {}, reveal = false) => {
     const m = new THREE.MeshPhysicalMaterial({ ...base, clippingPlanes: clip, ...extra });
     const mirror = clip === down;
     m.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, fx);
+      if (reveal) {
+        Object.assign(sh.uniforms, rv);
+        sh.fragmentShader = sh.fragmentShader.replace('#include <clipping_planes_fragment>', '#include <clipping_planes_fragment>\n if (uRevealOn > 0.5 && abs(vWP.y) < uRevealY) discard;')
+          .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n totalEmissiveRadiance += vec3(0.45, 0.82, 1.0) * exp(-pow((uRevealY - abs(vWP.y)) / 5.0, 2.0)) * uRevealGlow;');
+      }
       sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vWP;').replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvWP = (modelMatrix * vec4(transformed, 1.0)).xyz;');
-      sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vWP; uniform float uSweep, uShineW, uShineI, uScanI, uScanW;')
+      sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vWP; uniform float uSweep, uShineW, uShineI, uScanI, uScanW;' + (reveal ? ' uniform float uRevealY, uRevealOn, uRevealGlow;' : ''))
         .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
           float sd = (vWP.x + 0.55 * abs(vWP.y)) - uSweep; totalEmissiveRadiance += vec3(0.75, 0.9, 1.0) * exp(-sd*sd/(uShineW*uShineW)) * uShineI;
           totalEmissiveRadiance += vec3(0.35, 0.78, 1.0) * exp(-pow(abs(vWP.y) / uScanW, 2.0)) * uScanI;`);
       if (mirror) sh.fragmentShader = sh.fragmentShader.replace('#include <dithering_fragment>', '#include <dithering_fragment>\n gl_FragColor.rgb *= exp(-abs(vWP.y) / 110.0);');
     };
+    // same onBeforeCompile source for every variant: without a distinct key three.js would reuse the first
+    // compiled program (the mirror fade was leaking onto the letters and greying them)
+    m.customProgramCacheKey = () => `am-mark:${mirror ? 1 : 0}:${reveal ? 1 : 0}`;
     return m;
   };
   const FACE = { color: 0xf5f8fc, roughness: 0.22, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.06, envMapIntensity: 1.0 };
   const SIDE = { color: 0xbccde3, roughness: 0.3, metalness: 0.35, clearcoat: 1, clearcoatRoughness: 0.12, envMapIntensity: 1.2 };
   const faceM = markMat(FACE, up), sideM = markMat(SIDE, up), faceR = markMat(FACE, down), sideR = markMat(SIDE, down);
   // letters fade in one after another, so each gets its own (transparent) materials
-  const letterMats = () => ({ face: markMat(FACE, up, { transparent: true }), side: markMat(SIDE, up, { transparent: true }), faceR: markMat(FACE, down, { transparent: true }), sideR: markMat(SIDE, down, { transparent: true }) });
+  const LM = { face: markMat(FACE, up, {}, true), side: markMat(SIDE, up, {}, true), faceR: markMat(FACE, down, {}, true), sideR: markMat(SIDE, down, {}, true) };
   const data = new SVGLoader().parse(svgText);
   const pieces = {};
   for (const p of data.paths) {
@@ -213,7 +223,7 @@ export function buildIdent({ world, svgText, cam }) {
     const bb = geo.boundingBox, c = new THREE.Vector3(); bb.getCenter(c);
     const pivot = letter ? c.clone() : new THREE.Vector3(c.x, 0, c.z);
     geo.translate(-pivot.x, -pivot.y, -pivot.z);
-    const lm = letter ? letterMats() : null;
+    const lm = letter ? LM : null;
     const mesh = new THREE.Mesh(geo, letter ? [lm.face, lm.side] : [faceM, sideM]); mesh.castShadow = true; mesh.receiveShadow = !letter; // letters stay clean white
     const holder = new THREE.Group(); holder.position.copy(pivot); holder.add(mesh);
     pieces[id] = { holder, mesh, pivot, h: bb.max.y - bb.min.y, letter, lm };
@@ -227,7 +237,6 @@ export function buildIdent({ world, svgText, cam }) {
 
   // ---------------------------------------------------------------- choreography
   const RISE = { 'Path_40-2': 2.45, 'Path_39-2': 2.7, 'Path_41-2': 2.95 }, RISE_D = 2.1;
-  const FADE = { 'Path_36-2': 4.75, 'Path_37-2': 4.95, 'Path_38-2': 5.15 };
   const CAM_P = [[0, [-340, 150, 2800]], [3.2, [-150, 166, 2120]], [6.4, [-26, 178, 1690]], [IDENT, [0, 182, 1600]]];
   const CAM_T = [[0, [-60, 150, 0]], [3.2, [-22, 136, 0]], [6.4, [0, 116, 0]], [IDENT, [0, 112, 0]]];
   const camAt = (t) => ({ P: path(CAM_P, t), T: path(CAM_T, t) });
@@ -263,16 +272,14 @@ export function buildIdent({ world, svgText, cam }) {
         const u = E.inOutCubic(seg(t, RISE[id], RISE[id] + RISE_D));
         p.holder.position.set(p.pivot.x, p.pivot.y - p.h * 1.01 * (1 - u), p.pivot.z);
         p.holder.visible = t > RISE[id];
-      } else { p.holder.position.copy(p.pivot); p.holder.visible = t > FADE[id]; }
+      } else { p.holder.position.copy(p.pivot); p.holder.visible = t > 4.7; }
       r.position.copy(p.holder.position); r.visible = p.holder.visible;
     });
     fx.uScanI.value = envl(t, 2.45, 2.9, 4.6, 5.8, 'outCubic', 'inOutSine') * 1.4 + 0.1 * seg(t, 5.0, 6.0);
-    // letters: a soft fade with a brief blue glow (no pop, no scale)
-    for (const id of Object.keys(FADE)) {
-      const a = FADE[id], la = E.inOutSine(seg(t, a, a + 0.9)), lm = pieces[id].lm;
-      for (const m of [lm.face, lm.side, lm.faceR, lm.sideR]) { m.opacity = la; m.depthWrite = la > 0.98; }
-      lm.face.emissive.setHex(AM_BLUE); lm.face.emissiveIntensity = envl(t, a, a + 0.5, a + 0.7, a + 1.8, 'outCubic', 'inOutSine') * 0.35;
-    }
+    // letters: a line of light runs down the stack and leaves A, & and M behind it
+    rv.uRevealY.value = lerp(200, -8, E.inOutSine(seg(t, 4.7, 5.9)));
+    rv.uRevealOn.value = t < 6.0 ? 1 : 0;
+    rv.uRevealGlow.value = envl(t, 4.7, 4.85, 5.75, 6.0, 'outCubic', 'inOutSine') * 2.2;
     // one soft sweep of light across the finished mark
     fx.uSweep.value = lerp(-560, 680, E.inOutSine(seg(t, 5.4, 6.9))); fx.uShineI.value = envl(t, 5.4, 5.8, 6.5, 6.9, 'inOutSine', 'inOutSine') * 0.75;
     rimR.intensity = E.inOutSine(seg(t, 4.2, 6.4)) * 0.85; rimR.visible = rimR.intensity > 0.01;
