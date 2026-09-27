@@ -12,7 +12,7 @@ no card publicado. O passo a passo ficou ~22% mais ágil (a digitação do nome 
 
 A **v5.1** é a v5 com um único trecho trocado: o pódio de brinquedo do ranking saiu e, no fim de *Somos
 Exemplo*, entra a **tela Ranking real do FLOWS**, reconstruída a partir do print do time e montada no próprio
-universo 3D (ver *O que mudou da v5 para a v5.1*). Os primeiros 2:21 do arquivo são os mesmos bytes de vídeo da v5.
+universo 3D (ver *O que mudou da v5 para a v5.1*). Até 2:21 o vídeo é literalmente o da v5 (mesmos pacotes H.264).
 
 | Entrega | Arquivo |
 |---|---|
@@ -60,7 +60,7 @@ pessoas o vídeo mostra apenas o nome (sem e-mail). Os textos de apoio, as notas
 | Aparecer em etapas | interface → título → posição e pontuação (barra *#12 Você*, cards que pousam e contam) → indicadores (publicações, adoções e, por último, *Novo na temporada*) — `RKT` em `src/rankfilm.js` |
 | Tempo para ler | a tela fica ~18 s em cena (o pódio ficava ~11 s): a fanfarra do *DTS nº 1* chega um compasso depois e a tela segura mais três compassos inteiros da trilha antes de o emblema voltar; closes de leitura com a câmera parada e texto entre ~19 e ~40 px na tela |
 | Mesma linguagem | iluminação, DOF, motion blur, bloom e grade do filme; cards como placas de vidro com clearcoat; halo dourado no card DTS; moldura de foco e legendas do próprio filme (as duas frases do ranking foram mantidas) |
-| Não mexer no resto | até 2:21,25 o arquivo reutiliza o fluxo H.264 da v5 sem recompressão; o áudio até 2:28,6 é o da v5; a trilha é a mesma composição (build-up com tímpanos, fanfarra, cadência final), com os efeitos do ranking refeitos para a nova animação e o nível de mixagem da v5 fixado |
+| Não mexer no resto | até 2:21,25 o arquivo reutiliza o fluxo H.264 da v5 sem recompressão (pacotes idênticos); o áudio até 2:28,6 é o master da v5; a trilha é a mesma composição (build-up com tímpanos, fanfarra, cadência final), com os efeitos do ranking refeitos para a nova animação e o nível de mixagem da v5 fixado |
 
 ## O que mudou da v4 para a v5
 
@@ -141,6 +141,11 @@ ffmpeg -framerate 24 -i out/frames/f_%05d.jpg -i audio/soundtrack.wav \
        -c:a aac -b:a 192k -ar 48000 -shortest video/DTS_Todos_Sabem_Usam_Exemplo_3D.mp4
 npm run storyboard
 ```
+
+A v5.1 foi montada sem refazer o que já estava aprovado: o fluxo H.264 da v5 foi copiado até o keyframe de 141,25 s
+(`ffmpeg -i v5.mp4 -map 0:v -c copy -frames:v 3390`), só os quadros de 141,25 s em diante foram renderizados e
+codificados com os mesmos parâmetros do x264, e os dois trechos foram unidos com o demuxer concat
+(`-f concat -auto_convert 0 ... -c copy`); o áudio é o master da v5 até 148,6 s e o da v5.1 depois (fusão de 100 ms).
 
 O render usa WebGL por software (SwiftShader): ~12 s por quadro por processo em 1080p (3 processos ≈ 4 h 40 min).
 Para refazer um trecho, apague os quadros e rode `node render.mjs frames 24 0 1 out/frames <t0> <t1>`

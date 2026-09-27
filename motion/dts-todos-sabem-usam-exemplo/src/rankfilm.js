@@ -180,10 +180,12 @@ export function buildRankScreen({ scene, imgs, manifest, world }) {
       const land = seg(u, t0, t0 + (big ? 0.95 : 0.8)), a = E.outCubic(seg(u, t0, t0 + 0.45));
       o.g.visible = a > 0.003;
       if (!o.g.visible) return;
-      const lift = (big ? 110 : 80) * (1 - E.outBack(land, 1.25));
+      // the card flies in and settles on the glass (no overshoot in depth: it would dip behind the screen)
+      const lift = (big ? 110 : 80) * (1 - E.outCubic(land));
+      const settle = 1 + 0.018 * Math.sin(Math.PI * seg(land, 0.7, 1));
       const proud = big ? 8 * E.inOutSine(seg(u, reveal - 0.1, reveal + 0.6)) : 0; // DTS stays slightly proud of the screen
       o.g.position.set(o.home.x, o.home.y - (1 - E.outCubic(land)) * 18, o.home.z + lift + proud);
-      o.g.rotation.set((1 - E.outCubic(land)) * 0.14, 0, 0);
+      o.g.rotation.set((1 - E.outCubic(land)) * 0.14, 0, 0); o.g.scale.setScalar(settle);
       o.face.material.opacity = a; o.body.material.opacity = a;
       const c0 = t0 + 0.2, c1 = big ? reveal : t0 + 1.25;
       const v = Math.round(o.c.pts * E.outCubic(seg(u, c0, c1)));
