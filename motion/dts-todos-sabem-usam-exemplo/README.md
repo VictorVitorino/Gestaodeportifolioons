@@ -1,14 +1,19 @@
-# DTS · Todos Sabem, Todos Usam, Somos Exemplo — curta 3D cinematográfico (v5)
+# DTS · Todos Sabem, Todos Usam, Somos Exemplo — curta 3D cinematográfico (v6)
 
-Curta de **2 min 53 s** (1920×1080, 24 fps) que conta o fluxo **Compartilhar Skill** do FLOWS pela lente
+Curta de **2 min 23 s** (1920×1080, 24 fps) que conta o fluxo **Compartilhar Skill** do FLOWS pela lente
 dos três pilares da **DTS — Digital & Technology Services**, da **Alvarez & Marsal**. Abre com uma
-vinheta A&M, segue o roteiro em 3 atos e fecha com o **Ranking de Áreas do FLOWS**, em que DTS é a nº 1.
+vinheta A&M e a **entrada do Fabio**, segue o roteiro em 3 atos e fecha com o **Ranking de Áreas do FLOWS**,
+em que DTS é a nº 1.
 Não há personagem: o protagonismo é da própria skill, um objeto 3D que nasce do modal, voa e pousa na Biblioteca.
 
 A v5 mantém o filme da v4 e acrescenta, a pedido do time: um **tour rápido pelo FLOWS** (Catálogo de Métodos →
 métodos de DTS → Início → Biblioteca de Skills), a **anatomia do nome da skill** (Prefixo da Área · Service Line ·
 Produto/Entregável, um item por vez), a **2ª página do formulário (Detalhes)** fiel ao FLOWS real e o **troféu 95**
 no card publicado. O passo a passo ficou ~22% mais ágil (a digitação do nome segue igual).
+
+A v6 é o mesmo filme, **~18% mais enxuto** (2:53 → 2:23), com a **entrada do Fabio** incorporada: o clipe
+enviado pelo time substitui a abertura na praça e o filme 3D assume, sem corte perceptível, durante o
+movimento final de câmera do clipe (ver *Entrada do Fabio* abaixo).
 
 | Entrega | Arquivo |
 |---|---|
@@ -20,21 +25,36 @@ no card publicado. O passo a passo ficou ~22% mais ágil (a digitação do nome 
 
 | Tempo | Ato | Cena | Motion graphics |
 |---|---|---|---|
-| 0:00 | **Vinheta A&M** | Palco azul-marinho profundo: constelação de dados, trilhas de luz que formam um anel; o monograma **nasce da luz** e uma única varredura cruza a marca | letterbox 2.39:1, *Alvarez & Marsal · Digital & Technology Services apresenta* com revelação por máscara |
-| 0:10 | Abertura | Céu dourado, praça circular, o emblema **DTS** pousa; as barras do letterbox recolhem | *Como DTS compartilha conhecimento* (palavras sobem de máscaras) |
-| 0:22 | **Todos Sabem** (azul) | Câmera viaja até o pilar, assenta e **segura 4 s** | *Pilar 01 · Onde está o conhecimento* |
-| 0:30 | | Tela **Início** do FLOWS em moldura 3D | legendas em placa translúcida com sublinhado desenhado |
-| 0:36 | **Tour do FLOWS** | Cursor abre o **Catálogo de Métodos**, destaca o filtro **DTS (5)** e a seção **DTS · 5 métodos**, volta ao **Início** pelo breadcrumb e entra na **Biblioteca de Skills**, onde as pontuações (troféus) acendem | anéis de destaque desenhados na própria tela, clique com onda, telas reais do FLOWS em dissolução |
-| 0:48 | | Anel de **441** skills; três skills em destaque | *Na Biblioteca, a Alvarez já reúne 441 skills prontas para reuso* |
-| 0:58 | **Todos Usam** (laranja) | Viagem até o pilar; luz laranja; **segura 4 s** | *Pilar 02 · O passo a passo no dia a dia* |
-| 1:07 | | Passos 1–2: botão-cápsula, teclas `[DTS]` e o nome digitado | rastreador de passos, moldura de foco |
-| 1:19 | **Anatomia do nome** | Holofote no campo; um item por vez: **[DTS] → Prefixo da Área**, **Change Management → Service Line**, **Mapa de Impactos → Produto/Entregável** | rótulos numerados com conector, cores por item, legenda com sublinhado sincronizado |
-| 1:25 | | Passos 3–5: *Flows / Claude*, tambor de modelos (*Claude Sonnet 5*), caixa `SKILL.zip` | notas presas ao 3D |
-| 1:49 | **Passo 6 · Detalhes** | *Próximo* → a 2ª página: **Template**, **Área responsável: DTS — Performance (DTS)** (lista real de especializações), co-responsáveis **Domingues, Alexandre** e **Galvao, Talita**, **Descrição** (Entregável e Resultado Final/Produto) e **Compartilhar Skill** | página com cabeçalho e rodapé fixos e corpo que rola como no FLOWS; foco que acompanha a rolagem |
-| 2:04 | | O modal vira o card **NOVA** com **troféu 95**, que plana até o anel: **442** | *Pronto: a skill está publicada na Biblioteca* · *+1 skill de DTS na Biblioteca* |
-| 2:13 | **Somos Exemplo** (dourado) | Recuo contínuo até o pilar; luz dourada; **segura ~5 s** | *Pilar 03 · Quem compartilha, lidera pelo exemplo* |
-| 2:24 | | Fios de luz; pódio do **Ranking de Áreas**: Operations 951, M&A Services 1.054 e **DTS 1.557 (1º)** | cabeçalho do ranking sob o selo DTS (sem cobrir troféus e medalhas), placa **Nº 1 entre 12 áreas** |
-| 2:45 | Encerramento | O emblema DTS volta ao centro; letterbox | **Todos Sabem. Todos Usam. Somos Exemplo.** · assinatura Alvarez & Marsal |
+| 0:00 | **Vinheta A&M** | Palco azul-marinho: trilhas de luz formam um anel; o monograma **nasce da luz** | letterbox 2.39:1, *Alvarez & Marsal · Digital & Technology Services apresenta* |
+| 0:09 | **Entrada do Fabio** | Fabio no estúdio azul: olha para a câmera, sorri, pisca e convida; a câmera recua, o **emblema DTS** surge à frente dele e o estúdio vira a praça do filme | a trilha do filme já toca, acentuando o sorriso, a piscadela, o gesto e o emblema |
+| 0:16 | | Na praça, sobre o emblema, ele apresenta a DTS | *Como DTS compartilha conhecimento* em placa de vidro · o HUD do filme aparece |
+| 0:18 | **Todos Sabem** (azul) | A câmera gira para o pilar e o **filme 3D assume no meio do movimento**; as letras do pilar se formam, a câmera assenta e **segura 3 s** | *Pilar 01 · Onde está o conhecimento* |
+| 0:26 | | Tela **Início** do FLOWS em moldura 3D | legendas em placa translúcida com sublinhado desenhado |
+| 0:29 | **Tour do FLOWS** | Catálogo de Métodos → **métodos de DTS** → Início → **Biblioteca de Skills** com as pontuações | anéis de destaque na própria tela, cursor com clique |
+| 0:39 | | Anel de **441** skills; três skills em destaque | *Na Biblioteca, a Alvarez já reúne 441 skills prontas para reuso* |
+| 0:47 | **Todos Usam** (laranja) | Viagem até o pilar; luz laranja; **segura 3 s** | *Pilar 02 · O passo a passo no dia a dia* |
+| 0:54 | | Passos 1–2: botão-cápsula, teclas `[DTS]` e o nome digitado | rastreador de passos, moldura de foco |
+| 1:05 | **Anatomia do nome** | **[DTS] → Prefixo da Área**, **Change Management → Service Line**, **Mapa de Impactos → Produto/Entregável** | rótulos numerados com conector, holofote no campo |
+| 1:10 | | Passos 3–5: *Flows / Claude*, tambor de modelos (*Claude Sonnet 5*), caixa `SKILL.zip` | notas presas ao 3D |
+| 1:32 | **Passo 6 · Detalhes** | Template, **DTS — Performance (DTS)**, co-responsáveis, descrição e **Compartilhar Skill** | página que rola como no FLOWS, foco que acompanha |
+| 1:45 | | O modal vira o card **NOVA** com **troféu 95**, que plana até o anel: **442** | *Pronto: a skill está publicada na Biblioteca* |
+| 1:52 | **Somos Exemplo** (dourado) | Recuo contínuo até o pilar; luz dourada; **segura ~3 s** | *Pilar 03 · Quem compartilha, lidera pelo exemplo* |
+| 1:59 | | Fios de luz; pódio do **Ranking de Áreas**: Operations 951, M&A Services 1.054 e **DTS 1.557 (1º)** | cabeçalho do ranking sob o selo DTS, placa **Nº 1 entre 12 áreas** |
+| 2:17 | Encerramento | O emblema DTS volta ao centro; letterbox | **Todos Sabem. Todos Usam. Somos Exemplo.** · assinatura Alvarez & Marsal |
+
+## Entrada do Fabio (v6)
+
+O clipe enviado (`media/entrada_fabio.mp4`, 10,5 s, 30 fps) foi gerado a partir de uma versão anterior do
+filme: por isso ele termina na mesma praça, com o emblema, o título e o giro até o pilar Todos Sabem. A costura:
+
+| Ponto | Como ficou invisível |
+|---|---|
+| A&M → Fabio | a vinheta termina no preto, como antes; o clipe entra com um fade curto |
+| Texto antigo no clipe (*Como **a** DTS…*) | coberto por uma **placa de vidro** com o título correto (*Como DTS compartilha conhecimento*), no mesmo lugar e no mesmo instante em que o texto antigo sobe |
+| HUD antigo gravado no clipe | um **push-in lento** (×1,12, 5,9–7,1 s) tira o HUD antigo do quadro antes que ele apareça; o HUD do filme entra no mesmo ponto |
+| Clipe → filme 3D | corte aos **9,5 s do clipe**, no meio do giro de câmera, depois que o Fabio sai do quadro. A câmera do filme começa **na pose resolvida a partir do último quadro do clipe** (pódio, letra D do emblema e aro dourado alinhados) e continua o movimento até assentar no pilar; as letras de *Todos Sabem* seguem se formando como no clipe; um brilho quente carrega o halo do emblema do clipe por meio segundo |
+| Cor | o clipe recebe uma correção suave (sombras menos magenta) e nitidez leve (`tools/intro.sh`) para casar com o 3D |
+| Som | o áudio do clipe é substituído pela **mesma trilha do filme** (Ré maior, 84 BPM, mesmos instrumentos), composta sobre os gestos do Fabio e emendada no crescendo do pilar Todos Sabem |
 
 Dados do ranking: tela *Ranking → Áreas → Todos os tempos* do FLOWS (recalculado em 9 set 2026,
 12 áreas no placar). Telas do tour: prints reais do FLOWS (`tex/screen_*.webp`). A 2ª página do formulário
@@ -53,6 +73,10 @@ pessoas o vídeo mostra apenas o nome (sem e-mail). Os textos de apoio, as notas
 | 2ª página (Detalhes) | inserto de 14 s com Template, DTS — Performance, co-responsáveis, descrição e *Compartilhar Skill* |
 | Troféu no card | chip com troféu **95**, igual aos cards reais da Biblioteca |
 | Ranking | *Ranking de Áreas · Todos os tempos* e *12 áreas no placar* foram para baixo do selo DTS (canto superior esquerdo) |
+
+Na v6 os insertos ficaram mais curtos (tour 8,5 s, nome 4,3 s, Detalhes 12 s): cada um roda o mesmo roteiro
+num relógio de projeto (`INSERT_DESIGN`) acelerado de forma uniforme. As legendas dos insertos foram encurtadas
+para continuarem confortáveis de ler (todas entre 6 e 18 caracteres por segundo).
 
 Os insertos são trechos planos da curva de ritmo: a história "congela" e a cena nova roda no relógio do filme,
 com câmera própria que sai e volta exatamente ao enquadramento congelado, em repouso (sem saltos).
@@ -111,7 +135,8 @@ Cada valor da cena é função pura do tempo, então qualquer quadro pode ser re
 npm install                        # three + playwright-core; CHROME_PATH=<Chromium/Chrome> fora do Claude Code
 npm run bake                       # gera tex/*.png e tex/manifest.json (estados do modal, cards, ranking, logo)
 python3 -m pip install numpy scipy
-npm run audio                      # audio/soundtrack.wav (172,8 s)
+./tools/intro.sh                   # quadros da entrada do Fabio (tex/fabio) a partir de media/entrada_fabio.mp4
+npm run audio                      # audio/soundtrack.wav (143,5 s)
 npm run preview                    # quadros avulsos em out/preview (PNG)
 Q=0.5 node render.mjs frames 8 0 1 out/lr          # prévia rápida: 3D em meia resolução, 8 fps
 node render.mjs frames 24 0 3 out/frames & node render.mjs frames 24 1 3 out/frames & node render.mjs frames 24 2 3 out/frames
@@ -122,9 +147,10 @@ ffmpeg -framerate 24 -i out/frames/f_%05d.jpg -i audio/soundtrack.wav \
 npm run storyboard
 ```
 
-O render usa WebGL por software (SwiftShader): ~12 s por quadro por processo em 1080p (3 processos ≈ 4 h 40 min).
+O render usa WebGL por software (SwiftShader): ~12 s por quadro por processo em 1080p (3 processos ≈ 3 h 30 min);
+os quadros da entrada do Fabio não usam o 3D e saem em segundos.
 Para refazer um trecho, apague os quadros e rode `node render.mjs frames 24 0 1 out/frames <t0> <t1>`
-(tempos globais: a vinheta ocupa 0–9,6 s e o filme começa em 9,6 s).
+(tempos globais: a vinheta ocupa 0–9 s, a entrada do Fabio 9–18,5 s e o filme 3D começa em 18,5 s).
 
 ## Onde mexer
 
@@ -134,6 +160,8 @@ Para refazer um trecho, apague os quadros e rode `node render.mjs frames 24 0 1 
   A trilha lê o mesmo arquivo; rode `npm run audio` depois de mudar.
 - Insertos: roteiros em `src/timeline.js` — `TOUR_SCR`, `TOUR_RINGS`, `TOUR_CUR` (tour), `NAME_TL` (nome),
   `DET_TL`, `DET_CUR`, `detScroll` (Detalhes) e as câmeras em `INS_CAM`.
+- Entrada do Fabio: `INTRO` em `src/pace.js` (duração usada, push-in, HUD, título) e a pose de câmera do corte
+  (`HANDOFF` em `src/timeline.js`, resolvida com `handoff.mjs`).
 - Legendas (com `*termos*` sublinhados) e textos dos pilares: `SUBS` e `LOCK` em `src/timeline.js` (a lista
   principal em tempo da história; as dos insertos em tempo do inserto).
 - Ranking: `AREAS` em `src/podium.js` (pontos, posições, cores); publicações/adoções e textos no HUD em `src/timeline.js`.

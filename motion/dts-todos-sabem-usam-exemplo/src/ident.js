@@ -9,8 +9,8 @@ import * as THREE from 'three';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 import { E, clamp, lerp, seg, env as envl, rng, path } from './util.js';
 
-export const IDENT = 9.6;
-export const ID_TYPE = { a: 5.8, out: 8.9 }; // typography in, and when the picture starts to leave
+export const IDENT = 9.0; // v6: the final rest is 0.6 s shorter
+export const ID_TYPE = { a: 5.8, out: 8.35 }; // typography in, and when the picture starts to leave
 const AM_BLUE = 0x0085ca, WARM = 0xff9a3c;
 
 function studioEnv(renderer) {

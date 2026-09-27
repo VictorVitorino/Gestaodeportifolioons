@@ -42,9 +42,16 @@ async function boot() {
   const svgText = await (await fetch('tex/am_mark.svg')).text();
   const ident = buildIdent({ world, svgText, cam });
   const film = buildFilm({ ...ctx, ident, svgText });
-  window.DURATION = film.duration;
+  window.DURATION = film.duration; window.__IDENT = IDENT; window.__FILM0 = film.film0;
   window.__world = world; window.__THREE = THREE;
-  window.seek = async (t) => { const n = film.needs(t); if (n) for (const k of [].concat(n)) await ensure(k); film.update(t); world.render(); return true; };
+  window.seek = async (t) => {
+    const n = film.needs(t);
+    if (n && n.tex) for (const k of n.tex) await ensure(k);
+    if (n && n.clip !== undefined) await film.loadClip(n.clip); // Fabio's intro clip frame
+    const r = film.update(t) || {};
+    if (!r.skip3d) world.render();
+    return true;
+  };
   window.__film = film;
   await window.seek(0);
   window.ready = true;

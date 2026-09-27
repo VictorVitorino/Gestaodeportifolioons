@@ -12,10 +12,12 @@ import * as O from './objects.js';
 import * as MG from './mg.js';
 import { buildPodium, AREAS } from './podium.js';
 import { IDENT, ID_TYPE } from './ident.js';
-import { PACE, PILLAR_SEQ, INSERTS } from './pace.js';
+import { PACE, PILLAR_SEQ, INSERTS, INTRO } from './pace.js';
 
 export const FILM = PACE[PACE.length - 1][0];
-export const DURATION = IDENT + FILM;
+// global clock: A&M ident [0, IDENT) -> Fabio's intro clip [IDENT, FILM0) -> the film (nt = T - FILM0)
+export const FILM0 = IDENT + INTRO.dur;
+export const DURATION = FILM0 + FILM;
 const SHUTTER = 1 / 64; // ~135° shutter: motion reads smooth without smearing
 const S = warp(PACE);
 const BLUE = 0x3d8bff, ORANGE = 0xff8a1f, GOLD = 0xf2b544;
@@ -75,6 +77,7 @@ export function buildFilm(ctx) {
   const P_U = mkPillar('TODOS USAM', ORANGE, 'U', [0, 0, -500], 0);
   const P_E = mkPillar('SOMOS EXEMPLO', GOLD, 'E', [560, 0, -360], -20);
   const PILLARS = [P_S, P_U, P_E];
+  window.__dbg = { dts, P_S, P_U, emblem }; // debug handles (camera matching tools)
 
   // ------------------------------------------------------------ UI frames
   // the FLOWS screen in its 3D frame is a canvas: real screenshots (Início, Catálogo de Métodos,
@@ -218,6 +221,8 @@ export function buildFilm(ctx) {
     <div class="pd-head"><span class="c1">${MG.ico('chart')}Ranking de Áreas · Todos os tempos</span><span class="c2">${MG.ico('users')}12 áreas no placar</span></div>
     <div class="pd-stamp">${MG.ico('crown', '', 2)}<div><b>Nº 1</b><small>entre 12 áreas no placar</small></div></div>
     <div class="pd-stats"><div class="s1">${MG.ico('upload')}<b>0</b><small>publicações</small></div><div class="s2">${MG.ico('download')}<b>0</b><small>adoções</small></div></div>
+    <div class="ho-glow"></div>
+    <div class="intro-t"><div class="cov"></div><div class="h"></div><div class="tg">Compartilhar uma Skill no FLOWS · 6 passos</div></div>
     <div class="id-cap"><div class="n mk"><span>ALVAREZ &amp; MARSAL</span></div><div class="ln"></div><div class="s mk"><span>Digital &amp; Technology Services · apresenta</span></div></div>
     <div class="am-sign"><img src="tex/am_mark.svg" alt=""><span>Alvarez &amp; Marsal</span><i></i><span class="d">DTS · Digital &amp; Technology Services</span></div>`;
   const $ = (s) => hud.querySelector(s);
@@ -250,6 +255,34 @@ export function buildFilm(ctx) {
   hud.appendChild(pdLink); const pdLinkD = MG.drawable(pdLink); pdLinkD[1].e.style.strokeDasharray = 'none';
   const segLn = MG.el('<svg class="seg-ln" width="1920" height="1080" viewBox="0 0 1920 1080"><g fill="none" stroke-width="2.5" stroke-linecap="round"><path stroke="#f2a93b"/><path stroke="#3d8bff"/><path stroke="#20aa64"/></g></svg>');
   hud.appendChild(segLn); const segPath = [...segLn.querySelectorAll('path')];
+  // ---- Fabio's intro clip (DOM layer under the HUD): frames are loaded on demand by main.js
+  const clipWrap = document.createElement('div'); clipWrap.id = 'clipwrap';
+  clipWrap.innerHTML = '<img alt="">'; hud.parentNode.insertBefore(clipWrap, hud);
+  const clipImg = clipWrap.querySelector('img');
+  let clipN = -1;
+  const loadClip = async (n) => {
+    if (n === clipN) return;
+    clipImg.src = INTRO.frames.replace('%03d', String(n).padStart(3, '0'));
+    await clipImg.decode(); clipN = n;
+  };
+  const clipIndex = (u) => Math.min(Math.round(INTRO.dur * INTRO.fps) - 1, Math.max(0, Math.floor(u * INTRO.fps + 1e-6)));
+  const clipScale = (u) => 1 + (INTRO.zoom[2] - 1) * E.inOutSine(seg(u, INTRO.zoom[0], INTRO.zoom[1]));
+  const hoGlow = $('.ho-glow');
+  const introT = $('.intro-t'), introCov = introT.querySelector('.cov'), introH = introT.querySelector('.h'), introTg = introT.querySelector('.tg');
+  introH.innerHTML = 'Como DTS compartilha conhecimento'.split(' ').map((w) => `<span class="mk"><span class="w">${w}</span></span> `).join('');
+  const introW = [...introH.querySelectorAll('.w')];
+  // u: clip time (continues after the cut, so the title can leave while the camera settles)
+  const introTitle = (u) => {
+    const a = INTRO.cover, out = 1 - E.inOutSine(seg(u, INTRO.dur + 0.05, INTRO.dur + 0.45));
+    const o = E.inOutSine(seg(u, a[0], a[1])) * out;
+    if (!MG.vis(introT, o > 0.003)) return;
+    introT.style.transform = `scale(${clipScale(u).toFixed(4)})`;
+    introCov.style.opacity = o.toFixed(3); introCov.style.transform = `scale(${(0.985 + 0.015 * o).toFixed(4)})`;
+    introW.forEach((w, i) => rise(w, E.outCubic(seg(u, INTRO.title + i * 0.08, INTRO.title + 0.6 + i * 0.08))));
+    introH.style.opacity = out.toFixed(3);
+    introTg.style.opacity = (E.outCubic(seg(u, INTRO.title + 0.55, INTRO.title + 1.1)) * out).toFixed(3);
+    introTg.style.transform = `translateY(${((1 - E.outCubic(seg(u, INTRO.title + 0.55, INTRO.title + 1.1))) * 10).toFixed(2)}px)`;
+  };
   const idCap = $('.id-cap'), idN = idCap.querySelector('.n span'), idLine = idCap.querySelector('.ln'), idS = idCap.querySelector('.s span'), amSign = $('.am-sign');
   // subtitles run on the film clock: story lines are placed through the pacing curve, and
   // the inserts add their own lines; chained lines keep the plate up and swap the text
@@ -271,15 +304,16 @@ export function buildFilm(ctx) {
     [73.1, 76.3, '', 'E DTS lidera: *nº 1 entre 12 áreas*, com *1.557 pontos*.'],
     [76.5, 77.9, '', 'Cada contribuição conta.'],
   ].map(([a, b, k, txt]) => ({ a: NT(a), b: NT(b), k, s: txt, c: a < 24 ? 0 : a < 62 ? 1 : 2 }));
-  const isub = (q, u0, u1, k, txt, ul, c = 1) => ({ a: q.a + u0, b: q.a + u1, k, s: txt, c, ul: ul && ul.map((x) => q.a + x) });
+  const isub = (q, u0, u1, k, txt, ul, c = 1) => ({ a: q.a + u0 / q.k, b: q.a + u1 / q.k, k, s: txt, c, ul: ul && ul.map((x) => q.a + x / q.k) });
   SUBS.push(
-    isub(INSERTS[0], 0.25, 2.5, '', 'O FLOWS organiza os *métodos*, as *skills* e os *projetos* da Alvarez.', null, 0),
-    isub(INSERTS[0], 2.5, 5.5, '', 'No *Catálogo de Métodos*, os *métodos de DTS* estão a um clique.', [2.95, 4.2], 0),
+    // (v6: shorter lines, so each stays readable at the faster pace)
+    isub(INSERTS[0], 0.25, 2.6, '', 'O FLOWS organiza *métodos* e *skills*.', [0.9, 1.4], 0),
+    isub(INSERTS[0], 2.6, 5.5, '', 'Os *métodos de DTS* ficam no *Catálogo*.', [4.2, 2.95], 0),
     isub(INSERTS[0], 5.5, 9.95, '', 'E a *Biblioteca de Skills* mostra cada skill com sua *pontuação*.', [7.2, 8.1], 0),
     isub(INSERTS[1], 0.1, 5.1, 'Passo 2', 'O padrão do nome: *prefixo da área*, *service line* e *entregável*.', [0.3, 1.7, 3.1]),
-    isub(INSERTS[2], 0.3, 2.75, 'Passo 6', 'Na etapa *Detalhes*, classifique a skill: *Template*.', [0.85, 1.95]),
-    isub(INSERTS[2], 2.75, 4.6, 'Passo 6', 'Escolha a *área responsável*: ela recebe os *pontos no ranking*.', [3.3, 3.95]),
-    isub(INSERTS[2], 4.6, 8.1, 'Passo 6', 'Em *Acesso e colaboração*, inclua os *co-responsáveis*.', [5.2, 5.7]),
+    isub(INSERTS[2], 0.3, 2.75, 'Passo 6', 'Em *Detalhes*, classifique como *Template*.', [0.85, 1.95]),
+    isub(INSERTS[2], 2.75, 5.2, 'Passo 6', 'A *área responsável* recebe os *pontos*.', [3.3, 3.95]),
+    isub(INSERTS[2], 5.2, 8.1, 'Passo 6', 'Inclua os *co-responsáveis* da skill.', [5.7]),
     isub(INSERTS[2], 8.1, 11.95, 'Passo 6', 'Na *Descrição*, detalhe o *entregável* e o *resultado final*.', [8.65, 11.0, 11.45]),
     isub(INSERTS[2], 11.95, 14.45, 'Passo 6', 'Clique em *Compartilhar Skill*.'),
   );
@@ -312,8 +346,13 @@ export function buildFilm(ctx) {
   const podCam = (p, back) => { const dir = [Math.sin(p.g.rotation.y), 0, Math.cos(p.g.rotation.y)]; const o = p.g.position; return [[o.x + dir[0] * back, 190, o.z + dir[2] * back], [o.x + dir[0] * 10, 64, o.z + dir[2] * 10]]; }; // word sits above centre, lockup below
   const [sp, st] = podCam(P_S, 800), [up, ut] = podCam(P_U, 800), [ep, et] = podCam(P_E, 1080);
   const nameC = fieldC('name'), whereC = fieldC('where'), modelC = fieldC('model'), timeC = fieldC('time'), fileC = fieldC('file'), nextC = fieldC('next');
+  // hand-off from Fabio's clip: the clip's last pan reaches the Todos Sabem pillar; the film's
+  // camera picks it up mid-move (same framing and direction, still moving) and settles on the
+  // pillar. 'pre' is a virtual key that only sets the camera's speed at the cut.
+  // (solved from the clip's last frame: podium strip, the emblem's D and its gold ring line up on the cut)
+  const HANDOFF = window.__handoff || {pre: [[-324.4, 413.8, 1518.1], [-191.4, 92.5, -184.3]], at: [[-301.6, 279.5, 842.3], [-410.5, 75.4, -284.1]], fov: 27};
   const CAM_P = [
-    [0, [70, 26, 860]], [2.6, [0, 90, 720]], [5.2, [-260, 380, 1400]], [8.2, [-70, 500, 1760]], [10, [-280, 290, 800]],
+    [9.4, HANDOFF.pre[0]], [10, HANDOFF.at[0]],
     [11.2, sp], [12.0, off3(sp, [15, 5, -20])], [12.9, [-30, 290, 1020]], [15.9, [70, 272, 700]], [18.6, [520, 900, 1350]], [20.6, [260, 460, 980]], [24, [0, 270, 900]],
     [24.9, up], [26.0, off3(up, [0, 4, -15])], [26.9, [-150, 225, 640]], [27.5, [-200, 215, 560]], [28.4, [-130, 195, 420]], [30.2, [0, 300, 920]],
     [31.4, [-175, 490, 640]], [35.2, [-170, 484, 620]], [36.4, [nameC[0] - 10, nameC[1] + 6, 360]], [37.4, [nameC[0] + 10, nameC[1], 350]],
@@ -324,7 +363,7 @@ export function buildFilm(ctx) {
     [72.6, [20, 215, 1080]], [73.5, [-40, 235, 1120]], [75.7, [-290, 290, 1220]], [77.3, [40, 420, 1150]], [78.8, [0, 540, 1700]], [82.2, [0, 760, 2250]],
   ];
   const CAM_T = [
-    [0, [0, 36, 0]], [2.6, [0, 115, 60]], [5.2, [0, 130, -140]], [8.2, [0, 120, -200]], [10, [-540, 110, -350]],
+    [9.4, HANDOFF.pre[1]], [10, HANDOFF.at[1]],
     [11.2, st], [12.0, st], [12.9, [0, 270, -120]], [15.9, [-40, 262, -120]], [18.6, [0, 300, -900]], [20.6, [0, 320, -1500]], [22.2, [0, 262, 300]], [24, [0, 262, 300]],
     [24.9, ut], [26.0, ut], [26.9, [0, 150, 80]], [27.5, [0, 152, 80]], [28.4, [0, 158, 80]], [30.2, [0, 320, -40]],
     [31.4, [-175, 476, -20]], [35.2, [-170, 476, -20]], [36.4, nameC], [37.4, nameC],
@@ -348,15 +387,17 @@ export function buildFilm(ctx) {
   const FLIGHT = flight();
   function camPose(t) {
     let P = path(CAM_P, t), T = path(CAM_T, t);
-    const aperture = track(APT, t) * 0.75;
-    const fov = 30 + E.inOutSine(seg(t, 76.6, 82.2)) * 4;
+    // deep focus right after the cut from the clip (its frame is sharp front to back), then the film's lens
+    const aperture = track(APT, t) * 0.75 * (t < 11.0 ? 0.3 + 0.7 * E.inOutSine(seg(t, 10.0, 11.0)) : 1);
+    // the clip is pushed in (x1.12) at the cut: start narrower and ease back to the film's lens
+    const fov = 30 + E.inOutSine(seg(t, 76.6, 82.2)) * 4 - (t < 11.6 ? (30 - HANDOFF.fov) * (1 - E.inOutSine(seg(t, 10.0, 11.6))) : 0);
     if (t > 58.3 && t < 60.2) {
       // fly-along: the camera rides behind the new card all the way to the library slot
-      const u = E.inOutCubic(seg(t, 58.3, 60.2)), cp = FLIGHT.getPoint(u);
+      const u = E.inOutQuad(seg(t, 58.3, 60.2)), cp = FLIGHT.getPoint(u);
       const settle = E.inOutCubic(seg(t, 59.2, 60.2));
       const off = [lerp(0, 90, settle), lerp(90, 110, settle), lerp(520, 760, settle)];
       const follow = [cp.x + off[0], cp.y + off[1], cp.z + off[2]], look = [cp.x, cp.y - 10, cp.z - 300];
-      const w0 = E.inOutCubic(seg(t, 58.3, 58.9));
+      const w0 = E.inOutCubic(seg(t, 58.3, 59.2)); // v6: a longer hand-off into the fly-along
       P = mixv(P, follow, w0); T = mixv(T, look, w0);
     } else if (t >= 60.2 && t < 62.9) { P = path(LAND_P, t); T = path(LAND_T, t); }
     return { P, T, fov, aperture };
@@ -366,6 +407,7 @@ export function buildFilm(ctx) {
   // subtitle plate): px per unit s fits the box in 1560x700 px, the box centre sits at y=500.
   const SAFE = { w: 1560, h: 700, dy: 40 }, PXU = 1080 / (2 * Math.tan(15 * deg)); // distance = PXU / s
   const INS_CAM = {};
+  const uIns = (q, nt) => (nt - q.a) * q.k; // film time -> the insert's design clock
   const keysOf = (K) => ({ P: K.map(([u, v]) => [u, v[0]]), T: K.map(([u, v]) => [u, v[1]]) });
   {
     // FLOWS tour: boxes in screenshot px on the frame at its frozen pose (story 15.0)
@@ -375,7 +417,7 @@ export function buildFilm(ctx) {
     const box = (x0, y0, x1, y1) => { const sc = Math.min(SAFE.w / ((x1 - x0) * U), SAFE.h / ((y1 - y0) * U)), T = fp((x0 + x1) / 2, (y0 + y1) / 2 + SAFE.dy / (sc * U)); return [T.map((x, i) => x + dir[i] * PXU / sc), T]; };
     const home = box(260, 120, 1672, 520);
     INS_CAM.tour = keysOf([[0, [b.P, b.T]], [1.5, home], [3.0, box(290, 280, 1640, 700)], [4.6, box(290, 430, 1640, 720)], [5.6, box(250, 0, 1450, 460)],
-      [6.9, home], [8.5, box(290, 330, 1650, 940)], [q.b - q.a, [b.P, b.T]]]);
+      [6.9, home], [8.5, box(290, 330, 1650, 940)], [q.d, [b.P, b.T]]]);
   }
   // modal boxes (window CSS px): the modal faces +z; small offsets add a little parallax
   const mbox = (x0, y0, x1, y1, ox = 0, oy = 0) => { const U = MS, sc = Math.min(SAFE.w / ((x1 - x0) * U), SAFE.h / ((y1 - y0) * U)), T = mpt((x0 + x1) / 2, (y0 + y1) / 2 + SAFE.dy / (sc * U), 0); return [[T[0] + ox, T[1] + oy, T[2] + PXU / sc], T]; };
@@ -383,18 +425,18 @@ export function buildFilm(ctx) {
     // name anatomy: the whole name, a slow truck from the prefix to the deliverable
     const q = INSERTS[1], b = camPose(q.at), NS = manifest._nameSegs, n = MR.name;
     const shot = (k) => { const [P, T] = mbox(n.x - 12, n.y - 30, n.x + n.w + 12, n.y + n.h + 70); const dx = k < 0 ? 0 : (NS[k].x + NS[k].w / 2 - (n.x + n.w / 2)) * MS * 0.22; return [[P[0] + dx, P[1], P[2]], [T[0] + dx, T[1], T[2]]]; };
-    INS_CAM.name = keysOf([[0, [b.P, b.T]], [1.0, shot(0)], [2.5, shot(1)], [3.9, shot(2)], [4.7, shot(-1)], [q.b - q.a, [b.P, b.T]]]);
+    INS_CAM.name = keysOf([[0, [b.P, b.T]], [1.0, shot(0)], [2.5, shot(1)], [3.9, shot(2)], [4.7, shot(-1)], [q.d, [b.P, b.T]]]);
   }
   {
     // Detalhes: classification -> area -> people -> description -> button, then back
     const q = INSERTS[2], b = camPose(q.at);
     INS_CAM.det = keysOf([[0, [b.P, b.T]], [1.5, mbox(31, 165, 569, 480, 16, 8)], [2.45, mbox(31, 175, 569, 485, 8, 6)], [3.25, mbox(31, 140, 569, 560, 0, 8)], [4.45, mbox(31, 480, 569, 590, -8, 6)],
-      [5.6, mbox(31, 470, 569, 775, 8, 6)], [7.9, mbox(31, 475, 569, 780, 0, 4)], [9.1, mbox(31, 775, 569, 945, 0, -6)], [11.6, mbox(31, 780, 569, 945, 0, -6)], [12.6, mbox(20, 790, 580, 1015, 14, -8)], [q.b - q.a, [b.P, b.T]]]);
+      [5.6, mbox(31, 470, 569, 775, 8, 6)], [7.9, mbox(31, 475, 569, 780, 0, 4)], [9.1, mbox(31, 775, 569, 945, 0, -6)], [11.6, mbox(31, 780, 569, 945, 0, -6)], [12.6, mbox(20, 790, 580, 1015, 14, -8)], [q.d, [b.P, b.T]]]);
   }
   function poseAt(nt) {
     const pose = camPose(S(nt));
     for (const q of INSERTS) {
-      if (nt > q.a && nt < q.b) { const c = INS_CAM[q.id], u = nt - q.a; pose.P = path(c.P, u); pose.T = path(c.T, u); }
+      if (nt > q.a && nt < q.b) { const c = INS_CAM[q.id], u = uIns(q, nt); pose.P = path(c.P, u); pose.T = path(c.T, u); }
       pose.aperture *= 1 - 0.5 * envl(nt, q.a - 0.4, q.a + 0.6, q.b - 0.6, q.b + 0.4, 'inOutSine', 'inOutSine');
     }
     return pose;
@@ -436,9 +478,9 @@ export function buildFilm(ctx) {
   const detScroll = (u) => lerp(0, DET_SC1, E.inOutCubic(seg(u, 4.6, 5.6))) + (DSC - DET_SC1) * E.inOutCubic(seg(u, 8.1, 9.1));
   // what the modal shows: a baked state, or the composed Detalhes page (+ what it dissolves from)
   function modalPlan(t, nt) {
-    if (nt >= I_NAME.a && nt <= I_NAME.b) return { img: stepTL(NAME_TL, nt - I_NAME.a) };
+    if (nt >= I_NAME.a && nt <= I_NAME.b) return { img: stepTL(NAME_TL, uIns(I_NAME, nt)) };
     if (nt >= I_DET.a) {
-      const u = Math.min(nt - I_DET.a, I_DET.b - I_DET.a);
+      const u = Math.min(uIns(I_DET, nt), I_DET.d);
       const k = E.inOutSine(seg(u, 0.05, 0.45));
       return { det: true, img: nt > I_DET.b ? 'd_done' : stepTL(DET_TL, u), scroll: detScroll(u), under: k < 1 ? 'm_zip_file' : null, k };
     }
@@ -506,10 +548,13 @@ export function buildFilm(ctx) {
       p.g.position.y = riseY(t, t0, 0.9, -200, 1.15);
       vis(p.g, t > t0);
       aoSet(aoPil[k], p.g.visible ? p.g.position.y : 999);
-      letterPop(p.word.letters, t, t0 + 0.6, 0.06, 0.6, 60);
+      if (k === 0) letterPop(p.word.letters, nt, -0.06, 0.05, 0.5, 60); // Todos Sabem: pops as the camera arrives, continuing the clip
+      else if (k === 1) letterPop(p.word.letters, nt, 0.3, 0.05, 0.5, 60); // Todos Usam wakes up right after (it is hidden behind the emblem's glow at the cut)
+      else letterPop(p.word.letters, t, t0 + 0.6, 0.06, 0.6, 60);
       const L = lit[k], end = t > 76.7 ? E.outCubic(seg(t, 76.7 + k * 0.25, 77.5 + k * 0.25)) : 0;
       const glow = 0.8 + L * (k === 2 ? 3.2 : 2.3) + end * 1.4 + (t > 4.5 && t < 7.5 ? pulse(t, t0 + 0.9, 0.08, 0.6) * 1.2 : 0);
-      p.pod.userData.strip.material.emissiveIntensity = 1.2 + glow;
+      // Todos Usam sits behind the emblem's glow at the cut (the clip has no pillar there): its strip lights up a beat later
+      p.pod.userData.strip.material.emissiveIntensity = (1.2 + glow) * (k === 1 && nt < 1.2 ? 0.15 + 0.85 * E.inOutSine(seg(nt, 0.25, 1.2)) : 1);
       p.light.intensity = Math.max(0, glow - 0.8) * (k === 2 ? 2200 : 1800); p.light.visible = p.light.intensity > 20;
       // as the camera settles, a glint of light travels once across the letters, then they stay softly lit
       const g0 = PILLAR_SEQ[k].hold[0] - 0.35;
@@ -540,7 +585,7 @@ export function buildFilm(ctx) {
         inicio.position.set(0, y, -120); inicio.rotation.set(-0.04 + Math.sin(t * 0.8) * 0.01, Math.sin(t * 0.5) * 0.03, 0);
         inicio.updateMatrixWorld(true);
         // the tour (insert 1): Início -> Catálogo de Métodos -> Início -> Biblioteca de Skills
-        const u = nt - I_TOUR.a, inTour = u > 0 && nt < I_TOUR.b;
+        const u = uIns(I_TOUR, nt), inTour = u > 0 && nt < I_TOUR.b;
         const [a, b, k] = nt >= I_TOUR.b ? ['screen_biblioteca', null, 0] : u > 0 ? tourScreen(u) : ['screen_inicio', null, 0];
         drawScreen(a, b, k, inTour ? TOUR_RINGS.map(([r, e]) => [...r, envl(u, ...e, 'inOutSine', 'inOutSine')]) : []);
       }
@@ -604,12 +649,12 @@ export function buildFilm(ctx) {
       }
       let sc = 1.25;
       // inserts: the cursor visits the FLOWS screens (tour) and the Detalhes fields
-      if (nt > I_TOUR.a + 0.45 && nt < I_TOUR.a + 8.1) {
-        const u = nt - I_TOUR.a; on = true; rotZ = 0.22;
+      if (uIns(I_TOUR, nt) > 0.45 && uIns(I_TOUR, nt) < 8.1) {
+        const u = uIns(I_TOUR, nt); on = true; rotZ = 0.22;
         p = tourCurPt(u, 16 - pressAt(u, TOUR_CLK) * 8);
         sc = 1.0 * E.outBack(seg(u, 0.5, 0.85), 1.4) * (1 - E.inBack(seg(u, 7.75, 8.05), 1.2));
-      } else if (nt > I_DET.a + 0.95 && nt < I_DET.a + 13.45) {
-        const u = nt - I_DET.a; on = true; rotZ = 0.2;
+      } else if (uIns(I_DET, nt) > 0.95 && uIns(I_DET, nt) < 13.45) {
+        const u = uIns(I_DET, nt); on = true; rotZ = 0.2;
         p = detCurPt(u, 16 - pressAt(u, DET_CLK) * 8);
         sc = 0.9 * E.outBack(seg(u, 1.0, 1.35), 1.4) * (1 - E.inBack(seg(u, 13.1, 13.4), 1.2));
       }
@@ -707,14 +752,14 @@ export function buildFilm(ctx) {
       const on = t > 57.95 && t < 81.2; vis(newCard, on);
       newCard.userData.mbHold = t > 58.2 && t < 60.8;
       if (on) {
-        const u = E.inOutCubic(seg(t, 58.3, 60.2));
+        const u = E.inOutQuad(seg(t, 58.3, 60.2));
         const p = FLIGHT.getPoint(u);
         newCard.position.copy(p);
         const qq = new THREE.Quaternion().slerp(slotQ.clone(), E.inOutCubic(seg(t, 58.3, 60.0)));
         newCard.quaternion.copy(qq);
         newCard.rotateZ(Math.sin(u * Math.PI) * 0.28);
         const s0 = MODAL.w / 172;
-        newCard.scale.setScalar(t < 58.3 ? lerp(s0 * 0.5, s0, E.outBack(seg(t, 57.95, 58.3), 1.2)) : lerp(s0, 1, E.inOutCubic(seg(t, 58.3, 60.2))));
+        newCard.scale.setScalar(t < 58.3 ? lerp(s0 * 0.5, s0, E.outBack(seg(t, 57.95, 58.3), 1.2)) : lerp(s0, 1, E.inOutQuad(seg(t, 58.3, 60.2))));
         const g = pulse(t, 60.2, 0.1, 1.3) * 0.8 + (t > 64 && t < 70 ? 0.45 + 0.1 * Math.sin(nt * 1.6) : 0);
         newCard.userData.face.material.color.setScalar(1 + Math.min(g, 1) * 0.16);
         newCard.userData.body.material.emissive.setHex(0xffb347); newCard.userData.body.material.emissiveIntensity = Math.min(g, 1.2) * 1.2;
@@ -793,7 +838,7 @@ export function buildFilm(ctx) {
       };
       let res;
       if (nt > I_DET.a && nt < I_DET.b) {
-        const u = nt - I_DET.a, sc = detScroll(u);
+        const u = uIns(I_DET, nt), sc = detScroll(u);
         res = run(DFOCUS, u, (names) => { const rs = names.map((n) => detRect(n, sc)); return proj(Math.min(...rs.map((r) => r.x)), Math.min(...rs.map((r) => r.y)), Math.max(...rs.map((r) => r.x + r.w)), Math.max(...rs.map((r) => r.y + r.h))); });
       } else {
         res = run(FOCUS, t, fr);
@@ -803,7 +848,7 @@ export function buildFilm(ctx) {
     }
     // name anatomy (insert 2): a label under each part of the name, one at a time, then all
     {
-      const u = nt - I_NAME.a, on = u > 0.1 && nt < I_NAME.b;
+      const u = uIns(I_NAME, nt), on = u > 0.1 && nt < I_NAME.b;
       const NS = manifest._nameSegs, T0 = [0.25, 1.65, 3.05], out = 1 - E.inOutSine(seg(u, 4.95, 5.2));
       // a soft spotlight on the name field; the labels sit on the dimmed page
       const so = on ? envl(u, 0.05, 0.45, 4.85, 5.15, 'inOutSine', 'inOutSine') : 0;
@@ -825,7 +870,7 @@ export function buildFilm(ctx) {
     {
       let o = 0, x = 0, y = 0, r = 0;
       for (const [q, list, pt] of [[I_TOUR, TOUR_CLK, tourCurPt], [I_DET, DET_CLK, detCurPt]]) for (const c of list) {
-        const d = nt - q.a - c;
+        const d = uIns(q, nt) - c;
         if (d >= 0 && d < 0.5) { const p = project(pt(c, 10)); x = p.x; y = p.y; r = d / 0.5; o = 1 - r; }
       }
       if (MG.vis(clk, o > 0.01)) { clk.style.opacity = E.outQuad(o).toFixed(3); clk.style.transform = `translate(${x}px,${y}px) scale(${(0.35 + E.outCubic(r) * 1.15).toFixed(3)})`; }
@@ -898,6 +943,11 @@ export function buildFilm(ctx) {
       show(pdStats, stv, sx - 110, sy + 92 + (1 - stv) * 10, 0, 0, 1);
       if (stv > 0) { pdStats.querySelector('.s1 b').textContent = Math.round(87 * E.outCubic(seg(t, 73.8, 75.0))); pdStats.querySelector('.s2 b').textContent = Math.round(142 * E.outCubic(seg(t, 74.0, 75.2))); }
     }
+    // the warm haze the clip shows around the emblem at the cut, carried for a moment into the film
+    {
+      const g = nt >= 0 ? 1 - E.inOutSine(seg(nt, 0.05, 0.7)) : 0, c = project([-330, 118, 40]);
+      show(hoGlow, g * 0.95, c.x, c.y, 0, 0, 1 + 0.25 * (1 - g));
+    }
     // end card + A&M signature inside the letterbox
     {
       const o = Math.min(E.outCubic(seg(t, 78.0, 78.5)), 1 - E.inCubic(seg(t, 81.4, 82.0)));
@@ -923,6 +973,7 @@ export function buildFilm(ctx) {
   };
   function update(T) {
     if (T < IDENT) {
+      MG.vis(clipWrap, false); MG.vis(introT, false);
       updateFilm(-1, -1);
       world.useScene(ident.scene);
       const r = ident.update(T);
@@ -931,21 +982,40 @@ export function buildFilm(ctx) {
       identHud(T);
       const pc = ident.camAt(Math.max(0, T - SHUTTER));
       world.setPrevCamera(pc.P, pc.T, 30, T > 0.02 ? 1 : 0);
-      return;
+      return {};
     }
+    if (T < FILM0) {
+      // Fabio's intro: the clip fills the frame (no 3D this frame); our HUD fades in exactly where
+      // the clip's own overlay would, and our corrected headline rises over the clip's
+      const u = T - IDENT;
+      updateFilm(-1, -1); identHud(T);
+      bars.set(0);
+      MG.vis(clipWrap, true);
+      clipImg.style.transform = `scale(${clipScale(u).toFixed(4)})`;
+      clipImg.style.filter = `brightness(${E.inOutSine(seg(u, 0, INTRO.fadeIn)).toFixed(3)})`;
+      const h = E.outCubic(seg(u, INTRO.hud[0], INTRO.hud[1]));
+      bug.style.opacity = h; pillBox.style.opacity = h;
+      introTitle(u);
+      return { skip3d: true };
+    }
+    MG.vis(clipWrap, false);
     world.useScene(world.scene);
     identHud(T);
-    const nt = T - IDENT;
+    const nt = T - FILM0;
     updateFilm(S(nt), nt);
+    introTitle(INTRO.dur + nt);
     const pp = poseAt(nt - SHUTTER);
-    world.setPrevCamera(pp.P, pp.T, pp.fov, nt > 0.02 ? 1 : 0);
+    // the cut from the clip happens mid-pan: keep the camera's motion blur from the first frame
+    world.setPrevCamera(pp.P, pp.T, pp.fov, 1);
+    return {};
   }
   // the modal image a frame needs (loaded on demand by main.js before rendering it)
   const needs = (T) => {
     if (T < IDENT) return null;
-    const nt = T - IDENT, t = S(nt);
+    if (T < FILM0) return { clip: clipIndex(T - IDENT) };
+    const nt = T - FILM0, t = S(nt);
     if (!(t > 28.5 && t < 58.1)) return null;
-    const p = modalPlan(t, nt); return p.under ? [p.under, p.img] : [p.img];
+    const p = modalPlan(t, nt); return { tex: p.under ? [p.under, p.img] : [p.img] };
   };
-  return { duration: DURATION, update, needs, cam: (nt) => poseAt(nt), story: S };
+  return { duration: DURATION, film0: FILM0, update, needs, loadClip, cam: (nt) => poseAt(nt), story: S };
 }

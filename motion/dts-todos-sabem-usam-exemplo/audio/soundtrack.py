@@ -1,18 +1,22 @@
 """DTS · Todos Sabem, Todos Usam, Somos Exemplo (v5) — original score and sound design,
-synthesized from scratch on the same clock as the film: the 9.6 s Alvarez & Marsal
+synthesized from scratch on the same clock as the film: the Alvarez & Marsal
 ident, then the film. Story-time cues (the v3 choreography) are placed through the same
 pacing curve as src/pace.js, so every sound lands on its picture; the score itself is
 written on the new clock: calmer, broader, with a swell into each pillar. v5: the three
 inserts (flat segments of PACE: FLOWS tour, name anatomy, Detalhes page) get their own
-cues on the film clock, from the same schedules as src/timeline.js."""
+cues on the film clock, from the same schedules as src/timeline.js. v6: Fabio's intro clip plays
+between the ident and the film; its sound is replaced by this same score (same key, tempo and
+instruments), written on his gestures, so the intro flows into the film as one piece of music."""
 import numpy as np, wave, sys, math, json, re, os
 from scipy.signal import butter, sosfilt, fftconvolve
 
 SR = 48000
 HERE = os.path.dirname(os.path.abspath(__file__))
 PACE = json.loads(re.search(r'PACE = (\[.*?\]);', open(os.path.join(HERE, '..', 'src', 'pace.js')).read(), re.S).group(1))
-IDENT = 9.6
-DUR = IDENT + PACE[-1][0]
+IDENT = float(re.search(r'export const IDENT = ([0-9.]+)', open(os.path.join(HERE, '..', 'src', 'ident.js')).read()).group(1))
+INTRO = json.loads(re.search(r'INTRO = (\{.*?\});', open(os.path.join(HERE, '..', 'src', 'pace.js')).read()).group(1))
+FILM0 = IDENT + INTRO['dur']          # the film joins the intro clip here (story time PACE[0][1])
+DUR = FILM0 + PACE[-1][0]
 N = int(SR * DUR)
 rng = np.random.default_rng(7)
 mus = np.zeros((2, N)); sfx = np.zeros((2, N))
@@ -36,9 +40,11 @@ def _S(t):
 _nt = np.linspace(0, _x[-1], 400001); _st = _S(_nt)
 def T(s):
     """global time of story time s"""
-    return IDENT + float(np.interp(s, _st, _nt))
+    return FILM0 + float(np.interp(s, _st, _nt))
 # inserts: flat segments of PACE -> (global start, global end), in order tour / name / det
-INS = [(IDENT + PACE[i][0], IDENT + PACE[i + 1][0]) for i in range(len(PACE) - 1) if PACE[i][1] == PACE[i + 1][1]]
+DESIGN = json.loads(re.search(r'INSERT_DESIGN = (\{.*?\});', open(os.path.join(HERE, '..', 'src', 'pace.js')).read()).group(1))
+INS = [(FILM0 + PACE[i][0], FILM0 + PACE[i + 1][0]) for i in range(len(PACE) - 1) if PACE[i][1] == PACE[i + 1][1]]
+INS = [(a, b, DESIGN[n] / (b - a)) for (a, b), n in zip(INS, ['tour', 'name', 'det'])]   # (start, end, design seconds per film second)
 I_TOUR, I_NAME, I_DET = INS
 def D(s0, s1): return T(s1) - T(s0)
 def add(buf, t0, sig, gain=1.0, pan=0.0):
@@ -260,9 +266,9 @@ def swell(d, f0=180, f1=900):
 def shimmer(d=1.6, seed=1, lo=3500, hi=9500, n=16):
     return sparkle(d, n, lo, hi, seed) * np.linspace(1, 0.4, int(d * SR))
 
-# ================================================================== IDENT (0-9.6 s): Alvarez & Marsal
-add(mus, 0.0, lp(saw_pad(midi(38), 9.6, 0.25) * env_adsr(int(9.6 * SR), 2.5, 0.5, 0.9, 1.4), 520), 0.15)
-add(mus, 0.0, lp(pink(int(9.6 * SR)), 1800) * env_adsr(int(9.6 * SR), 3.0, 0.5, 0.8, 1.2) * 0.25, 0.08)
+# ================================================================== IDENT (0-IDENT s): Alvarez & Marsal
+add(mus, 0.0, lp(saw_pad(midi(38), IDENT, 0.25) * env_adsr(int(IDENT * SR), 2.5, 0.5, 0.9, 1.4), 520), 0.15)
+add(mus, 0.0, lp(pink(int(IDENT * SR)), 1800) * env_adsr(int(IDENT * SR), 3.0, 0.5, 0.8, 1.2) * 0.25, 0.08)
 R0 = np.random.default_rng(3)
 for i in range(22):  # slow "data" arpeggio: sparse plucks from the D major pentatonic
     tt = 0.9 + i * 0.36 + R0.random() * 0.05
@@ -325,16 +331,31 @@ def pillar_swell(g0, g1, chord, gain, bright=0.5):
         add(mus, g0, s, gain * (1.3 if m < 48 else 1.0), pan=(m % 5 - 2) / 5)
 
 G = lambda s: T(s)
-P1m, P1h, P1e = G(9.35), G(11.2), G(11.5)
+P1m, P1h, P1e = G(10.0), G(11.2), G(11.5)   # the pillar move starts at the cut from the intro clip
 P2m, P2h, P2e = G(24.0), G(24.9), G(25.6)
 FOLD, FLY, LAND = G(57.4), G(58.3), G(60.2)
 P3m, P3h, P3e = G(62.0), G(62.9), G(63.7)
 POD, REVEAL, SINK, FIN = G(68.5), G(72.9), G(75.9), G(78.1)
 PROG_A = ['D', 'Bm', 'G', 'A']; PROG_B = ['D', 'A', 'Bm', 'G']; PROG_C = ['G', 'A', 'F#m', 'Bm', 'Em', 'Asus', 'D', 'D']
-# opening
-add(mus, IDENT, lp(saw_pad(midi(38), 12.0, 0.3) * env_adsr(int(12 * SR), 2.4, 0.5, 0.9, 2.0), 700), 0.24)
-for i, m in enumerate([74, 78, 81, 86]): add(mus, G(1.2) + i * 0.3, celesta(midi(m), 2.2), 0.05, pan=-0.3 + i * 0.2)
-pads(IDENT + 1.4, P1m, ['D', 'G', 'D', 'Gmaj7'], 0.1, 0.35)
+# ---- Fabio's intro (clip clock u = T - IDENT): the film's own score, written on his acting.
+# D pedal from the ident, then four bars (84 bpm) D - G - D - Asus that lift into the pillar swell.
+IU = lambda u: IDENT + u
+add(mus, IDENT - 0.2, lp(saw_pad(midi(38), INTRO['dur'] + 3.0, 0.3) * env_adsr(int((INTRO['dur'] + 3.0) * SR), 1.6, 0.5, 0.9, 2.4), 700), 0.17)
+for i, m in enumerate([74, 78, 81, 86]): add(mus, IU(0.35) + i * 0.28, celesta(midi(m), 2.2), 0.045, pan=-0.3 + i * 0.2)   # he looks at us
+pads(IU(0.2), IU(INTRO['dur']) + 0.3, ['D', 'G', 'D', 'Asus'], 0.065, 0.36)
+pizz_bass(IU(0.2 + bar), IU(INTRO['dur']), ['G', 'D', 'Asus'], 0.1)
+for u, m, g in [(1.05, 69, 0.04), (1.4, 74, 0.035)]: add(mus, IU(u), pizz(midi(m), 0.6), g, pan=0.2)     # the smile
+add(mus, IU(2.45), glock(midi(98), 1.4), 0.05, pan=0.35); add(sfx, IU(2.47), shimmer(0.7, 71, 5000, 10000, 8) * 0.8, 0.035, pan=0.35)   # the wink
+for i, m in enumerate([69, 71, 74, 78]): add(mus, IU(2.75 + i * 0.16), pizz(midi(m + 12), 0.5), 0.04, pan=-0.2 + i * 0.12)   # "come on" gesture
+add(sfx, IU(3.62), pop(700, 300, 0.1), 0.04)                                                                   # hands together
+add(sfx, IU(3.55), whoosh(1.6, 180, 1800, 0.7), 0.09, pan=-0.1); add(sfx, IU(3.8), riser(1.0, 200, 1400), 0.05)   # the camera pulls back
+add(sfx, IU(4.25), whoosh(0.7, 150, 900, 0.6), 0.08); add(sfx, IU(4.62), thump(0.35), 0.2); add(sfx, IU(4.64), sub_boom(1.8, 70, 36), 0.14)   # the emblem rises
+add(sfx, IU(4.66), shimmer(1.4, 72), 0.05); add(mus, IU(4.68), bell(midi(86), 2.4), 0.05)
+for m in [50, 57, 62, 66, 69, 74]: add(mus, IU(5.05), strings(midi(m), 3.6, 0.5) * env_adsr(int(3.6 * SR), 0.5, 0.6, 0.8, 1.6), 0.032 if m > 55 else 0.05, pan=(m % 5 - 2) / 5)   # the plaza opens up
+for i, m in enumerate([81, 86, 90]): add(mus, IU(5.15 + i * 0.14), celesta(midi(m), 2.0), 0.035, pan=0.3 - i * 0.2)  # presenting DTS
+add(sfx, IU(6.45), reverse_swell(0.45), 0.035); add(sfx, IU(6.9), whoosh(1.0, 700, 3500, 0.5), 0.07)          # the title panel and headline
+add(sfx, IU(INTRO['hud'][0] + 0.02), click(3400, 0.02, 0.15), 0.05, pan=0.7)
+add(sfx, IU(8.35), whoosh(1.5, 260, 2200, 0.8), 0.1, pan=-0.3)                                                 # the pan to the pillar
 # pillar 1 (blue): swell into the hold
 pillar_swell(P1m, P1h, 'Dadd9', 0.05, 0.45)
 cue(P1h - 0.35, shimmer(1.8, 21), 0.06); cue(P1h - 0.3, bell(midi(86), 2.8, 1.0, 2.0), 0.06); cue(P1h - 0.3, sub_boom(2.0, 70, 36), 0.12)
@@ -385,16 +406,11 @@ for m in [38, 50, 57, 62, 66, 69, 74]:
 for i, m in enumerate([74, 78, 81, 86, 90, 93]): add(mus, FIN + i * 0.16, celesta(midi(m), 2.8), 0.045, pan=-0.5 + i * 0.2)
 
 # ================================================================== SOUND DESIGN on story time (v3 cues, calmer)
-scue(0.1, reverse_swell(1.2), 0.05)
-for i in range(3):   # DTS letters land
-    a = 1.4 + i * 0.18
-    scue(a - 0.05, whoosh(0.5, 400, 2200, 0.7), 0.07, -0.4 + i * 0.4); scue(a + 0.4, thump(0.3), 0.28, -0.4 + i * 0.4)
-scue(1.95, sub_boom(1.6, 72, 38), 0.2); scue(2.0, shimmer(1.2, 31), 0.05)
-scue(2.5, whoosh(1.2, 900, 5000, 0.5), 0.05)
-for k, t0 in enumerate([4.2, 4.5, 4.8]):   # pillars rise
-    scue(t0, whoosh(0.9, 200, 1400, 0.6), 0.1, -0.6 + k * 0.6); scue(t0 + 0.6, thump(0.3), 0.16, -0.6 + k * 0.6)
-    for i in range([11, 10, 13][k]): scue(t0 + 0.6 + i * 0.06 + 0.3, pizz(midi(74 + [0, 2, 4, 7, 9][i % 5] + (i // 5) * 12 - 12), 0.35), 0.035, -0.6 + k * 0.6)
-scue(6.8, whoosh(1.0, 700, 3500, 0.5), 0.07)
+# (the v5 opening cues are gone: the intro clip covers story < 10.) The Todos Sabem letters pop at the
+# cut on the film clock (as in src/timeline.js), Todos Usam a beat later, softly.
+for k, (t0, n, g) in enumerate([(-0.06, 11, 0.035), (0.3, 10, 0.02)]):
+    for i in range(n): add(sfx, FILM0 + t0 + i * 0.05 + 0.22, pizz(midi(74 + [0, 2, 4, 7, 9][i % 5] + (i // 5) * 12 - 12), 0.35), g, -0.5 + k * 0.9)
+add(sfx, FILM0 + 0.02, thump(0.3), 0.1, -0.4)
 scue(11.4, whoosh(1.0, 1200, 200, 0.3), 0.07); scue(12.3, whoosh(1.2, 200, 1600, 0.6), 0.1); scue(13.1, thump(0.3), 0.12)
 scue(15.9, whoosh(1.0, 1600, 200, 0.4), 0.08)
 for i in range(24): scue(16.2 + (i / 24) * 2.6, pizz(midi(86 + [0, 2, 4, 7, 9][i % 5]), 0.3), 0.018, math.sin(i) * 0.8)
@@ -475,7 +491,7 @@ for s in [31.25, 37.6, 42.6, 47.2, 54.5, 55.7]: scue(s, click(2900, 0.025, 0.25)
 for s in [16.65, 60.35]: scue(s, bell(midi(90), 1.8), 0.04)
 
 # ================================================================== v5 inserts (film clock)
-def icue(ins, u, sig, g=1.0, pan=0.0): add(sfx, ins[0] + u, sig, g, pan)
+def icue(ins, u, sig, g=1.0, pan=0.0): add(sfx, ins[0] + u / ins[2], sig, g, pan)
 def uiclick(ins, u, g=0.16): icue(ins, u, click(2500, 0.035, 0.6), g, 0.1); icue(ins, u + 0.005, pop(1100, 420, 0.06), 0.03, 0.1)
 # FLOWS tour: cursor, clicks, page dissolves, highlight rings, the trophies
 icue(I_TOUR, 0.45, whoosh(0.6, 1200, 3200, 0.5), 0.025, 0.4)
@@ -492,7 +508,7 @@ icue(I_DET, 0.05, whoosh(0.6, 600, 3000, 0.5), 0.07)
 for u in (1.95, 3.05, 3.75, 5.65, 7.0, 8.0, 9.15): uiclick(I_DET, u)
 icue(I_DET, 1.99, glock(midi(86), 1.0), 0.025)                       # Template selected
 icue(I_DET, 3.1, pop(800, 400, 0.08), 0.04); icue(I_DET, 3.8, tink(2900), 0.04)   # list opens, DTS chosen
-for a, b in ((4.6, 5.6), (8.1, 9.1)): icue(I_DET, a, whoosh(b - a, 1500, 900, 0.5, 0.6), 0.025, 0.2)   # scroll
+for a, b in ((4.6, 5.6), (8.1, 9.1)): icue(I_DET, a, whoosh((b - a) / I_DET[2], 1500, 900, 0.5, 0.6), 0.025, 0.2)   # scroll
 for i in range(9): icue(I_DET, 5.75 + i * 0.083, key(700 + i), 0.16, -0.1)                 # domingues
 for i in range(6): icue(I_DET, 7.1 + i * 0.075, key(720 + i), 0.16, -0.1)                  # talita
 for u in (6.55, 7.6): icue(I_DET, u, pop(1300, 700, 0.07), 0.03)                          # suggestion
@@ -520,8 +536,8 @@ env = np.abs(lp(np.abs(sfx).sum(axis=0), 8))
 duck = 1 / (1 + 0.9 * env / (env.max() + 1e-9))
 mix = mus_mix * duck * 0.95 + sfx_mix * 0.9
 mix = hp(mix, 28)
-# ident dips to black at 8.9-9.6: the sound breathes with it
-dip = np.ones(N); a0, a1, a2 = int(8.9 * SR), int(9.6 * SR), int(10.4 * SR)
+# ident dips to black in its last 0.65 s: the sound breathes with it
+dip = np.ones(N); a0, a1, a2 = int((IDENT - 0.65) * SR), int(IDENT * SR), int((IDENT + 0.8) * SR)
 dip[a0:a1] = np.linspace(1, 0.55, a1 - a0); dip[a1:a2] = np.linspace(0.55, 1, a2 - a1)
 mix *= dip
 fi = int(0.8 * SR); fo = int(2.2 * SR)

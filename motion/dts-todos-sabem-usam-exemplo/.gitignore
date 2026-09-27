@@ -4,3 +4,5 @@ audio/soundtrack.wav
 # texturas geradas por `npm run bake` (reprodutíveis); as telas de referência .webp ficam versionadas
 tex/*.png
 tex/manifest.json
+# quadros da entrada do Fabio, gerados por tools/intro.sh a partir de media/entrada_fabio.mp4
+tex/fabio/

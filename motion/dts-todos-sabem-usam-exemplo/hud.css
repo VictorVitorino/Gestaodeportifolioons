@@ -119,3 +119,12 @@ html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#000;fo
 .seg-lbl b{width:34px;height:34px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font-size:18px;font-weight:900}
 .seg-ln{position:absolute;left:0;top:0;pointer-events:none}
 .clk{position:absolute;left:0;top:0;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;border:3px solid rgba(255,206,130,.95);box-shadow:0 0 16px rgba(255,170,60,.75),inset 0 0 12px rgba(255,190,90,.5)}
+/* v6: Fabio's intro clip (a DOM layer under the HUD) and our headline over its baked one */
+#clipwrap{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden;background:#000}
+#clipwrap img{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:50% 100%}
+.intro-t{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:50% 100%}
+.intro-t .cov{position:absolute;left:356px;top:326px;width:1164px;height:160px;border-radius:28px;background:linear-gradient(180deg,rgba(22,26,66,.46),rgba(8,10,36,.56));backdrop-filter:blur(20px) saturate(1.2);-webkit-backdrop-filter:blur(20px) saturate(1.2);border:1.5px solid rgba(255,255,255,.2);box-shadow:0 18px 50px rgba(0,0,30,.3),inset 0 1px 0 rgba(255,255,255,.24)}
+.intro-t .h{position:absolute;left:-45px;right:0;top:343px;text-align:center;font-size:58px;font-weight:800;letter-spacing:-.015em;color:#fff;text-shadow:0 6px 34px rgba(10,0,40,.6)}
+.intro-t .h .w{display:inline-block;white-space:pre}
+.intro-t .tg{position:absolute;left:-32px;right:0;top:438px;text-align:center;font-size:24px;font-weight:800;letter-spacing:.42em;text-transform:uppercase;color:#ffe2b8;text-shadow:0 2px 16px rgba(20,0,40,.6)}
+.ho-glow{position:absolute;left:0;top:0;width:1150px;height:900px;margin:-450px 0 0 -575px;background:radial-gradient(closest-side,rgba(255,228,184,.8),rgba(255,198,126,.4) 45%,rgba(255,170,90,0) 100%);mix-blend-mode:screen;pointer-events:none}
