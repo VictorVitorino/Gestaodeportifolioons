@@ -134,18 +134,28 @@ export class World {
     this.scene.add(hemi);
   }
 
-  plazaTexture() {
+  plazaTexture(glowOnly = false) {
     const S = 4096, c = document.createElement('canvas'); c.width = c.height = S;
     const x = c.getContext('2d');
     const g = x.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
     g.addColorStop(0, '#3b4aa8'); g.addColorStop(0.55, '#26327f'); g.addColorStop(1, '#161c52');
-    x.fillStyle = g; x.fillRect(0, 0, S, S);
+    x.fillStyle = glowOnly ? '#000' : g; x.fillRect(0, 0, S, S);
     const R = rng(4);
-    for (let i = 0; i < 9000; i++) { x.fillStyle = `rgba(255,255,255,${R() * 0.025})`; x.fillRect(R() * S, R() * S, 2 + R() * 6, 2 + R() * 6); }
-    const ring = (rr, w, a) => { x.strokeStyle = `rgba(255,196,110,${a})`; x.lineWidth = w; x.beginPath(); x.arc(S / 2, S / 2, rr, 0, Math.PI * 2); x.stroke(); };
+    if (!glowOnly) for (let i = 0; i < 9000; i++) { x.fillStyle = `rgba(255,255,255,${R() * 0.025})`; x.fillRect(R() * S, R() * S, 2 + R() * 6, 2 + R() * 6); }
+    const G = glowOnly ? 0.62 : 1; // (emissive: a little dimmer than the lines, the bloom does the rest)
+    const ring = (rr, w, a) => { x.strokeStyle = `rgba(255,196,110,${a * G})`; x.lineWidth = w; x.beginPath(); x.arc(S / 2, S / 2, rr, 0, Math.PI * 2); x.stroke(); };
     const k = S / 2 / 1400;
     ring(190 * k, 5, 0.9); ring(560 * k, 4, 0.55); ring(930 * k, 4, 0.45); ring(1330 * k, 8, 0.8); ring(1300 * k, 3, 0.5);
-    x.strokeStyle = 'rgba(255,196,110,0.18)'; x.lineWidth = 3;
+    if (glowOnly) {
+      // sparkles along the rings (the footage's floor twinkles with them)
+      const R2 = rng(12);
+      for (const rr of [190, 560, 930, 1300, 1330]) for (let i = 0; i < rr * 0.9; i++) {
+        const a = R2() * Math.PI * 2, d = (R2() - 0.5) * 26 * k, s = 2 + R2() * 5;
+        x.fillStyle = `rgba(255,${200 + R2() * 50},${130 + R2() * 90},${0.35 + R2() * 0.6})`;
+        x.beginPath(); x.arc(S / 2 + Math.cos(a) * (rr * k + d), S / 2 + Math.sin(a) * (rr * k + d), s, 0, Math.PI * 2); x.fill();
+      }
+    }
+    x.strokeStyle = `rgba(255,196,110,${0.18 * G})`; x.lineWidth = 3;
     for (let i = 0; i < 24; i++) { const a = (i / 24) * Math.PI * 2; x.beginPath(); x.moveTo(S / 2 + Math.cos(a) * 230 * k, S / 2 + Math.sin(a) * 230 * k); x.lineTo(S / 2 + Math.cos(a) * 1290 * k, S / 2 + Math.sin(a) * 1290 * k); x.stroke(); }
     x.fillStyle = 'rgba(255,200,120,0.7)';
     for (let i = 0; i < 180; i++) { const a = (i / 180) * Math.PI * 2; x.save(); x.translate(S / 2 + Math.cos(a) * 1260 * k, S / 2 + Math.sin(a) * 1260 * k); x.rotate(a); x.fillRect(-10, -3, 20, 6); x.restore(); }
@@ -155,13 +165,13 @@ export class World {
 
   buildPlaza() {
     const mat = new THREE.MeshPhysicalMaterial({ map: this.plazaTexture(), roughness: 0.5, metalness: 0, clearcoat: 0.35, clearcoatRoughness: 0.35, envMapIntensity: 0.45 });
-    const plaza = new THREE.Mesh(new THREE.CircleGeometry(1400, 160), mat);
+    const plaza = (this.plaza = new THREE.Mesh(new THREE.CircleGeometry(1400, 160), mat));
     plaza.rotation.x = -Math.PI / 2; plaza.receiveShadow = true; this.scene.add(plaza);
     const rim = (this.rim = new THREE.Mesh(new THREE.TorusGeometry(1400, 7, 16, 256), new THREE.MeshStandardMaterial({ color: 0xffc46e, emissive: 0xffa640, emissiveIntensity: 1.6, roughness: 0.3 })));
     rim.rotation.x = -Math.PI / 2; rim.position.y = 2; this.scene.add(rim);
     const side = new THREE.Mesh(new THREE.CylinderGeometry(1400, 1380, 50, 160, 1, true), new THREE.MeshStandardMaterial({ color: 0x151a4a, roughness: 0.6 }));
     side.position.y = -25; this.scene.add(side);
-    const ground = new THREE.Mesh(new THREE.PlaneGeometry(60000, 60000), new THREE.MeshStandardMaterial({ color: 0x241f4a, roughness: 0.95 }));
+    const ground = (this.ground = new THREE.Mesh(new THREE.PlaneGeometry(60000, 60000), new THREE.MeshStandardMaterial({ color: 0x241f4a, roughness: 0.95 })));
     ground.rotation.x = -Math.PI / 2; ground.position.y = -52; ground.receiveShadow = true; this.scene.add(ground);
   }
 
@@ -180,6 +190,7 @@ export class World {
           vA = (0.35 + 0.65*abs(sin(uTime*0.7+ph))) * smoothstep(40.0, 260.0, d) * (1.0 - smoothstep(1500.0, 2600.0, d)); }`,
       fragmentShader: `varying float vA; void main(){ float d = length(gl_PointCoord-0.5); float a = smoothstep(0.5, 0.0, d); gl_FragColor = vec4(vec3(1.0,0.86,0.62)*a*vA*0.55, 1.0); }`,
     });
+    this.dustMat = m;
     const dust = new THREE.Points(g, m); dust.userData.noDepth = true; dust.renderOrder = 20; this.scene.add(dust);
     // soft god rays from the sun, billboarded fans behind the library
     const rayMat = new THREE.ShaderMaterial({
@@ -196,6 +207,73 @@ export class World {
     const rays = new THREE.Mesh(new THREE.PlaneGeometry(5200, 2600), rayMat);
     rays.position.set(0, 1000, -2300); rays.rotation.x = 0.35; rays.userData.noDepth = true; rays.renderOrder = 15;
     this.scene.add(rays);
+  }
+
+
+  // v10 · the Biblioteca at night: the same hall as Fabio's footage (navy sky full of stars, soft nebulae,
+  // light falling from the zenith, glowing golden rings on the floor). Called once, before the first frame.
+  night() {
+    const sc = this.scene;
+    sc.fog.color.set(0x111a48); sc.fog.density = 0.00013;
+    this.skyMat.fragmentShader = `varying vec3 vDir; uniform float uTime; ${NOISE}
+      vec3 C(float r,float g,float b){ return vec3(r,g,b)/255.0; }
+      float star(vec3 d, float sc, float thr, float seed){
+        vec2 uv = vec2(atan(d.x, -d.z) / 6.2831853 * 2.0, asin(clamp(d.y, -1.0, 1.0)) / 3.14159265) * sc;
+        vec2 id = floor(uv), f = fract(uv) - 0.5; float h = hash(id + seed);
+        if (h < thr) return 0.0;
+        vec2 o = vec2(hash(id + seed + 3.1), hash(id + seed + 7.7)) - 0.5;
+        float r = length(f - o * 0.7);
+        float tw = 0.55 + 0.45 * sin(uTime * (1.2 + h * 2.5) + h * 60.0);
+        return smoothstep(0.16, 0.0, r) * tw * (0.35 + 0.65 * fract(h * 37.0)); }
+      void main(){
+        vec3 d = normalize(vDir); float e = d.y; float az = atan(d.x, -d.z);
+        vec3 zen = C(9.0,14.0,44.0), mid = C(20.0,31.0,88.0), hor = C(40.0,52.0,124.0), low = C(12.0,17.0,50.0);
+        vec3 col = mix(hor, mid, smoothstep(0.0, 0.22, e));
+        col = mix(col, zen, smoothstep(0.22, 0.85, e));
+        if (e < 0.0) col = mix(hor, low, smoothstep(0.0, 0.18, -e));
+        // nebulae: violet and blue veils, strongest a little above the horizon
+        float n1 = fbm(vec2(az * 2.2 + 11.0, e * 5.5) + uTime * 0.004), n2 = fbm(vec2(az * 4.3 - 3.0, e * 9.0 + 5.0));
+        float band = smoothstep(0.02, 0.2, e) * (1.0 - smoothstep(0.45, 0.9, e));
+        col += C(74.0, 46.0, 140.0) * smoothstep(0.48, 0.85, n1) * 0.55 * band;
+        col += C(40.0, 82.0, 190.0) * smoothstep(0.55, 0.9, n2) * 0.35 * band;
+        // light falling from the zenith, and a faint warm glow on the horizon (the library's own light)
+        float z = acos(clamp(e, -1.0, 1.0));
+        col += C(120.0, 150.0, 255.0) * exp(-pow(z / 0.42, 2.0)) * 0.22;
+        col += C(255.0, 190.0, 120.0) * exp(-pow(e / 0.05, 2.0)) * 0.10;
+        // stars (three layers; the dense small ones only high in the sky)
+        float st = star(d, 150.0, 0.972, 1.0) + star(d, 320.0, 0.982, 9.0) * smoothstep(0.05, 0.3, e) + star(d, 70.0, 0.992, 21.0) * 1.4;
+        col += vec3(0.86, 0.9, 1.0) * st * smoothstep(-0.02, 0.1, e);
+        gl_FragColor = vec4(col, 1.0);
+      }`;
+    this.skyMat.needsUpdate = true;
+    // lights: a warm key (the stage light), a cool backlight, a navy fill
+    this.key.color.set(0xffe4c4); this.key.intensity = 1.45;
+    this.sun.color.set(0x7f97ff); this.sun.intensity = 1.05; this.sun.position.set(200, 700, -1800);
+    this.hemi.color.set(0x6f87dd); this.hemi.groundColor.set(0x0b1030); this.hemi.intensity = 0.55;
+    sc.environment = this.nightEnv(this.renderer);
+    // the floor's rings glow (an emissive copy of the plaza's lines), the ground beyond is the night
+    const m = this.plaza.material; m.emissiveMap = this.plazaTexture(true); m.emissive = new THREE.Color(0xffffff); m.emissiveIntensity = 1.0; m.needsUpdate = true;
+    m.color.setRGB(0.86, 0.9, 1.0);
+    this.ground.material.color.set(0x0c1234);
+    this.rim.material.emissiveIntensity = 2.2;
+    this.rayMat.uniforms.uTint.value.setRGB(0.62, 0.72, 1.0);
+    this._base = null; // setAccent re-reads the base colours from the night
+    this.isNight = true;
+  }
+
+  nightEnv(r) {
+    const es = new THREE.Scene();
+    const sky = new THREE.Mesh(new THREE.SphereGeometry(50, 32, 16), new THREE.ShaderMaterial({ side: THREE.BackSide,
+      vertexShader: 'varying vec3 vD; void main(){ vD = normalize(position); gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
+      fragmentShader: 'varying vec3 vD; void main(){ float e = vD.y; vec3 c = mix(vec3(0.10,0.13,0.32), vec3(0.03,0.05,0.16), smoothstep(0.0, 0.8, e)); if (e < 0.0) c = mix(vec3(0.10,0.13,0.32), vec3(0.05,0.06,0.16), smoothstep(0.0, 0.3, -e)); gl_FragColor = vec4(c, 1.0); }' }));
+    es.add(sky);
+    const card = (color, intensity, pos, w, h) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(color).multiplyScalar(intensity), side: THREE.DoubleSide })); m.position.set(...pos); m.lookAt(0, 0, 0); es.add(m); };
+    card(0xffe6c8, 1.0, [-22, 30, 26], 26, 16);
+    card(0xffb45a, 0.55, [0, 6, -46], 60, 6);
+    card(0x8fa8ff, 0.7, [40, 20, 10], 14, 20);
+    card(0xc9d6ff, 0.35, [0, 46, 0], 30, 30);
+    const pm = new THREE.PMREMGenerator(r);
+    return pm.fromScene(es, 0.02, 0.1, 200).texture;
   }
 
   set({ time = 0, focus = 800, aperture = 0.00006, maxblur = 0.009, bloom = 0.38, fade = 0, flash = 0, flashCol = [1, 0.95, 0.86], vig = 0.32, exposure = 1.0, rays = 1 }) {

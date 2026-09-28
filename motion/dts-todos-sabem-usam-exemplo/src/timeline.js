@@ -494,6 +494,8 @@ export function buildFilm(ctx) {
 
   // ------------------------------------------------------------ update
   function updateFilm(t, nt) {
+    // v10: a re-edit can hide the Passo 1 button and the threads, and add its own light to the library
+    const V10 = window.__v10 || {};
     // ============ CAMERA (computed first: projections below depend on it)
     const { P, T, fov, aperture } = poseAt(nt);
     setCam(P, T, fov);
@@ -605,7 +607,7 @@ export function buildFilm(ctx) {
     // ============ STEP PROPS
     // Passo 1: pedestal + capsule button + cursor press
     {
-      const on = t > 26.3 && t < 31.2; vis(btnPed, on); vis(btn, on);
+      const on = t > 26.3 && t < 31.2 && !V10.hideBtn; vis(btnPed, on); vis(btn, on);
       if (!on) aoBtn.visible = false;
       if (on) {
         const y = riseY(t, 26.35, 0.9, -300, 1.2) + (t > 30.2 ? sinkY(t, 30.2, 0.8, -300) : 0);
@@ -775,10 +777,11 @@ export function buildFilm(ctx) {
     // threads of reuse (Somos Exemplo)
     threads.forEach((th) => {
       const t0 = 64.4 + th.userData.delay, u = E.inOutCubic(seg(t, t0, t0 + 1.4));
-      th.visible = t > t0 && t < 81.2;
+      th.visible = t > t0 && t < 81.2 && !V10.noThreads;
       th.material.uniforms.uP.value = u; th.material.uniforms.uA.value = 0.62 + 0.14 * Math.sin(nt * 1.3 + th.userData.delay * 7);
-      if (u >= 1) { const i = th.userData.tile; const g = pulse(t, t0 + 1.4, 0.08, 0.9) * 1.0 + 0.25; ring.set(i, 1, g * 24, g); }
+      if (u >= 1 && !V10.noThreads) { const i = th.userData.tile; const g = pulse(t, t0 + 1.4, 0.08, 0.9) * 1.0 + 0.25; ring.set(i, 1, g * 24, g); }
     });
+    if (V10.ringHook) V10.ringHook(ring, t, nt);
     ring.commit();
 
     // ============ HUD
@@ -1007,5 +1010,5 @@ export function buildFilm(ctx) {
     if (!(t > 28.5 && t < 58.1)) return null;
     const p = modalPlan(t, nt); return { tex: p.under ? [p.under, p.img] : [p.img] };
   };
-  return { duration: DURATION, film0: FILM0, update, needs, loadClip, cam: (nt) => poseAt(nt), story: S, NT, INSERTS, SHUTTER };
+  return { duration: DURATION, film0: FILM0, update, needs, loadClip, cam: (nt) => poseAt(nt), story: S, NT, INSERTS, SHUTTER, ring, slotPos, slotQ, TARGET, podium, emblem, PILLARS, MODAL, aoPil, newCard };
 }

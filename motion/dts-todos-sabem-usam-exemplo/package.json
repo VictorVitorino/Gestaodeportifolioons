@@ -1,9 +1,9 @@
 {
   "name": "dts-todos-sabem-usam-exemplo-motion",
-  "version": "9.0.0",
+  "version": "10.0.0",
   "private": true,
   "type": "module",
-  "description": "Curtas 3D cinematográficos DTS · Todos Sabem, Todos Usam, Somos Exemplo — v9 'O Fio Dourado · a jornada do Fabio' (2:16): as filmagens do Fabio (tema escrito em luz, o toque na Biblioteca de Skills, o portal para o universo FLOWS, o botão Publicar skill) e uma íris dourada para o FLOWS 3D em plano-sequência, com o Fabio de corpo inteiro no mundo; v8: o corte com menos de 1:30; v7: a versão completa. three.js (PBR, DOF, motion blur, bloom), renderizado quadro a quadro",
+  "description": "Curtas 3D cinematográficos DTS · Todos Sabem, Todos Usam, Somos Exemplo — v10 'A Travessia' (1:59, sem falas): o Fabio é transportado ao mundo FLOWS, DTS escrito no céu, o nivelamento das três colunas, a Biblioteca de Skills, o Publicar Skill apertado pelo próprio Fabio, o formulário em plano-sequência no salão noturno, o chafariz de luz e o ranking com a DTS em 1º; v9 'O Fio Dourado · a jornada do Fabio' (2:16); v8: o corte com menos de 1:30; v7: a versão completa. three.js (PBR, DOF, motion blur, bloom), renderizado quadro a quadro",
   "scripts": {
     "intro": "./tools/intro.sh",
     "bake": "node bake.mjs",
@@ -23,7 +23,13 @@
     "preview9": "PAGE=film9.htm node render.mjs preview 2.8,13.6,20.8,25.8,28.0,36.8,50.6,66.8,90.2,96.3,102.6,108.4,119.6,132.0 out/preview9",
     "frames9": "./tools/render9.sh",
     "encode9": "./tools/encode9.sh",
-    "storyboard9": "python3 tools/storyboard9.py out/frames9 video/storyboard9.jpg"
+    "storyboard9": "python3 tools/storyboard9.py out/frames9 video/storyboard9.jpg",
+    "footage10": "./tools/footage10.sh",
+    "audio10": "python3 audio/soundtrack10.py audio/soundtrack10.wav",
+    "preview10": "PAGE=film10.htm node render.mjs preview 3.3,9.0,13.6,24.3,33.2,38.7,39.8,48.5,75,89.5,97.6,107.4,116.6 out/preview10",
+    "frames10": "./tools/render10.sh",
+    "encode10": "./tools/encode10.sh",
+    "storyboard10": "python3 tools/storyboard10.py out/frames10 video/storyboard10.jpg"
   },
   "dependencies": {
     "playwright-core": "1.56.0",

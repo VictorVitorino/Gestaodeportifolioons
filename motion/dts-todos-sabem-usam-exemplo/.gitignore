@@ -16,3 +16,7 @@ __pycache__/
 fm_src/
 fabio_poses/
 audio/soundtrack9.wav
+# v10: the clips' frames and the opening plate (tools/footage10.sh)
+clips10/
+plates10/*.jpg
+audio/soundtrack10.wav

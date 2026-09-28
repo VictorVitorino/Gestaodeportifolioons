@@ -1,0 +1,94 @@
+/* v10 · A Travessia — graphics over the plate (camera-tracked), the act and step tags, the press and the
+   iris. No sentences: titles and labels only. */
+#hud10 { position: absolute; inset: 0; pointer-events: none; color: #fff; overflow: hidden; z-index: 5 }
+#hud10 .mk { display: inline-block; overflow: hidden; vertical-align: bottom }
+#hud10 .mk > span { display: inline-block; white-space: pre }
+
+/* 1. the golden strand (screen light over the flash) */
+#hud10 .ribbon { position: absolute; left: 0; top: 0; mix-blend-mode: normal }
+
+/* camera-tracked layers: reference-frame pixels, transformed per frame */
+#hud10 .trk { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0 }
+#hud10 .dts { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0 }
+#hud10 .dsvg { position: absolute; left: 0; top: 0; overflow: visible }
+#hud10 .dsvg .dfill path { filter: drop-shadow(0 6px 10px rgba(10, 14, 60, .45)) }
+#hud10 .dsvg .thread { stroke: #ffe39a; stroke-width: 3.2; stroke-linecap: round; filter: drop-shadow(0 0 6px rgba(255, 170, 50, .95)) }
+#hud10 .dts .tag { position: absolute; left: 460px; width: 1000px; display: flex; align-items: center; justify-content: center; gap: 22px;
+  font: 800 27px/1 Inter, sans-serif; letter-spacing: .36em; color: #14215c; white-space: nowrap;
+  text-shadow: 0 0 10px rgba(255, 255, 255, .9), 0 0 2px rgba(255, 255, 255, 1) }
+#hud10 .dts .tag span { padding-left: .36em }
+#hud10 .dts .tag i { display: block; height: 2px; width: calc(var(--r, 0) * 90px); background: linear-gradient(90deg, rgba(242, 181, 68, 0), #e9a53a 40%, #fff2c8);
+  box-shadow: 0 0 8px rgba(255, 190, 90, .9) }
+#hud10 .dts .tag i:last-child { background: linear-gradient(270deg, rgba(242, 181, 68, 0), #e9a53a 40%, #fff2c8) }
+
+/* 3. the columns of light */
+#hud10 .cols { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px }
+#hud10 .col { position: absolute; left: 0; top: 0; width: 0; height: 0 }
+#hud10 .col .beam { position: absolute; border-radius: 10px 10px 0 0;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, color-mix(in srgb, var(--c) 55%, transparent) 14%, color-mix(in srgb, var(--l) 30%, transparent) 34%,
+    rgba(255, 255, 255, .22) 50%, color-mix(in srgb, var(--l) 30%, transparent) 66%, color-mix(in srgb, var(--c) 55%, transparent) 86%, rgba(255, 255, 255, 0) 100%);
+  -webkit-mask-image: linear-gradient(0deg, rgba(0, 0, 0, .55), #000 18%, #000 100%); mask-image: linear-gradient(0deg, rgba(0, 0, 0, .55), #000 18%, #000 100%);
+  box-shadow: 0 0 38px 6px color-mix(in srgb, var(--c) 45%, transparent) }
+#hud10 .col .core { position: absolute; width: 3.2px; border-radius: 2px; background: linear-gradient(0deg, rgba(255, 255, 255, .2), #fff 30%, #fff);
+  box-shadow: 0 0 10px 3px var(--l), 0 0 34px 10px color-mix(in srgb, var(--c) 70%, transparent) }
+#hud10 .col .cap { position: absolute; border-radius: 50%; border: 3px solid var(--l); background: radial-gradient(closest-side, rgba(255, 255, 255, .55), color-mix(in srgb, var(--c) 40%, transparent)) }
+#hud10 .col .foot { position: absolute; border-radius: 50%; border: 3px solid var(--l);
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--l) 55%, transparent), color-mix(in srgb, var(--c) 18%, transparent) 70%, transparent);
+  box-shadow: 0 0 26px 8px color-mix(in srgb, var(--c) 60%, transparent) }
+#hud10 .col .mote { position: absolute; left: -3px; top: -3px; width: 6px; height: 6px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px 3px var(--l) }
+#hud10 .col .lbl { position: absolute; transform: translate(-50%, -100%); padding: 6px 4px }
+#hud10 .col .lbl span { display: flex; align-items: center; gap: 16px; padding: 13px 28px 13px 20px; border-radius: 999px; white-space: nowrap;
+  font: 800 37px/1 Inter, sans-serif; letter-spacing: .05em; color: #fff;
+  background: linear-gradient(180deg, rgba(24, 34, 92, .9), rgba(10, 16, 54, .9)); border: 1.5px solid var(--l);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--c) 70%, transparent), 0 8px 20px rgba(0, 0, 24, .45) }
+#hud10 .col .lbl span i { width: 16px; height: 16px; border-radius: 50%; background: var(--l); box-shadow: 0 0 10px 3px var(--c) }
+#hud10 .lvl { position: absolute; height: 3px; border-radius: 2px; background: linear-gradient(90deg, rgba(255, 214, 130, 0), #ffe39a 8%, #fff4d4 50%, #ffe39a 92%);
+  box-shadow: 0 0 10px 3px rgba(255, 196, 90, .8) }
+#hud10 .lvl.done { background: linear-gradient(90deg, rgba(255, 214, 130, 0), rgba(255, 227, 154, .75) 8%, rgba(255, 244, 212, .75) 50%, rgba(255, 227, 154, .75) 92%, rgba(255, 214, 130, 0)) }
+#hud10 .lvl b { position: absolute; right: -14px; top: -13px; width: 28px; height: 28px; border-radius: 50%;
+  background: radial-gradient(closest-side, #fff, #ffe7a8 35%, rgba(255, 170, 50, .5) 65%, rgba(255, 150, 40, 0)) }
+
+/* 4. act tag and step tag */
+#hud10 .act { position: absolute; left: 56px; top: 50px; display: flex; align-items: center; gap: 14px; padding: 10px 22px 10px 10px; border-radius: 999px;
+  background: linear-gradient(180deg, rgba(20, 28, 80, .72), rgba(10, 14, 48, .72)); border: 1px solid rgba(255, 255, 255, .16);
+  box-shadow: 0 8px 22px rgba(0, 0, 20, .35); font: 800 19px/1 Inter, sans-serif; letter-spacing: .16em; text-transform: uppercase }
+#hud10 .act b { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: var(--c); color: #0b1440; font: 900 16px/1 Inter, sans-serif; letter-spacing: 0;
+  box-shadow: 0 0 16px color-mix(in srgb, var(--c) 80%, transparent) }
+#hud10 .step { position: absolute; left: 0; right: 0; bottom: 46px; text-align: center }
+#hud10 .step .pl { display: inline-flex; align-items: center; gap: 14px; padding: 10px 26px 10px 10px; border-radius: 999px;
+  background: linear-gradient(180deg, rgba(20, 28, 80, .8), rgba(10, 14, 48, .82)); border: 1px solid rgba(255, 214, 140, .35);
+  box-shadow: 0 10px 26px rgba(0, 0, 20, .4), 0 0 24px rgba(255, 180, 80, .12) }
+#hud10 .step .n { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(180deg, #ffe39e, #f2ab40); color: #3a2204; font: 900 20px/1 Inter, sans-serif }
+#hud10 .step .k { font: 800 15px/1 Inter, sans-serif; letter-spacing: .28em; text-transform: uppercase; color: #ffd27a }
+#hud10 .step .t { font: 700 24px/1 Inter, sans-serif; color: #fff; display: inline-block }
+
+/* 5. the library counter */
+#hud10 .c441 { position: absolute; left: 0; right: 0; top: 64px; text-align: center; transform-origin: 50% 0 }
+#hud10 .c441:before { content: ''; position: absolute; left: 50%; top: 50%; width: 820px; height: 270px; transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(6, 10, 40, .72), rgba(6, 10, 40, 0)); z-index: -1 }
+#hud10 .c441 .mk { display: block; overflow: visible }
+#hud10 .c441 .n { font: 900 118px/1 Inter, sans-serif; letter-spacing: -.01em; color: #fff3d6;
+  text-shadow: 0 0 26px rgba(255, 190, 90, .85), 0 0 70px rgba(255, 160, 50, .5), 0 6px 20px rgba(0, 0, 30, .6) }
+#hud10 .c441 .l { margin-top: 8px; font: 800 26px/1.2 Inter, sans-serif; letter-spacing: .02em; color: #ffe2b8; text-shadow: 0 2px 12px rgba(0, 0, 30, .8) }
+
+/* 6. the press and the iris */
+#hud10 .press > div, #hud10 .press .psp { position: absolute; left: 0; top: 0 }
+#hud10 .pglow { border-radius: 999px; mix-blend-mode: screen;
+  background: radial-gradient(closest-side, rgba(255, 244, 214, .95), rgba(255, 196, 96, .55) 45%, rgba(255, 150, 40, 0) 100%) }
+#hud10 .pring { border-radius: 50%; border: 4px solid #fff3d0; box-shadow: 0 0 18px 6px rgba(255, 190, 90, .9), inset 0 0 14px 4px rgba(255, 190, 90, .6) }
+#hud10 .pflash { width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(closest-side, #fff, rgba(255, 230, 170, .8) 30%, rgba(255, 180, 60, 0)) }
+#hud10 .psp i { position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: #fff6dc; box-shadow: 0 0 10px 4px rgba(255, 190, 90, .9) }
+#hud10 .iris { position: absolute; left: 0; top: 0; border-radius: 50%; transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 5px rgba(255, 238, 200, .95), 0 0 24px 10px rgba(255, 196, 96, .9), 0 0 80px 30px rgba(255, 150, 40, .45), inset 0 0 40px 10px rgba(255, 196, 96, .6) }
+
+/* 7. the golden Nº 1 over Fabio's raised finger */
+#hud10 .num1 { position: absolute; left: 0; top: 0; transform-origin: 50% 100% }
+#hud10 .num1 b { position: relative; display: block; padding: 10px 22px 12px; border-radius: 22px; font: 900 44px/1 Inter, sans-serif;
+  color: #3a2204; background: linear-gradient(180deg, #ffe39e, #f2ab40); border: 2px solid rgba(255, 246, 220, .95);
+  box-shadow: 0 10px 34px rgba(120, 60, 0, .45), 0 0 50px rgba(255, 196, 90, .7), inset 0 2px 0 rgba(255, 255, 255, .6); white-space: nowrap }
+#hud10 .num1 .rays { position: absolute; left: 50%; top: 50%; width: 360px; height: 360px;
+  background: repeating-conic-gradient(from 0deg, rgba(255, 214, 130, .55) 0 6deg, rgba(255, 214, 130, 0) 6deg 30deg);
+  -webkit-mask-image: radial-gradient(closest-side, #000 18%, rgba(0, 0, 0, 0) 100%); mask-image: radial-gradient(closest-side, #000 18%, rgba(0, 0, 0, 0) 100%); mix-blend-mode: screen }
+#hud10 .col.c1 .beam { background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, color-mix(in srgb, var(--c) 50%, transparent) 10%, color-mix(in srgb, var(--l) 16%, transparent) 26%,
+  rgba(255, 255, 255, .06) 50%, color-mix(in srgb, var(--l) 16%, transparent) 74%, color-mix(in srgb, var(--c) 50%, transparent) 90%, rgba(255, 255, 255, 0) 100%) }
+#hud10 .col.c1 .core { opacity: .35 !important }
