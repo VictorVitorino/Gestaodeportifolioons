@@ -1,9 +1,9 @@
 {
   "name": "dts-todos-sabem-usam-exemplo-motion",
-  "version": "8.0.0",
+  "version": "9.0.0",
   "private": true,
   "type": "module",
-  "description": "Curtas 3D cinematográficos DTS · Todos Sabem, Todos Usam, Somos Exemplo — v8 'O Fio Dourado' (menos de 1:30): o Fabio abre o filme e é composto no mundo FLOWS (estalo de dedo que materializa o botão Compartilhar Skill, pódio da DTS), montagem com rampas de velocidade e fio dourado nas transições; v7: a versão completa com ritmo de leitura. three.js (PBR, DOF, motion blur, bloom), renderizado quadro a quadro",
+  "description": "Curtas 3D cinematográficos DTS · Todos Sabem, Todos Usam, Somos Exemplo — v9 'O Fio Dourado · a jornada do Fabio' (2:16): as filmagens do Fabio (tema escrito em luz, o toque na Biblioteca de Skills, o portal para o universo FLOWS, o botão Publicar skill) e uma íris dourada para o FLOWS 3D em plano-sequência, com o Fabio de corpo inteiro no mundo; v8: o corte com menos de 1:30; v7: a versão completa. three.js (PBR, DOF, motion blur, bloom), renderizado quadro a quadro",
   "scripts": {
     "intro": "./tools/intro.sh",
     "bake": "node bake.mjs",
@@ -16,7 +16,14 @@
     "footage8": "./tools/footage8.sh",
     "audio8": "python3 audio/soundtrack8.py audio/soundtrack8.wav",
     "preview8": "PAGE=film8.htm node render.mjs preview 2.8,6,10,16,21,25.7,27,30,35,53,60,64,72,77,84 out/preview8",
-    "frames8": "PAGE=film8.htm node render.mjs frames 24 0 1 out/frames8"
+    "frames8": "PAGE=film8.htm node render.mjs frames 24 0 1 out/frames8",
+    "footage9": "./tools/footage9.sh",
+    "textqa9": "node textqa9.mjs",
+    "audio9": "python3 audio/soundtrack9.py audio/soundtrack9.wav",
+    "preview9": "PAGE=film9.htm node render.mjs preview 2.8,13.6,20.8,25.8,28.0,36.8,50.6,66.8,90.2,96.3,102.6,108.4,119.6,132.0 out/preview9",
+    "frames9": "./tools/render9.sh",
+    "encode9": "./tools/encode9.sh",
+    "storyboard9": "python3 tools/storyboard9.py out/frames9 video/storyboard9.jpg"
   },
   "dependencies": {
     "playwright-core": "1.56.0",

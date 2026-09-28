@@ -1,6 +1,65 @@
-# DTS · Todos Sabem, Todos Usam, Somos Exemplo — curtas 3D cinematográficos (v8 e v7)
+# DTS · Todos Sabem, Todos Usam, Somos Exemplo — curtas 3D cinematográficos (v9, v8 e v7)
 
-## v8 · O Fio Dourado (1:28)
+## v9 · O Fio Dourado · a jornada do Fabio (2:16)
+
+A versão longa e calma (mais de 2 minutos): mais movimento, respiro entre as falas, calmaria no
+preenchimento do formulário e tempo de leitura para cada texto. As filmagens do Fabio viram uma única
+cena contínua: o tema escrito em luz, a caminhada, **o toque na Biblioteca de Skills**, o **portal para o
+universo FLOWS**, as skills orbitando ao redor dele e o botão **Publicar skill** que ele oferece a quem
+assiste. O dedo aperta o botão e uma **íris dourada** se abre a partir dele para o FLOWS 3D, que segue em
+**plano-sequência** (o filme da v7 no ritmo de leitura, sem cortes secos). A câmera só deixa o formulário
+para encontrar o Fabio, agora **de corpo inteiro dentro do mundo**, feito de luz dourada dos pés à cabeça,
+como o portal: apresentando o mural, de braços abertos para os arcos, apontando o **Nº 1** e se despedindo.
+
+| Entrega | Arquivo |
+|---|---|
+| Filme v9 (1920×1080, 24 fps, H.264 + AAC 48 kHz) | `video/FLOWS_O_Fio_Dourado_v9.mp4` |
+| Pôster e storyboard | `video/poster9.jpg`, `video/storyboard9.jpg` |
+
+| Tempo | Ato | Cena | Como foi feito |
+|---|---|---|---|
+| 0:00 | **Abertura** | Espirais de luz em volta do Fabio escrevem **TODOS SABEM · TODOS USAM · SOMOS EXEMPLO**; o logo FLOWS; o *Pilar 01* enquanto ele caminha | referência 1 + tipografia em luz |
+| 0:13 | **Todos Sabem** | Corte na ação: a mão dele **toca a Biblioteca de Skills**, um anel dourado se forma, o **portal** se abre, o universo FLOWS nasce e as skills **orbitam** ao redor dele: **441 skills prontas para reuso** | continuação da entrada (`media/referencia_continuacao.mp4`) |
+| 0:22 | **Todos Usam** | Fusão na órbita; a câmera desce, o botão **Publicar skill** surge diante dele, o Fabio aponta e o dedo de quem assiste aperta (*Passo 1 de 6*) | `media/referencia_botao.mp4` |
+| 0:27 | | **A íris dourada** abre, a partir do botão, o formulário **Compartilhar Skill** do FLOWS 3D | máscara circular + anel de luz |
+| 0:28 | | **Plano-sequência** do formulário, calmo: nome padrão e sua anatomia, onde foi testada, modelo, SKILL.zip, Próximo, Detalhes (Template, área DTS, co-responsáveis, descrição), *Compartilhar Skill*; cada passo com legenda numerada (*Passo N de 6*) e as etiquetas da v7 de volta | o filme da v7, velocidade 0,8–1,1× |
+| 1:27 | **Somos Exemplo** | O card voa ao mural: **442**; a câmera recua e encontra o **Fabio apresentando** o mural | Fabio de corpo inteiro no 3D |
+| 1:39 | | *Pilar 03 · Somos Exemplo*; os **arcos dourados** partem para todo o mural e o **Fabio abre os braços** | idem |
+| 1:52 | | **Ranking de Áreas**: o pódio sobe, a câmera desliza para o **Fabio apontando o Nº 1**, que brota dourado do dedo dele quando o troféu pousa na DTS (1.557 pontos) | idem + selo em motion graphics |
+| 2:05 | Encerramento | *Todos Sabem. Todos Usam. Somos Exemplo.* · DTS · FLOWS · Alvarez & Marsal, com o **Fabio acenando** ao lado do DTS | cartela da v7 + Fabio |
+
+**O Fabio de corpo inteiro.** As poses vêm do *model sheet* animado (`media/fabio_poses.mp4`: acenando,
+apresentando, *explaining #1 ranking*, boas-vindas). A folha dá um zoom lento: `tools/stab9.py` estima,
+quadro a quadro, a similaridade que o leva de volta ao primeiro quadro, e cada pose fica parada na sua
+coluna, só com o movimento dela. `tools/matte9.py` recorta cada pose (BiRefNet lite): pinta por cima a mão
+ou o *#1* da pose vizinha e remove a franja cinza da folha (descontaminação de cor). `tools/posemeta9.py`
+mede onde ficam as solas e a ponta do dedo. No filme (`src/film9.js`), cada pose é um *billboard* de pé no
+chão do mundo, virado para a câmera, com sombra de contato e luz de borda. Os quadros correm em vaivém, e
+ele se materializa de baixo para cima numa faixa de luz dourada, com um anel no chão e faíscas.
+
+**Câmera.** O plano-sequência nunca corta: nos momentos do Fabio, a câmera da v7 é misturada suavemente
+com uma câmera de desvio (entrada e saída de cerca de 1 s), e o foco vai para ele. Os enquadramentos foram
+calculados por projeção (pés num pixel-alvo, altura de 40 a 50% do quadro, sem invadir o pódio).
+
+**Texto.** Regra de leitura mais calma que a da v7: legenda com 1,0 s + 13,5 caracteres/s (mínimo 3 s),
+lockups e contador com os caracteres a 13,5/s de visibilidade total, e 0,35 s de respiro entre legendas
+(ou troca no lugar, quando são do mesmo passo). `node textqa9.mjs` confere tudo: *todos os textos com
+tempo de leitura*.
+
+**Som** (`audio/soundtrack9.py`). Música nova sobre o corte: o toque (celesta), o portal (riser e passagem),
+o universo FLOWS (sinos e cordas), a órbita (celesta flutuante e o contador), o botão e o aperto (clique,
+grave e a íris), um groove calmo sob o formulário, um brilho a cada vez que a luz forma o Fabio, fanfarra
+no Nº 1 e o final. Os efeitos da v7 são reposicionados pelo mapa de tempo do plano-sequência. Master em
+torno de -15 LUFS, com pico real de -1 dBTP.
+
+**Reproduzir a v9:** `npm run footage9` (quadros das filmagens, estabilização, recortes; `pip install
+rembg onnxruntime opencv-python-headless`) → `npm run audio9` → `npm run frames9` (3 processos) →
+`npm run encode9` → `npm run storyboard9`.
+
+---
+
+
+# v8 · O Fio Dourado (1:28)
 
 Um corte cinematográfico **com menos de 1:30**, com o **Fabio como anfitrião**. As duas cenas de referência
 enviadas pelo time (`media/referencia_inovadora_*.mp4`: o Fabio envolto por espirais de luz que viram o
