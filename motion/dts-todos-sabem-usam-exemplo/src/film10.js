@@ -14,6 +14,7 @@ import * as MG from './mg.js';
 import * as O from './objects.js';
 import * as K from './cut10.js';
 import { buildFountain } from './fountain10.js';
+import { SCHED } from './pace.js';
 
 const mixv = (a, b, u) => a.map((v, i) => v + (b[i] - v) * u);
 const pad = (n, w) => String(n).padStart(w, '0');
@@ -23,6 +24,8 @@ export function buildFilm10({ world, film7, hud, meta, project, plate, track, fo
   const F0 = film7.film0, SHUTTER = film7.SHUTTER;
   const { T3D, IRIS, TAKE_F, DURATION } = K;
   hud.classList.add('v9', 'v10');
+  // the take runs the name's anatomy a little faster than v7: its spotlight and labels leave more slowly
+  SCHED.name.spot = [0.05, 0.45, 5.85, 6.75]; SCHED.name.out = [5.9, 6.7];
   const vis = MG.vis;
 
   // ---------------------------------------------------------------- the plate layer (under the graphics)
