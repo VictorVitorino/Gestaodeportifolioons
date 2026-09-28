@@ -457,7 +457,9 @@ export function buildFilm10({ world, film7, hud, meta, project, plate, track, fo
       }
       // focus on him while the camera is with him (unless the shot keeps its own focus)
       const dist = Math.hypot(cam.position.x - x, cam.position.y - s.h * 0.6, cam.position.z - z);
-      const u = world.dof.uniforms; u.focus.value = lerp(u.focus.value, dist, 0.85);
+      // (the focus eases onto him over a second and eases off before he leaves: no focus pop)
+      const fIn = s.a <= T3D + 1e-6 ? 1 : E.inOutSine(seg(T, s.a, s.a + 1.0)), fOut = 1 - E.inOutSine(seg(T, s.b - 1.0, s.b));
+      const u = world.dof.uniforms; u.focus.value = lerp(u.focus.value, dist, 0.85 * fIn * fOut);
       // the golden Nº 1 over his raised finger (the ranking)
       if (s.id === K.NUM1.at && g.M.finger) {
         fab.updateMatrixWorld(true);
