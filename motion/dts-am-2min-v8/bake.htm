@@ -1,0 +1,31 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<link rel="stylesheet" href="fonts/fonts.css"><link rel="stylesheet" href="ui.css">
+<style>html,body{background:transparent!important;width:auto;height:auto;overflow:visible} #stage{position:absolute;left:0;top:0;padding:0} #stage>*{margin:0}</style>
+</head><body><div id="stage"></div>
+<script type="module">
+import * as UI from './src/ui.js';
+import { icon } from './src/icons.js';
+const stage = document.getElementById('stage');
+window.UI = UI; window.icon = icon;
+window.show = (kind, arg) => {
+  stage.innerHTML = '';
+  let el;
+  if (kind === 'modal') { el = window._modal || (window._modal = UI.shareModal()); stage.appendChild(el); el.setState(arg); }
+  else if (kind === 'det') { el = window._det || (window._det = UI.shareModalDetails()); stage.appendChild(el); el.setState(arg); }
+  else if (kind === 'card') { el = UI.skillCard(UI.SKILLS[arg]); stage.appendChild(el); }
+  else if (kind === 'newcard') {
+    // v5: the published skill already carries its quality score (trophy), like the real library cards
+    el = UI.skillCard({ t: '[DTS] - Change Management - Mapa de Impactos', area: ['network', 'DTS'], sc: 95, d: 'Entregável: Mapa de Impactos Organizacionais, separando por categoria de impacto, análise organizacional, mapa de riscos, ações de mitigação, heatmap. Resultado Final/Produto: Arquivo Excel, Apresentação em PPT.', a: 'Vitorino, Victor', dt: '27/09/2026', s: [0, 0, 0] }, '<span class="new">NOVA</span>');
+    stage.appendChild(el);
+  }
+  else if (kind === 'libhead') { el = UI.libHeader(); el.querySelector('.cn').textContent = arg; stage.appendChild(el); }
+  else if (kind === 'rank') { el = UI.ranking(); el.style.width = '760px'; stage.appendChild(el); }
+  else if (kind === 'sharebtn') { el = UI.shareButton(); el.style.boxShadow = 'none'; el.style.background = 'transparent'; el.style.textShadow = 'none'; stage.appendChild(el); }
+  else if (kind === 'logo') { el = UI.logo(arg || 120); stage.appendChild(el); }
+  else if (kind === 'rankcard') { el = UI.rankCard(arg); stage.appendChild(el); }
+  const r = el.getBoundingClientRect();
+  return { w: Math.ceil(r.width), h: Math.ceil(r.height) };
+};
+await Promise.all(['400 20px Inter', '500 20px Inter', '600 20px Inter', '700 20px Inter', '800 20px Inter', '900 20px Inter', '500 20px "JetBrains Mono"'].map((f) => document.fonts.load(f)));
+window.ready = true;
+</script></body></html>
