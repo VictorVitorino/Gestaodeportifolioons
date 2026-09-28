@@ -13,7 +13,7 @@ beats = [
     (28.6, 'O portal: o universo FLOWS', BLUE), (33.0, '441 skills orbitam o Fabio', BLUE), (37.0, '02 · Todos Usam: Publicar Skill', ORANGE),
     (38.9, 'O Fabio aperta o botão', ORANGE), (39.8, 'A íris dourada abre o salão 3D', ORANGE), (48.5, 'Página 1 · o nome [DTS]', ORANGE),
     (75.0, 'Página 2 · Detalhes', ORANGE), (85.5, 'A skill publicada voa à Biblioteca', ORANGE), (89.5, '442 · o Fabio apresenta', ORANGE),
-    (93.4, '03 · Somos Exemplo: a gota de luz', GOLD), (97.6, 'O chafariz alcança todas as skills', GOLD), (107.4, 'DTS em 1º · o Fabio levanta o nº 1', GOLD),
+    (93.95, '03 · Somos Exemplo: a gota de luz', GOLD), (97.6, 'O chafariz alcança todas as skills', GOLD), (107.4, 'DTS em 1º · o Fabio levanta o nº 1', GOLD),
     (116.6, 'Encerramento · o Fabio se despede', GOLD),
 ]
 cols, w = 3, 620; h = int(w * 1080 / 1920); pad = 16
