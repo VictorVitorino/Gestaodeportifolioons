@@ -8,4 +8,4 @@ run() { for w in 0 1 2; do PAGE=film10.htm node render.mjs frames 30 $w 3 out/fr
 run 0 41.0
 run 41.0
 for i in 1 2 3; do python3 tools/badframes10.py --rm | tail -1; run 0; done
-echo "render finished $(date +%H:%M:%S) $(ls out/frames10 | wc -l) frames"
+echo "render finished $(date +%H:%M:%S) $(ls out/frames10 | wc -l) frames" | tee -a logs/render10.log

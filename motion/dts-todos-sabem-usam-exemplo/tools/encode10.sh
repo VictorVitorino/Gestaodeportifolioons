@@ -3,7 +3,7 @@
 set -e
 cd "$(dirname "$0")/.."
 NF=$(node -e "import('./src/cut10.js').then(m=>console.log(Math.round(m.DURATION*30)))")
-until [ "$(ls out/frames10 | wc -l)" -ge "$NF" ] && [ -z "$(pgrep -f 'node [r]ender.mjs frames 30')" ]; do sleep 10; done
+until grep -q "render finished" logs/render10.log && [ "$(ls out/frames10 | wc -l)" -ge "$NF" ]; do sleep 20; done
 echo "frames complete ($NF) $(date +%H:%M:%S)"
 VF="scale=out_color_matrix=bt709:out_range=tv,format=yuv420p"
 COL="-colorspace bt709 -color_primaries bt709 -color_trc bt709"

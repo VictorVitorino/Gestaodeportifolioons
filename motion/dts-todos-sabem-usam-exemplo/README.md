@@ -1,4 +1,66 @@
-# DTS · Todos Sabem, Todos Usam, Somos Exemplo — curtas 3D cinematográficos (v9, v8 e v7)
+# DTS · Todos Sabem, Todos Usam, Somos Exemplo — curtas 3D cinematográficos (v10, v9, v8 e v7)
+
+## v10 · A Travessia (1:59, sem nenhuma fala)
+
+Versão totalmente customizada e lúdica, em **1080p a 30 fps**, com **menos de 2 minutos** e **cinematografia
+estilo Pixar 3D**. Nenhuma fala e nenhuma frase na tela: só títulos e etiquetas. A história é fixa:
+o Fabio é **transportado** ao mundo FLOWS e **entra pela porta de luz**; as iniciais **DTS** (Digital &
+Technology Services) são escritas no céu; um **nivelamento** mostra *Todos Sabem · Todos Usam · Somos
+Exemplo*; ele caminha até a **Biblioteca de Skills**, toca o painel, atravessa o portal e **ele mesmo aperta
+Publicar Skill**; a skill é construída (**as 2 páginas do formulário**) e publicada; o **contador** vai de 441
+para **442**; um **chafariz de luz** mostra que a skill ajuda todo mundo; e o **ranking** fecha com a **DTS em
+1º lugar** e o **Fabio levantando o número 1**. Um único cenário do começo ao fim: o salão 3D é o mesmo salão
+noturno das filmagens, sem quebra de ambiente.
+
+| Entrega | Arquivo |
+|---|---|
+| Filme v10 (1920×1080, 30 fps, H.264 + AAC 48 kHz, 1:59) | `video/FLOWS_A_Travessia_v10.mp4` |
+| Pôster e storyboard | `video/poster10.jpg`, `video/storyboard10.jpg` |
+
+| Tempo | Ato | Cena | Conector (sem corte seco) |
+|---|---|---|---|
+| 0:00 | **Transporte** | Fabio de braços cruzados no espaço de luz; anéis dourados e espirais o envolvem | as espirais crescem até o clarão |
+| 0:03 | | Um fio dourado da espiral atravessa o clarão e **vira o arco do logo FLOWS** | forma: espiral → anel → logo |
+| 0:04 | | A câmera desce, a **porta de luz** sobe e o Fabio se materializa dentro dela | luz: a porta inunda o quadro |
+| 0:07 | **DTS** | O palco FLOWS; um **fio de luz sai do "O"** e escreve **D·T·S** no céu, que se preenche em azul-marinho com borda dourada; *Digital & Technology Services* | câmera lenta suave (fluxo óptico) |
+| 0:11 | **Nivelamento** | Três **colunas de luz** sobem desiguais (placa esquerda, o próprio Fabio, placa direita); uma **linha dourada** passa e as nivela; **TODOS SABEM · TODOS USAM · SOMOS EXEMPLO** | as colunas afundam quando ele começa a andar |
+| 0:17 | **01 · Todos Sabem** | A caminhada; o **toque na Biblioteca de Skills**; o portal; o salão; **441 skills** orbitando | emendas no quadro exato das filmagens |
+| 0:36 | **02 · Todos Usam** | O botão **Publicar Skill** sobe; em câmera lenta, **o dedo do Fabio aperta** (a mão em 1ª pessoa foi apagada); o botão se carrega de luz | a **íris dourada** nasce do botão pressionado |
+| 0:39 | | O mesmo salão, agora em 3D: o formulário nasce da luz e o Fabio se materializa ao lado | câmera em movimento contínuo |
+| 0:42 | | **Página 1 · Arquivos**: nome [DTS] e sua anatomia, onde foi testada, modelo, tempo, SKILL.zip, Próximo · **Página 2 · Detalhes**: Template, área DTS, co-responsáveis, descrição, *Compartilhar Skill* (etiquetas *Passo N de 6*) | plano-sequência |
+| 1:23 | | O formulário dobra no card, que voa à Biblioteca: **442**, com o **Fabio apresentando** | a skill nova brilha no mural |
+| 1:32 | **03 · Somos Exemplo** | **O chafariz**: uma **gota de luz** sai da skill publicada e cai no centro da praça; a bacia se abre, o jato central sobe, os **três pilares** emergem e uma coroa de **44 jatos** alcança o mural inteiro, acendendo cada card; o Fabio de braços abertos | a luz escoa e o pódio sobe no lugar da bacia |
+| 1:42 | | **Ranking de Áreas**: a **DTS em 1º** (1.557 pontos) e o **Fabio levantando o número 1** | a câmera desliza até ele |
+| 1:51 | Encerramento | *Todos Sabem. Todos Usam. Somos Exemplo.* · DTS · FLOWS · A&M, com o Fabio acenando | fade |
+
+**A abertura** (`tools/plate10.py`) é uma única tomada a 30 fps feita das quatro filmagens do Fabio
+(`media/v10_*.mp4`): as emendas R21 → R22 → R23 caem no quadro idêntico; o R16 (a porta) tinha um quadro
+repetido a cada cinco e passa a rodar seus quadros únicos a 24 fps com intermediários por fluxo óptico
+(DIS); no palco, a velocidade desce suavemente a 0,3× (intermediários por fluxo óptico, sem tremor) para o
+DTS e o nivelamento, e volta a 1× quando ele anda. As transições são de luz, nunca branco puro. Em R23, a
+mão de quem assiste foi pintada por cima com um *clean plate* rastreado (`tools/hand10.py`), protegendo o
+dedo do Fabio, que é quem aperta o botão. `tools/track10.py` rastreia a câmera do palco (céu e piso, ORB +
+RANSAC), e os gráficos vivem dentro da cena: o DTS acompanha o céu, as colunas acompanham o piso.
+
+**O salão 3D** (`src/film10.js`, `world.night()`): o mundo da v7 relido à noite, com o mesmo azul-marinho,
+estrelas, nebulosas, luz vinda do zênite e os anéis dourados do piso acesos, para que a íris abra no
+**mesmo lugar** das filmagens. O formulário é o da v7 num plano-sequência mais ágil (sem legendas para ler,
+o próprio formulário é o texto). O **chafariz** (`src/fountain10.js`) é novo: gota, bacia, coluna, coroa de
+jatos (tubos de luz + gotículas) e o mural que se acende card a card. Os três pilares ficam sob o piso até
+o chafariz os erguer.
+
+**Som** (`audio/soundtrack10.py`): música original sem voz: as espirais, o mundo que nasce do anel, a caneta
+de luz que escreve o DTS (uma nota por contorno), as colunas e o nivelamento, a caminhada, o portal, a
+órbita e o contador, o aperto e a íris, o groove calmo do formulário, **uma nota para cada card que o
+chafariz acende**, a fanfarra do nº 1 e o final. Master em -16 LUFS, pico real ≤ -1 dBTP.
+
+**QA de movimento**: `tools/jumpscan10.py` mede a variação quadro a quadro e aponta saltos;
+`tools/badframes10.py` encontra quadros com falha de rasterização e o render os refaz.
+
+**Reproduzir a v10:** `npm run footage10` → `npm run audio10` → `npm run frames10` → `npm run encode10` →
+`npm run storyboard10`.
+
+---
 
 ## v9 · O Fio Dourado · a jornada do Fabio (2:16)
 
