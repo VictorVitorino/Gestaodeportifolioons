@@ -95,7 +95,8 @@ export const CAMS = [
   // the establishing shot the iris opens on: the form born from the light, Fabio beside it
   { a: T3D, b: 44.0, fin: 0, fout: 1.5, keys: [[T3D, [-120, 226, 1760], [-150, 266, 0], 32], [41.0, [-126, 232, 1640], [-150, 272, 0], 32], [42.5, [-165, 360, 1150], [-150, 420, -20], 31]] },
   // 442: Fabio presents the new skill on the library wall
-  { a: 87.3, b: 92.3, fin: 1.1, fout: 0, keys: [[87.3, [-110, 186, -210], [200, 190, -2250], 32], [92.3, [-90, 193, -300], [200, 192, -2250], 32]] },
+  // (it stays under the fountain's camera until that one has fully blended in: a hand-over, not a switch)
+  { a: 87.3, b: 93.3, fin: 1.1, fout: 0, keys: [[87.3, [-110, 186, -210], [200, 190, -2250], 32], [92.3, [-90, 193, -300], [200, 192, -2250], 32]] },
   // the fountain: the new card glows, its drop falls into the plaza, the eruption, then a slow orbit while
   // the jets reach everyone (deep focus: the whole library stays readable)
   { a: 91.8, b: 103.2, fin: 1.3, fout: 1.3, ap: 2.2e-5, focusAt: [0, 320, -200], keys: [
