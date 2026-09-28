@@ -7,13 +7,13 @@ F = lambda s, w=700: ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVu
 BLUE, ORANGE, GOLD, FAB = (61, 139, 255), (255, 138, 31), (242, 181, 68), (238, 232, 250)
 # (film seconds, scene, act colour) — the film clock is the v8 clock (src/cut8.js)
 beats = [
-    (0.6, 'Fabio no mundo FLOWS', FAB), (2.6, 'O tema escrito em luz', FAB), (4.6, 'O logo FLOWS nasce do fio', FAB),
+    (0.6, 'Fabio no mundo FLOWS', FAB), (2.95, 'O tema escrito em luz', FAB), (4.6, 'O logo FLOWS nasce do fio', FAB),
     (6.6, 'Todos Sabem · Todos Usam · Somos Exemplo', FAB), (10.2, 'Pilar 01 · Todos Sabem', BLUE), (15.0, 'Biblioteca: cada skill com sua pontuação', BLUE),
     (22.4, '441 skills prontas para reuso', BLUE), (25.4, 'Pilar 02 · Fabio apresenta', ORANGE), (27.1, 'O estalo: Compartilhar Skill', ORANGE),
-    (29.6, 'Passo 1 · Compartilhar Skill', ORANGE), (34.6, 'Passo 2 · o nome padrão', ORANGE), (40.2, 'Passos 3–5 · teste, modelo, SKILL.zip', ORANGE),
-    (45.0, 'Passo 6 · Detalhes', ORANGE), (48.4, 'Compartilhar Skill', ORANGE), (52.0, 'O voo do card', ORANGE),
+    (36.6, 'Passo 2 · o nome padrão', ORANGE), (40.2, 'Passos 3–5 · teste, modelo, SKILL.zip', ORANGE),
+    (44.0, 'Passo 6 · Detalhes', ORANGE), (49.2, 'Compartilhar Skill', ORANGE), (52.0, 'O voo do card', ORANGE),
     (55.4, 'Publicada: 442 skills', ORANGE), (60.6, 'Pilar 03 · Somos Exemplo', GOLD), (64.6, 'Arcos dourados para todos', GOLD),
-    (69.2, 'Ranking de áreas', GOLD), (73.6, 'Fabio no pódio de DTS', GOLD), (78.0, 'DTS nº 1 · 87 publicações', GOLD),
+    (70.5, 'Ranking de áreas', GOLD), (73.6, 'Fabio no pódio de DTS', GOLD), (78.0, 'DTS nº 1 · 87 publicações', GOLD),
     (84.0, 'Todos Sabem. Todos Usam. Somos Exemplo.', GOLD),
 ]
 cols, w = 3, 620; h = int(w * 1080 / 1920); pad = 16
