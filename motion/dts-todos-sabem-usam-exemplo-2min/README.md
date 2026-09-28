@@ -5,7 +5,9 @@ commit `49161cd`, 2:54). Mesmo conteúdo, mesma ordem, mesmos quadros renderizad
 
 | Entrega | Arquivo |
 |---|---|
-| Filme 2:00 | `video/DTS_Todos_Sabem_Usam_Exemplo_3D_2min.mp4` |
+| **Filme 2:00 — cores A&M (recomendado)** | `video/DTS_2min_cores-AM.mp4` |
+| Filme 2:00 — cores originais da v7 | `video/DTS_2min_cores-originais.mp4` |
+| Antes/depois da gradação | `grade/antes_depois.png` |
 | Folha de contato | `video/storyboard_2min.png` |
 
 ## Como foi encurtado (sem estragar)
@@ -40,3 +42,19 @@ Na fonte da v7 (`git worktree add <dir> 49161cd`):
 1. `python3 retime/plan.py` → mapa de quadros (`map.npy`) e nova curva (`newpace.json`)
 2. troque o `PACE` e o `INTRO.out` de `src/pace.js` (resultado em `retime/pace_2min.js`) e rode `python3 audio/soundtrack.py soundtrack_2min.wav`
 3. `python3 retime/encode.py` → lê os quadros da v7 em ordem e grava o filme de 2:00 com a trilha nova
+
+## Correção do contador 442
+
+O 442 é o total da **Biblioteca da Alvarez**, não da DTS. O rótulo mudou de *“+1 skill de DTS na Biblioteca”* para
+**“skills na Biblioteca da Alvarez · +1 de DTS”** (`patch/timeline.js`, linha do contador). Os 65 quadros afetados
+foram re-renderizados pelo pipeline original da v7 (render idêntico ao restante, verificado quadro a quadro) e
+substituídos no corte (`retime/encode2.py`).
+
+## Gradação cinematográfica A&M
+
+LUT 33³ (`grade/am_grade.cube`, gerado por `grade/amlut.py`), aplicado com interpolação tetraédrica + nitidez leve:
+- roxos/violetas → **azul-marinho profundo A&M**; azuis → aproximados do **azul A&M #0085CA**;
+- rosas/magentas → laranja quente (a luz dos pilares);
+- **laranja e dourado preservados** (pilares Todos Usam / Somos Exemplo, troféus, FLOWS);
+- curva de contraste suave com pretos puxando para o navy.
+Os arquivos têm codificação em 2 passes a ~5,8 Mb/s para ficarem abaixo do limite de 100 MB do GitHub.
