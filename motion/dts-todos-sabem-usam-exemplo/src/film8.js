@@ -234,7 +234,7 @@ export function buildFilm8({ world, film7, hud, imgs }) {
   const fabCache = new Map();
   const loadFab = async (n) => {
     let img = fabCache.get(n);
-    if (!img) { img = new Image(); img.src = `fabio_matte/e_${String(n).padStart(3, '0')}.png`; await img.decode(); fabCache.set(n, img); if (fabCache.size > 12) fabCache.delete(fabCache.keys().next().value); }
+    if (!img) { img = new Image(); img.src = `fabio_matte/e_${String(n).padStart(3, '0')}.png?v=2`; await img.decode(); fabCache.set(n, img); if (fabCache.size > 12) fabCache.delete(fabCache.keys().next().value); }
     setFab(img, n);
   };
   const nt7 = (T) => { const sh = shotAt(T); return sh.kind === 'foot' ? null : sh.f(T); };

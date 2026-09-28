@@ -558,17 +558,23 @@ mix = mus_mix * duck * 0.95 + sfx_mix * 0.9
 mix = hp(mix, 28)
 fi = int(0.05 * SR); fo = int(2.0 * SR)
 mix[:, :fi] *= np.linspace(0, 1, fi); mix[:, -fo:] *= np.linspace(1, 0, fo) ** 1.5
-def limiter(x, ceil=0.89):
+def limiter(x, ceil=0.84, look=0.005, rel=0.08):
+    # look-ahead peak limiter: the gain is already down when a transient arrives (no clipped edges)
+    from scipy.ndimage import minimum_filter1d, uniform_filter1d
     peak = np.max(np.abs(x), axis=0)
-    g = np.minimum(1, ceil / (peak + 1e-9))
-    gs = np.copy(g); a = np.exp(-1 / (0.08 * SR))
+    L = int(look * SR)
+    g = minimum_filter1d(np.minimum(1, ceil / (peak + 1e-9)), size=2 * L + 1)
+    gs = np.copy(g); a = np.exp(-1 / (rel * SR))
     for i in range(1, len(gs)):
         gs[i] = g[i] if g[i] < gs[i - 1] else a * gs[i - 1] + (1 - a) * g[i]
-    return x * gs
+    return x * uniform_filter1d(gs, size=L + 1)
 rms = np.sqrt(np.mean(mix ** 2))
-mix *= 0.15 / (rms + 1e-9)
+mix *= 0.12 / (rms + 1e-9)            # about -14 LUFS integrated
 mix = np.tanh(mix * 1.05) / np.tanh(1.05)
-mix = limiter(mix, 0.89)
+mix = limiter(mix, 0.84)
+from scipy.signal import resample_poly
+tp = np.abs(resample_poly(mix, 4, 1, axis=1)).max()   # true peak (4x oversampled) at most -1 dBTP
+if tp > 0.89: mix *= 0.89 / tp
 out = (np.clip(mix, -1, 1).T * 32767).astype(np.int16)
 with wave.open(sys.argv[1] if len(sys.argv) > 1 else 'soundtrack.wav', 'wb') as w:
     w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR); w.writeframes(out.tobytes())

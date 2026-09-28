@@ -53,3 +53,5 @@
 #hud8 .lockup.left .lk-ln { margin-left: 0 }
 #hud8 .lockup.left:before { left: 330px }
 #hud8 .sub { bottom: 58px }
+/* the ranking chips move to the right: Fabio stands in the left foreground of the ranking */
+#hud.v8 .pd-head { left: auto; right: 64px; justify-content: flex-end }

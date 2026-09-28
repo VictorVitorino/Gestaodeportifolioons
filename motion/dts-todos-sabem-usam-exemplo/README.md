@@ -23,12 +23,15 @@ cortes: o *fio dourado*.
 | 0:24 | **Todos Usam** | **Fabio dentro do mundo**, diante do pilar *Todos Usam*: olha para nós, sorri, pisca e **estala os dedos**: faíscas, e o botão **Compartilhar Skill** surge ao lado da mão dele | Fabio recortado (BiRefNet) e composto no 3D |
 | 0:28 | | Montagem do passo a passo: botão e modal, nome padrão (prefixo, service line, entregável), onde testou, modelo, SKILL.zip, Detalhes (Template, área DTS, co-responsáveis, descrição), *Compartilhar Skill* | 3D da v7 com rampas de velocidade e cortes secos |
 | 0:50 | **Somos Exemplo** | O modal vira o card (troféu 95), voa ao **mural de skills** (442); o pilar dourado; os **arcos dourados** partem do card para todo o mural | efeitos da v5/v7 |
-| 1:07 | | **Ranking de Áreas**: o pódio sobe; **Fabio em primeiro plano, de braços cruzados, enquanto o troféu pousa na DTS**; placa Nº 1 · 1.557 pontos | Fabio composto + 3D |
+| 1:07 | | **Ranking de Áreas**: o pódio sobe; **Fabio em primeiro plano, de braços cruzados, enquanto o troféu pousa na DTS**, e pisca; placa Nº 1 · 1.557 pontos (os selos do ranking vão para a direita, livres do Fabio) | Fabio composto + 3D |
 | 1:20 | Encerramento | *Todos Sabem. Todos Usam. Somos Exemplo.* · DTS · FLOWS · Alvarez & Marsal | cartela da v7 |
 
 **Fabio no mundo 3D.** Os gestos existem na entrada original (fundo azul liso): braços cruzados, sorriso,
 piscada, estalo, mão aberta. `tools/footage8.sh` extrai esses 4,8 s a 24 fps e `tools/matte8.py` recorta o
-Fabio com o **BiRefNet** (rembg/ONNX), com despill da borda azul. No filme, ele é um plano preso à câmera,
+Fabio com o **BiRefNet** (rembg/ONNX), com despill da borda azul. Onde o quadro corta o Fabio na cintura, o
+modelo às vezes perde a calça e o cinto (ele pareceria flutuar, e a barra piscaria): `tools/matte8_fix.py`
+estende a silhueta da barra do colete até a borda do quadro, com uma chave contra o azul do estúdio. No filme,
+ele é um plano preso à câmera,
 desenhado depois do desfoque e antes do bloom e do grade (`src/film8.js`): fica nítido com o fundo
 desfocado e recebe a mesma luz e cor do mundo, com uma leve luz quente na borda.
 
@@ -41,12 +44,16 @@ desfocado e recebe a mesma luz e cor do mundo, com uma leve luz quente na borda.
 - um groove carrega a montagem, e o estalo do Fabio tem faíscas e o "pop" do botão;
 - uma fanfarra recebe o troféu, e as cordas seguram a cartela.
 
+Master: cerca de -14,6 LUFS integrados e pico real de -1 dBTP, com limitador *look-ahead* (sem bordas
+cortadas nos transientes, então nada clipa depois do AAC).
+
 Todos os efeitos da v7 (cliques, digitação, tambor, troféu) são reposicionados pelas mesmas funções de
 tempo de cada plano (`src/cut8.js`), então caem no quadro certo.
 
 **Reproduzir a v8:** `npm run footage8` (quadros + matte; `pip install rembg onnxruntime`) →
 `npm run audio8` → `PAGE=film8.htm node render.mjs frames 24 <w> 3 out/frames8` (3 processos) → ffmpeg com
-`audio/soundtrack8.wav`. O corte inteiro (planos, rampas, textos, transições) está em `src/cut8.js`.
+`audio/soundtrack8.wav` → `python3 tools/storyboard8.py out/frames8 video/storyboard8.jpg`. O corte inteiro
+(planos, rampas, textos, transições) está em `src/cut8.js`.
 
 ---
 
