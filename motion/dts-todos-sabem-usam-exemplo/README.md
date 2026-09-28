@@ -1,4 +1,56 @@
-# DTS · Todos Sabem, Todos Usam, Somos Exemplo — curta 3D cinematográfico (v7)
+# DTS · Todos Sabem, Todos Usam, Somos Exemplo — curtas 3D cinematográficos (v8 e v7)
+
+## v8 · O Fio Dourado (1:28)
+
+Um corte cinematográfico **com menos de 1:30**, com o **Fabio como anfitrião**. As duas cenas de referência
+enviadas pelo time (`media/referencia_inovadora_*.mp4`: o Fabio envolto por espirais de luz que viram o
+mundo FLOWS) abrem o filme. O mundo 3D da v7 é remontado plano a plano, com câmeras novas, rampas de
+velocidade e montagem. O Fabio é **recortado da entrada original** (matte por IA, quadro a quadro) e
+**composto dentro do mundo FLOWS**. O rastro de luz dourada das referências vira a linha que costura os
+cortes: o *fio dourado*.
+
+| Entrega | Arquivo |
+|---|---|
+| Filme v8 (1920×1080, 24 fps, H.264 + AAC 48 kHz) | `video/FLOWS_O_Fio_Dourado.mp4` |
+| Pôster e storyboard | `video/poster8.jpg`, `video/storyboard8.jpg` |
+
+| Tempo | Ato | Cena | Como foi feito |
+|---|---|---|---|
+| 0:00 | **Abertura · o tema** | Fabio de braços cruzados; espirais de luz azul e dourada o envolvem e **escrevem, uma a uma, TODOS SABEM · TODOS USAM · SOMOS EXEMPLO**; as palavras são levadas pela espiral | referência 1 + tipografia revelada por uma barra de luz, na cor de cada pilar |
+| 0:04 | | A espiral vira o aro do **FLOWS** e o mundo nasce; o tema assenta sob o logo | referência 1 + título |
+| 0:08 | **Todos Sabem** | Fabio caminha entre *Catálogo de Métodos*, *Meus Projetos* e *Biblioteca de Skills*; o fio dourado o leva à Biblioteca | referência 1 + *Pilar 01* no céu |
+| 0:13 | | O fio atravessa o corte e entra na **Biblioteca de Skills** do FLOWS (pontuações) → anel de **441 skills** | 3D da v7 remontado |
+| 0:24 | **Todos Usam** | **Fabio dentro do mundo**, diante do pilar *Todos Usam*: olha para nós, sorri, pisca e **estala os dedos**: faíscas, e o botão **Compartilhar Skill** surge ao lado da mão dele | Fabio recortado (BiRefNet) e composto no 3D |
+| 0:28 | | Montagem do passo a passo: botão e modal, nome padrão (prefixo, service line, entregável), onde testou, modelo, SKILL.zip, Detalhes (Template, área DTS, co-responsáveis, descrição), *Compartilhar Skill* | 3D da v7 com rampas de velocidade e cortes secos |
+| 0:50 | **Somos Exemplo** | O modal vira o card (troféu 95), voa ao **mural de skills** (442); o pilar dourado; os **arcos dourados** partem do card para todo o mural | efeitos da v5/v7 |
+| 1:07 | | **Ranking de Áreas**: o pódio sobe; **Fabio em primeiro plano, de braços cruzados, enquanto o troféu pousa na DTS**; placa Nº 1 · 1.557 pontos | Fabio composto + 3D |
+| 1:20 | Encerramento | *Todos Sabem. Todos Usam. Somos Exemplo.* · DTS · FLOWS · Alvarez & Marsal | cartela da v7 |
+
+**Fabio no mundo 3D.** Os gestos existem na entrada original (fundo azul liso): braços cruzados, sorriso,
+piscada, estalo, mão aberta. `tools/footage8.sh` extrai esses 4,8 s a 24 fps e `tools/matte8.py` recorta o
+Fabio com o **BiRefNet** (rembg/ONNX), com despill da borda azul. No filme, ele é um plano preso à câmera,
+desenhado depois do desfoque e antes do bloom e do grade (`src/film8.js`): fica nítido com o fundo
+desfocado e recebe a mesma luz e cor do mundo, com uma leve luz quente na borda.
+
+**Texto.** Poucas frases, curtas e com tempo de leitura (0,7 s + 13,5 caracteres/s). Pilares como
+*lockup* (no céu, à esquerda do Fabio ou embaixo, conforme o plano) e legendas na placa translúcida.
+
+**Som** (`audio/soundtrack8.py`). Música nova no corte:
+- a espiral sobe em celesta, com um sino por pilar quando cada palavra se escreve;
+- o mundo nasce de um impacto suave no aro;
+- um groove carrega a montagem, e o estalo do Fabio tem faíscas e o "pop" do botão;
+- uma fanfarra recebe o troféu, e as cordas seguram a cartela.
+
+Todos os efeitos da v7 (cliques, digitação, tambor, troféu) são reposicionados pelas mesmas funções de
+tempo de cada plano (`src/cut8.js`), então caem no quadro certo.
+
+**Reproduzir a v8:** `npm run footage8` (quadros + matte; `pip install rembg onnxruntime`) →
+`npm run audio8` → `PAGE=film8.htm node render.mjs frames 24 <w> 3 out/frames8` (3 processos) → ffmpeg com
+`audio/soundtrack8.wav`. O corte inteiro (planos, rampas, textos, transições) está em `src/cut8.js`.
+
+---
+
+# v7 · versão completa com ritmo de leitura (2:54)
 
 Curta de **2 min 54 s** (1920×1080, 24 fps) que conta o fluxo **Compartilhar Skill** do FLOWS pela lente
 dos três pilares da **DTS — Digital & Technology Services**, da **Alvarez & Marsal**. Abre com a

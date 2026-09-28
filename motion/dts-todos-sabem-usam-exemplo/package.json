@@ -1,9 +1,9 @@
 {
   "name": "dts-todos-sabem-usam-exemplo-motion",
-  "version": "7.0.0",
+  "version": "8.0.0",
   "private": true,
   "type": "module",
-  "description": "Curta 3D cinematográfico DTS · Todos Sabem, Todos Usam, Somos Exemplo — entrada do Fabio (clipe incorporado com corte invisível e título que atravessa o corte), fluxo Compartilhar Skill do FLOWS e ranking de áreas em three.js (PBR, DOF, motion blur, bloom), com ritmo de leitura por curva de tempo, tour do FLOWS, anatomia do nome da skill, etapa Detalhes e motion graphics por máscara, renderizado quadro a quadro",
+  "description": "Curtas 3D cinematográficos DTS · Todos Sabem, Todos Usam, Somos Exemplo — v8 'O Fio Dourado' (menos de 1:30): o Fabio abre o filme e é composto no mundo FLOWS (estalo de dedo que materializa o botão Compartilhar Skill, pódio da DTS), montagem com rampas de velocidade e fio dourado nas transições; v7: a versão completa com ritmo de leitura. three.js (PBR, DOF, motion blur, bloom), renderizado quadro a quadro",
   "scripts": {
     "intro": "./tools/intro.sh",
     "bake": "node bake.mjs",
@@ -12,7 +12,11 @@
     "audio": "python3 audio/soundtrack.py audio/soundtrack.wav",
     "preview": "node render.mjs preview 8.0,11.7,16.5,21.5,27.5,31.5,37.6,45.0,57.5,76.0,107.8,122.0,140.0,158.3,170.3 out/preview",
     "frames": "node render.mjs frames 24 0 1 out/frames",
-    "storyboard": "python3 tools/storyboard.py out/frames video/storyboard.jpg"
+    "storyboard": "python3 tools/storyboard.py out/frames video/storyboard.jpg",
+    "footage8": "./tools/footage8.sh",
+    "audio8": "python3 audio/soundtrack8.py audio/soundtrack8.wav",
+    "preview8": "PAGE=film8.htm node render.mjs preview 2.8,6,10,16,21,25.7,27,30,35,53,60,64,72,77,84 out/preview8",
+    "frames8": "PAGE=film8.htm node render.mjs frames 24 0 1 out/frames8"
   },
   "dependencies": {
     "playwright-core": "1.56.0",

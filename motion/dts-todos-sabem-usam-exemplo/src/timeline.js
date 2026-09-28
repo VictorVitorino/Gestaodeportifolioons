@@ -429,12 +429,14 @@ export function buildFilm(ctx) {
       [11.35, mbox(31, 475, 569, 780, 0, 4)], [12.35, mbox(31, 775, 569, 945, 0, -6)], [16.4, mbox(31, 780, 569, 945, 0, -6)], [17.35, mbox(20, 790, 580, 1015, 14, -8)],
       [18.6, mbox(20, 792, 580, 1017, 10, -8)], [q.d, [b.P, b.T]]]);
   }
-  function poseAt(nt) {
+  function poseAt(nt, prev = false) {
     const pose = camPose(S(nt));
     for (const q of INSERTS) {
       if (nt > q.a && nt < q.b) { const c = INS_CAM[q.id], u = uIns(q, nt); pose.P = path(c.P, u); pose.T = path(c.T, u); }
       pose.aperture *= 1 - 0.5 * envl(nt, q.a - 0.4, q.a + 0.6, q.b - 0.6, q.b + 0.4, 'inOutSine', 'inOutSine');
     }
+    // v8: a re-edit of this film can take over the camera (window.__camHook returns {P, T, fov, aperture})
+    if (window.__camHook) { const o = window.__camHook(nt, pose, prev); if (o) Object.assign(pose, o); }
     return pose;
   }
 
@@ -992,7 +994,7 @@ export function buildFilm(ctx) {
     const nt = T - FILM0;
     updateFilm(S(nt), nt);
     introTitle(INTRO.dur + nt);
-    const pp = poseAt(nt - SHUTTER);
+    const pp = poseAt(nt - SHUTTER, true);
     // the cut from the clip happens mid-pan: keep the camera's motion blur from the first frame
     world.setPrevCamera(pp.P, pp.T, pp.fov, 1);
     return {};
@@ -1005,5 +1007,5 @@ export function buildFilm(ctx) {
     if (!(t > 28.5 && t < 58.1)) return null;
     const p = modalPlan(t, nt); return { tex: p.under ? [p.under, p.img] : [p.img] };
   };
-  return { duration: DURATION, film0: FILM0, update, needs, loadClip, cam: (nt) => poseAt(nt), story: S };
+  return { duration: DURATION, film0: FILM0, update, needs, loadClip, cam: (nt) => poseAt(nt), story: S, NT, INSERTS, SHUTTER };
 }

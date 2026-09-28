@@ -1,0 +1,55 @@
+/* v8 · O Fio Dourado — the re-cut keeps only the v7 graphics that belong to its shots
+   (name anatomy, focus brackets, click ripples; counters, ranking and end card on demand) */
+#hud.v8 .band, #hud.v8 .bug, #hud.v8 .pillars, #hud.v8 > .sub, #hud.v8 .t-dts, #hud.v8 .hbd, #hud.v8 .h-open, #hud.v8 .t-open,
+#hud.v8 > .lockup, #hud.v8 .callout, #hud.v8 .ho-glow, #hud.v8 .intro-t, #hud.v8 .id-cap, #hud.v8 .mg-steps { display: none !important }
+#hud.v8:not(.show-k) .k-count { display: none !important }
+#hud.v8:not(.show-rank) .pd-head, #hud.v8:not(.show-rank) .pd-stamp, #hud.v8:not(.show-rank) .pd-stats, #hud.v8:not(.show-rank) .pd-link { display: none !important }
+#hud.v8:not(.show-end) .endcard, #hud.v8:not(.show-end) .am-sign { display: none !important }
+#hud.off { display: none !important }
+
+/* footage (Fabio's clips) above the 3D canvas, under every graphic */
+#footwrap { position: absolute; inset: 0; overflow: hidden; background: #000 }
+#footwrap img { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 50% 50% }
+
+#hud8 { position: absolute; inset: 0; pointer-events: none; color: #fff }
+#hud8 .mk { display: inline-block; overflow: hidden; vertical-align: bottom }
+#hud8 .mk > span { display: inline-block; white-space: pre }
+
+/* opening: the theme written in light, one pillar at a time */
+.t8 { position: absolute; left: 1150px; top: 318px; width: 720px }
+.t8 .kk { font-size: 17px; font-weight: 800; letter-spacing: .42em; color: #ffe2b8; text-transform: uppercase; margin: 0 0 26px 4px;
+  text-shadow: 0 2px 14px rgba(0, 0, 30, .8) }
+.t8 .ln { position: relative; height: 92px; margin-bottom: 6px }
+.t8 .ln b { position: absolute; left: 0; top: 0; font-size: 70px; font-weight: 800; letter-spacing: .004em; white-space: nowrap; color: var(--c);
+  text-shadow: 0 0 22px var(--g), 0 0 60px var(--g), 0 4px 18px rgba(0, 0, 30, .6) }
+.t8 .ln i { position: absolute; top: -10px; width: 6px; height: 108px; border-radius: 3px; background: #fff;
+  box-shadow: 0 0 18px 6px var(--c), 0 0 60px 16px var(--g); opacity: 0 }
+
+/* the golden thread that stitches the cuts */
+.streak8 { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; opacity: 0;
+  background: radial-gradient(ellipse 900px 180px at var(--x) var(--y), rgba(255, 244, 214, .95), rgba(255, 196, 96, .55) 38%, rgba(255, 150, 40, 0) 72%);
+  mix-blend-mode: screen }
+.streak8 i { position: absolute; left: 0; width: 1920px; height: 6px; top: calc(var(--y) - 3px);
+  background: linear-gradient(90deg, rgba(255, 210, 120, 0), #fff6dc 50%, rgba(255, 210, 120, 0)); box-shadow: 0 0 30px 8px rgba(255, 190, 90, .8) }
+.flash8 { position: absolute; inset: 0; background: #fff3dc; opacity: 0 }
+
+/* title line under the FLOWS logo */
+.title8 { position: absolute; left: 0; right: 0; top: 868px; text-align: center }
+.title8:before { content: ''; position: absolute; left: 50%; top: 50%; width: 1300px; height: 260px; transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(6, 10, 36, .62), rgba(6, 10, 36, 0)); z-index: -1 }
+.title8 .kk { font-size: 17px; font-weight: 800; letter-spacing: .44em; padding-left: .44em; color: #ffe2b8; text-transform: uppercase;
+  text-shadow: 0 2px 12px rgba(0, 0, 20, .8) }
+.title8 .rl { height: 2px; width: 0; margin: 14px auto 12px; background: linear-gradient(90deg, rgba(242, 181, 68, 0), #f2b544 25%, #fff2cc 50%, #f2b544 75%, rgba(242, 181, 68, 0)) }
+.title8 .tl { font-size: 46px; font-weight: 800; letter-spacing: -.004em; text-shadow: 0 4px 24px rgba(4, 6, 30, .7) }
+.title8 .tl em { font-style: normal }
+.title8 .tl .c1 { color: #9cc8ff } .title8 .tl .c2 { color: #ffb466 } .title8 .tl .c3 { color: #ffd27a } .title8 .tl .dot { color: rgba(255, 255, 255, .55) }
+
+/* pillar lockups (same language as v7) and subtitles, in the v8 layer */
+#hud8 .lockup { top: 812px }
+/* Todos Sabem rides over Fabio's walk: the lockup sits in the sky; Todos Usam sits left of him */
+#hud8 .lockup.top { top: 104px }
+#hud8 .lockup.top:before { width: 900px; height: 220px }
+#hud8 .lockup.left { left: 110px; right: auto; text-align: left }
+#hud8 .lockup.left .lk-ln { margin-left: 0 }
+#hud8 .lockup.left:before { left: 330px }
+#hud8 .sub { bottom: 58px }

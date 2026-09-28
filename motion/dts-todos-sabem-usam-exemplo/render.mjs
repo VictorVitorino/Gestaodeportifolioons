@@ -4,7 +4,7 @@
 import { chromium } from 'playwright-core';
 import http from 'http'; import fs from 'fs'; import path from 'path';
 const root = path.dirname(new URL(import.meta.url).pathname);
-const types = { '.svg': 'image/svg+xml', '.htm': 'text/html', '.webp': 'image/webp', '.ttf': 'font/ttf', '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.json': 'application/json', '.woff2': 'font/woff2', '.jpg': 'image/jpeg' };
+const types = { '.png': 'image/png', '.svg': 'image/svg+xml', '.htm': 'text/html', '.webp': 'image/webp', '.ttf': 'font/ttf', '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.json': 'application/json', '.woff2': 'font/woff2', '.jpg': 'image/jpeg' };
 const mode = process.argv[2];
 const port = 9000 + Math.floor(Math.random() * 900);
 const srv = http.createServer((req, res) => {
@@ -21,7 +21,7 @@ const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, de
 page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') console.log('[page]', m.type(), m.text()); });
 page.on('pageerror', (e) => console.log('[pageerror]', e.message));
 // film.htm (not .html) keeps the host app's Vite dependency scanner away from this page; Q=0.5 -> half-res 3D preview
-await page.goto(`http://localhost:${port}/film.htm${process.env.Q ? '?q=' + process.env.Q : ''}`);
+await page.goto(`http://localhost:${port}/${process.env.PAGE || 'film.htm'}${process.env.Q ? '?q=' + process.env.Q : ''}`);
 await page.waitForFunction(() => window.ready === true || window.bootError, null, { timeout: 120000 });
 const err = await page.evaluate(() => window.bootError);
 if (err) { console.log('BOOT ERROR', err); process.exit(1); }
