@@ -13,10 +13,10 @@ import onnxruntime as ort
 
 S = 1.5                     # canvas scale over frame 1 (the later frames are zoomed in: more detail)
 POSES = {                   # frames (1-based, inclusive), column in frame-1 pixels, rects painted over
-    'greet': {'win': (1, 72), 'box': (748, 36, 970, 748), 'paint': []},
+    'greet': {'win': (1, 48), 'box': (748, 36, 970, 748), 'paint': []},
     'present': {'win': (1, 72), 'box': (966, 36, 1248, 748), 'paint': [(1198, 36, 1248, 142)]},
     'rank1': {'win': (1, 72), 'box': (1196, 36, 1422, 748), 'paint': [(1196, 142, 1248, 748)]},
-    'welcome': {'win': (1, 60), 'box': (1418, 36, 1660, 748), 'paint': []},
+    'welcome': {'win': (1, 40), 'box': (1418, 36, 1660, 748), 'paint': []},
 }
 st = json.load(open('fm_src/stab.json'))
 so = ort.SessionOptions(); so.enable_cpu_mem_arena = False; so.enable_mem_pattern = False

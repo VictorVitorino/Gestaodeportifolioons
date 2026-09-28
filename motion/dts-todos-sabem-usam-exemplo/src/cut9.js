@@ -65,11 +65,11 @@ export const SHOW = [['k', 118.0, 127.2], ['rank', 140.9, 151.2], ['end', 151.0,
 export const STANDS = [
   { id: 'present', a: 93.2, b: 99.9, pose: 'present', frames: [1, 72], pos: [299, 0, -1408], h: 178, inAt: 93.8, outAt: 99.3,
     cam: { a: 93.2, b: 99.9, fin: 1.2, fout: 1.0, from: { P: [-60, 135, -760], T: [260, 200, -2250] }, to: { P: [-40, 140, -800], T: [255, 202, -2250] }, fov: 34 } },
-  { id: 'welcome', a: 105.2, b: 112.2, pose: 'welcome', frames: [1, 60], pos: [-221, 0, 179], h: 178, inAt: 105.9, outAt: 111.6,
+  { id: 'welcome', a: 105.2, b: 112.2, pose: 'welcome', frames: [1, 40], pos: [-221, 0, 179], h: 178, inAt: 105.9, outAt: 111.6,
     cam: { a: 105.2, b: 112.2, fin: 1.2, fout: 1.0, from: { P: [60, 150, 820], T: [-60, 250, -1400] }, to: { P: [40, 155, 780], T: [-60, 252, -1400] }, fov: 36 } },
   { id: 'rank1', a: 116.5, b: 122.6, pose: 'rank1', frames: [1, 72], pos: [-590, 0, 420], h: 178, inAt: 117.0, outAt: 122.1,
     cam: { a: 116.5, b: 122.6, fin: 1.3, fout: 1.0, from: { P: [-800, 170, 1080], T: [-99, 165, 60] }, to: { P: [-780, 172, 1040], T: [-95, 168, 60] }, fov: 32 } },
-  { id: 'greet', a: 127.6, b: 136.2, pose: 'greet', frames: [1, 72], pos: [300, 0, 400], h: 178, inAt: 128.3, outAt: 999,
+  { id: 'greet', a: 127.6, b: 136.2, pose: 'greet', frames: [1, 48], pos: [300, 0, 400], h: 178, inAt: 128.3, outAt: 999,
     cam: { a: 127.6, b: 136.2, fin: 1.4, fout: 0, from: { P: [120, 200, 1100], T: [107, 133, 60] }, to: { P: [110, 205, 1060], T: [105, 136, 60] }, fov: 34 } },
 ];
 export const NUM1 = { t: 118.2, at: 'rank1' };           // the golden Nº 1 bursts over his raised finger
