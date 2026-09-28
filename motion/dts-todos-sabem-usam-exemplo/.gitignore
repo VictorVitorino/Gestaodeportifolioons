@@ -11,3 +11,4 @@ clips/
 fabio_src/
 fabio_matte/
 audio/soundtrack8.wav
+__pycache__/
