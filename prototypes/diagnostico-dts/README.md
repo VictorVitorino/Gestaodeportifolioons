@@ -20,7 +20,7 @@ Arquivo único, sem build e sem dependências além das fontes do Google Fonts (
 | Página | Experiência | Brincadeira (post-it "Lembra…?") | Linguagem visual | O que registra |
 |---|---|---|---|---|
 | 01 | Meu ponto de partida | jogo de trilha | matriz corporativa + régua navy | `declaredIndex` (6 dimensões, pesos 10/20/20/20/15/15, travas de 60% e 80%) |
-| 02 | O que chama sua atenção? | Jogo dos 7 Erros (sem erros escondidos) | storyboard em quadrinhos (17h42) | até 3 sinais percebidos na cena → `experience02` |
+| 02 | O que chama sua atenção? | Detetive / caça às pistas | storyboard em quadrinhos (17h42) | 3 pistas na ordem em que a pessoa investigaria (a ordem fica em `selectedSignals`) → `experience02` |
 | 03 | Quem está mais perto? | Lince + Cara a Cara | mesa com fichas viradas | caminho a partir de PROMPT → `experience03` |
 | 04 | Por onde você iria? | labirinto | mapa | caminho A–D e `behaviorProfile` → `experience04` |
 | 05 | A Skill que ninguém merece | recorte e cole | documento bagunçado | até 3 elementos de reutilização → `experience05` |

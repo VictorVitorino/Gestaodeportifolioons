@@ -913,14 +913,15 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
   const EXPERIENCES = {
     experience02: {
       signals: [
-        { id: 'prompt', label: 'O pedido digitado no Claude', detail: 'prompt genérico, quase sem contexto', maturitySignal: 3 },
-        { id: 'blankDoc', label: 'O documento em branco', detail: 'começar imediatamente do zero', maturitySignal: 3 },
-        { id: 'skills', label: 'A gaveta de Skills', detail: 'nenhuma Skill procurada', maturitySignal: 3 },
-        { id: 'methods', label: 'Os Métodos na prateleira', detail: 'nenhum Método verificado', maturitySignal: 3 },
-        { id: 'flows', label: 'O aviso do FLOWS no celular', detail: 'FLOWS não consultado', maturitySignal: 3 },
-        { id: 'deadline', label: 'O relógio e os post-its', detail: 'prazo apertado', maturitySignal: 1 },
-        { id: 'tabs', label: 'As 17 abas abertas', detail: 'muitas abas', maturitySignal: 1 },
-        { id: 'coffee', label: 'O café esquecido', detail: 'café frio', maturitySignal: 0 }
+        // label = nome neutro exibido ao participante (só a pista); detail = leitura interna do sinal.
+        { id: 'prompt', label: 'Pedido no Claude', detail: 'percepção de contexto / qualidade da instrução', maturitySignal: 3 },
+        { id: 'blankDoc', label: 'Documento em branco', detail: 'tendência a começar do zero', maturitySignal: 3 },
+        { id: 'skills', label: 'Gaveta de Skills', detail: 'percepção de reutilização por Skill', maturitySignal: 3 },
+        { id: 'methods', label: 'Prateleira de Métodos', detail: 'percepção de Método existente', maturitySignal: 3 },
+        { id: 'flows', label: 'FLOWS · 3 Métodos parecidos', detail: 'percepção do ecossistema FLOWS', maturitySignal: 3 },
+        { id: 'deadline', label: 'Relógio e post-its', detail: 'atenção a urgência / prazo', maturitySignal: 1 },
+        { id: 'tabs', label: '17 abas abertas', detail: 'atenção a carga operacional / organização', maturitySignal: 1 },
+        { id: 'coffee', label: 'Caneca sobre a mesa', detail: 'elemento neutro', maturitySignal: 0 }
       ]
     },
     experience03: {
@@ -1494,7 +1495,7 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
   const PAGES = [
     { id: 'cover' },
     { id: 'xp01', n: 1, name: 'Meu ponto de partida', game: 'jogo de trilha' },
-    { id: 'xp02', n: 2, name: 'O que chama sua atenção?', game: 'jogo dos 7 erros' },
+    { id: 'xp02', n: 2, name: 'O que chama sua atenção?', game: 'Detetive' },
     { id: 'xp03', n: 3, name: 'Quem está mais perto?', game: 'Lince e Cara a Cara' },
     { id: 'xp04', n: 4, name: 'Por onde você iria?', game: 'labirinto' },
     { id: 'xp05', n: 5, name: 'A Skill que ninguém merece', game: 'recorte e cole' },
@@ -1783,6 +1784,8 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
   ];
   const SCRIBBLE = '<svg class="scribble" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M14 58 C8 26 42 7 76 11 C97 15 99 60 84 82 C66 99 20 97 8 72 C3 60 9 43 25 33"/></svg>';
   const signalById = id => EXPERIENCES.experience02.signals.find(s => s.id === id);
+  // Os espaços seguem a ordem das escolhas (a ordem de selectedSignals é o que fica registrado).
+  const PICK_PLACEHOLDERS = ['Minha primeira pista', 'Depois eu olharia…', 'Também verificaria…'];
 
   const XP02 = {
     sceneArt() {
@@ -1813,8 +1816,8 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
           <span class="sr-only">${esc(signal.label)}</span><span class="hs-label" aria-hidden="true">${esc(signal.label)}</span>${SCRIBBLE}<span class="hs-badge" aria-hidden="true"></span></button>`;
       }).join('');
       return `<section class="sheet xp xp02"><span class="tape tape-r" aria-hidden="true"></span>
-        ${headerHTML({ n: 2, title: 'Tem alguma coisa <span class="hl">acontecendo aqui…</span>', sub: '17h42. Acabou de chegar o pedido do Mapa de Impactos. Olhe a cena como se fosse você ali.',
-          aside: '<p class="postit analogy"><b>Lembra do Jogo dos 7 Erros?</b>É parecido, mas aqui não há erros escondidos.</p>' })}
+        ${headerHTML({ n: 2, title: '17h42. <span class="hl">E agora?</span>', sub: 'Antes de agir, observe as pistas.',
+          aside: '<p class="postit analogy"><b>Lembra do jogo Detetive?</b>Antes de decidir, você procurava pistas para entender o que estava acontecendo.</p>' })}
         <div class="story">
           <div class="panel panel-intro">
             <p class="caption">17h42.</p>
@@ -1825,19 +1828,20 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
           </div>
           <div class="panel scene-panel">
             <div class="scene" role="group" aria-label="Cena: fim de tarde no escritório" aria-describedby="sceneDesc">
-              <p class="sr-only" id="sceneDesc">17h42. Na parede, uma prateleira com Métodos ainda lacrados, um relógio e dois post-its de urgência. No monitor, 17 abas abertas, o Claude com um pedido curto e um documento em branco. Na mesa, um café esquecido e um celular com um aviso do FLOWS não lido. Ao lado, o gaveteiro de Skills fechado.</p>
+              <p class="sr-only" id="sceneDesc">17h42. Na parede, uma prateleira de Métodos, um relógio e dois post-its de urgência. No monitor, 17 abas abertas, um pedido no Claude e um documento em branco. Na mesa, uma caneca e um celular com um aviso do FLOWS. Ao lado, o gaveteiro de Skills. Use Tab para percorrer as pistas da cena.</p>
               ${XP02.sceneArt()}
               ${hotspots}
             </div>
           </div>
           <div class="story-side">
-            <p class="side-q" id="q02">Se você estivesse nessa situação, quais 3 coisas chamariam mais sua atenção?</p>
-            <p class="side-hint">Marque até 3 elementos da cena. Passe o mouse para ver o nome de cada um.</p>
+            <p class="side-hint">São 17h42 e o Mapa de Impactos precisa sair às 18h.</p>
+            <p class="side-q" id="q02">Quais 3 pistas você investigaria primeiro para decidir o que fazer?</p>
+            <p class="side-hint">Escolha 3 elementos da cena, na ordem em que você os investigaria. A ordem importa.</p>
             <ol class="picks" data-picks aria-labelledby="q02"></ol>
-            <p class="side-foot">Não existe uma lista certa. O que importa é o que você percebe primeiro.</p>
+            <p class="side-foot">Não existe uma sequência certa. Queremos entender o que você observa primeiro.</p>
           </div>
         </div>
-        ${footerHTML({ back: 1, enabled: state.experience02.selectedSignals.length > 0, note: 'Clique nos objetos da cena para marcar.' })}
+        ${footerHTML({ back: 1, enabled: state.experience02.selectedSignals.length > 0, note: 'Passe o mouse para ver o nome de cada pista e clique para escolher.' })}
       </section>`;
     },
     mount(rootEl) {
@@ -1853,24 +1857,24 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
         $('[data-picks]', rootEl).innerHTML = Array.from({ length: max }, (_, i) => {
           const signal = e2.selectedSignals[i] && signalById(e2.selectedSignals[i]);
           if (signal) {
-            return `<li class="pick is-filled"><span class="pick-n">${i + 1}</span><span>${esc(signal.label)}</span><button type="button" class="pick-x" data-remove="${signal.id}" aria-label="Tirar “${esc(signal.label)}” dos destaques">tirar</button></li>`;
+            return `<li class="pick is-filled"><span class="pick-n">${i + 1}</span><span>${esc(signal.label)}</span><button type="button" class="pick-x" data-remove="${signal.id}" aria-label="Tirar “${esc(signal.label)}” das pistas">tirar</button></li>`;
           }
-          return `<li class="pick"><span class="pick-n">${i + 1}</span><span class="pick-empty">${i === e2.selectedSignals.length ? 'toque em algo na cena' : '·'}</span><span></span></li>`;
+          return `<li class="pick"><span class="pick-n">${i + 1}</span><span class="pick-empty">${PICK_PLACEHOLDERS[i]}</span><span></span></li>`;
         }).join('');
         setNextEnabled(rootEl, e2.selectedSignals.length > 0);
       };
       const toggle = (id, fromList) => {
         const index = e2.selectedSignals.indexOf(id);
         if (index >= 0) e2.selectedSignals.splice(index, 1);
-        else if (e2.selectedSignals.length >= max) { setFootNote(rootEl, 'Você já escolheu 3. Tire um para trocar.', false); return; }
+        else if (e2.selectedSignals.length >= max) { setFootNote(rootEl, 'Você já escolheu 3 pistas. Tire uma para trocar.', false); return; }
         else e2.selectedSignals.push(id);
         commit();
         sync();
         const count = e2.selectedSignals.length;
         if (index < 0) {
-          setFootNote(rootEl, count === 1 ? 'Interessante. Vamos guardar essa escolha.' : count === max ? 'Boa. Seguimos quando você quiser.' : 'Essa escolha nos ajuda a entender o que você prioriza.', true);
+          setFootNote(rootEl, count === 1 ? 'Primeira pista anotada. Faltam 2.' : count === max ? 'Pistas registradas. Vamos guardar a ordem em que você analisou a situação.' : 'Segunda pista anotada. Falta 1.', true);
         } else {
-          setFootNote(rootEl, count ? 'Tudo bem trocar. Fica valendo o que você escolher.' : 'Escolha até 3 elementos da cena.', false);
+          setFootNote(rootEl, count ? 'Tudo bem trocar. Vale a ordem que ficar registrada.' : 'Escolha 3 pistas, na ordem em que você as investigaria.', false);
         }
         if (fromList) { const hs = $(`.hs[data-signal="${id}"]`, rootEl); if (hs) hs.focus(); }
       };
@@ -2296,6 +2300,8 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
 
   const XP07 = {
     character: () => CHARACTERS.find(c => c.id === state.experience07.selectedCharacter) || null,
+    // Exemplo no rascunho: caricatura a partir da fisionomia, sem afirmar traços que a pessoa talvez não tenha.
+    example: who => `Ex.: Crie uma caricatura de ${who ? who.name : 'a pessoa escolhida'} a partir do rosto: o formato (oval, redondo, alongado?), os olhos e as sobrancelhas, o nariz, a boca e a simetria do sorriso, o cabelo. Depois defina o traço (lápis, HQ, aquarela) e o enquadramento (close do rosto, fundo neutro).`,
     notesHTML(list, side) {
       return `<ul class="notes notes--${side === 'left' ? 'left' : 'right'}" aria-label="Dicas para o ilustrador" style="list-style:none;margin:0;padding:0">${list.map(([label, hint]) =>
         `<li class="note"><span><span class="note-l">${esc(label)}</span><span class="note-h">${esc(hint)}</span></span>${NOTE_ARROW}</li>`).join('')}</ul>`;
@@ -2319,14 +2325,14 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
       const number = stage === 'draft1' || stage === 'analysis1' ? 1 : 2;
       const text = number === 1 ? e7.originalPrompt : e7.revisedPrompt;
       const who = XP07.character();
-      const placeholder = `Ex.: Desenhe ${who ? who.name : 'a pessoa escolhida'} como maestro regendo uma orquestra formada por Skills, num palco…`;
+      const placeholder = XP07.example(who);
       const action = isDraft
         ? `<button type="button" class="btn btn-primary" data-action="deliver" disabled>${number === 1 ? 'Entregar ao ilustrador' : 'Entregar rascunho nº 2'}</button>`
         : stage === 'analysis2' ? '<button type="button" class="btn btn-quiet" data-action="edit-revision">Mexer no rascunho nº 2</button>' : '';
       return `<div class="board">
         <span class="board-rings" aria-hidden="true"></span>
         <p class="board-kicker"><span>2. Ordem de serviço para o ilustrador</span><b>Rascunho nº ${number}</b></p>
-        <ul class="board-rules"><li>Imagine que o ilustrador nunca viu seu colega e não pode fazer nenhuma pergunta.</li><li>Escreva uma única instrução que dê informações suficientes para ele imaginar a caricatura.</li><li>O humor mora na situação, não na aparência de ninguém.</li></ul>
+        <ul class="board-rules"><li>Imagine que o ilustrador nunca viu seu colega e não pode fazer nenhuma pergunta.</li><li>Escreva uma única instrução que dê informações suficientes para ele imaginar a caricatura.</li><li>Valorize os traços da pessoa com carinho: nada que a constranja.</li></ul>
         <label class="sr-only" for="portraitDraft">Seu pedido para o ilustrador, rascunho nº ${number}</label>
         <textarea id="portraitDraft" class="draft" ${isDraft ? '' : 'readonly'} placeholder="${esc(placeholder)}" spellcheck="true">${esc(text)}</textarea>
         <div class="board-actions"><span class="draft-meta" data-meta></span>${action}</div>
@@ -2410,7 +2416,7 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
         bindRadioGroup($('.cast-grid', rootEl), radio => {
           e7.selectedCharacter = radio.dataset.character;
           commit();
-          textarea.placeholder = `Ex.: Desenhe ${XP07.character().name} como maestro regendo uma orquestra formada por Skills, num palco…`;
+          textarea.placeholder = XP07.example(XP07.character());
           updateMeta();
           setFootNote(rootEl, 'Boa escolha. Agora é com as palavras.', true);
         });
