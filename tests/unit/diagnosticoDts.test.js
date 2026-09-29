@@ -112,9 +112,13 @@ test('experiência 03 usa a peça escolhida como nova âncora', () => {
 
 test('experiência 02 compara com o máximo possível para a mesma quantidade', () => {
   assert.equal(Core.calculateExperience02(['prompt', 'skills', 'flows']), 100);
-  assert.equal(Core.calculateExperience02(['coffee']), 0);
+  assert.equal(Core.calculateExperience02(['happyHour']), 0);
   assert.equal(Core.calculateExperience02(['tabs', 'deadline', 'prompt']), 55.56);
   assert.equal(Core.calculateExperience02([]), null);
+  // pistas da cena redesenhada: ata (contexto) 3, mapa de outro projeto (reutilização informal) 2, happy hour 0
+  assert.equal(Core.calculateExperience02(['minutes', 'pastMap', 'happyHour']), 55.56);
+  assert.equal(Core.calculateExperience02(['pastMap']), 66.67);
+  assert.equal(Core.EXPERIENCES.experience02.signals.length, 10);
 });
 
 test('experiências 04, 05 e 06', () => {
@@ -147,7 +151,7 @@ test('learningDelta nunca é negativo', () => {
 test('recomputeAll mantém declarado e demonstrado separados', () => {
   const state = Core.createInitialState();
   Object.assign(state.declared, answers(3, 2, 2, 2, 2, 1));
-  state.experience02.selectedSignals = ['prompt', 'flows', 'coffee'];
+  state.experience02.selectedSignals = ['prompt', 'flows', 'happyHour'];
   state.experience03.path = ['skill', 'method'];
   state.experience04.selectedPath = 'C';
   state.experience05.selectedElements = ['objective', 'context', 'example'];

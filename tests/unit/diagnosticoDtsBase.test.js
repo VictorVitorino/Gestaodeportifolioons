@@ -27,7 +27,7 @@ function filledState() {
   Object.assign(state.participant, { fullName: 'Ana Paula Costa', email: 'ana.costa@empresa.com',
     aiOpinion: 'uma boa ajuda, desde que eu saiba revisar o que ela entrega.', registeredAt: '2026-09-29T12:00:00.000Z' });
   Object.assign(state.declared, { claude: 3, flows: 2, skills: 2, methods: 2, reuse: 2, creationSharing: 1 });
-  state.experience02.selectedSignals = ['flows', 'prompt', 'coffee'];
+  state.experience02.selectedSignals = ['flows', 'prompt', 'happyHour'];
   state.experience03.path = ['skill', 'method'];
   state.experience04.selectedPath = 'C';
   state.experience05.selectedElements = ['objective', 'context', 'example'];
@@ -180,7 +180,7 @@ test('uma coluna por questão, com respostas legíveis e na ordem escolhida', ()
   assert.match(row['P01.6 · Compartilhamento'], /^1 · /);
   assert.equal(row['P02.1 · 1ª pista'], 'FLOWS · 3 Métodos parecidos');
   assert.equal(row['P02.2 · 2ª pista'], 'Pedido no Claude');
-  assert.equal(row['P02.3 · 3ª pista'], 'Caneca sobre a mesa');
+  assert.equal(row['P02.3 · 3ª pista'], 'Convite do happy hour');
   assert.equal(row['P03.1 · 1ª peça ligada ao Prompt'], 'Skill');
   assert.equal(row['P03.2 · 2ª peça'], 'Método');
   assert.match(row['P04 · caminho escolhido'], /^C · FLOWS → /);

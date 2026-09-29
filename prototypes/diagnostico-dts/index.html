@@ -332,7 +332,7 @@ img{max-width:100%}
 .sc-shelf .b:nth-child(3){background:var(--steel);height:86%}
 .sc-shelf .b:nth-child(4){background:var(--steel-dark);height:95%;transform:rotate(9deg);transform-origin:bottom left;margin-left:2%}
 .sc-shelf .b em{writing-mode:vertical-rl;transform:rotate(180deg);font-style:normal;font-family:var(--f-type);font-weight:700;font-size:1.05cqw;letter-spacing:.1em;color:var(--ice)}
-.sc-shelf .seal{position:absolute;left:-12%;right:-12%;top:38%;height:13%;background:rgba(252,209,162,.95);transform:rotate(-8deg)}
+.sc-shelf .seal{position:absolute;left:-40%;right:-40%;top:-1%;display:grid;place-items:center;padding:.15cqw 0;background:rgba(252,209,162,.97);transform:rotate(-12deg);font-family:var(--f-hand);font-weight:700;font-size:.9cqw;line-height:1;color:var(--navy);box-shadow:0 .15cqw .3cqw rgba(0,20,40,.25)}
 .sc-shelf .dust{position:absolute;left:10%;top:-4%;font-family:var(--f-hand);font-size:1.2cqw;color:var(--steel-dark);white-space:nowrap}
 .sc-shelf .tag{position:absolute;right:-2%;top:-6%;padding:.2cqw .6cqw;background:var(--paper-hi);border:1px solid var(--steel-dark);font-family:var(--f-hand);font-size:1.15cqw;line-height:1.1;color:var(--navy);transform:rotate(4deg)}
 .sc-bezel{--l:29%;--t:7%;--w:43%;--h:50%;background:var(--navy-deep);border-radius:.9cqw;box-shadow:0 .5cqw 1cqw rgba(0,20,40,.35)}
@@ -355,10 +355,22 @@ img{max-width:100%}
 .sc-doc .meta{padding:.3cqw .7cqw;font-family:var(--f-type);font-size:.95cqw;color:var(--steel-dark)}
 @keyframes blink{50%{opacity:0}}
 .sc-keyboard{--l:33%;--t:68%;--w:27%;--h:8%;border-radius:.5cqw;background:repeating-linear-gradient(90deg,var(--paper-hi) 0 1.3cqw,var(--light-blue) 1.3cqw 1.45cqw);border:.2cqw solid var(--navy);transform:perspective(40cqw) rotateX(35deg)}
-.sc-mug{--l:8%;--t:64.5%;--w:6%;--h:13%;background:var(--light-blue);border:.25cqw solid var(--navy);border-radius:.3cqw .3cqw 1.2cqw 1.2cqw}
-.sc-mug::before{content:"";position:absolute;right:-2.4cqw;top:22%;width:2.2cqw;height:2.8cqw;border:.35cqw solid var(--navy);border-left:0;border-radius:0 1.4cqw 1.4cqw 0}
-.sc-mug::after{content:"";position:absolute;left:8%;right:8%;top:5%;height:1cqw;border-radius:50%;background:var(--steel-dark)}
-.sc-mugnote{--l:4.5%;--t:79.5%;--w:14%;--h:5%;font-family:var(--f-hand);font-size:1.2cqw;line-height:1;color:var(--navy);text-align:center;white-space:nowrap}
+/* mesa: o Mapa de Impactos entregue em outro projeto */
+.sc-folder{--l:4.5%;--t:65%;--w:16.5%;--h:18.5%;display:flex;flex-direction:column;gap:.25cqw;padding:.7cqw .8cqw .7cqw 1.9cqw;background:var(--paper-hi);border:.2cqw solid var(--navy);border-left:1.1cqw solid var(--steel-dark);border-radius:.3cqw;
+  box-shadow:.45cqw .45cqw 0 var(--light-blue),.7cqw .9cqw .9cqw -.3cqw rgba(0,20,40,.45);transform:rotate(-5deg)}
+.sc-folder small{font-family:var(--f-type);font-weight:700;font-size:.85cqw;letter-spacing:.08em;color:var(--steel-dark)}
+.sc-folder b{font-family:var(--f-display);font-size:1.4cqw;line-height:1.05;color:var(--navy)}
+.sc-folder .done{align-self:flex-start;margin-top:auto;padding:.1cqw .45cqw;border:.2cqw solid var(--orange);border-radius:.2cqw;font-family:var(--f-type);font-weight:700;font-size:.85cqw;letter-spacing:.1em;color:var(--navy);background:rgba(252,209,162,.6);transform:rotate(-4deg)}
+/* parede: quadro de avisos com a ata do kick-off e o convite do happy hour */
+.sc-board{--l:3%;--t:38.5%;--w:24%;--h:21%;border:.35cqw solid var(--steel-dark);border-radius:.3cqw;
+  background:radial-gradient(rgba(51,85,109,.2) .12cqw,transparent .17cqw) 0 0/.9cqw .9cqw,linear-gradient(var(--peach-soft),var(--peach-soft)),var(--off-white)}
+.sc-board .pin{position:absolute;top:-.45cqw;left:50%;width:1cqw;height:1cqw;margin-left:-.5cqw;border-radius:50%;background:var(--orange);border:.12cqw solid var(--navy)}
+.sc-board .ata{position:absolute;left:5%;top:9%;width:58%;height:84%;display:flex;flex-direction:column;padding:.8cqw .7cqw .5cqw;background:#fff;box-shadow:0 .3cqw .5cqw -.3cqw rgba(0,20,40,.5);transform:rotate(-1.5deg);font-size:.95cqw;line-height:1.25;color:var(--navy)}
+.sc-board .ata b{margin-bottom:.3cqw;font-family:var(--f-type);font-size:.95cqw;letter-spacing:.06em;white-space:nowrap}
+.sc-board .ata span{white-space:nowrap}
+.sc-board .flyer{position:absolute;left:67%;top:12%;width:29%;height:62%;display:grid;place-content:center;gap:.3cqw;padding:.4cqw;background:var(--light-blue);text-align:center;color:var(--navy);transform:rotate(5deg);box-shadow:0 .3cqw .5cqw -.3cqw rgba(0,20,40,.5)}
+.sc-board .flyer b{font-family:var(--f-display);font-size:1.15cqw;line-height:1}
+.sc-board .flyer span{font-family:var(--f-hand);font-size:1cqw;line-height:1.1}
 .sc-phone{--l:61.5%;--t:65.5%;--w:15%;--h:20%;padding:.6cqw;border-radius:1cqw;background:var(--navy);transform:rotate(-7deg)}
 .sc-phone .scr{height:100%;border-radius:.6cqw;background:var(--ice);padding:.6cqw;display:flex;flex-direction:column;gap:.3cqw}
 .sc-phone .ntf{padding:.4cqw .5cqw;border-radius:.4cqw;background:#fff;border-left:.35cqw solid var(--steel)}
@@ -366,12 +378,23 @@ img{max-width:100%}
 .sc-phone .ntf span{display:block;font-size:1.12cqw;line-height:1.15;color:var(--steel-dark)}
 .sc-phone .unread{font-family:var(--f-hand);font-size:1.2cqw;color:var(--navy)}
 .sc-phone .unread::before{content:"";display:inline-block;width:.8cqw;height:.8cqw;margin-right:.3cqw;border-radius:50%;background:var(--steel)}
-.sc-clock{--l:76%;--t:6%;--w:12%;--h:11%;display:grid;place-items:center;border-radius:.6cqw;background:var(--navy);border:.3cqw solid var(--steel-dark);font-family:var(--f-type);font-weight:700;font-size:3.1cqw;letter-spacing:.06em;color:var(--peach)}
+/* parede: relógio de verdade (17h42) e o lembrete da entrega */
+.sc-clock{--l:75%;--t:6%;width:11cqw;height:11cqw;filter:drop-shadow(0 .4cqw .5cqw rgba(0,20,40,.35))}
+.sc-clock svg{display:block;width:100%;height:100%}
+.sc-clock circle{fill:var(--paper-hi);stroke:var(--navy);stroke-width:2.4}
+.sc-clock .tick{stroke:var(--steel-dark);stroke-width:1.1;stroke-linecap:round}
+.sc-clock .hand{stroke:var(--navy);stroke-linecap:round}
+.sc-clock .hand.h{stroke-width:2.2}
+.sc-clock .hand.m{stroke-width:1.4}
+.sc-clock .hub{fill:var(--orange);stroke:var(--navy);stroke-width:.6}
 .sc-post{display:grid;place-items:center;padding:.6cqw;text-align:center;font-family:var(--f-hand);font-weight:700;line-height:1.05;color:var(--navy);box-shadow:0 .6cqw .8cqw -.5cqw rgba(0,20,40,.5)}
-.sc-post.p1{--l:73.5%;--t:21%;--w:10.5%;--h:16%;background:var(--light-blue);font-size:1.5cqw;transform:rotate(-6deg)}
-.sc-post.p2{--l:85.5%;--t:23%;--w:11.5%;--h:17%;background:var(--peach);font-size:1.45cqw;transform:rotate(5deg);text-decoration:underline double;text-underline-offset:.3cqw}
-.sc-cabinet{--l:80%;--t:46%;--w:17%;--h:42%;display:grid;grid-template-rows:1fr 1fr;gap:4%;padding:5% 6%;background:var(--steel);border:.3cqw solid var(--navy);border-radius:.4cqw .4cqw 0 0}
+.sc-post.due{--l:87%;--t:8%;--w:11%;--h:25%;align-content:center;gap:.15cqw;background:var(--peach);transform:rotate(5deg)}
+.sc-post.due b{font-family:var(--f-type);font-size:1.15cqw;letter-spacing:.08em}
+.sc-post.due strong{font-family:var(--f-display);font-size:2.6cqw;line-height:1}
+.sc-post.due span{font-weight:400;font-size:1.05cqw;line-height:1.1}
+.sc-cabinet{--l:80%;--t:46%;--w:17%;--h:42%;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:1fr 1fr;gap:1cqw;padding:1.1cqw 1.4cqw;background:var(--steel);border:.3cqw solid var(--navy);border-radius:.4cqw .4cqw 0 0}
 .sc-cabinet .drawer{position:relative;background:var(--light-blue);border:.2cqw solid var(--steel-dark);border-radius:.3cqw;display:grid;place-items:center}
+.sc-cabinet .note{position:absolute;right:6%;bottom:-1.1cqw;width:max-content;z-index:1;padding:.25cqw .5cqw;white-space:nowrap;font-family:var(--f-hand);font-size:.95cqw;line-height:1;color:var(--navy);background:var(--paper-hi);border:.12cqw solid var(--steel-dark);box-shadow:0 .2cqw .3cqw rgba(0,20,40,.3);transform:rotate(-3deg)}
 .sc-cabinet .label{padding:.2cqw .7cqw;background:var(--paper-hi);border:.15cqw solid var(--navy);font-family:var(--f-type);font-weight:700;font-size:1.2cqw;letter-spacing:.12em;color:var(--navy)}
 .sc-cabinet .handle{position:absolute;bottom:14%;left:35%;right:35%;height:.5cqw;border-radius:1cqw;background:var(--navy)}
 .sc-cabinet .web{position:absolute;left:-.1cqw;top:-.1cqw;width:3.4cqw;height:3.4cqw}
@@ -973,9 +996,11 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
         { id: 'skills', label: 'Gaveta de Skills', detail: 'percepção de reutilização por Skill', maturitySignal: 3 },
         { id: 'methods', label: 'Prateleira de Métodos', detail: 'percepção de Método existente', maturitySignal: 3 },
         { id: 'flows', label: 'FLOWS · 3 Métodos parecidos', detail: 'percepção do ecossistema FLOWS', maturitySignal: 3 },
-        { id: 'deadline', label: 'Relógio e post-its', detail: 'atenção a urgência / prazo', maturitySignal: 1 },
+        { id: 'minutes', label: 'Ata do kick-off', detail: 'busca do contexto do cliente (áreas, público, datas)', maturitySignal: 3 },
+        { id: 'pastMap', label: 'Mapa de outro projeto', detail: 'reutilização informal de uma entrega antiga', maturitySignal: 2 },
+        { id: 'deadline', label: 'Relógio e lembrete das 18h', detail: 'atenção a urgência / prazo', maturitySignal: 1 },
         { id: 'tabs', label: '17 abas abertas', detail: 'atenção a carga operacional / organização', maturitySignal: 1 },
-        { id: 'coffee', label: 'Caneca sobre a mesa', detail: 'elemento neutro', maturitySignal: 0 }
+        { id: 'happyHour', label: 'Convite do happy hour', detail: 'elemento neutro (distração do fim de tarde)', maturitySignal: 0 }
       ]
     },
     experience03: {
@@ -1650,6 +1675,7 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
     else if (m.xp07Stage === 'draft1') m.xp07Stage = 'analysis1';
     state.experience03.path = state.experience03.path.filter(n => EXPERIENCES.experience03.pieces.includes(n)).slice(0, CONFIG.experience03Connections);
     if (state.participant.registeredAt && !Report.isParticipantComplete(state.participant)) state.participant.registeredAt = null;
+    state.experience02.selectedSignals = state.experience02.selectedSignals.filter(id => EXPERIENCES.experience02.signals.some(sig => sig.id === id));
   }
 
   /* ================================ SYNC ================================ */
@@ -2258,14 +2284,16 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
 
   /* ------------------------------------------------------------ página 02 · storyboard */
   const HOTSPOTS = [
-    { id: 'methods', l: 2, t: 5, w: 27, h: 30 },
+    { id: 'methods', l: 2, t: 4, w: 27, h: 31 },
     { id: 'tabs', l: 29.5, t: 7.8, w: 42, h: 6.4 },
     { id: 'prompt', l: 29.8, t: 14.4, w: 18.2, h: 41 },
     { id: 'blankDoc', l: 48.2, t: 14.4, w: 22.8, h: 41 },
-    { id: 'deadline', l: 72.5, t: 4, w: 26, h: 38 },
-    { id: 'coffee', l: 3.5, t: 62, w: 15, h: 24 },
-    { id: 'flows', l: 59.5, t: 63.5, w: 18.5, h: 24 },
-    { id: 'skills', l: 79, t: 44, w: 19.5, h: 46 }
+    { id: 'deadline', l: 73, t: 3.5, w: 26, h: 36 },
+    { id: 'minutes', l: 3.2, t: 37.5, w: 15.3, h: 23 },
+    { id: 'happyHour', l: 18.8, t: 38.5, w: 8.6, h: 18 },
+    { id: 'skills', l: 79, t: 44, w: 19.5, h: 46 },
+    { id: 'pastMap', l: 2.5, t: 62.5, w: 20, h: 24.5 },
+    { id: 'flows', l: 59.5, t: 63.5, w: 18.5, h: 24 }
   ];
   const SCRIBBLE = '<svg class="scribble" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M14 58 C8 26 42 7 76 11 C97 15 99 60 84 82 C66 99 20 97 8 72 C3 60 9 43 25 33"/></svg>';
   const signalById = id => EXPERIENCES.experience02.signals.find(s => s.id === id);
@@ -2278,19 +2306,25 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
         <div class="sc-wall"></div><div class="sc-floor"></div>
         <div class="sc sc-desk"></div><div class="sc sc-desk-front"></div>
         <div class="sc sc-shelf"><span class="tag">Métodos do time</span><span class="dust">· · pó · ·</span>
-          <div class="binders"><i class="b"><em>MÉTODO</em><span class="seal"></span></i><i class="b"><em>MÉTODO</em></i><i class="b"><em>MÉTODO</em><span class="seal"></span></i><i class="b"><em>MÉTODO</em></i></div><div class="plank"></div></div>
-        <div class="sc sc-clock">17:42</div>
-        <div class="sc sc-post p1">URGENTE!</div>
-        <div class="sc sc-post p2">URGENTE MESMO!</div>
+          <div class="binders"><i class="b"><em>MUDANÇA</em></i><i class="b"><em>IMPACTOS</em><span class="seal">lacrado</span></i><i class="b"><em>PÚBLICOS</em></i><i class="b"><em>ADOÇÃO</em></i></div><div class="plank"></div></div>
+        <div class="sc sc-board">
+          <div class="ata"><i class="pin"></i><b>ATA · KICK-OFF</b><span>Áreas: Atendimento,</span><span>Financeiro e TI</span><span>Go-live: 15/11</span><span>Público: diretoria</span></div>
+          <div class="flyer"><i class="pin"></i><b>HAPPY HOUR</b><span>hoje · 18h30</span></div>
+        </div>
+        <div class="sc sc-clock"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="18"/>${Array.from({ length: 12 }, (_, i) => {
+          const a = i * Math.PI / 6; const r1 = i % 3 ? 15.5 : 14; const x = n => (20 + n * Math.sin(a)).toFixed(2); const y = n => (20 - n * Math.cos(a)).toFixed(2);
+          return `<line class="tick" x1="${x(r1)}" y1="${y(r1)}" x2="${x(17)}" y2="${y(17)}"/>`;
+        }).join('')}<line class="hand h" x1="20" y1="20" x2="21.41" y2="28.89"/><line class="hand m" x1="20" y1="20" x2="6.69" y2="24.33"/><circle class="hub" cx="20" cy="20" r="1.6"/></svg></div>
+        <div class="sc sc-post due"><b>ENTREGA</b><strong>18h</strong><span>diretoria do cliente</span></div>
         <div class="sc sc-bezel"></div>
         <div class="sc sc-tabs">${'<i></i>'.repeat(16)}<i class="on"></i><b>17</b></div>
         <div class="sc sc-claude"><div class="bar">Claude</div><div class="chat"><div class="me">faz um mapa de impactos aí</div><div class="dots">•••</div></div><div class="input"></div></div>
         <div class="sc sc-doc"><div class="bar">Mapa_de_Impactos.docx</div><div class="sheetlet"><span class="caret"></span></div><div class="meta">Página 1 de 1 · 0 palavras</div></div>
         <div class="sc sc-neck"></div><div class="sc sc-base"></div>
         <div class="sc sc-keyboard"></div>
-        <div class="sc sc-mug"></div><div class="sc sc-mugnote">frio desde 14h</div>
+        <div class="sc sc-folder"><small>PROJETO AURORA</small><b>Mapa de Impactos</b><span class="done">ENTREGUE</span></div>
         <div class="sc sc-phone"><div class="scr"><div class="ntf"><b>FLOWS</b><span>3 Métodos parecidos</span></div><span class="unread">não lida</span></div></div>
-        <div class="sc sc-cabinet"><div class="drawer"><svg class="web" viewBox="0 0 34 34"><path d="M0 0 L34 34 M0 0 L34 13 M0 0 L13 34 M0 11 Q9 9 11 0 M0 21 Q17 17 21 0 M0 31 Q25 25 31 0"/></svg><span class="label">SKILLS</span><span class="handle"></span></div><div class="drawer"><span class="handle"></span></div></div>
+        <div class="sc sc-cabinet"><div class="drawer"><svg class="web" viewBox="0 0 34 34"><path d="M0 0 L34 34 M0 0 L34 13 M0 0 L13 34 M0 11 Q9 9 11 0 M0 21 Q17 17 21 0 M0 31 Q25 25 31 0"/></svg><span class="label">SKILLS</span><span class="note">mapa de impactos v2</span><span class="handle"></span></div><div class="drawer"><span class="handle"></span></div></div>
       </div>`;
     },
     html() {
@@ -2313,7 +2347,7 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
           </div>
           <div class="panel scene-panel">
             <div class="scene" role="group" aria-label="Cena: fim de tarde no escritório" aria-describedby="sceneDesc">
-              <p class="sr-only" id="sceneDesc">17h42. Na parede, uma prateleira de Métodos, um relógio e dois post-its de urgência. No monitor, 17 abas abertas, um pedido no Claude e um documento em branco. Na mesa, uma caneca e um celular com um aviso do FLOWS. Ao lado, o gaveteiro de Skills. Use Tab para percorrer as pistas da cena.</p>
+              <p class="sr-only" id="sceneDesc">17h42. Na parede, a prateleira de Métodos do time (Mudança, Impactos ainda lacrado, Públicos, Adoção), um quadro com a ata do kick-off e um convite de happy hour, um relógio e um lembrete da entrega das 18h para a diretoria do cliente. No monitor, 17 abas abertas, um pedido vago no Claude e o documento do Mapa de Impactos em branco. Na mesa, o Mapa de Impactos entregue em outro projeto e um celular com um aviso do FLOWS. Ao lado, o gaveteiro de Skills com um mapa de impactos guardado. Use Tab para percorrer as pistas da cena.</p>
               ${XP02.sceneArt()}
               ${hotspots}
             </div>

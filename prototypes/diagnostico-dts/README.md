@@ -56,6 +56,12 @@ Cada página segue a mesma sequência de leitura: **lembrança** (post-it "Lembr
 **contexto** (subtítulo) → **ação** (pergunta e dica no rodapé). Na página 01, a faixa acima da matriz mostra a
 pergunta da linha da vez (a próxima sem resposta, ou a linha em foco pelo teclado).
 
+Na página 02, cada objeto da cena é uma pista ligada à entrega do Mapa de Impactos às 18h (sinal interno entre parênteses):
+Prateleira de Métodos com o Método de Impactos ainda lacrado (3), ata do kick-off com áreas, go-live e público (3),
+pedido vago no Claude (3), documento em branco (3), aviso do FLOWS (3), gaveta de Skills com um mapa de impactos
+guardado (3), Mapa de Impactos entregue em outro projeto (2), relógio e lembrete da entrega à diretoria (1),
+17 abas abertas (1) e convite do happy hour (0).
+
 Capa e encerramento não são experiências. O encerramento mostra apenas o ponto de partida declarado.
 
 ## Modelo de cálculo (resumo)
