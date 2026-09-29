@@ -60,16 +60,17 @@ Dois blocos `<script>` no `index.html`:
 - `#dts-app` — estado, persistência, animações e as páginas. Os eventos só registram escolhas e chamam
   `commit()`, que recalcula tudo a partir do estado.
 
-## Trocar os personagens por fotos reais
+## Time e caricaturas
 
-Edite `CHARACTERS` no bloco `#dts-core`:
+As 7 pessoas do time estão em `CHARACTERS` (bloco `#dts-core`), com nome completo (usado na análise do rascunho)
+e primeiro nome (etiqueta do polaroid). As caricaturas são SVGs desenhados em código, no traço de nanquim do caderno:
+cabeça levemente maior, olhos expressivos, sorriso simpático e sem exagerar traços físicos.
 
-```js
-{ id: 'person01', name: 'Nome da pessoa', image: 'fotos/person01.jpg' }
-```
-
-Com `image: 'placeholder'` o slot mostra uma moldura vazia (nenhum rosto é gerado). `PERSONAGEM_01`
-também aparece no storyboard da página 02.
+- `caricaturas/gerar.mjs` descreve cada pessoa (cabelo, barba, óculos, roupa, gravata) e gera `caricaturas/*.svg`.
+- O mesmo script injeta as artes no `index.html` (bloco `<script id="dts-art">`). Depois de ajustar alguém:
+  `node prototypes/diagnostico-dts/caricaturas/gerar.mjs`.
+- O storyboard da página 02 usa um personagem neutro, **Você**, para que ninguém do time apareça na cena do aperto das 17h42.
+- Para usar uma foto no lugar da caricatura, informe o caminho em `image` (ex.: `fotos/person01.jpg`).
 
 ## Validação feita
 
