@@ -1330,7 +1330,7 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
     return { declared: summarize('declared'), demonstrated: summarize('demonstrated'), evidence };
   }
 
-  // Identificador da sessão: une participante, etapas e resultado na planilha.
+  // Identificador da sessão: é a chave da linha da pessoa na planilha.
   function createSessionId() {
     return 'dts-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
   }
@@ -1423,10 +1423,10 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
 
 <script id="dts-report">
 /* =====================================================================
-   DTS REPORT · participante e linhas para a base (Google Planilhas)
-   Lógica pura (sem DOM). As chaves de cada linha são os cabeçalhos das
-   colunas na planilha: o Apps Script cria as colunas que faltarem e
-   atualiza sempre a mesma linha (ID da sessão, e página nas etapas).
+   DTS REPORT · participante e linha da base (Google Planilhas)
+   Lógica pura (sem DOM). Uma linha por pessoa, uma coluna por questão:
+   as chaves são os cabeçalhos da aba Diagnóstico, e o Apps Script
+   atualiza sempre a mesma linha (ID da sessão).
    ===================================================================== */
 (function (root) {
   'use strict';
@@ -1443,7 +1443,7 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
     hint: 'Vale entusiasmo, dúvida ou receio. Não existe resposta certa.'
   });
   const COLUMNS = Object.freeze({
-    session: 'ID da sessão', page: 'Página', name: 'Nome completo', email: 'E-mail', opinion: AI_QUESTION.stem
+    session: 'ID da sessão', name: 'Nome completo', email: 'E-mail', opinion: AI_QUESTION.stem
   });
   const MESSAGES = Object.freeze({
     fullName: 'Escreva nome e sobrenome, como no crachá.',
@@ -1492,99 +1492,22 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
     return done;
   }
 
-  /* ------------------------------------------------------------ leitura das respostas */
-  const pad2 = n => String(n).padStart(2, '0');
+  /* ------------------------------------------------------------ linha da planilha */
   const num = v => (v == null || Number.isNaN(v) ? '' : Math.round(v * 100) / 100);
   const nodeLabel = id => (SEMANTIC_GRAPH.nodes[id] ? SEMANTIC_GRAPH.nodes[id].label : id);
   const labelIn = (list, id) => { const item = list.find(x => x.id === id); return item ? item.label : id; };
   const row = pairs => { const out = {}; pairs.forEach(([key, v]) => { out[key] = v == null ? '' : v; }); return out; };
-  const routeOf = s => EXPERIENCES.experience04.routes.find(r => r.id === s.experience04.selectedPath) || null;
-  const portrayed = s => CHARACTERS.find(c => c.id === s.experience07.selectedCharacter) || null;
-  const lists = {
-    clues: s => s.experience02.selectedSignals.map(id => labelIn(EXPERIENCES.experience02.signals, id)),
-    path: s => s.experience03.semanticPath.map(nodeLabel),
-    skill: s => s.experience05.selectedElements.map(id => labelIn(EXPERIENCES.experience05.elements, id)),
-    prompt: s => s.experience06.selectedPromptElements.map(id => labelIn(EXPERIENCES.experience06.elements, id))
-  };
+  const nth = (list, i) => (list[i] == null ? '' : list[i]);
 
-  // Uma leitura por página: texto legível, leitura interna (0–100) e detalhe técnico.
-  const READERS = {
-    1: s => {
-      const d = s.declared;
-      const answers = {};
-      LEVELING.dimensions.forEach(dim => { answers[dim.key] = d[dim.key]; });
-      return {
-        text: LEVELING.dimensions.map(dim => `${dim.label}: ${d[dim.key] == null ? '—' : dim.options[d[dim.key]]}`).join('\n'),
-        signal: d.finalIndex,
-        detail: { respostas: answers, bruto: d.rawIndex, final: d.finalIndex, trava: d.appliedCap, faixa: d.stage }
-      };
-    },
-    2: s => ({ text: lists.clues(s).map((label, i) => `${i + 1}. ${label}`).join('\n'), signal: s.experience02.score,
-      detail: { pistasEmOrdem: s.experience02.selectedSignals } }),
-    3: s => {
-      const e = s.experience03;
-      return { text: lists.path(s).join(' → '), signal: e.score,
-        detail: { caminho: e.semanticPath, distancias: e.semanticDistances, proximidades: e.proximities } };
-    },
-    4: s => {
-      const route = routeOf(s);
-      return { text: route ? `Rota ${route.id}: ${route.stops.join(' → ')} (${route.profileLabel})` : '', signal: s.experience04.score,
-        detail: { rota: s.experience04.selectedPath, perfil: s.experience04.behaviorProfile } };
-    },
-    5: s => ({ text: lists.skill(s).join(', '), signal: s.experience05.score, detail: { elementos: s.experience05.selectedElements } }),
-    6: s => ({ text: lists.prompt(s).join(', '), signal: s.experience06.score, detail: { elementos: s.experience06.selectedPromptElements } }),
-    7: s => {
-      const e = s.experience07;
-      const who = portrayed(s);
-      const text = [`Retratado: ${who ? who.name : '—'}`, `Rascunho nº 1: ${e.originalPrompt}`];
-      if (e.revisedStructureScore != null) text.push(`Rascunho nº 2: ${e.revisedPrompt}`);
-      return { text: text.join('\n'), signal: e.score,
-        detail: { retratado: e.selectedCharacter, estrutura1: e.originalStructureScore, estrutura2: e.revisedStructureScore, evolucao: e.learningDelta } };
-    }
-  };
-
-  /* ------------------------------------------------------------ linhas da planilha */
-  // Aba "Participantes": uma linha por pessoa, atualizada a cada envio.
-  function participantRecord(state, pageNames) {
-    const p = state.participant;
-    const m = state.meta;
-    const reached = m.maxReachedPage;
-    const furthest = m.finishedAt || reached > EXPERIENCE_COUNT ? 'Encerramento'
-      : reached >= 1 ? `Página ${pad2(reached)} · ${(pageNames && pageNames[reached]) || ''}` : 'Capa';
-    return row([
-      [COLUMNS.session, m.sessionId],
-      [COLUMNS.name, p.fullName],
-      [COLUMNS.email, p.email],
-      [COLUMNS.opinion, p.aiOpinion],
-      ['Status', m.finishedAt ? 'Concluído' : 'Em andamento'],
-      ['Páginas concluídas (de 7)', countCompleteExperiences(state)],
-      ['Página mais avançada', furthest],
-      ['Identificado em', p.registeredAt],
-      ['Concluído em', m.finishedAt],
-      ['Versão do caderno', VERSION]
-    ]);
-  }
-
-  // Aba "Etapas": uma linha por pessoa e página.
-  function stageRecord(state, n, pageNames) {
-    const read = READERS[n](state);
-    return row([
-      [COLUMNS.session, state.meta.sessionId],
-      [COLUMNS.name, state.participant.fullName],
-      [COLUMNS.page, 'P' + pad2(n)],
-      ['Experiência', (pageNames && pageNames[n]) || ''],
-      ['Respostas', read.text],
-      ['Leitura interna (0–100)', num(read.signal)],
-      ['Detalhe (JSON)', read.detail]
-    ]);
-  }
+  // Início estável: o mais antigo entre a etiqueta e a página 01 (não muda ao abrir a página 01).
+  const startOf = state => [state.meta.startedAt, state.participant.registeredAt].filter(Boolean).sort()[0] || null;
 
   // Estado sem dados de navegação: o mesmo conjunto de respostas gera sempre o mesmo registro.
   function snapshot(state) {
     const m = state.meta;
     return {
       versao: VERSION,
-      meta: { sessionId: m.sessionId, startedAt: m.startedAt, finishedAt: m.finishedAt },
+      meta: { sessionId: m.sessionId, startedAt: startOf(state), finishedAt: m.finishedAt },
       participant: state.participant, declared: state.declared,
       experience02: state.experience02, experience03: state.experience03, experience04: state.experience04,
       experience05: state.experience05, experience06: state.experience06, experience07: state.experience07,
@@ -1592,47 +1515,55 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
     };
   }
 
-  // Aba "Resultados": uma linha por pessoa, com tudo aberto em colunas (pronta para filtro e tabela dinâmica).
-  function resultRecord(state) {
+  // Aba "Diagnóstico": uma linha por pessoa, uma coluna por questão. As chaves são os cabeçalhos da planilha
+  // (google-apps-script/Codigo.gs). O nível é calculado pela própria planilha a partir destas respostas.
+  function diagnosisRecord(state) {
     const m = state.meta;
     const p = state.participant;
     const d = state.declared;
-    const r = state.results;
+    const e3 = state.experience03;
+    const e4 = state.experience04;
     const e7 = state.experience07;
-    const route = routeOf(state);
-    const who = portrayed(state);
-    const profile = r.dimensionProfile || { declared: {}, demonstrated: {} };
-    const minutes = m.startedAt && m.finishedAt ? Math.round((Date.parse(m.finishedAt) - Date.parse(m.startedAt)) / 6000) / 10 : null;
+    const route = EXPERIENCES.experience04.routes.find(r => r.id === e4.selectedPath) || null;
+    const who = CHARACTERS.find(c => c.id === e7.selectedCharacter) || null;
+    const clues = state.experience02.selectedSignals.map(id => labelIn(EXPERIENCES.experience02.signals, id));
+    const pieces = e3.path.map(nodeLabel);
+    const skill = state.experience05.selectedElements.map(id => labelIn(EXPERIENCES.experience05.elements, id));
+    const prompt = state.experience06.selectedPromptElements.map(id => labelIn(EXPERIENCES.experience06.elements, id));
+    const profile = state.results.dimensionProfile || { declared: {}, demonstrated: {} };
+    const startedAt = startOf(state);
+    const minutes = startedAt && m.finishedAt ? Math.round((Date.parse(m.finishedAt) - Date.parse(startedAt)) / 6000) / 10 : null;
     const pairs = [
       [COLUMNS.session, m.sessionId], [COLUMNS.name, p.fullName], [COLUMNS.email, p.email], [COLUMNS.opinion, p.aiOpinion],
-      ['Iniciado em', m.startedAt], ['Concluído em', m.finishedAt], ['Duração (min)', minutes]
+      ['Status', m.finishedAt ? 'Concluído' : 'Em andamento'],
+      ['Páginas concluídas (de 7)', countCompleteExperiences(state)],
+      ['Iniciado em', startedAt], ['Concluído em', m.finishedAt], ['Duração (min)', minutes]
     ];
-    LEVELING.dimensions.forEach(dim => pairs.push([`P01 · ${dim.label} (0–3)`, d[dim.key]]));
+    // "2 · texto da opção": o número (0 a 3) alimenta a conta da planilha; o texto é o que a pessoa escolheu.
+    LEVELING.dimensions.forEach((dim, i) => pairs.push([`P01.${i + 1} · ${dim.label}`, d[dim.key] == null ? '' : `${d[dim.key]} · ${dim.options[d[dim.key]]}`]));
     pairs.push(
-      ['Declarado · bruto (%)', num(d.rawIndex)],
-      ['Declarado · final (%)', num(d.finalIndex)],
-      ['Declarado · trava aplicada (%)', d.appliedCap || ''],
-      ['Faixa declarada', d.finalIndex != null ? Core.getLevelingStage(d.finalIndex).label : ''],
-      ['P02 · pistas (em ordem)', lists.clues(state).join(' → ')], ['P02 · leitura (0–100)', num(state.experience02.score)],
-      ['P03 · caminho', lists.path(state).join(' → ')], ['P03 · distâncias no grafo', state.experience03.semanticDistances.join(' · ')],
-      ['P03 · leitura (0–100)', num(state.experience03.score)],
-      ['P04 · rota', route ? `${route.id}: ${route.stops.join(' → ')}` : ''], ['P04 · perfil', route ? route.profileLabel : ''],
-      ['P04 · leitura (0–100)', num(state.experience04.score)],
-      ['P05 · elementos', lists.skill(state).join(', ')], ['P05 · leitura (0–100)', num(state.experience05.score)],
-      ['P06 · elementos', lists.prompt(state).join(', ')], ['P06 · leitura (0–100)', num(state.experience06.score)],
-      ['P07 · retratado', who ? who.name : ''],
-      ['P07 · rascunho nº 1', e7.originalPrompt], ['P07 · estrutura nº 1', num(e7.originalStructureScore)],
-      ['P07 · rascunho nº 2', e7.revisedStructureScore != null ? e7.revisedPrompt : ''], ['P07 · estrutura nº 2', num(e7.revisedStructureScore)],
-      ['P07 · evolução entre rascunhos', num(e7.learningDelta)], ['P07 · leitura (0–100)', num(e7.score)],
-      ['Índice demonstrado', num(r.demonstratedIndex)],
-      ['Índice consolidado (30/70)', num(r.overallMaturityIndex)],
-      ['Gap de alinhamento', num(r.alignmentGap)],
-      ['Índice de alinhamento', num(r.alignmentIndex)]
+      ['P02.1 · 1ª pista', nth(clues, 0)], ['P02.2 · 2ª pista', nth(clues, 1)], ['P02.3 · 3ª pista', nth(clues, 2)],
+      ['P02 · leitura (0–100)', num(state.experience02.score)],
+      ['P03.1 · 1ª peça ligada ao Prompt', nth(pieces, 0)], ['P03.2 · 2ª peça', nth(pieces, 1)], ['P03 · leitura (0–100)', num(e3.score)],
+      ['P04 · caminho escolhido', route ? `${route.id} · ${route.stops.join(' → ')}` : ''], ['P04 · perfil', route ? route.profileLabel : ''],
+      ['P04 · leitura (0–100)', num(e4.score)],
+      ['P05.1 · 1º elemento', nth(skill, 0)], ['P05.2 · 2º elemento', nth(skill, 1)], ['P05.3 · 3º elemento', nth(skill, 2)],
+      ['P05 · leitura (0–100)', num(state.experience05.score)],
+      ['P06.1 · 1ª peça', nth(prompt, 0)], ['P06.2 · 2ª peça', nth(prompt, 1)], ['P06.3 · 3ª peça', nth(prompt, 2)],
+      ['P06 · leitura (0–100)', num(state.experience06.score)],
+      ['P07 · pessoa retratada', who ? who.name : ''],
+      ['P07 · rascunho nº 1', e7.originalStructureScore != null ? e7.originalPrompt : ''], ['P07 · estrutura nº 1 (0–100)', num(e7.originalStructureScore)],
+      ['P07 · rascunho nº 2', e7.revisedStructureScore != null ? e7.revisedPrompt : ''], ['P07 · estrutura nº 2 (0–100)', num(e7.revisedStructureScore)],
+      ['P07 · evolução entre rascunhos', num(e7.learningDelta)], ['P07 · leitura (0–100)', num(e7.score)]
     );
     Object.keys(DIMENSIONS).forEach(key => {
       pairs.push([`${DIMENSIONS[key]} · declarado`, num(profile.declared[key])], [`${DIMENSIONS[key]} · demonstrado`, num(profile.demonstrated[key])]);
     });
-    pairs.push(['Estado completo (JSON)', snapshot(state)]);
+    pairs.push(
+      ['Índice consolidado (caderno)', num(state.results.overallMaturityIndex)],
+      ['Versão do caderno', VERSION],
+      ['Estado completo (JSON)', snapshot(state)]
+    );
     return row(pairs);
   }
 
@@ -1640,7 +1571,7 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
     VERSION, EXPERIENCE_COUNT, AI_QUESTION, COLUMNS, MESSAGES, LIMITS,
     validateParticipant, isParticipantComplete, firstName,
     isExperienceComplete, countCompleteExperiences,
-    participantRecord, stageRecord, resultRecord, snapshot
+    diagnosisRecord, snapshot
   });
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
@@ -1722,7 +1653,7 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
   }
 
   /* ================================ SYNC ================================ */
-  // Envia participante, etapas e resultado para a planilha (Google Apps Script; link em #dts-config).
+  // Envia a linha da pessoa (uma coluna por questão) para a planilha (Google Apps Script; link em #dts-config).
   // A fila fica guardada no navegador: se a conexão cair, nada se perde e o envio recomeça sozinho.
   // O Apps Script atualiza sempre a mesma linha, então reenviar é seguro.
   const Sync = (() => {
@@ -1762,12 +1693,12 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
     }
     function notify() { const s = status(); listeners.forEach(fn => { try { fn(s); } catch (e) { /* noop */ } }); }
 
-    function put(tipo, participante, linha, options) {
+    // Uma linha por pessoa: a fila guarda só o retrato mais recente de cada sessão.
+    function put(tipo, linha, options) {
       if (!enabled()) return;
-      const key = tipo + ':' + ((linha && linha[Report.COLUMNS.page]) || '');
-      const body = JSON.stringify({ tipo, versao: Report.VERSION, participante, linha: linha || null });
-      // Compara só o conteúdo da linha (o bloco do participante vai junto, atualizado, em todo envio).
-      const fp = fingerprint(linha ? JSON.stringify(linha) : JSON.stringify(participante));
+      const key = 'diagnostico:' + linha[Report.COLUMNS.session];
+      const body = JSON.stringify({ tipo, versao: Report.VERSION, linha });
+      const fp = fingerprint(JSON.stringify(linha));
       const waiting = box.pending.find(item => item.key === key);
       if (!(options && options.force) && (waiting ? waiting.fp === fp : box.sent[key] === fp)) return;
       const item = { key, tipo, body, fp, tries: 0, nextAt: 0 };
@@ -1930,9 +1861,6 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
   ];
   const FINAL_PAGE = PAGES.length - 1;
 
-  const PAGE_NAMES = {};
-  PAGES.forEach(p => { if (p.n) PAGE_NAMES[p.n] = p.name; });
-
   function isPageComplete(index) {
     const n = PAGES[index] && PAGES[index].n;
     return n ? Report.isExperienceComplete(state, n) : true;
@@ -1954,7 +1882,7 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
     if (target >= 1 && !state.meta.startedAt) state.meta.startedAt = new Date().toISOString();
     if (target === FINAL_PAGE && !state.meta.finishedAt) state.meta.finishedAt = new Date().toISOString();
     commit();
-    syncProgress(from);
+    syncDiagnosis();
     renderStage({ direction, focus: true });
   }
 
@@ -1975,26 +1903,16 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
     Cover.view = 'intro';
     Cover.pendingTarget = null;
     commit();
-    syncEverything(false);
+    syncDiagnosis(state.meta.startedAt ? null : 'inicio');
     if (target != null) goTo(target, { direction: 'forward' });
     else renderStage({ direction: 'back', focus: true });
   }
-  // Leva à planilha o que mudou: a página que a pessoa acabou de deixar e, depois do fim, o resultado consolidado.
-  function syncProgress(leftIndex) {
+  // Leva à planilha a linha da pessoa (uma coluna por questão) sempre que ela muda de página.
+  // Só vai o que mudou; com force ("Reenviar tudo" no painel), vai de novo mesmo sem mudança.
+  function syncDiagnosis(tipo, force) {
     if (!isParticipantReady() || !Sync.enabled()) return;
-    const participante = Report.participantRecord(state, PAGE_NAMES);
-    const n = PAGES[leftIndex] && PAGES[leftIndex].n;
-    if (n && isPageComplete(leftIndex)) Sync.put('etapa', participante, Report.stageRecord(state, n, PAGE_NAMES));
-    if (state.meta.finishedAt) Sync.put('resultado_final', participante, Report.resultRecord(state));
-  }
-  // Tudo de uma vez (etiqueta nova/editada ou "Reenviar tudo" no painel). Sem force, só vai o que mudou.
-  function syncEverything(force) {
-    if (!isParticipantReady() || !Sync.enabled()) return;
-    const opts = force ? { force: true } : null;
-    const participante = Report.participantRecord(state, PAGE_NAMES);
-    Sync.put('inicio', participante, null, opts);
-    for (let i = 1; i < FINAL_PAGE; i++) if (isPageComplete(i)) Sync.put('etapa', participante, Report.stageRecord(state, PAGES[i].n, PAGE_NAMES), opts);
-    if (state.meta.finishedAt) Sync.put('resultado_final', participante, Report.resultRecord(state), opts);
+    const kind = tipo || (state.meta.finishedAt ? 'resultado_final' : 'etapa');
+    Sync.put(kind, Report.diagnosisRecord(state), force ? { force: true } : null);
   }
   function syncMessage(s) {
     if (!s.enabled) return 'Suas respostas ficam guardadas neste navegador.';
@@ -3130,7 +3048,7 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
     if (btn.dataset.fac === 'resend') {
       if (!Sync.enabled()) { btn.textContent = 'Sem link da planilha'; return; }
       if (!isParticipantReady()) { btn.textContent = 'Etiqueta ainda vazia'; return; }
-      syncEverything(true);
+      syncDiagnosis(null, true);
       Sync.retryNow();
       return;
     }
@@ -3166,7 +3084,7 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
     const btn = event.target.closest('[data-modal]');
     if (!btn) return;
     if (btn.dataset.modal === 'cancel') { closeConfirm(); return; }
-    syncProgress(state.meta.currentPage); // o que mudou nesta página ainda vai para a planilha
+    syncDiagnosis(); // o que mudou nesta página ainda vai para a planilha
     Store.clear();
     state = Core.createInitialState();
     Cover.view = 'intro';
@@ -3221,7 +3139,7 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
     Sync.start();
   }
   // Ao sair (fechar a aba, trocar de app no celular): registra a página atual e empurra a fila.
-  window.addEventListener('pagehide', () => { syncProgress(state.meta.currentPage); Sync.beacon(); });
+  window.addEventListener('pagehide', () => { syncDiagnosis(); Sync.beacon(); });
   const hot = window.claude && window.claude.hot;
   if (hot && typeof hot.snapshot === 'function') hot.snapshot(() => ({ state }));
   if (hot && typeof hot.ready === 'function') hot.ready(start);

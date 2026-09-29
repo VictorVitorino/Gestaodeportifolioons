@@ -25,12 +25,20 @@ Passo a passo em [`google-apps-script/LEIAME.md`](google-apps-script/LEIAME.md);
 
 - **Um único ponto de configuração:** `sheetsEndpoint` no bloco `<script id="dts-config">`, no topo do `index.html`.
   Vazio = o caderno funciona igual e guarda tudo só no navegador.
-- **Abas:** Participantes (1 linha por pessoa), Etapas (1 por pessoa e página), Resultados (1 por pessoa, tudo em colunas)
-  e Resumo (fórmulas que se atualizam sozinhas).
-- **Quando envia:** ao entregar a etiqueta, ao sair de cada página concluída e ao chegar ao encerramento. Só vai o que mudou.
-- **Resiliente:** fila no navegador (`dts-caderno-envios`) com novas tentativas automáticas, envio ao reabrir o caderno,
-  `sendBeacon` ao fechar a aba e botão "Tentar agora" no encerramento. O servidor atualiza a mesma linha (ID da sessão +
-  página), então reenviar nunca duplica.
+- **Abas criadas automaticamente por `configurarPlanilha`:**
+  - **Diagnóstico** — uma linha por pessoa e **uma coluna por questão** (P01.1 … P07), agrupadas por seção colorida,
+    com o **nível diagnosticado** logo depois da identificação.
+  - **Regras** — pesos da página 01, travas de 60/80, pesos do demonstrado, 30/70, faixas de nível e tolerância de
+    alinhamento. Editáveis: mudar um valor recalcula todos os níveis.
+  - **Resumo** — participação, pessoas por nível, médias e alinhamento, em fórmulas.
+- **O nível é calculado pela planilha:** as colunas de diagnóstico são fórmulas escritas na própria linha (índice
+  declarado com travas, demonstrado, consolidado, os três níveis, próximo passo, alinhamento). As leituras de 0 a 100 das
+  páginas 02 a 07 vêm do caderno (mapa de conceitos e análise do texto). A coluna "Confere com o caderno?" compara os dois.
+- **Quando envia:** ao entregar a etiqueta e a cada troca de página; a linha se completa enquanto a pessoa responde.
+  Só vai o que mudou.
+- **Resiliente:** fila no navegador (`dts-caderno-envios`, no máximo um envio por sessão) com novas tentativas automáticas,
+  envio ao reabrir o caderno, `sendBeacon` ao fechar a aba e botão "Tentar agora" no encerramento. O servidor atualiza
+  a mesma linha (ID da sessão), então reenviar nunca duplica.
 
 ## As 7 experiências
 
@@ -74,9 +82,10 @@ Blocos `<script>` no `index.html`:
   `getLevelingStage`, `calculateSemanticDistance`, `calculateSemanticProximity`, `calculateExperience02…07`,
   `analyzePromptStructure`, `calculateDemonstratedIndex`, `calculateAlignment`, `recomputeAll`).
   Testado em `tests/unit/diagnosticoDts.test.js` (`npm test`).
-- `#dts-report` — lógica pura da etiqueta (`validateParticipant`) e das linhas da planilha (`participantRecord`,
-  `stageRecord`, `resultRecord`). Os nomes das chaves são os cabeçalhos das colunas.
-  Testado com o Apps Script numa planilha simulada em `tests/unit/diagnosticoDtsBase.test.js`.
+- `#dts-report` — lógica pura da etiqueta (`validateParticipant`) e da linha da planilha (`diagnosisRecord`).
+  Os nomes das chaves são os cabeçalhos da aba Diagnóstico, definidos em `google-apps-script/Codigo.gs`
+  (`gruposDiagnostico_`). Testado com o Apps Script numa planilha simulada em `tests/unit/diagnosticoDtsBase.test.js`,
+  que também garante que a aba Regras nasce com os mesmos pesos, travas e faixas do `#dts-core`.
 - `#dts-app` — estado, persistência, envio para a planilha (`Sync`), animações e as páginas. Os eventos só registram escolhas e chamam
   `commit()`, que recalcula tudo a partir do estado.
 
@@ -98,6 +107,8 @@ cabeça levemente maior, olhos expressivos, sorriso simpático e sem exagerar tr
   sem rolagem horizontal, sem texto cortado, sem sobreposição (notebooks cabem sem rolagem).
 - Navegação só por teclado (setas nos grupos de rádio, Enter/Espaço nos cartões, foco visível).
 - `prefers-reduced-motion` respeitado.
-- Envio para a planilha testado no Chromium contra um Apps Script simulado: etiqueta obrigatória, 7 etapas + resultado,
-  nada reenviado sem mudança, queda de rede com fila e "Tentar agora", fila enviada ao reabrir, fallback `no-cors`,
-  "Reenviar tudo" e recomeço com sessão nova.
+- Envio para a planilha testado no Chromium contra um Apps Script simulado: etiqueta obrigatória, linha que se completa
+  página a página, nada reenviado sem mudança, queda de rede com fila e "Tentar agora", fila enviada ao reabrir,
+  fallback `no-cors`, "Reenviar tudo" e recomeço com sessão nova.
+- Fórmulas da aba Diagnóstico executadas num motor de planilhas independente (HyperFormula) para 612 perfis (aleatórios,
+  travas de 60/80, extremos e incompletos): índices, níveis, travas, próximo passo e alinhamento idênticos ao `#dts-core`.

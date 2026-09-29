@@ -20,8 +20,6 @@ function loadReport() {
   return { Core: context.DTSCore, Report: context.DTSReport };
 }
 const { Core, Report } = loadReport();
-const PAGE_NAMES = { 1: 'Meu ponto de partida', 2: 'O que chama sua atenção?', 3: 'Quem está mais perto?', 4: 'Por onde você iria?',
-  5: 'A Skill que ninguém merece', 6: 'Salve este Prompt', 7: 'Retrato Falado DTS' };
 const plain = value => JSON.parse(JSON.stringify(value));
 
 function filledState() {
@@ -45,6 +43,84 @@ function filledState() {
   Core.recomputeAll(state);
   return state;
 }
+
+/* ------------------------------------------------------------ planilha simulada (Apps Script) */
+
+function loadAppsScript() {
+  const sheets = new Map();
+  const named = new Map();
+  const makeSheet = name => {
+    const sheet = {
+      name, cells: [], notes: {}, merged: [], frozen: [0, 0], rules: [],
+      getName: () => name,
+      getLastRow() { for (let r = sheet.cells.length - 1; r >= 0; r--) if ((sheet.cells[r] || []).some(v => v !== '' && v != null)) return r + 1; return 0; },
+      getLastColumn() { let max = 0; sheet.cells.forEach(row => (row || []).forEach((v, c) => { if (v !== '' && v != null) max = Math.max(max, c + 1); })); return max; },
+      getMaxRows: () => 1000,
+      getRange(r, c, nr = 1, nc = 1) { return makeRange(sheet, r, c, nr, nc); },
+      setFrozenRows(n) { sheet.frozen[0] = n; },
+      setFrozenColumns(n) { sheet.frozen[1] = n; },
+      setColumnWidth() {},
+      setConditionalFormatRules(rules) { sheet.rules = rules; },
+      clear() { sheet.cells.length = 0; },
+      deleteRow(r) { sheet.cells.splice(r - 1, 1); }
+    };
+    return sheet;
+  };
+  const write = (sheet, r, c, values) => values.forEach((row, i) => row.forEach((v, j) => {
+    const rr = r - 1 + i;
+    sheet.cells[rr] = sheet.cells[rr] || [];
+    sheet.cells[rr][c - 1 + j] = v;
+  }));
+  const makeRange = (sheet, r, c, nr, nc) => {
+    const shape = values => { assert.equal(values.length, nr); values.forEach(row => assert.equal(row.length, nc)); };
+    const target = {
+      sheet, r, c, nr, nc,
+      getValues: () => Array.from({ length: nr }, (_, i) => Array.from({ length: nc }, (_, j) => {
+        const v = (sheet.cells[r - 1 + i] || [])[c - 1 + j];
+        return v == null ? '' : v;
+      })),
+      setValues(values) { shape(values); write(sheet, r, c, values); return proxy; },
+      setFormulas(values) { shape(values); values.flat().forEach(f => assert.ok(f === '' || f.startsWith('='), f)); write(sheet, r, c, values); return proxy; },
+      setValue: v => target.setValues([[v]]),
+      setFormula: f => target.setFormulas([[f]]),
+      setNotes(values) { shape(values); values.forEach((row, i) => row.forEach((n, j) => { sheet.notes[`${r + i}:${c + j}`] = n; })); return proxy; },
+      merge() { sheet.merged.push([r, c, nr, nc]); return proxy; }
+    };
+    const proxy = new Proxy(target, { get: (t, key) => (key in t ? t[key] : () => proxy) });
+    return proxy;
+  };
+  const spreadsheet = {
+    getSheetByName: name => sheets.get(name) || null,
+    insertSheet(name) { const s = makeSheet(name); sheets.set(name, s); return s; },
+    setNamedRange(name, range) { named.set(name, range); },
+    removeNamedRange(name) { if (!named.delete(name)) throw new Error('não existe'); }
+  };
+  const builder = () => new Proxy({}, { get: (t, key) => (key === 'build' ? () => ({ rule: true }) : () => builder()) });
+  const context = vm.createContext({
+    SpreadsheetApp: { getActiveSpreadsheet: () => spreadsheet, openById: () => spreadsheet, newConditionalFormatRule: builder },
+    LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
+    ContentService: {
+      MimeType: { JSON: 'application/json' },
+      createTextOutput: text => ({ text, setMimeType() { return this; }, getContent() { return this.text; } })
+    },
+    Logger: { log() {} }
+  });
+  vm.runInContext(appsScript, context);
+  const diag = () => {
+    const sheet = sheets.get('Diagnóstico');
+    const header = (sheet.cells[1] || []).map(String);
+    const rows = sheet.cells.slice(2).filter(row => row && row.some(v => v !== '' && v != null));
+    const cell = (row, title) => row[header.indexOf(title)];
+    return { sheet, header, rows, cell };
+  };
+  const post = payload => JSON.parse(context.doPost({ postData: { contents: typeof payload === 'string' ? payload : JSON.stringify(payload) } }).getContent());
+  const namedValues = name => named.get(name).getValues().map(row => row[0]);
+  return { context, sheets, named, namedValues, diag, post };
+}
+
+// Exatamente o corpo que o caderno envia (Sync.put).
+const payload = (state, tipo = 'resultado_final') => ({ tipo, versao: Report.VERSION, linha: Report.diagnosisRecord(state) });
+const schema = gs => Array.from(gs.context.colunasDiagnostico_(), c => ({ titulo: c.titulo, calculada: !!c.formula, nota: c.nota, grupo: c.grupo }));
 
 /* ------------------------------------------------------------ participante */
 
@@ -88,68 +164,65 @@ test('participante só conta como pronto depois de registrado e válido', () => 
   assert.equal(Report.isParticipantComplete(p), false);
 });
 
-/* ------------------------------------------------------------ linhas para a planilha */
+/* ------------------------------------------------------------ linha do diagnóstico */
 
-test('linha de participante resume progresso e status', () => {
+test('a linha do caderno tem exatamente as colunas de resposta da aba Diagnóstico', () => {
+  const gs = loadAppsScript();
+  const fromSheet = schema(gs).filter(c => !c.calculada && c.titulo !== 'Recebido em').map(c => c.titulo);
+  const fromNotebook = Object.keys(Report.diagnosisRecord(filledState()));
+  assert.deepEqual(fromNotebook, fromSheet, 'mesmas colunas, na mesma ordem');
+});
+
+test('uma coluna por questão, com respostas legíveis e na ordem escolhida', () => {
   const state = filledState();
-  const row = Report.participantRecord(state, PAGE_NAMES);
-  assert.equal(row['ID da sessão'], state.meta.sessionId);
-  assert.equal(row['Nome completo'], 'Ana Paula Costa');
-  assert.equal(row[Report.AI_QUESTION.stem], state.participant.aiOpinion);
+  const row = Report.diagnosisRecord(state);
+  assert.equal(row['P01.1 · Claude Desktop'], '3 · Utilizo com frequência e autonomia em várias atividades.');
+  assert.match(row['P01.6 · Compartilhamento'], /^1 · /);
+  assert.equal(row['P02.1 · 1ª pista'], 'FLOWS · 3 Métodos parecidos');
+  assert.equal(row['P02.2 · 2ª pista'], 'Pedido no Claude');
+  assert.equal(row['P02.3 · 3ª pista'], 'Caneca sobre a mesa');
+  assert.equal(row['P03.1 · 1ª peça ligada ao Prompt'], 'Skill');
+  assert.equal(row['P03.2 · 2ª peça'], 'Método');
+  assert.match(row['P04 · caminho escolhido'], /^C · FLOWS → /);
+  assert.equal(row['P04 · perfil'], 'reutilização estruturada');
+  assert.deepEqual([row['P05.1 · 1º elemento'], row['P05.2 · 2º elemento'], row['P05.3 · 3º elemento']], ['Objetivo', 'Contexto', 'Exemplo']);
+  assert.deepEqual([row['P06.1 · 1ª peça'], row['P06.2 · 2ª peça'], row['P06.3 · 3ª peça']], ['Contexto', 'Objetivo', 'Tom']);
+  assert.equal(row['P07 · pessoa retratada'], 'Ana Paula Costa');
+  assert.equal(row['P07 · evolução entre rascunhos'], 35);
+  assert.equal(row['P07 · leitura (0–100)'], 80);
+  assert.equal(row['P02 · leitura (0–100)'], state.experience02.score);
+  assert.equal(row['Índice consolidado (caderno)'], state.results.overallMaturityIndex);
   assert.equal(row['Status'], 'Concluído');
   assert.equal(row['Páginas concluídas (de 7)'], 7);
-  assert.equal(row['Página mais avançada'], 'Encerramento');
-
-  const midway = Core.createInitialState();
-  midway.meta.maxReachedPage = 3;
-  const early = Report.participantRecord(midway, PAGE_NAMES);
-  assert.equal(early['Status'], 'Em andamento');
-  assert.equal(early['Página mais avançada'], 'Página 03 · Quem está mais perto?');
-  assert.equal(early['Páginas concluídas (de 7)'], 0);
-});
-
-test('linhas de etapa são legíveis e guardam a ordem das pistas', () => {
-  const state = filledState();
-  const p2 = Report.stageRecord(state, 2, PAGE_NAMES);
-  assert.equal(p2['Página'], 'P02');
-  assert.equal(p2['Experiência'], 'O que chama sua atenção?');
-  assert.equal(p2['Respostas'], '1. FLOWS · 3 Métodos parecidos\n2. Pedido no Claude\n3. Caneca sobre a mesa');
-  assert.equal(p2['Leitura interna (0–100)'], state.experience02.score);
-  assert.deepEqual(plain(p2['Detalhe (JSON)']), { pistasEmOrdem: ['flows', 'prompt', 'coffee'] });
-
-  assert.equal(Report.stageRecord(state, 3, PAGE_NAMES)['Respostas'], 'Prompt → Skill → Método');
-  assert.match(Report.stageRecord(state, 4, PAGE_NAMES)['Respostas'], /^Rota C: FLOWS → .*\(reutilização estruturada\)$/);
-  assert.match(Report.stageRecord(state, 1, PAGE_NAMES)['Respostas'], /^Claude Desktop: Utilizo com frequência/);
-  const p7 = Report.stageRecord(state, 7, PAGE_NAMES)['Respostas'];
-  assert.match(p7, /^Retratado: Ana Paula Costa\nRascunho nº 1: Desenhe a Ana Paula sorrindo\.\nRascunho nº 2: Contexto:/);
-});
-
-test('linha de resultado abre tudo em colunas, sem misturar declarado e demonstrado', () => {
-  const state = filledState();
-  const row = Report.resultRecord(state);
-  assert.equal(row['P01 · Claude Desktop (0–3)'], 3);
-  assert.equal(row['Declarado · final (%)'], state.declared.finalIndex);
-  assert.equal(row['Faixa declarada'], Core.getLevelingStage(state.declared.finalIndex).label);
-  assert.equal(row['P02 · pistas (em ordem)'], 'FLOWS · 3 Métodos parecidos → Pedido no Claude → Caneca sobre a mesa');
-  assert.equal(row['Índice demonstrado'], Math.round(state.results.demonstratedIndex * 100) / 100);
-  assert.equal(row['Duração (min)'], 6.5);
-  assert.equal(row['P07 · retratado'], 'Ana Paula Costa');
-  assert.equal(row['P07 · evolução entre rascunhos'], 35);
-  assert.notEqual(row['Declarado · final (%)'], row['Índice demonstrado']);
-  const snapshot = row['Estado completo (JSON)'];
-  assert.equal(snapshot.meta.sessionId, state.meta.sessionId);
-  assert.equal('ui' in snapshot.meta, false);
-  assert.equal('currentPage' in snapshot.meta, false);
+  assert.equal(row['Iniciado em'], '2026-09-29T12:00:00.000Z', 'começa na etiqueta (o mais antigo entre etiqueta e página 01)');
+  assert.equal(row['Duração (min)'], 7);
+  assert.equal(row[Report.AI_QUESTION.stem], state.participant.aiOpinion);
   assert.ok(JSON.stringify(row).length < 45000);
+});
+
+test('linha parcial: o que ainda não foi respondido vai vazio', () => {
+  const state = Core.createInitialState();
+  state.experience02.selectedSignals = ['prompt'];
+  Core.recomputeAll(state);
+  const row = Report.diagnosisRecord(state);
+  assert.equal(row['P01.1 · Claude Desktop'], '');
+  assert.equal(row['P02.1 · 1ª pista'], 'Pedido no Claude');
+  assert.equal(row['P02.2 · 2ª pista'], '');
+  assert.equal(row['P03 · leitura (0–100)'], '');
+  assert.equal(row['Status'], 'Em andamento');
+  assert.equal(row['Índice consolidado (caderno)'], '');
 });
 
 test('o mesmo conjunto de respostas gera sempre a mesma linha (reenvio não muda nada)', () => {
   const state = filledState();
-  const before = JSON.stringify(Report.resultRecord(state));
+  const before = JSON.stringify(Report.diagnosisRecord(state));
   state.meta.currentPage = 4;
   state.meta.updatedAt = new Date().toISOString();
   state.meta.ui.flipped = ['skill'];
-  assert.equal(JSON.stringify(Report.resultRecord(state)), before);
+  assert.equal(JSON.stringify(Report.diagnosisRecord(state)), before);
+  const snapshot = Report.diagnosisRecord(state)['Estado completo (JSON)'];
+  assert.equal('ui' in snapshot.meta, false);
+  assert.equal('currentPage' in snapshot.meta, false);
 });
 
 test('páginas completas seguem as mesmas regras do caderno', () => {
@@ -162,162 +235,145 @@ test('páginas completas seguem as mesmas regras do caderno', () => {
   assert.equal(Report.countCompleteExperiences(filledState()), 7);
 });
 
-/* ------------------------------------------------------------ Apps Script (planilha simulada) */
+/* ------------------------------------------------------------ Apps Script */
 
-function loadAppsScript() {
-  const sheets = new Map();
-  const makeSheet = name => {
-    const sheet = {
-      name, cells: [], frozen: 0,
-      getLastRow() { for (let r = sheet.cells.length - 1; r >= 0; r--) if ((sheet.cells[r] || []).some(v => v !== '' && v != null)) return r + 1; return 0; },
-      getLastColumn() { let max = 0; sheet.cells.forEach(row => (row || []).forEach((v, c) => { if (v !== '' && v != null) max = Math.max(max, c + 1); })); return max; },
-      getRange(r, c, nr = 1, nc = 1) { return makeRange(sheet, r, c, nr, nc); },
-      setFrozenRows(n) { sheet.frozen = n; },
-      setColumnWidth() {},
-      clear() { sheet.cells.length = 0; },
-      deleteRow(r) { sheet.cells.splice(r - 1, 1); }
-    };
-    return sheet;
-  };
-  const makeRange = (sheet, r, c, nr, nc) => {
-    const target = {
-      getValues: () => Array.from({ length: nr }, (_, i) => Array.from({ length: nc }, (_, j) => {
-        const v = (sheet.cells[r - 1 + i] || [])[c - 1 + j];
-        return v == null ? '' : v;
-      })),
-      setValues(values) {
-        assert.equal(values.length, nr);
-        values.forEach((row, i) => {
-          assert.equal(row.length, nc);
-          row.forEach((v, j) => { const rr = r - 1 + i; sheet.cells[rr] = sheet.cells[rr] || []; sheet.cells[rr][c - 1 + j] = v; });
-        });
-        return proxy;
-      },
-      setValue: v => target.setValues([[v]]),
-      setFormula: f => target.setValues([[f]])
-    };
-    const proxy = new Proxy(target, { get: (t, key) => (key in t ? t[key] : () => proxy) });
-    return proxy;
-  };
-  const spreadsheet = {
-    getSheetByName: name => sheets.get(name) || null,
-    insertSheet(name) { const s = makeSheet(name); sheets.set(name, s); return s; }
-  };
-  const context = vm.createContext({
-    SpreadsheetApp: { getActiveSpreadsheet: () => spreadsheet, openById: () => spreadsheet },
-    LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
-    ContentService: {
-      MimeType: { JSON: 'application/json' },
-      createTextOutput: text => ({ text, setMimeType() { return this; }, getContent() { return this.text; } })
-    },
-    Logger: { log() {} }
-  });
-  vm.runInContext(appsScript, context);
-  const table = name => {
-    const sheet = sheets.get(name);
-    if (!sheet) return null;
-    const [header = [], ...rows] = sheet.cells;
-    return { header, rows: rows.filter(row => row && row.some(v => v !== '' && v != null)), sheet };
-  };
-  const post = payload => JSON.parse(context.doPost({ postData: { contents: typeof payload === 'string' ? payload : JSON.stringify(payload) } }).getContent());
-  return { context, sheets, table, post };
-}
-
-// Exatamente o corpo que o caderno envia (Sync.put).
-const payload = (tipo, state, linha) => ({ tipo, versao: Report.VERSION, participante: Report.participantRecord(state, PAGE_NAMES), linha: linha || null });
-
-test('Apps Script: participante, etapas e resultado viram linhas atualizáveis', () => {
+test('configurarPlanilha monta Diagnóstico (seções + uma coluna por questão), Regras e Resumo', () => {
   const gs = loadAppsScript();
-  const state = filledState();
-
-  assert.equal(gs.post(payload('inicio', state)).sucesso, true);
-  let people = gs.table('Participantes');
-  assert.equal(people.rows.length, 1);
-  assert.deepEqual(people.header.slice(0, 4), ['ID da sessão', 'Nome completo', 'E-mail', Report.AI_QUESTION.stem]);
-  assert.equal(people.header.at(-1), 'Recebido em');
-  assert.equal(people.sheet.frozen, 1);
-
-  state.participant.fullName = 'Ana Paula da Costa';
-  gs.post(payload('inicio', state));
-  people = gs.table('Participantes');
-  assert.equal(people.rows.length, 1, 'mesma sessão atualiza a mesma linha');
-  assert.equal(people.rows[0][1], 'Ana Paula da Costa');
-
-  gs.post(payload('etapa', state, Report.stageRecord(state, 2, PAGE_NAMES)));
-  gs.post(payload('etapa', state, Report.stageRecord(state, 2, PAGE_NAMES)));
-  gs.post(payload('etapa', state, Report.stageRecord(state, 3, PAGE_NAMES)));
-  const stages = gs.table('Etapas');
-  assert.equal(stages.rows.length, 2);
-  const detail = stages.header.indexOf('Detalhe (JSON)');
-  assert.equal(stages.rows[0][detail], '{"pistasEmOrdem":["flows","prompt","coffee"]}');
-
-  const result = gs.post(payload('resultado_final', state, Report.resultRecord(state)));
-  assert.equal(result.sucesso, true);
-  assert.deepEqual(Array.from(result.gravados), ['Participantes!2', 'Resultados!2']);
-  const results = gs.table('Resultados');
-  assert.equal(results.rows.length, 1);
-  const col = name => results.header.indexOf(name);
-  assert.equal(Object.prototype.toString.call(results.rows[0][col('Concluído em')]), '[object Date]');
-  assert.equal(results.rows[0][col('P01 · Claude Desktop (0–3)')], 3);
-  assert.equal(JSON.parse(results.rows[0][col('Estado completo (JSON)')]).meta.sessionId, state.meta.sessionId);
-
-  const other = filledState();
-  gs.post(payload('resultado_final', other, Report.resultRecord(other)));
-  assert.equal(gs.table('Resultados').rows.length, 2, 'outra sessão, outra linha');
-  assert.equal(gs.table('Participantes').rows.length, 2);
+  gs.context.configurarPlanilha();
+  ['Diagnóstico', 'Regras', 'Resumo'].forEach(name => assert.ok(gs.sheets.get(name), name));
+  const { sheet, header } = gs.diag();
+  const cols = schema(gs);
+  assert.deepEqual(header, cols.map(c => c.titulo));
+  assert.equal(sheet.cells[0][0], 'Identificação');
+  assert.ok(sheet.cells[0].includes('Diagnóstico · calculado pela planilha'));
+  assert.ok(sheet.cells[0].includes('P02 · O que chama sua atenção?'));
+  assert.deepEqual(sheet.frozen, [2, 2]);
+  assert.ok(sheet.merged.length >= 10);
+  assert.ok(sheet.rules.length >= 7, 'níveis coloridos');
+  assert.deepEqual(header.slice(9, 12), ['Nível diagnosticado', 'Índice consolidado', 'Próximo passo']);
+  // notas dos cabeçalhos da página 01 = perguntas do caderno
+  Core.LEVELING.dimensions.forEach((dim, i) => assert.ok(sheet.notes[`2:${header.indexOf(`P01.${i + 1} · ${dim.label}`) + 1}`].startsWith(dim.context)));
 });
 
-test('Apps Script: textos não viram fórmula, número ou data', () => {
+test('aba Regras nasce com os mesmos pesos, travas e faixas do caderno', () => {
+  const gs = loadAppsScript();
+  gs.context.configurarPlanilha();
+  const L = Core.LEVELING;
+  assert.deepEqual(gs.namedValues('Pesos_P01'), Array.from(L.dimensions, d => d.weight));
+  const regras = gs.sheets.get('Regras').cells;
+  const p01 = gs.named.get('Pesos_P01');
+  assert.deepEqual(regras.slice(p01.r - 1, p01.r - 1 + 6).map(r => r[0]), Array.from(L.dimensions, d => d.label));
+  assert.deepEqual(gs.namedValues('Trava_60'), [60]);
+  assert.deepEqual(gs.namedValues('Trava_80'), [80]);
+  assert.deepEqual(gs.namedValues('Pesos_Demonstrado'), Object.values(Core.CONFIG.demonstratedWeights).map(w => Math.round(w * 100)));
+  assert.deepEqual([gs.namedValues('Peso_Declarado')[0], gs.namedValues('Peso_Demonstrado')[0]],
+    [Core.CONFIG.overallWeights.declared * 100, Core.CONFIG.overallWeights.demonstrated * 100]);
+  assert.deepEqual(gs.namedValues('Faixas_Nome'), Array.from(L.stages, s => s.label));
+  assert.deepEqual(gs.namedValues('Faixas_Min'), Array.from(L.stages, s => s.min));
+  L.stages.forEach((s, i) => { if (i) assert.equal(s.min, L.stages[i - 1].max + 1, 'faixas contíguas'); });
+  assert.deepEqual(gs.namedValues('Faixas_Passo'), Array.from(L.stages, s => s.nextStep));
+  assert.equal(gs.context.PERGUNTA_IA, Report.AI_QUESTION.stem);
+});
+
+test('cada envio vira uma linha por pessoa, com as fórmulas de diagnóstico na própria linha', () => {
+  const gs = loadAppsScript();
+  const state = filledState();
+  const answer = gs.post(payload(state, 'inicio'));
+  assert.equal(answer.sucesso, true);
+  assert.equal(answer.gravado, 'Diagnóstico!3');
+  gs.post(payload(state));
+  let { rows, cell, header } = gs.diag();
+  assert.equal(rows.length, 1, 'mesma sessão, mesma linha');
+  const row = rows[0];
+  assert.equal(cell(row, 'Nome completo'), 'Ana Paula Costa');
+  assert.equal(cell(row, 'P02.1 · 1ª pista'), 'FLOWS · 3 Métodos parecidos');
+  assert.equal(Object.prototype.toString.call(cell(row, 'Concluído em')), '[object Date]');
+  assert.equal(JSON.parse(cell(row, 'Estado completo (JSON)')).meta.sessionId, state.meta.sessionId);
+
+  const ref = title => `${gs.context.letra_(header.indexOf(title) + 1)}3`;
+  assert.equal(cell(row, 'Nível diagnosticado'), `=IF(${ref('Índice consolidado')}="","",INDEX(Faixas_Nome,MATCH(ROUND(${ref('Índice consolidado')},0),Faixas_Min,1)))`);
+  assert.ok(cell(row, 'Índice declarado').includes(`MIN(${ref('P01 · índice bruto')},IF(NOT(AND(LEFT(${ref('P01.2 · FLOWS')},1)*1>=2`));
+  assert.ok(cell(row, 'Índice demonstrado').startsWith(`=IF(COUNT(${ref('P02 · leitura (0–100)')},`));
+  const colIndex = letters => Array.from(letters).reduce((acc, ch) => acc * 26 + ch.charCodeAt(0) - 64, 0) - 1;
+  schema(gs).filter(c => c.calculada).forEach(c => {
+    const formula = cell(row, c.titulo);
+    assert.ok(formula.startsWith('='), c.titulo);
+    // toda referência de célula aponta para a linha 3 e para uma coluna existente
+    for (const [, letters, n] of formula.replace(/"[^"]*"/g, '""').matchAll(/(?<![A-Za-z_])([A-Z]{1,2})(\d+)(?![\d(_])/g)) {
+      assert.equal(n, '3', `${c.titulo}: ${letters}${n}`);
+      assert.ok(header[colIndex(letters)], `${c.titulo}: coluna ${letters}`);
+    }
+    for (const [name] of formula.matchAll(/\b(Pesos_P01|Pesos_Demonstrado|Peso_Declarado|Peso_Demonstrado|Trava_60|Trava_80|Faixas_\w+|Tolerancia_Alinhamento)\b/g)) {
+      assert.ok(gs.named.has(name), `${c.titulo}: intervalo nomeado ${name}`);
+    }
+  });
+
+  const other = filledState();
+  gs.post(payload(other));
+  ({ rows } = gs.diag());
+  assert.equal(rows.length, 2, 'outra sessão, outra linha');
+  assert.match(gs.diag().cell(rows[1], 'Nível diagnosticado'), /ROUND\([A-Z]+4,0\)/);
+});
+
+test('o caderno não consegue escrever por cima das colunas calculadas', () => {
+  const gs = loadAppsScript();
+  const linha = Report.diagnosisRecord(filledState());
+  linha['Nível diagnosticado'] = 'Multiplicação';
+  linha['Índice declarado'] = 100;
+  gs.post({ tipo: 'resultado_final', versao: 'x', linha });
+  const { rows, cell } = gs.diag();
+  assert.ok(cell(rows[0], 'Nível diagnosticado').startsWith('=IF('));
+  assert.ok(cell(rows[0], 'Índice declarado').startsWith('=IF('));
+});
+
+test('Resumo e recalcularTudo usam só cabeçalhos que existem', () => {
+  const gs = loadAppsScript();
+  gs.context.configurarPlanilha();
+  const titles = new Set(schema(gs).map(c => c.titulo));
+  const formulas = gs.sheets.get('Resumo').cells.flatMap(row => row || []).map(String).filter(f => f.startsWith('='));
+  assert.ok(formulas.length >= 14);
+  for (const f of formulas) for (const [, t] of f.matchAll(/MATCH\("([^"]+)"/g)) assert.ok(titles.has(t), t);
+  gs.post(payload(filledState()));
+  const { sheet, header } = gs.diag();
+  sheet.cells[2][header.indexOf('Nível diagnosticado')] = 'apagado sem querer';
+  gs.context.recalcularTudo();
+  assert.ok(gs.diag().cell(gs.diag().rows[0], 'Nível diagnosticado').startsWith('=IF('));
+});
+
+test('textos não viram fórmula, número ou data', () => {
   const gs = loadAppsScript();
   const state = filledState();
   state.participant.aiOpinion = '=HYPERLINK("http://exemplo.com","clique")';
-  gs.post(payload('inicio', state));
-  const people = gs.table('Participantes');
-  assert.equal(people.rows[0][people.header.indexOf(Report.AI_QUESTION.stem)], '\'=HYPERLINK("http://exemplo.com","clique")');
+  gs.post(payload(state));
+  const { rows, cell } = gs.diag();
+  assert.equal(cell(rows[0], Report.AI_QUESTION.stem), '\'=HYPERLINK("http://exemplo.com","clique")');
   assert.equal(gs.context.celula_('1/2'), "'1/2");
   assert.equal(gs.context.celula_('+55 11 99999-0000'), "'+55 11 99999-0000");
+  assert.equal(gs.context.celula_('2 · Tenho acesso'), '2 · Tenho acesso');
   assert.equal(gs.context.celula_(12.5), 12.5);
-  assert.equal(gs.context.celula_('P03'), 'P03');
   assert.equal(gs.context.celula_({ a: 1 }), '{"a":1}');
   assert.equal(gs.context.celula_('x'.repeat(50000)).length, 45001);
 });
 
-test('Apps Script: recusa pedidos incompletos sem gravar nada', () => {
+test('recusa pedidos incompletos sem gravar nada', () => {
   const gs = loadAppsScript();
   assert.equal(gs.post('isto não é json').sucesso, false);
-  assert.equal(gs.post({ tipo: 'outro', participante: { 'ID da sessão': 'x' } }).sucesso, false);
-  const noKey = gs.post({ tipo: 'inicio', participante: { 'Nome completo': 'Sem ID' } });
+  assert.equal(gs.post({ tipo: 'outro', linha: { 'ID da sessão': 'x' } }).sucesso, false);
+  const noKey = gs.post({ tipo: 'inicio', linha: { 'Nome completo': 'Sem ID' } });
   assert.equal(noKey.sucesso, false);
   assert.match(noKey.erro, /ID da sessão/);
-  assert.equal(gs.post({ tipo: 'etapa', participante: null, linha: null }).sucesso, false);
-  assert.equal(gs.table('Participantes'), null);
+  assert.equal(gs.post({ tipo: 'etapa', linha: null }).sucesso, false);
+  assert.equal(gs.sheets.get('Diagnóstico'), undefined);
 });
 
-test('Apps Script: resumo acha as colunas pelos cabeçalhos que o caderno envia', () => {
-  const gs = loadAppsScript();
-  gs.context.configurarPlanilha();
-  ['Participantes', 'Etapas', 'Resultados', 'Resumo'].forEach(name => assert.ok(gs.sheets.get(name), name));
-  const formulas = gs.sheets.get('Resumo').cells.map(row => String(row[1] || '')).filter(f => f.startsWith('='));
-  assert.ok(formulas.length >= 10);
-
-  const state = filledState();
-  const known = new Set([...Object.keys(Report.participantRecord(state, PAGE_NAMES)), ...Object.keys(Report.resultRecord(state))]);
-  const referenced = [...appsScript.matchAll(/coluna\([PR], '([^']+)'\)|contar\([PR], '([^']+)'|media\('([^']+)'\)/g)].map(m => m[1] || m[2] || m[3]);
-  assert.ok(referenced.length >= 7);
-  referenced.forEach(header => assert.ok(known.has(header), `cabeçalho "${header}" não existe nas linhas do caderno`));
-
-  assert.deepEqual(Array.from(gs.context.FAIXAS), Array.from(Core.LEVELING.stages, s => s.label));
-  assert.equal(gs.context.PERGUNTA_IA, Report.AI_QUESTION.stem);
-  assert.deepEqual(Array.from(gs.context.ABAS.etapa.chaves), [Report.COLUMNS.session, Report.COLUMNS.page]);
-});
-
-test('Apps Script: testarEnvio grava e apagarLinhasDeTeste limpa', () => {
+test('testarEnvio grava uma pessoa completa e apagarLinhasDeTeste limpa', () => {
   const gs = loadAppsScript();
   assert.equal(JSON.parse(gs.context.testarEnvio()).sucesso, true);
-  assert.equal(gs.table('Participantes').rows.length, 1);
-  assert.equal(gs.table('Etapas').rows.length, 1);
-  assert.equal(gs.context.apagarLinhasDeTeste(), 2);
-  assert.equal(gs.table('Participantes').rows.length, 0);
-  const status = JSON.parse(gs.context.doGet().getContent());
-  assert.equal(status.sucesso, true);
+  const { rows, cell } = gs.diag();
+  assert.equal(rows.length, 1);
+  assert.equal(cell(rows[0], 'P01.3 · Skills'), '3 · resposta de teste');
+  assert.equal(cell(rows[0], 'Índice consolidado (caderno)'), 78.35);
+  assert.equal(gs.context.apagarLinhasDeTeste(), 1);
+  assert.equal(gs.diag().rows.length, 0);
+  assert.equal(JSON.parse(gs.context.doGet().getContent()).sucesso, true);
 });
