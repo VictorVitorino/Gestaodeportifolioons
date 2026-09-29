@@ -10,10 +10,27 @@ Arquivo único, sem build e sem dependências além das fontes do Google Fonts (
 
 - Abra `index.html` direto no navegador, ou sirva a pasta (`npx serve prototypes/diagnostico-dts`).
 - As respostas ficam no `localStorage` do navegador (chave `dts-caderno-nivelamento`).
-- **Recomeçar diagnóstico** (topo direito) apaga os dados após confirmação na própria página.
+- Antes da página 01, a pessoa preenche a **etiqueta do caderno**: nome completo, e-mail e uma frase para completar
+  (*"Para mim, trazer IA para dentro dos projetos de DTS é…"*). Sem etiqueta, nenhuma página abre.
+- **Recomeçar diagnóstico** (topo direito) apaga os dados após confirmação na própria página e abre uma sessão nova.
 - **Painel interno de facilitação:** acrescente `#facilitador` ao endereço. Mostra índices declarado,
   demonstrado, consolidado, alinhamento, perfil por dimensão e o JSON completo (botão “Copiar JSON”).
-  Nada disso aparece para o participante.
+  Nada disso aparece para o participante. O painel também mostra participante, fila de envio e o botão **Reenviar tudo**.
+
+## Base de respostas (Google Planilhas)
+
+Tudo o que a pessoa responde chega numa planilha do Google por um App da Web do Apps Script.
+Passo a passo em [`google-apps-script/LEIAME.md`](google-apps-script/LEIAME.md); o script está em
+[`google-apps-script/Codigo.gs`](google-apps-script/Codigo.gs).
+
+- **Um único ponto de configuração:** `sheetsEndpoint` no bloco `<script id="dts-config">`, no topo do `index.html`.
+  Vazio = o caderno funciona igual e guarda tudo só no navegador.
+- **Abas:** Participantes (1 linha por pessoa), Etapas (1 por pessoa e página), Resultados (1 por pessoa, tudo em colunas)
+  e Resumo (fórmulas que se atualizam sozinhas).
+- **Quando envia:** ao entregar a etiqueta, ao sair de cada página concluída e ao chegar ao encerramento. Só vai o que mudou.
+- **Resiliente:** fila no navegador (`dts-caderno-envios`) com novas tentativas automáticas, envio ao reabrir o caderno,
+  `sendBeacon` ao fechar a aba e botão "Tentar agora" no encerramento. O servidor atualiza a mesma linha (ID da sessão +
+  página), então reenviar nunca duplica.
 
 ## As 7 experiências
 
@@ -50,14 +67,17 @@ Capa e encerramento não são experiências. O encerramento mostra apenas o pont
 
 ## Estrutura do código
 
-Dois blocos `<script>` no `index.html`:
+Blocos `<script>` no `index.html`:
 
 - `#dts-core` — lógica pura, sem DOM: `CONFIG`, `CHARACTERS`, `LEVELING`, `SEMANTIC_GRAPH`,
   `EXPERIENCES`, `PROMPT_SIGNALS`, funções de cálculo (`calculateDeclaredIndex`, `applyLevelingCoherenceRules`,
   `getLevelingStage`, `calculateSemanticDistance`, `calculateSemanticProximity`, `calculateExperience02…07`,
   `analyzePromptStructure`, `calculateDemonstratedIndex`, `calculateAlignment`, `recomputeAll`).
   Testado em `tests/unit/diagnosticoDts.test.js` (`npm test`).
-- `#dts-app` — estado, persistência, animações e as páginas. Os eventos só registram escolhas e chamam
+- `#dts-report` — lógica pura da etiqueta (`validateParticipant`) e das linhas da planilha (`participantRecord`,
+  `stageRecord`, `resultRecord`). Os nomes das chaves são os cabeçalhos das colunas.
+  Testado com o Apps Script numa planilha simulada em `tests/unit/diagnosticoDtsBase.test.js`.
+- `#dts-app` — estado, persistência, envio para a planilha (`Sync`), animações e as páginas. Os eventos só registram escolhas e chamam
   `commit()`, que recalcula tudo a partir do estado.
 
 ## Time e caricaturas
@@ -78,3 +98,6 @@ cabeça levemente maior, olhos expressivos, sorriso simpático e sem exagerar tr
   sem rolagem horizontal, sem texto cortado, sem sobreposição (notebooks cabem sem rolagem).
 - Navegação só por teclado (setas nos grupos de rádio, Enter/Espaço nos cartões, foco visível).
 - `prefers-reduced-motion` respeitado.
+- Envio para a planilha testado no Chromium contra um Apps Script simulado: etiqueta obrigatória, 7 etapas + resultado,
+  nada reenviado sem mudança, queda de rede com fila e "Tentar agora", fila enviada ao reabrir, fallback `no-cors`,
+  "Reenviar tudo" e recomeço com sessão nova.

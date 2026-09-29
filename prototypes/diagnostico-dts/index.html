@@ -8,6 +8,18 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Kalam:wght@400;700&family=Libre+Franklin:wght@400;500;600;700;800&family=Zilla+Slab:wght@500;600;700&display=swap">
+<!-- =====================================================================
+     BASE DE RESPOSTAS · GOOGLE PLANILHAS
+     1. Crie a planilha e cole o Apps Script de google-apps-script/Codigo.gs
+        (passo a passo em google-apps-script/LEIAME.md).
+     2. Implante como "App da Web" e cole abaixo o link que termina em /exec.
+     Sem link, o caderno funciona igual e guarda as respostas só neste navegador.
+     ===================================================================== -->
+<script id="dts-config">
+  window.DTS_CONFIG = {
+    sheetsEndpoint: ''
+  };
+</script>
 <style>
 /* =====================================================================
    CADERNO DE NIVELAMENTO DTS
@@ -197,6 +209,42 @@ img{max-width:100%}
 .toc li b{font-family:var(--f-type);color:var(--steel-dark)}
 .toc li::after{content:"";border-bottom:2px dotted rgba(51,85,109,.45);transform:translateY(-4px)}
 .toc-game{font-family:var(--f-hand);font-style:normal;font-size:.88rem;color:var(--steel-dark)}
+/* dono do caderno (capa) */
+.owner-tag{justify-self:start;align-self:flex-start;display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;max-width:100%;margin:0;padding:6px 14px 7px;border-radius:10px;border:2px solid var(--light-blue);background:var(--paper-hi);color:var(--navy);box-shadow:0 0 0 3px var(--paper-hi),0 0 0 4px rgba(191,208,225,.55);transform:rotate(-1deg)}
+.owner-tag small{font-family:var(--f-type);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--steel-dark)}
+.owner-tag b{font-family:var(--f-hand);font-weight:700;font-size:1.12rem;line-height:1.2;overflow-wrap:anywhere}
+.dark-surface .owner-tag .btn-quiet{min-height:28px;padding:0;font-size:.82rem;color:var(--steel-dark)}
+.dark-surface .owner-tag .btn-quiet:hover{color:var(--navy)}
+/* etiqueta do caderno (identificação) */
+.label-card{position:relative;width:min(560px,100%);justify-self:center;display:grid;gap:clamp(8px,1.5vh,13px);margin:0;padding:clamp(14px,2.4vh,22px) clamp(16px,2vw,26px) clamp(12px,2vh,18px);
+  border:2px solid var(--navy);border-radius:16px;background:#fff;
+  box-shadow:0 0 0 5px #fff,0 0 0 7px var(--light-blue),0 22px 34px -20px rgba(0,20,40,.7);transform:rotate(-.5deg);animation:pop .45s var(--ease-paper)}
+.lc-head{display:grid;gap:2px;padding-bottom:clamp(4px,1vh,8px);border-bottom:1.5px dashed rgba(51,85,109,.35)}
+.lc-kicker{margin:0;font-family:var(--f-type);font-weight:700;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--steel-dark)}
+.lc-title{margin:0;font-family:var(--f-display);font-weight:700;font-size:clamp(1.3rem,1rem + .8vw,1.7rem);line-height:1.1;color:var(--navy)}
+.lc-title:focus{outline:none}
+.lc-grid{display:grid;grid-template-columns:max-content minmax(0,1fr);align-items:end;gap:6px 12px}
+.lc-label{padding-bottom:7px;font-family:var(--f-type);font-weight:700;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--steel-dark)}
+.lc-input,.lc-area{width:100%;min-width:0;margin:0;border:0;border-radius:4px 4px 0 0;background:transparent;font-family:var(--f-hand);font-size:1.15rem;color:var(--navy);transition:background-color .2s,box-shadow .2s}
+.lc-input{height:38px;padding:4px 6px 0;border-bottom:2px solid var(--light-blue)}
+.lc-input::placeholder,.lc-area::placeholder{color:#7F97AC;opacity:1}
+.lc-input:focus,.lc-area:focus,.lc-input:focus-visible,.lc-area:focus-visible{outline:none;background-color:rgba(252,209,162,.22);box-shadow:0 3px 0 var(--orange)}
+.lc-input[aria-invalid="true"],.lc-area[aria-invalid="true"]{box-shadow:0 3px 0 var(--orange)}
+.lc-error{grid-column:2;margin:3px 0 0;font-size:.8rem;font-weight:700;line-height:1.25;color:var(--navy)}
+.lc-error::before{content:"";display:inline-block;width:.55em;height:.55em;margin-right:.45em;border-radius:50%;background:var(--orange);vertical-align:.08em}
+.lc-ask{display:grid;gap:2px;padding-top:clamp(2px,.6vh,6px)}
+.lc-ask .lc-error{grid-column:auto}
+.lc-ask-label{display:grid;gap:1px}
+.lc-ask-kicker{font-family:var(--f-type);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--steel-dark)}
+.lc-stem{font-family:var(--f-display);font-weight:700;font-size:1.12rem;line-height:1.2;color:var(--navy)}
+.lc-area{display:block;height:64px;min-height:64px;max-height:95px;padding:1px 6px;resize:none;line-height:31px;overflow-y:auto;
+  background-image:repeating-linear-gradient(180deg,transparent 0 29px,var(--light-blue) 29px 31px);background-attachment:local}
+.lc-area:focus,.lc-area:focus-visible{background-image:repeating-linear-gradient(180deg,transparent 0 29px,var(--light-blue) 29px 31px)}
+.lc-hint{display:flex;justify-content:space-between;gap:12px;margin:2px 0 0;font-family:var(--f-hand);font-size:.95rem;line-height:1.2;color:var(--steel-dark)}
+.lc-count{font-family:var(--f-type);font-size:.72rem;white-space:nowrap;align-self:flex-end}
+.lc-privacy{margin:0;padding-top:clamp(4px,1vh,8px);border-top:1.5px dashed rgba(51,85,109,.35);font-size:.8rem;line-height:1.35;color:var(--steel-dark)}
+.lc-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+.cover--ficha .cover-title{font-size:clamp(1.9rem,1.1rem + 2.6vw,3.3rem)}
 
 /* ---------------------------------------------------------------- P01 · matriz */
 .xp01{--dim-col:minmax(150px,190px)}
@@ -662,6 +710,7 @@ img{max-width:100%}
   .leveling{gap:10px}
 }
 @media (max-height:700px){
+  .lc-area{max-height:64px}
   .xp02 .xp-sub{display:none}
   .story{grid-template-columns:minmax(170px,215px) minmax(0,1fr) minmax(250px,300px)}
   .cast .character-photo{aspect-ratio:16/10}
@@ -712,6 +761,11 @@ img{max-width:100%}
   .cover,.finale{grid-template-columns:minmax(0,1fr)}
 }
 @media (max-width:640px){
+  .lc-grid{grid-template-columns:minmax(0,1fr)}
+  .lc-area{max-height:126px}
+  .lc-grid .lc-error{grid-column:auto}
+  .lc-label{padding-bottom:0}
+  .lc-actions .btn-primary{margin-left:auto}
     .topbar{gap:8px}
   .tab{padding:0 7px;font-size:.72rem}
   .matrix-row{grid-template-columns:minmax(0,1fr)}
@@ -1276,16 +1330,24 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
     return { declared: summarize('declared'), demonstrated: summarize('demonstrated'), evidence };
   }
 
+  // Identificador da sessão: une participante, etapas e resultado na planilha.
+  function createSessionId() {
+    return 'dts-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+  }
+
   function createInitialState() {
     return {
       meta: {
         version: CONFIG.stateVersion,
+        sessionId: createSessionId(),
         startedAt: null, updatedAt: null, finishedAt: null,
         currentPage: 0, maxReachedPage: 0,
         xp01View: 'matrix',
         xp07Stage: 'draft1',
+        fichaDraft: null,
         ui: { flipped: [], poolOrder: null }
       },
+      participant: { fullName: '', email: '', aiOpinion: '', registeredAt: null },
       declared: {
         claude: null, flows: null, skills: null, methods: null, reuse: null, creationSharing: null,
         rawIndex: null, finalIndex: null, appliedCap: null, stage: null
@@ -1359,6 +1421,230 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
 
+<script id="dts-report">
+/* =====================================================================
+   DTS REPORT · participante e linhas para a base (Google Planilhas)
+   Lógica pura (sem DOM). As chaves de cada linha são os cabeçalhos das
+   colunas na planilha: o Apps Script cria as colunas que faltarem e
+   atualiza sempre a mesma linha (ID da sessão, e página nas etapas).
+   ===================================================================== */
+(function (root) {
+  'use strict';
+  const Core = root.DTSCore;
+  const { CONFIG, CHARACTERS, LEVELING, SEMANTIC_GRAPH, EXPERIENCES, DIMENSIONS } = Core;
+
+  const VERSION = 'caderno-dts-1';
+  const EXPERIENCE_COUNT = 7;
+  // Pergunta de abertura em formato de frase para completar: tira o peso da "folha em branco"
+  // e acolhe entusiasmo, dúvida ou receio com a mesma naturalidade.
+  const AI_QUESTION = Object.freeze({
+    kicker: 'Em uma frase, com sinceridade',
+    stem: 'Para mim, trazer IA para dentro dos projetos de DTS é…',
+    hint: 'Vale entusiasmo, dúvida ou receio. Não existe resposta certa.'
+  });
+  const COLUMNS = Object.freeze({
+    session: 'ID da sessão', page: 'Página', name: 'Nome completo', email: 'E-mail', opinion: AI_QUESTION.stem
+  });
+  const MESSAGES = Object.freeze({
+    fullName: 'Escreva nome e sobrenome, como no crachá.',
+    email: 'Confira o e-mail (ex.: nome@empresa.com).',
+    aiOpinion: 'Complete a frase com pelo menos duas palavras.'
+  });
+  const LIMITS = Object.freeze({ fullName: 120, email: 160, aiOpinion: 280 });
+
+  /* ------------------------------------------------------------ participante */
+  const squash = value => String(value == null ? '' : value).replace(/\s+/g, ' ').trim();
+  const letters = word => (word.match(/\p{L}/gu) || []).length;
+
+  function validateParticipant(input) {
+    const src = input || {};
+    const value = {
+      fullName: squash(src.fullName).slice(0, LIMITS.fullName),
+      email: squash(src.email).replace(/\s/g, '').toLowerCase().slice(0, LIMITS.email),
+      aiOpinion: squash(src.aiOpinion).slice(0, LIMITS.aiOpinion)
+    };
+    const errors = {};
+    const nameWords = value.fullName.split(' ').filter(w => letters(w) >= 2);
+    if (nameWords.length < 2 || /[\d@_]/.test(value.fullName)) errors.fullName = MESSAGES.fullName;
+    if (!/^[^\s@]+@([^\s@.]+\.)+[^\s@.]{2,}$/.test(value.email)) errors.email = MESSAGES.email;
+    if (value.aiOpinion.split(' ').filter(w => letters(w) >= 1).length < 2) errors.aiOpinion = MESSAGES.aiOpinion;
+    return { value, errors, valid: Object.keys(errors).length === 0 };
+  }
+  const isParticipantComplete = participant => !!(participant && participant.registeredAt) && validateParticipant(participant).valid;
+  const firstName = participant => squash(participant && participant.fullName).split(' ')[0] || '';
+
+  /* ------------------------------------------------------------ progresso */
+  function isExperienceComplete(state, n) {
+    switch (n) {
+      case 1: return Core.isDeclaredComplete(state.declared);
+      case 2: return state.experience02.selectedSignals.length > 0;
+      case 3: return state.experience03.path.length >= CONFIG.experience03Connections;
+      case 4: return !!state.experience04.selectedPath;
+      case 5: return state.experience05.selectedElements.length > 0;
+      case 6: return state.experience06.selectedPromptElements.length > 0;
+      case 7: return state.experience07.originalStructureScore != null;
+      default: return true;
+    }
+  }
+  function countCompleteExperiences(state) {
+    let done = 0;
+    for (let n = 1; n <= EXPERIENCE_COUNT; n++) if (isExperienceComplete(state, n)) done++;
+    return done;
+  }
+
+  /* ------------------------------------------------------------ leitura das respostas */
+  const pad2 = n => String(n).padStart(2, '0');
+  const num = v => (v == null || Number.isNaN(v) ? '' : Math.round(v * 100) / 100);
+  const nodeLabel = id => (SEMANTIC_GRAPH.nodes[id] ? SEMANTIC_GRAPH.nodes[id].label : id);
+  const labelIn = (list, id) => { const item = list.find(x => x.id === id); return item ? item.label : id; };
+  const row = pairs => { const out = {}; pairs.forEach(([key, v]) => { out[key] = v == null ? '' : v; }); return out; };
+  const routeOf = s => EXPERIENCES.experience04.routes.find(r => r.id === s.experience04.selectedPath) || null;
+  const portrayed = s => CHARACTERS.find(c => c.id === s.experience07.selectedCharacter) || null;
+  const lists = {
+    clues: s => s.experience02.selectedSignals.map(id => labelIn(EXPERIENCES.experience02.signals, id)),
+    path: s => s.experience03.semanticPath.map(nodeLabel),
+    skill: s => s.experience05.selectedElements.map(id => labelIn(EXPERIENCES.experience05.elements, id)),
+    prompt: s => s.experience06.selectedPromptElements.map(id => labelIn(EXPERIENCES.experience06.elements, id))
+  };
+
+  // Uma leitura por página: texto legível, leitura interna (0–100) e detalhe técnico.
+  const READERS = {
+    1: s => {
+      const d = s.declared;
+      const answers = {};
+      LEVELING.dimensions.forEach(dim => { answers[dim.key] = d[dim.key]; });
+      return {
+        text: LEVELING.dimensions.map(dim => `${dim.label}: ${d[dim.key] == null ? '—' : dim.options[d[dim.key]]}`).join('\n'),
+        signal: d.finalIndex,
+        detail: { respostas: answers, bruto: d.rawIndex, final: d.finalIndex, trava: d.appliedCap, faixa: d.stage }
+      };
+    },
+    2: s => ({ text: lists.clues(s).map((label, i) => `${i + 1}. ${label}`).join('\n'), signal: s.experience02.score,
+      detail: { pistasEmOrdem: s.experience02.selectedSignals } }),
+    3: s => {
+      const e = s.experience03;
+      return { text: lists.path(s).join(' → '), signal: e.score,
+        detail: { caminho: e.semanticPath, distancias: e.semanticDistances, proximidades: e.proximities } };
+    },
+    4: s => {
+      const route = routeOf(s);
+      return { text: route ? `Rota ${route.id}: ${route.stops.join(' → ')} (${route.profileLabel})` : '', signal: s.experience04.score,
+        detail: { rota: s.experience04.selectedPath, perfil: s.experience04.behaviorProfile } };
+    },
+    5: s => ({ text: lists.skill(s).join(', '), signal: s.experience05.score, detail: { elementos: s.experience05.selectedElements } }),
+    6: s => ({ text: lists.prompt(s).join(', '), signal: s.experience06.score, detail: { elementos: s.experience06.selectedPromptElements } }),
+    7: s => {
+      const e = s.experience07;
+      const who = portrayed(s);
+      const text = [`Retratado: ${who ? who.name : '—'}`, `Rascunho nº 1: ${e.originalPrompt}`];
+      if (e.revisedStructureScore != null) text.push(`Rascunho nº 2: ${e.revisedPrompt}`);
+      return { text: text.join('\n'), signal: e.score,
+        detail: { retratado: e.selectedCharacter, estrutura1: e.originalStructureScore, estrutura2: e.revisedStructureScore, evolucao: e.learningDelta } };
+    }
+  };
+
+  /* ------------------------------------------------------------ linhas da planilha */
+  // Aba "Participantes": uma linha por pessoa, atualizada a cada envio.
+  function participantRecord(state, pageNames) {
+    const p = state.participant;
+    const m = state.meta;
+    const reached = m.maxReachedPage;
+    const furthest = m.finishedAt || reached > EXPERIENCE_COUNT ? 'Encerramento'
+      : reached >= 1 ? `Página ${pad2(reached)} · ${(pageNames && pageNames[reached]) || ''}` : 'Capa';
+    return row([
+      [COLUMNS.session, m.sessionId],
+      [COLUMNS.name, p.fullName],
+      [COLUMNS.email, p.email],
+      [COLUMNS.opinion, p.aiOpinion],
+      ['Status', m.finishedAt ? 'Concluído' : 'Em andamento'],
+      ['Páginas concluídas (de 7)', countCompleteExperiences(state)],
+      ['Página mais avançada', furthest],
+      ['Identificado em', p.registeredAt],
+      ['Concluído em', m.finishedAt],
+      ['Versão do caderno', VERSION]
+    ]);
+  }
+
+  // Aba "Etapas": uma linha por pessoa e página.
+  function stageRecord(state, n, pageNames) {
+    const read = READERS[n](state);
+    return row([
+      [COLUMNS.session, state.meta.sessionId],
+      [COLUMNS.name, state.participant.fullName],
+      [COLUMNS.page, 'P' + pad2(n)],
+      ['Experiência', (pageNames && pageNames[n]) || ''],
+      ['Respostas', read.text],
+      ['Leitura interna (0–100)', num(read.signal)],
+      ['Detalhe (JSON)', read.detail]
+    ]);
+  }
+
+  // Estado sem dados de navegação: o mesmo conjunto de respostas gera sempre o mesmo registro.
+  function snapshot(state) {
+    const m = state.meta;
+    return {
+      versao: VERSION,
+      meta: { sessionId: m.sessionId, startedAt: m.startedAt, finishedAt: m.finishedAt },
+      participant: state.participant, declared: state.declared,
+      experience02: state.experience02, experience03: state.experience03, experience04: state.experience04,
+      experience05: state.experience05, experience06: state.experience06, experience07: state.experience07,
+      results: state.results
+    };
+  }
+
+  // Aba "Resultados": uma linha por pessoa, com tudo aberto em colunas (pronta para filtro e tabela dinâmica).
+  function resultRecord(state) {
+    const m = state.meta;
+    const p = state.participant;
+    const d = state.declared;
+    const r = state.results;
+    const e7 = state.experience07;
+    const route = routeOf(state);
+    const who = portrayed(state);
+    const profile = r.dimensionProfile || { declared: {}, demonstrated: {} };
+    const minutes = m.startedAt && m.finishedAt ? Math.round((Date.parse(m.finishedAt) - Date.parse(m.startedAt)) / 6000) / 10 : null;
+    const pairs = [
+      [COLUMNS.session, m.sessionId], [COLUMNS.name, p.fullName], [COLUMNS.email, p.email], [COLUMNS.opinion, p.aiOpinion],
+      ['Iniciado em', m.startedAt], ['Concluído em', m.finishedAt], ['Duração (min)', minutes]
+    ];
+    LEVELING.dimensions.forEach(dim => pairs.push([`P01 · ${dim.label} (0–3)`, d[dim.key]]));
+    pairs.push(
+      ['Declarado · bruto (%)', num(d.rawIndex)],
+      ['Declarado · final (%)', num(d.finalIndex)],
+      ['Declarado · trava aplicada (%)', d.appliedCap || ''],
+      ['Faixa declarada', d.finalIndex != null ? Core.getLevelingStage(d.finalIndex).label : ''],
+      ['P02 · pistas (em ordem)', lists.clues(state).join(' → ')], ['P02 · leitura (0–100)', num(state.experience02.score)],
+      ['P03 · caminho', lists.path(state).join(' → ')], ['P03 · distâncias no grafo', state.experience03.semanticDistances.join(' · ')],
+      ['P03 · leitura (0–100)', num(state.experience03.score)],
+      ['P04 · rota', route ? `${route.id}: ${route.stops.join(' → ')}` : ''], ['P04 · perfil', route ? route.profileLabel : ''],
+      ['P04 · leitura (0–100)', num(state.experience04.score)],
+      ['P05 · elementos', lists.skill(state).join(', ')], ['P05 · leitura (0–100)', num(state.experience05.score)],
+      ['P06 · elementos', lists.prompt(state).join(', ')], ['P06 · leitura (0–100)', num(state.experience06.score)],
+      ['P07 · retratado', who ? who.name : ''],
+      ['P07 · rascunho nº 1', e7.originalPrompt], ['P07 · estrutura nº 1', num(e7.originalStructureScore)],
+      ['P07 · rascunho nº 2', e7.revisedStructureScore != null ? e7.revisedPrompt : ''], ['P07 · estrutura nº 2', num(e7.revisedStructureScore)],
+      ['P07 · evolução entre rascunhos', num(e7.learningDelta)], ['P07 · leitura (0–100)', num(e7.score)],
+      ['Índice demonstrado', num(r.demonstratedIndex)],
+      ['Índice consolidado (30/70)', num(r.overallMaturityIndex)],
+      ['Gap de alinhamento', num(r.alignmentGap)],
+      ['Índice de alinhamento', num(r.alignmentIndex)]
+    );
+    Object.keys(DIMENSIONS).forEach(key => {
+      pairs.push([`${DIMENSIONS[key]} · declarado`, num(profile.declared[key])], [`${DIMENSIONS[key]} · demonstrado`, num(profile.demonstrated[key])]);
+    });
+    pairs.push(['Estado completo (JSON)', snapshot(state)]);
+    return row(pairs);
+  }
+
+  root.DTSReport = Object.freeze({
+    VERSION, EXPERIENCE_COUNT, AI_QUESTION, COLUMNS, MESSAGES, LIMITS,
+    validateParticipant, isParticipantComplete, firstName,
+    isExperienceComplete, countCompleteExperiences,
+    participantRecord, stageRecord, resultRecord, snapshot
+  });
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+
 <script id="dts-app">
 /* =====================================================================
    DTS APP · STATE · ANIMATIONS · UI (capa, 7 páginas, encerramento) · boot
@@ -1368,6 +1654,7 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
 (function () {
   'use strict';
   const Core = window.DTSCore;
+  const Report = window.DTSReport;
   const { CONFIG, LEVELING, SEMANTIC_GRAPH, CHARACTERS, EXPERIENCES, PROMPT_SIGNALS } = Core;
   document.documentElement.lang = 'pt-BR';
 
@@ -1431,7 +1718,145 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
     else if (m.xp07Stage === 'analysis2' && e7.revisedStructureScore == null) m.xp07Stage = 'draft2';
     else if (m.xp07Stage === 'draft1') m.xp07Stage = 'analysis1';
     state.experience03.path = state.experience03.path.filter(n => EXPERIENCES.experience03.pieces.includes(n)).slice(0, CONFIG.experience03Connections);
+    if (state.participant.registeredAt && !Report.isParticipantComplete(state.participant)) state.participant.registeredAt = null;
   }
+
+  /* ================================ SYNC ================================ */
+  // Envia participante, etapas e resultado para a planilha (Google Apps Script; link em #dts-config).
+  // A fila fica guardada no navegador: se a conexão cair, nada se perde e o envio recomeça sozinho.
+  // O Apps Script atualiza sempre a mesma linha, então reenviar é seguro.
+  const Sync = (() => {
+    const KEY = 'dts-caderno-envios';
+    const RETRY_MS = 30000;
+    const MAX_RETRY_MS = 600000;
+    const MIN_GAP_MS = 5000;
+    const listeners = new Set();
+    let box = read();
+    let busy = false;
+    let offline = false;
+    let timer = null;
+    let started = false;
+
+    function read() {
+      try {
+        const data = JSON.parse(window.localStorage.getItem(KEY) || 'null');
+        if (data && Array.isArray(data.pending) && data.sent && typeof data.sent === 'object') return data;
+      } catch (e) { /* armazenamento indisponível */ }
+      return { pending: [], sent: {}, lastOkAt: null, lastError: null, unconfirmed: 0 };
+    }
+    function write() { try { window.localStorage.setItem(KEY, JSON.stringify(box)); } catch (e) { /* armazenamento indisponível */ } }
+    function endpoint() {
+      const url = String((window.DTS_CONFIG && window.DTS_CONFIG.sheetsEndpoint) || '').trim();
+      return /^https:\/\/\S+$/i.test(url) ? url : '';
+    }
+    const enabled = () => !!endpoint();
+    // Impressão digital curta do conteúdo (FNV-1a): evita reenviar o que já chegou igual.
+    function fingerprint(text) {
+      let h = 0x811c9dc5;
+      for (let i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+      return h.toString(36) + '.' + text.length;
+    }
+    function status() {
+      return { enabled: enabled(), pending: box.pending.length, sending: busy, offline: offline && box.pending.length > 0,
+        lastOkAt: box.lastOkAt, lastError: box.lastError, unconfirmed: box.unconfirmed || 0 };
+    }
+    function notify() { const s = status(); listeners.forEach(fn => { try { fn(s); } catch (e) { /* noop */ } }); }
+
+    function put(tipo, participante, linha, options) {
+      if (!enabled()) return;
+      const key = tipo + ':' + ((linha && linha[Report.COLUMNS.page]) || '');
+      const body = JSON.stringify({ tipo, versao: Report.VERSION, participante, linha: linha || null });
+      // Compara só o conteúdo da linha (o bloco do participante vai junto, atualizado, em todo envio).
+      const fp = fingerprint(linha ? JSON.stringify(linha) : JSON.stringify(participante));
+      const waiting = box.pending.find(item => item.key === key);
+      if (!(options && options.force) && (waiting ? waiting.fp === fp : box.sent[key] === fp)) return;
+      const item = { key, tipo, body, fp, tries: 0, nextAt: 0 };
+      if (waiting) box.pending[box.pending.indexOf(waiting)] = item; else box.pending.push(item);
+      write();
+      notify();
+      flush();
+    }
+
+    // POST "simples" (text/plain) para não disparar preflight de CORS no Apps Script.
+    async function post(url, body) {
+      const init = { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body, cache: 'no-store' };
+      let res;
+      try { res = await fetch(url, init); }
+      catch (blocked) {
+        // Resposta ilegível (CORS) ou rede: no modo no-cors o pedido ainda chega, sem confirmação.
+        await fetch(url, Object.assign({}, init, { mode: 'no-cors' }));
+        return false;
+      }
+      if (!res.ok) throw new Error('A planilha respondeu HTTP ' + res.status + '.');
+      let data = null;
+      try { data = await res.json(); } catch (e) { throw new Error('Resposta inesperada: confira se o Apps Script foi implantado como App da Web com acesso "Qualquer pessoa".'); }
+      if (!data || data.sucesso !== true) throw new Error('Planilha: ' + ((data && data.erro) || 'registro não confirmado.'));
+      return true;
+    }
+    function describe(err) {
+      if (err instanceof TypeError) return 'Sem conexão com a planilha (rede fora do ar ou link bloqueado).';
+      return (err && err.message) || String(err);
+    }
+    function schedule() {
+      clearTimeout(timer);
+      timer = null;
+      if (!box.pending.length || !enabled()) return;
+      const next = Math.min.apply(null, box.pending.map(item => item.nextAt));
+      timer = setTimeout(flush, Math.max(offline ? MIN_GAP_MS : 0, next - Date.now()));
+    }
+    async function flush() {
+      if (busy || !enabled()) return;
+      clearTimeout(timer);
+      timer = null;
+      const item = box.pending.find(i => i.nextAt <= Date.now());
+      if (!item) { schedule(); return; }
+      busy = true;
+      notify();
+      try {
+        const confirmed = await post(endpoint(), item.body);
+        box.pending = box.pending.filter(i => i !== item); // se foi substituído durante o envio, a versão nova segue na fila
+        box.sent[item.key] = item.fp;
+        box.lastOkAt = new Date().toISOString();
+        box.lastError = null;
+        if (!confirmed) box.unconfirmed = (box.unconfirmed || 0) + 1;
+        offline = false;
+      } catch (err) {
+        item.tries += 1;
+        item.nextAt = Date.now() + Math.min(MAX_RETRY_MS, RETRY_MS * Math.pow(2, item.tries - 1));
+        box.lastError = describe(err);
+        offline = true;
+      }
+      busy = false;
+      write();
+      notify();
+      if (offline) schedule(); else flush();
+    }
+    function retryNow() {
+      box.pending.forEach(item => { item.nextAt = 0; });
+      offline = false;
+      notify();
+      flush();
+    }
+    // Ao fechar a aba: último empurrão com sendBeacon (a fila continua valendo até a confirmação).
+    function beacon() {
+      const url = endpoint();
+      if (!url || !box.pending.length || !navigator.sendBeacon) return;
+      box.pending.forEach(item => {
+        try { navigator.sendBeacon(url, new Blob([item.body], { type: 'text/plain;charset=utf-8' })); } catch (e) { /* noop */ }
+      });
+    }
+    function start() {
+      if (started) return;
+      started = true;
+      window.addEventListener('online', retryNow);
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') flush(); });
+      retryNow(); // caderno reaberto: o que ficou na fila tenta de novo na hora
+    }
+    return {
+      enabled, endpoint, put, flush, retryNow, beacon, status, start,
+      onChange(fn) { listeners.add(fn); return () => listeners.delete(fn); }
+    };
+  })();
 
   /* ============================= ANIMATIONS ============================= */
   const motionOK = () => !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1505,32 +1930,77 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
   ];
   const FINAL_PAGE = PAGES.length - 1;
 
+  const PAGE_NAMES = {};
+  PAGES.forEach(p => { if (p.n) PAGE_NAMES[p.n] = p.name; });
+
   function isPageComplete(index) {
-    switch (PAGES[index].id) {
-      case 'xp01': return Core.isDeclaredComplete(state.declared);
-      case 'xp02': return state.experience02.selectedSignals.length > 0;
-      case 'xp03': return state.experience03.path.length >= CONFIG.experience03Connections;
-      case 'xp04': return !!state.experience04.selectedPath;
-      case 'xp05': return state.experience05.selectedElements.length > 0;
-      case 'xp06': return state.experience06.selectedPromptElements.length > 0;
-      case 'xp07': return state.experience07.originalStructureScore != null;
-      default: return true;
-    }
+    const n = PAGES[index] && PAGES[index].n;
+    return n ? Report.isExperienceComplete(state, n) : true;
   }
+  const isParticipantReady = () => Report.isParticipantComplete(state.participant);
 
   function goTo(index, options) {
     const opts = options || {};
     const target = Math.max(0, Math.min(FINAL_PAGE, index));
+    if (target >= 1 && !isParticipantReady()) { openFicha(target); return; } // todo caderno tem dono: etiqueta primeiro
     if (target > state.meta.maxReachedPage) {
       for (let i = 1; i < target; i++) if (!isPageComplete(i)) return;
       state.meta.maxReachedPage = target;
     }
-    const direction = opts.direction || (target < state.meta.currentPage ? 'back' : 'forward');
+    const from = state.meta.currentPage;
+    const direction = opts.direction || (target < from ? 'back' : 'forward');
+    if (target === 0) Cover.view = 'intro';
     state.meta.currentPage = target;
     if (target >= 1 && !state.meta.startedAt) state.meta.startedAt = new Date().toISOString();
     if (target === FINAL_PAGE && !state.meta.finishedAt) state.meta.finishedAt = new Date().toISOString();
     commit();
+    syncProgress(from);
     renderStage({ direction, focus: true });
+  }
+
+  /* ------------------------------------------------------------ participante e envio para a planilha */
+  function openFicha(target) {
+    Cover.view = 'ficha';
+    Cover.pendingTarget = target == null ? null : target;
+    state.meta.currentPage = 0;
+    commit();
+    renderStage({ direction: 'forward', focus: true });
+  }
+  function registerParticipant(value) {
+    const p = state.participant;
+    Object.assign(p, value);
+    if (!p.registeredAt) p.registeredAt = new Date().toISOString();
+    state.meta.fichaDraft = null;
+    const target = Cover.pendingTarget;
+    Cover.view = 'intro';
+    Cover.pendingTarget = null;
+    commit();
+    syncEverything(false);
+    if (target != null) goTo(target, { direction: 'forward' });
+    else renderStage({ direction: 'back', focus: true });
+  }
+  // Leva à planilha o que mudou: a página que a pessoa acabou de deixar e, depois do fim, o resultado consolidado.
+  function syncProgress(leftIndex) {
+    if (!isParticipantReady() || !Sync.enabled()) return;
+    const participante = Report.participantRecord(state, PAGE_NAMES);
+    const n = PAGES[leftIndex] && PAGES[leftIndex].n;
+    if (n && isPageComplete(leftIndex)) Sync.put('etapa', participante, Report.stageRecord(state, n, PAGE_NAMES));
+    if (state.meta.finishedAt) Sync.put('resultado_final', participante, Report.resultRecord(state));
+  }
+  // Tudo de uma vez (etiqueta nova/editada ou "Reenviar tudo" no painel). Sem force, só vai o que mudou.
+  function syncEverything(force) {
+    if (!isParticipantReady() || !Sync.enabled()) return;
+    const opts = force ? { force: true } : null;
+    const participante = Report.participantRecord(state, PAGE_NAMES);
+    Sync.put('inicio', participante, null, opts);
+    for (let i = 1; i < FINAL_PAGE; i++) if (isPageComplete(i)) Sync.put('etapa', participante, Report.stageRecord(state, PAGES[i].n, PAGE_NAMES), opts);
+    if (state.meta.finishedAt) Sync.put('resultado_final', participante, Report.resultRecord(state), opts);
+  }
+  function syncMessage(s) {
+    if (!s.enabled) return 'Suas respostas ficam guardadas neste navegador.';
+    if (s.offline) return 'Sem conexão com a planilha agora. Suas respostas estão guardadas e seguem assim que der.';
+    if (s.pending > 0) return 'Enviando suas respostas para o time…';
+    return 'Respostas enviadas para o time. Obrigado!';
   }
 
   const stageEl = $('#stage');
@@ -1644,17 +2114,25 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
 
   /* ------------------------------------------------------------ capa */
   const Cover = {
-    html() {
+    view: 'intro', // 'intro' (capa) ou 'ficha' (etiqueta do caderno)
+    pendingTarget: null,
+    html() { return Cover.view === 'ficha' ? Cover.fichaHTML() : Cover.introHTML(); },
+    mount(rootEl) { if (Cover.view === 'ficha') Cover.mountFicha(rootEl); },
+    introHTML() {
       const reached = state.meta.maxReachedPage;
       const toc = PAGES.filter(p => p.n).map(p => `<li><b>${pad2(p.n)}</b><span>${esc(p.name)} <i class="toc-game">· ${esc(p.game)}</i></span></li>`).join('');
       const actions = reached > 0
         ? `<button type="button" class="btn btn-primary" data-goto="${reached}">${reached === FINAL_PAGE ? 'Ver o encerramento' : 'Continuar da página ' + pad2(reached)} <span aria-hidden="true">→</span></button>
            <button type="button" class="btn btn-ghost-light" data-action="restart">Começar de novo</button>`
         : '<button type="button" class="btn btn-primary" data-goto="1">Abrir o caderno <span aria-hidden="true">→</span></button>';
+      const owner = isParticipantReady()
+        ? `<p class="owner-tag"><small>Este caderno é de</small><b>${esc(state.participant.fullName)}</b><button type="button" class="btn btn-quiet" data-action="edit-ficha" aria-label="Editar a etiqueta do caderno">editar</button></p>`
+        : '';
       return `<section class="sheet cover" aria-labelledby="coverTitle">
         <div class="cover-left dark-surface">
           <p class="cover-kicker">Digital &amp; Technology Services</p>
           <h1 class="cover-title" id="coverTitle" tabindex="-1" data-autofocus>Caderno de<br>Nivelamento <span>DTS</span></h1>
+          ${owner}
           <p class="cover-lede">Sete páginas, cada uma inspirada numa brincadeira que você já conhece, para mostrar como você trabalha hoje com Claude, FLOWS, Métodos e Skills.</p>
           <div class="cover-actions">${actions}</div>
           <p class="cover-time">leva uns 6 minutos · dá para parar e voltar depois</p>
@@ -1664,6 +2142,95 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
           <nav class="toc" aria-label="Sumário do caderno"><p class="toc-title">Sumário</p><ol>${toc}</ol></nav>
         </div>
       </section>`;
+    },
+    fichaHTML() {
+      const editing = isParticipantReady();
+      const draft = state.meta.fichaDraft || state.participant;
+      const q = Report.AI_QUESTION;
+      const L = Report.LIMITS;
+      return `<section class="sheet cover cover--ficha" aria-labelledby="fichaTitle">
+        <div class="cover-left dark-surface">
+          <p class="cover-kicker">Digital &amp; Technology Services</p>
+          <p class="cover-title" aria-hidden="true">Caderno de<br>Nivelamento <span>DTS</span></p>
+          <p class="cover-lede">Lembra da etiqueta na capa do caderno da escola? Nome, turma, matéria… Este caderno também tem dono. Preencha a etiqueta e ele se abre.</p>
+          <p class="cover-time">leva menos de 1 minuto</p>
+        </div>
+        <div class="cover-right">
+          <form class="label-card" data-ficha novalidate aria-describedby="fichaPrivacy">
+            <div class="lc-head"><p class="lc-kicker">Etiqueta do caderno</p><h1 class="lc-title" id="fichaTitle" tabindex="-1">Este caderno pertence a</h1></div>
+            <div class="lc-grid">
+              <label class="lc-label" for="fichaName">Nome completo</label>
+              <input class="lc-input" id="fichaName" name="fullName" type="text" value="${esc(draft.fullName)}" maxlength="${L.fullName}"
+                autocomplete="name" autocapitalize="words" spellcheck="false" placeholder="nome e sobrenome" aria-describedby="fichaNameErr" data-autofocus>
+              <p class="lc-error" id="fichaNameErr" data-error="fullName" hidden></p>
+              <label class="lc-label" for="fichaEmail">E-mail</label>
+              <input class="lc-input" id="fichaEmail" name="email" type="email" value="${esc(draft.email)}" maxlength="${L.email}"
+                autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="nome@empresa.com" aria-describedby="fichaEmailErr">
+              <p class="lc-error" id="fichaEmailErr" data-error="email" hidden></p>
+            </div>
+            <div class="lc-ask">
+              <label class="lc-ask-label" for="fichaOpinion"><span class="lc-ask-kicker">${esc(q.kicker)}</span><span class="lc-stem">${esc(q.stem)}</span></label>
+              <textarea class="lc-area" id="fichaOpinion" name="aiOpinion" rows="2" maxlength="${L.aiOpinion}" placeholder="escreva aqui, do seu jeito"
+                aria-describedby="fichaOpinionHint fichaOpinionErr">${esc(draft.aiOpinion)}</textarea>
+              <p class="lc-hint" id="fichaOpinionHint"><span>${esc(q.hint)}</span><span class="lc-count" data-count aria-hidden="true"></span></p>
+              <p class="lc-error" id="fichaOpinionErr" data-error="aiOpinion" hidden></p>
+            </div>
+            <p class="lc-privacy" id="fichaPrivacy">Nome e e-mail servem só para o time que organiza o nivelamento DTS reconhecer suas respostas. Nada aqui vira nota.</p>
+            <div class="lc-actions">
+              <button type="button" class="btn btn-quiet" data-action="ficha-back">← Capa</button>
+              <button type="submit" class="btn btn-primary">${editing ? 'Salvar etiqueta' : 'Abrir o caderno'} <span aria-hidden="true">→</span></button>
+            </div>
+          </form>
+        </div>
+      </section>`;
+    },
+    mountFicha(rootEl) {
+      const form = $('[data-ficha]', rootEl);
+      const fields = { fullName: $('#fichaName', form), email: $('#fichaEmail', form), aiOpinion: $('#fichaOpinion', form) };
+      const count = $('[data-count]', form);
+      let tried = false;
+      const read = () => ({ fullName: fields.fullName.value, email: fields.email.value, aiOpinion: fields.aiOpinion.value });
+      const showErrors = (errors, only) => Object.keys(fields).forEach(key => {
+        if (only && !only.includes(key)) return;
+        const message = errors[key] || '';
+        const slot = $(`[data-error="${key}"]`, form);
+        slot.textContent = message;
+        slot.hidden = !message;
+        fields[key].setAttribute('aria-invalid', message ? 'true' : 'false');
+      });
+      const updateCount = () => { count.textContent = `${fields.aiOpinion.value.length}/${Report.LIMITS.aiOpinion}`; };
+      // A caixa da frase cresce com o texto até o limite de linhas do CSS (depois rola).
+      const fitArea = () => {
+        const area = fields.aiOpinion;
+        area.style.height = 'auto';
+        area.style.height = Math.min(area.scrollHeight + 2, parseFloat(getComputedStyle(area).maxHeight) || Infinity) + 'px';
+      };
+      const submit = () => {
+        tried = true;
+        const result = Report.validateParticipant(read());
+        showErrors(result.errors);
+        if (!result.valid) { fields[Object.keys(fields).find(key => result.errors[key])].focus(); return; }
+        registerParticipant(result.value);
+      };
+      updateCount();
+      fitArea();
+      form.addEventListener('input', event => {
+        state.meta.fichaDraft = read();
+        saveSoon();
+        updateCount();
+        fitArea();
+        if (tried && fields[event.target.name]) showErrors(Report.validateParticipant(read()).errors, [event.target.name]);
+      });
+      // Ao sair de um campo já preenchido, avisa na hora (sem esperar o botão).
+      form.addEventListener('focusout', event => {
+        const key = event.target.name;
+        if (fields[key] && fields[key].value.trim()) showErrors(Report.validateParticipant(read()).errors, [key]);
+      });
+      // Uma frase só: Enter entrega a etiqueta em vez de quebrar a linha.
+      fields.aiOpinion.addEventListener('keydown', event => {
+        if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) { event.preventDefault(); submit(); }
+      });
+      form.addEventListener('submit', event => { event.preventDefault(); submit(); });
     }
   };
 
@@ -2459,12 +3026,13 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
     html() {
       const d = state.declared;
       const stage = d.finalIndex != null ? Core.getLevelingStage(d.finalIndex) : null;
+      const name = Report.firstName(state.participant);
       const done = ['refletiu sobre sua rotina', 'conectou conceitos', 'escolheu caminhos', 'pensou em reutilização',
         'estruturou uma Skill', 'trabalhou com Contexto', 'melhorou um Prompt'];
       return `<section class="sheet finale" aria-labelledby="finTitle" style="grid-template-rows:1fr auto">
         <div class="finale-left dark-surface">
           <p class="stamp stamp--light">Caderno concluído</p>
-          <h1 class="finale-title" id="finTitle" tabindex="-1" data-autofocus>Você terminou.</h1>
+          <h1 class="finale-title" id="finTitle" tabindex="-1" data-autofocus>${name ? `Você terminou, ${esc(name)}.` : 'Você terminou.'}</h1>
           <p class="finale-sub">Mas talvez tenha feito mais coisas do que percebeu.</p>
           ${stage ? `<div class="declared-card"><p class="dc-label">Seu ponto de partida declarado</p><p class="dc-value">${Math.round(d.finalIndex)}% · ${esc(stage.label)}</p><p class="dc-next">Próximo passo: <b>${esc(stage.nextStep)}</b></p></div>` : ''}
         </div>
@@ -2473,8 +3041,22 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
           <p class="finale-close">Agora entendemos melhor de onde partir.</p>
           <p class="finale-stamp" aria-hidden="true">Nivelamento registrado</p>
         </div>
-        <footer class="sheet-foot"><button type="button" class="btn btn-quiet" data-goto="7">← Página 07</button><p class="foot-note">Suas respostas ficam guardadas neste navegador.</p></footer>
+        <footer class="sheet-foot"><button type="button" class="btn btn-quiet" data-goto="7">← Página 07</button>
+          <p class="foot-note" data-sync-status role="status">${esc(syncMessage(Sync.status()))}</p>
+          <button type="button" class="btn btn-quiet" data-action="sync-retry" hidden>Tentar agora</button></footer>
       </section>`;
+    },
+    mount(rootEl) {
+      const note = $('[data-sync-status]', rootEl);
+      const retry = $('[data-action="sync-retry"]', rootEl);
+      const paint = s => {
+        const text = syncMessage(s);
+        if (note.textContent !== text) { note.textContent = text; pop(note); }
+        note.classList.toggle('is-feedback', s.enabled && !s.offline && s.pending === 0);
+        retry.hidden = !s.offline;
+      };
+      paint(Sync.status());
+      onCleanup(Sync.onChange(paint));
     }
   };
 
@@ -2507,9 +3089,26 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
       ['alignmentIndex', fmt(r.alignmentIndex)]
     ];
     const profile = r.dimensionProfile || { declared: {}, demonstrated: {} };
+    const p = s.participant;
+    const sync = Sync.status();
+    const when = iso => (iso ? new Date(iso).toLocaleString('pt-BR') : '—');
+    const people = [
+      ['Nome', p.fullName || '—'],
+      ['E-mail', p.email || '—'],
+      ['IA nos projetos DTS', p.aiOpinion || '—'],
+      ['ID da sessão', s.meta.sessionId],
+      ['Planilha', sync.enabled ? 'configurada' : 'sem link (DTS_CONFIG.sheetsEndpoint)'],
+      ['Na fila para envio', String(sync.pending) + (sync.sending ? ' · enviando…' : '')],
+      ['Último envio confirmado', when(sync.lastOkAt)],
+      ['Envios sem confirmação (no-cors)', String(sync.unconfirmed)],
+      ['Último erro', sync.lastError || '—']
+    ];
     const dims = Object.keys(Core.DIMENSIONS).map(k => `<tr><td>${esc(Core.DIMENSIONS[k])}</td><td>${fmt(profile.declared[k])}</td><td>${fmt(profile.demonstrated[k])}</td></tr>`).join('');
     facEl.innerHTML = `<h2>Painel interno · facilitação</h2>
       <p>Visível só com <b>#facilitador</b> no endereço. Não mostrar ao participante.</p>
+      <h3>Participante e planilha</h3>
+      <table><tbody>${people.map(([k, v]) => `<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join('')}</tbody></table>
+      <h3>Índices</h3>
       <table><tbody>${rows.map(([k, v]) => `<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join('')}</tbody></table>
       <h3>Perfil por dimensão</h3>
       <table><thead><tr><th>Dimensão</th><th>Declarado</th><th>Demonstrado</th></tr></thead><tbody>${dims}</tbody></table>
@@ -2522,12 +3121,19 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
         <tr><td>rascunho 2 · estrutura</td><td>${fmt(s.experience07.revisedStructureScore)}</td></tr>
         <tr><td>learningDelta</td><td>${fmt(s.experience07.learningDelta)}</td></tr>
       </tbody></table>
-      <div class="fac-actions"><button type="button" data-fac="copy">Copiar JSON</button><button type="button" data-fac="close">Fechar painel</button></div>
+      <div class="fac-actions"><button type="button" data-fac="copy">Copiar JSON</button><button type="button" data-fac="resend">Reenviar tudo</button><button type="button" data-fac="close">Fechar painel</button></div>
       <pre data-fac-json>${esc(JSON.stringify(s, null, 2))}</pre>`;
   }
   facEl.addEventListener('click', event => {
     const btn = event.target.closest('[data-fac]');
     if (!btn) return;
+    if (btn.dataset.fac === 'resend') {
+      if (!Sync.enabled()) { btn.textContent = 'Sem link da planilha'; return; }
+      if (!isParticipantReady()) { btn.textContent = 'Etiqueta ainda vazia'; return; }
+      syncEverything(true);
+      Sync.retryNow();
+      return;
+    }
     if (btn.dataset.fac === 'close') {
       try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch (e) { window.location.hash = ''; }
       refreshFacilitator();
@@ -2539,12 +3145,15 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
     else fallback();
   });
   window.addEventListener('hashchange', refreshFacilitator);
+  Sync.onChange(() => { if (facilitatorOpen()) refreshFacilitator(); });
 
   /* ------------------------------------------------------------ recomeçar (confirmação na própria página) */
   const modal = $('#confirmModal');
   let lastFocus = null;
   function openConfirm() {
     lastFocus = document.activeElement;
+    $('#confirmDesc').textContent = 'Isso apaga as respostas guardadas neste navegador. '
+      + (Sync.enabled() ? 'O que já foi enviado para a planilha continua lá. ' : '') + 'Não dá para desfazer.';
     modal.hidden = false;
     $('[data-modal="cancel"]', modal).focus();
   }
@@ -2557,8 +3166,11 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
     const btn = event.target.closest('[data-modal]');
     if (!btn) return;
     if (btn.dataset.modal === 'cancel') { closeConfirm(); return; }
+    syncProgress(state.meta.currentPage); // o que mudou nesta página ainda vai para a planilha
     Store.clear();
     state = Core.createInitialState();
+    Cover.view = 'intro';
+    Cover.pendingTarget = null;
     ensureUiState();
     commit();
     modal.hidden = true;
@@ -2581,6 +3193,19 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
     if (goto && !goto.disabled) { goTo(Number(goto.dataset.goto)); return; }
     const restart = event.target.closest('[data-action="restart"]');
     if (restart) { openConfirm(); return; }
+    const action = event.target.closest('[data-action="edit-ficha"], [data-action="ficha-back"], [data-action="sync-retry"]');
+    if (action) {
+      const kind = action.dataset.action;
+      if (kind === 'edit-ficha') openFicha(null);
+      else if (kind === 'sync-retry') Sync.retryNow();
+      else {
+        if (isParticipantReady()) { state.meta.fichaDraft = null; commit(); } // editando: voltar descarta o que não foi salvo
+        Cover.view = 'intro';
+        Cover.pendingTarget = null;
+        renderStage({ direction: 'back', focus: true });
+      }
+      return;
+    }
     const next = event.target.closest('[data-action="next"]');
     if (next && !next.disabled) goTo(state.meta.currentPage + 1, { direction: 'forward' });
   });
@@ -2593,7 +3218,10 @@ window.DTS_ART = {"you":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-5 
     sanitizeState();
     commit();
     renderStage({ direction: 'none' });
+    Sync.start();
   }
+  // Ao sair (fechar a aba, trocar de app no celular): registra a página atual e empurra a fila.
+  window.addEventListener('pagehide', () => { syncProgress(state.meta.currentPage); Sync.beacon(); });
   const hot = window.claude && window.claude.hot;
   if (hot && typeof hot.snapshot === 'function') hot.snapshot(() => ({ state }));
   if (hot && typeof hot.ready === 'function') hot.ready(start);
