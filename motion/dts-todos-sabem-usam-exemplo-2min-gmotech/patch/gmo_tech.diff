@@ -1,0 +1,72 @@
+diff --git a/motion/dts-todos-sabem-usam-exemplo/bake.htm b/motion/dts-todos-sabem-usam-exemplo/bake.htm
+index c843975..0f2a047 100644
+--- a/motion/dts-todos-sabem-usam-exemplo/bake.htm
++++ b/motion/dts-todos-sabem-usam-exemplo/bake.htm
+@@ -15,7 +15,7 @@ window.show = (kind, arg) => {
+   else if (kind === 'card') { el = UI.skillCard(UI.SKILLS[arg]); stage.appendChild(el); }
+   else if (kind === 'newcard') {
+     // v5: the published skill already carries its quality score (trophy), like the real library cards
+-    el = UI.skillCard({ t: '[DTS] - Change Management - Mapa de Impactos', area: ['network', 'DTS'], sc: 95, d: 'Entregável: Mapa de Impactos Organizacionais, separando por categoria de impacto, análise organizacional, mapa de riscos, ações de mitigação, heatmap. Resultado Final/Produto: Arquivo Excel, Apresentação em PPT.', a: 'Vitorino, Victor', dt: '27/09/2026', s: [0, 0, 0] }, '<span class="new">NOVA</span>');
++    el = UI.skillCard({ t: '[DTS] - GMO TECH - Mapa de Impactos', area: ['network', 'DTS'], sc: 95, d: 'Entregável: Mapa de Impactos Organizacionais, separando por categoria de impacto, análise organizacional, mapa de riscos, ações de mitigação, heatmap. Resultado Final/Produto: Arquivo Excel, Apresentação em PPT.', a: 'Vitorino, Victor', dt: '27/09/2026', s: [0, 0, 0] }, '<span class="new">NOVA</span>');
+     stage.appendChild(el);
+   }
+   else if (kind === 'libhead') { el = UI.libHeader(); el.querySelector('.cn').textContent = arg; stage.appendChild(el); }
+diff --git a/motion/dts-todos-sabem-usam-exemplo/bake.mjs b/motion/dts-todos-sabem-usam-exemplo/bake.mjs
+index 9ef7236..314a9b0 100644
+--- a/motion/dts-todos-sabem-usam-exemplo/bake.mjs
++++ b/motion/dts-todos-sabem-usam-exemplo/bake.mjs
+@@ -21,7 +21,7 @@ async function snap(pg, name, kind, arg) {
+ }
+ const manifest = {};
+ // ---- modal state sequence
+-const NAME = '[DTS] - Change Management - Mapa de Impactos';
++const NAME = '[DTS] - GMO TECH - Mapa de Impactos';
+ const base = { name: '', where: '', whereFilled: false, whereHint: false, dd: 0, ddHi: 0, model: '', modelOk: false, reqPulse: 0, time: '', mode: 0, file: '', stepP: 0, press: 0, focus: '', caret: true, pfx: false };
+ const S = [];
+ S.push(['m_empty', { ...base }]);
+diff --git a/motion/dts-todos-sabem-usam-exemplo/src/timeline.js b/motion/dts-todos-sabem-usam-exemplo/src/timeline.js
+index f75510c..41fbc36 100644
+--- a/motion/dts-todos-sabem-usam-exemplo/src/timeline.js
++++ b/motion/dts-todos-sabem-usam-exemplo/src/timeline.js
+@@ -440,10 +440,10 @@ export function buildFilm(ctx) {
+ 
+   // ------------------------------------------------------------ modal texture state (pure)
+   function modalState(t) {
+-    const NAME = 44;
++    const NAME = 35;
+     let img = 'm_empty';
+-    if (t > 31.2) img = `m_name_${String(Math.min(NAME, t < 32.6 ? Math.floor(seg(t, 31.4, 32.6) * 5.999) : 5 + Math.floor(seg(t, 32.6, 35.3) * 39))).padStart(2, '0')}`;
+-    if (t > 35.4) img = t < 36.2 ? 'm_name_44' : 'm_name_done'; // v5: the anatomy insert takes over at 36.9
++    if (t > 31.2) img = `m_name_${String(Math.min(NAME, t < 32.6 ? Math.floor(seg(t, 31.4, 32.6) * 5.999) : 5 + Math.floor(seg(t, 32.6, 35.3) * 30))).padStart(2, '0')}`;
++    if (t > 35.4) img = t < 36.2 ? 'm_name_35' : 'm_name_done'; // v5: the anatomy insert takes over at 36.9
+     if (t > 37.5) img = 'm_where_0';
+     if (t > 37.95) img = 'm_where_1'; if (t > 38.15) img = 'm_where_2'; if (t > 38.35) img = 'm_where_3';
+     if (t > 38.7) img = 'm_where_dd'; if (t > 39.3) img = 'm_where_ddhi';
+@@ -896,7 +896,7 @@ export function buildFilm(ctx) {
+     {
+       let o = 0, n = 0, lbl = '', icn = '', t0 = 0;
+       if (t > 16.6 && t < 20.4) { o = envl(t, 16.6, 17.1, 19.9, 20.4); n = Math.round(441 * E.outCubic(seg(t, 16.7, 19.3))); lbl = 'skills prontas para <b>reuso</b>'; icn = 'library'; t0 = 16.6; }
+-      if (t > 60.25 && t < 62.25) { o = envl(t, 60.25, 60.55, 61.9, 62.25); n = 442; lbl = '<b>+1</b> skill de DTS na Biblioteca'; icn = 'sparkles'; t0 = 60.25; }
++      if (t > 60.25 && t < 62.25) { o = envl(t, 60.25, 60.55, 61.9, 62.25); n = 442; lbl = 'skills na Biblioteca da Alvarez · <b>+1</b> de DTS'; icn = 'sparkles'; t0 = 60.25; }
+       show(kC, o, 0, (t > 60 ? -60 : 0) + (1 - o) * 14);
+       if (o > 0) {
+         kCBig.textContent = n; if (kCLbl.innerHTML !== lbl) kCLbl.innerHTML = lbl;
+diff --git a/motion/dts-todos-sabem-usam-exemplo/src/ui.js b/motion/dts-todos-sabem-usam-exemplo/src/ui.js
+index 6d54d74..bd1eb7a 100644
+--- a/motion/dts-todos-sabem-usam-exemplo/src/ui.js
++++ b/motion/dts-todos-sabem-usam-exemplo/src/ui.js
+@@ -82,10 +82,10 @@ export function ranking() {
+ export const SKILLS = [
+   { t: 'amp-flows-cli', area: ['network', 'DnA - Data &amp; Analytics'], sc: 81, medal: true, d: 'Amp Flows CLI agent skill (/flows): projects, methods, files, skills library; routes DocHub via O que ler quando.', a: 'Froes, Paulo', dt: '31/07/2026', s: [0, 221, 0] },
+   { t: '[AMP] Regramento PPT A&amp;M', area: ['network', 'DTS'], sc: 97, feat: true, d: 'Cria apresentações em powerpoint no template oficial A&amp;M: cada slide vem de um layout nomeado do master, com paleta, tipografia Arial Nova, grafismo a 330° e tags padrão.', a: 'Barreto, Abner', dt: '23/09/2026', s: [5, 9, 3] },
+-  { t: '[DTS] - Experience Builder | Gamificação, Team Building, Escape Room - GMO (Gestão da Mudança)', area: ['network', 'DTS'], sc: 98, d: 'Use to engineer AMP Flows Skills through a fixed contract-driven lifecycle: create a new Skill from a repeatable task or...', a: 'Vitorino, Victor', dt: '03/09/2026', s: [2, 7, 1] },
+-  { t: '[DTS] - Culture &amp; Stakeholder Diagnostic Builder - GMO (Gestão da Mudança)', area: ['network', 'DTS'], sc: 96, d: 'Use esta skill para desenhar e executar diagnósticos de cultura, prontidão para mudança e stakeholders com base e...', a: 'Vitorino, Victor', dt: '08/09/2026', s: [2, 2, 1] },
+-  { t: '[DTS] - Mapa de Impactos (Estrutura Completa) - GMO (Gestão da Mudança)', area: ['network', 'DTS'], sc: 98, d: 'Builds and maintains a complete Change Impact Assessment workspace for organizational transformation projects. Use...', a: 'Vitorino, Victor', dt: '06/09/2026', s: [2, 5, 1] },
+-  { t: '[DTS] - Plano de Comunicação Estrutura Completa - GMO (Gestão da Mudança)', area: ['network', 'DTS'], sc: 91, d: 'Builds and maintains a living communication and engagement workspace for organizational change projects, including...', a: 'Vitorino, Victor', dt: '06/09/2026', s: [3, 7, 1] },
++  { t: '[DTS] - GMO TECH - Experience Builder | Gamificação, Team Building, Escape Room', area: ['network', 'DTS'], sc: 98, d: 'Use to engineer AMP Flows Skills through a fixed contract-driven lifecycle: create a new Skill from a repeatable task or...', a: 'Vitorino, Victor', dt: '03/09/2026', s: [2, 7, 1] },
++  { t: '[DTS] - GMO TECH - Culture &amp; Stakeholder Diagnostic Builder', area: ['network', 'DTS'], sc: 96, d: 'Use esta skill para desenhar e executar diagnósticos de cultura, prontidão para mudança e stakeholders com base e...', a: 'Vitorino, Victor', dt: '08/09/2026', s: [2, 2, 1] },
++  { t: '[DTS] - GMO TECH - Mapa de Impactos', area: ['network', 'DTS'], sc: 98, d: 'Builds and maintains a complete Change Impact Assessment workspace for organizational transformation projects. Use...', a: 'Vitorino, Victor', dt: '06/09/2026', s: [2, 5, 1] },
++  { t: '[DTS] - GMO TECH - Plano de Comunicação Estrutura Completa', area: ['network', 'DTS'], sc: 91, d: 'Builds and maintains a living communication and engagement workspace for organizational change projects, including...', a: 'Vitorino, Victor', dt: '06/09/2026', s: [3, 7, 1] },
+   { t: '[DTS] Análise de Custos de Empresas', area: ['network', 'DTS'], sc: 94, feat: true, d: 'Use esta skill para construir o baseline de custos de uma empresa (target de M&amp;A, cliente e...', a: 'Velame, Lais', dt: '15/09/2026', s: [4, 3, 3] },
+   { t: '[DTS] Avaliação de Cibersegurança - IT DD', area: ['network', 'DTS'], sc: 92, feat: true, d: 'Use esta skill para avaliar a maturidade e efetividade de controles de segurança da informação de uma empresa em...', a: 'Velame, Lais', dt: '21/09/2026', s: [4, 3, 2] },
+ ];
