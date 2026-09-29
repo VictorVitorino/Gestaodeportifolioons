@@ -25,6 +25,7 @@ Passo a passo em [`google-apps-script/LEIAME.md`](google-apps-script/LEIAME.md);
 
 - **Um único ponto de configuração:** `sheetsEndpoint` no bloco `<script id="dts-config">`, no topo do `index.html`.
   Vazio = o caderno funciona igual e guarda tudo só no navegador.
+  Já está apontado para o App da Web da planilha do nivelamento; para trocar de planilha, basta colar outro link `/exec`.
 - **Abas criadas automaticamente por `configurarPlanilha`:**
   - **Diagnóstico** — uma linha por pessoa e **uma coluna por questão** (P01.1 … P07), agrupadas por seção colorida,
     com o **nível diagnosticado** logo depois da identificação.
