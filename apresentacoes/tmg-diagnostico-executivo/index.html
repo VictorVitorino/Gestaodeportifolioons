@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TMG · Diagnóstico e Reorganização</title>
+<meta name="description" content="Diagnóstico consolidado de Gestão de Mudanças (ADKAR) e proposta de reorganização cultural, tática e operacional da TMG.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#002B49;--blue:#0085CA;--steel:#5E8AB4;--gold:#CE8E00;--orange:#E23500;--green:#02624B;--purple:#500260;--red:#BC0404;--yellow:#FCBF00;--grey:#D9D9D9;
+  --ice:#E5F2FA;--ice2:#F2F7FB;--ink:#002B49;--ink2:#35516A;--muted:#6B7B8C;--line:#D6DEE6;--line2:#E8EDF2;--paper:#fff;
+  --crit:#BC0404;--fragil:#CE8E00;--equil:#5E8AB4;--forte:#02624B;
+  --fh:"Arial Nova Cond","Barlow Condensed","Arial Narrow",sans-serif;--fb:"Inter","Helvetica Neue",Arial,sans-serif;--ease:cubic-bezier(.2,.7,.2,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#07131F;color:var(--ink);font-family:var(--fb);overflow:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer;color:inherit}
+#viewport{position:fixed;inset:0;overflow:hidden}
+#stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform:translate(-50%,-50%);transform-origin:center;background:#fff;box-shadow:0 30px 90px rgba(0,0,0,.5);overflow:hidden}
+.slide{position:absolute;inset:0;display:none;background:#fff}
+.slide.active{display:block}
+.slide.entering{animation:sIn .55s var(--ease) both}
+@keyframes sIn{from{opacity:0;transform:translateX(34px)}to{opacity:1;transform:none}}
+.slide.back.entering{animation-name:sInB}@keyframes sInB{from{opacity:0;transform:translateX(-34px)}to{opacity:1;transform:none}}
+[data-a]{opacity:0}
+.play [data-a]{animation:.75s var(--ease) both;animation-delay:calc(var(--d,0)*80ms + 120ms)}
+.play [data-a=up]{animation-name:aUp}.play [data-a=fade]{animation-name:aF}.play [data-a=zoom]{animation-name:aZ}.play [data-a=left]{animation-name:aL}.play [data-a=grow]{animation-name:aG;transform-origin:left}
+@keyframes aUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}@keyframes aF{from{opacity:0}to{opacity:1}}@keyframes aZ{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:none}}@keyframes aL{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}@keyframes aG{from{opacity:1;transform:scaleX(0)}to{opacity:1;transform:none}}
+.flow{stroke-dasharray:6 7;animation:fl 1.1s linear infinite}@keyframes fl{to{stroke-dashoffset:-26}}
+.pulse{animation:pu 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}@keyframes pu{50%{transform:scale(1.08);opacity:.8}}
+@media (prefers-reduced-motion:reduce){[data-a]{opacity:1!important;animation:none!important}.slide.entering{animation:none}.flow,.pulse{animation:none}}
+
+/* chrome A&M-like */
+.pad{position:absolute;inset:0;padding:46px 64px 70px}
+.hd{display:flex;align-items:flex-end;gap:18px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:18px}
+.hd .num{font:700 44px/0.9 var(--fh);color:var(--blue);min-width:56px}
+.hd h2{font:700 38px/1.05 var(--fh);color:var(--navy);letter-spacing:-.005em}
+.hd h2 em{font-style:normal;color:var(--blue)}
+.hd .sub{font-size:15px;color:var(--ink2);margin-top:5px;line-height:1.35;max-width:1150px}
+.hd .sec{margin-left:auto;font:700 11px var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);white-space:nowrap;padding-bottom:4px}
+.foot{position:absolute;left:64px;right:64px;bottom:22px;display:flex;gap:16px;font-size:11px;color:var(--muted);border-top:1px solid var(--line2);padding-top:10px}
+.foot b{color:var(--navy);letter-spacing:.06em}.foot .n{margin-left:auto;font-weight:700;color:var(--navy)}
+.foot .s{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:980px}
+.dark{background:radial-gradient(1100px 700px at 78% 28%,#07558A 0%,#003A63 40%,var(--navy) 75%);color:#fff}
+.dark .foot{border-color:rgba(255,255,255,.15);color:#9DB7CE}.dark .foot b,.dark .foot .n{color:#fff}
+
+/* FDII strip: Fato → Dado → Insight → Implicação */
+.fdii{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.fdii>div{padding:12px 16px;position:relative;font-size:13.5px;line-height:1.42;color:var(--ink2);background:#fff}
+.fdii>div+div{border-left:1px solid var(--line)}
+.fdii>div::after{content:"";position:absolute;right:-8px;top:50%;width:14px;height:14px;background:inherit;border-top:1px solid var(--line);border-right:1px solid var(--line);transform:translateY(-50%) rotate(45deg);z-index:2}
+.fdii>div:last-child::after{display:none}
+.fdii .k{display:block;font:700 10.5px var(--fb);letter-spacing:.14em;text-transform:uppercase;margin-bottom:4px}
+.fdii .f .k{color:var(--navy)}.fdii .d .k{color:var(--blue)}.fdii .i .k{color:var(--gold)}.fdii .m .k{color:var(--green)}
+.fdii .m{background:#F1F8F5}
+.fdii b{color:var(--navy)}
+
+.card{background:#fff;border:1px solid var(--line);border-radius:3px;padding:16px 18px}
+.card.soft{background:var(--ice2);border-color:var(--line2)}
+.card.nv{background:var(--navy);border-color:var(--navy);color:#fff}
+.card h3{font:700 22px/1.1 var(--fh);color:var(--navy);margin-bottom:6px}.card.nv h3{color:#fff}
+.card h4{font:700 14.5px/1.3 var(--fb);color:var(--navy);margin-bottom:4px}
+.card p,.card li{font-size:14px;line-height:1.45;color:var(--ink2)}.card.nv p,.card.nv li{color:#C8DBEB}
+.card ul{padding-left:17px}.card li+li{margin-top:3px}
+.eye{font:700 11px var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue);margin-bottom:8px}
+.big{font:700 60px/.95 var(--fh);color:var(--navy)}.big small{font-size:24px;color:var(--muted)}
+.small{font-size:12px;color:var(--muted);line-height:1.4}
+.pill{display:inline-block;font:600 11.5px/1 var(--fb);padding:6px 10px;border-radius:99px;background:var(--ice);color:var(--navy)}
+.tagx{display:inline-block;font:700 10px var(--fb);letter-spacing:.1em;text-transform:uppercase;padding:5px 8px;border-radius:2px;color:#fff;background:var(--steel)}
+.hint{display:inline-flex;align-items:center;gap:6px;font:700 11px var(--fb);letter-spacing:.08em;text-transform:uppercase;color:var(--gold);background:#FFF6E0;border:1px dashed #E3C173;padding:5px 10px;border-radius:99px}
+.hint::before{content:"👆"}
+.grid{display:grid;gap:14px}
+.st-crit{background:var(--crit)}.st-frag{background:var(--fragil)}.st-equil{background:var(--equil)}.st-forte{background:var(--forte)}
+
+/* interactive bits */
+.clk{cursor:pointer;transition:transform .18s,box-shadow .18s,border-color .18s}
+.clk:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(0,43,73,.14)}
+.clk.sel{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,133,202,.25)}
+.flip{perspective:1000px}
+.flip .in{position:relative;width:100%;height:100%;transition:transform .6s var(--ease);transform-style:preserve-3d}
+.flip.on .in{transform:rotateY(180deg)}
+.flip .fr,.flip .bk{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:3px}
+.flip .bk{transform:rotateY(180deg)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:99px;background:linear-gradient(90deg,var(--steel),var(--blue));outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:#fff;border:4px solid var(--navy);box-shadow:0 3px 10px rgba(0,0,0,.25);cursor:grab}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:4px solid var(--navy);cursor:grab}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:99px;overflow:hidden;background:#fff}
+.seg button{border:0;background:none;padding:9px 16px;font:600 13px var(--fb);color:var(--ink2)}
+.seg button.on{background:var(--navy);color:#fff}
+.tabs{display:flex;gap:8px}
+.tabs button{border:1px solid var(--line);background:#fff;border-radius:3px;padding:10px 16px;font:700 16px var(--fh);color:var(--navy);text-align:left}
+.tabs button small{display:block;font:500 11px var(--fb);color:var(--muted)}
+.tabs button.on{background:var(--navy);color:#fff;border-color:var(--navy)}.tabs button.on small{color:#9DB7CE}
+.pane{display:none}.pane.on{display:block;animation:aF .4s both}
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.tbl th{font:700 10.5px var(--fb);letter-spacing:.1em;text-transform:uppercase;background:var(--navy);color:#fff;text-align:left;padding:9px 11px}
+.tbl td{padding:9px 11px;border-bottom:1px solid var(--line2);color:var(--ink2);vertical-align:top;line-height:1.38}
+.tbl td b{color:var(--navy)}
+.confetti{position:absolute;width:9px;height:14px;top:-20px;z-index:40;pointer-events:none;animation:cf 1.8s ease-in forwards}
+@keyframes cf{to{transform:translateY(960px) rotate(720deg);opacity:.2}}
+svg text{font-family:var(--fb)}
+svg.i{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;width:22px;height:22px}
+
+/* ui */
+#progress{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--blue),var(--gold));z-index:50;transition:width .5s var(--ease)}
+#controls{position:fixed;right:20px;bottom:16px;z-index:60;display:flex;gap:8px;align-items:center}
+#controls button{border:0;border-radius:3px;height:44px;padding:0 16px;font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:8px;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+#controls .g{background:rgba(255,255,255,.93);color:var(--navy)}#controls .p{background:var(--blue);color:#fff}
+#controls button:disabled{opacity:.4;cursor:not-allowed}
+#controls .c{background:rgba(0,43,73,.9);color:#fff;border-radius:3px;height:44px;display:inline-flex;align-items:center;padding:0 14px;font:600 13px var(--fb)}
+#dots{position:fixed;left:20px;bottom:30px;z-index:60;display:flex;gap:6px}
+#dots button{width:10px;height:10px;border-radius:50%;border:0;background:rgba(255,255,255,.3);padding:0}
+#dots button.on{background:var(--gold);width:26px;border-radius:99px}
+#tip{position:fixed;z-index:99;pointer-events:none;background:#fff;border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,20,40,.25);border-radius:4px;padding:9px 12px;font:13px/1.4 var(--fb);max-width:320px;opacity:0;transition:opacity .12s}
+#tip.on{opacity:1}#tip b{display:block;font-size:15px;color:var(--navy)}#tip span{color:var(--muted);font-size:12px}
+@media (max-width:760px){#dots{display:none}#controls .lb{display:none}}
+@media print{html,body{overflow:visible;background:#fff}#controls,#progress,#dots,#tip{display:none!important}#viewport{position:static}#stage{position:relative;left:auto!important;top:auto!important;transform:none!important;height:auto;box-shadow:none}.slide{position:relative;display:block!important;height:900px;break-after:page}[data-a]{opacity:1!important;animation:none!important}.pane{display:block!important}@page{size:1600px 900px;margin:0}}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div id="viewport"><div id="stage">
+
+<!-- 01 CAPA -->
+<section class="slide dark" data-t="Capa" data-nofoot>
+  <svg viewBox="0 0 700 760" style="position:absolute;right:40px;top:70px;width:680px;height:740px" aria-hidden="true" id="coverSvg"></svg>
+  <div class="pad" style="padding:80px 84px">
+    <div data-a="fade" style="display:flex;gap:12px;align-items:center"><span style="font:800 italic 26px var(--fb);background:#fff;color:var(--navy);padding:8px 15px;border-radius:3px">TMG</span><span class="tagx" style="background:rgba(255,255,255,.14)">Confidencial</span></div>
+    <div style="margin-top:130px;max-width:860px">
+      <div class="eye" data-a="fade" style="--d:1;color:var(--yellow)">Gestão de Mudanças · Reorganização Organizacional</div>
+      <h1 data-a="up" style="--d:2;font:700 92px/.93 var(--fh);color:#fff;margin-top:16px">Do diagnóstico ao <span style="color:#5CB8E6">modelo futuro</span></h1>
+      <p data-a="up" style="--d:3;font-size:21px;line-height:1.45;color:#C8DBEB;margin-top:24px;max-width:760px">Leitura consolidada do ambiente organizacional da TMG pela lente ADKAR e proposta de evolução cultural, tática e operacional.</p>
+      <div data-a="up" style="--d:4;display:flex;gap:34px;margin-top:40px">
+        <div><div class="big" style="color:#fff;font-size:48px">7</div><div class="small" style="color:#9DB7CE">entrevistas consolidadas</div></div>
+        <div><div class="big" style="color:#fff;font-size:48px">77</div><div class="small" style="color:#9DB7CE">perguntas respondidas</div></div>
+        <div><div class="big" style="color:#fff;font-size:48px">46</div><div class="small" style="color:#9DB7CE">evidências qualitativas</div></div>
+        <div><div class="big" style="color:#fff;font-size:48px">15</div><div class="small" style="color:#9DB7CE">telas · clique e explore</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 GESTÃO DE MUDANÇAS + ADKAR -->
+<section class="slide" data-t="Gestão de Mudanças e ADKAR" data-sec="Contexto" data-src="ADKAR® é um modelo da Prosci. Backbone metodológico já presente nos instrumentos de entrevista aplicados.">
+  <div class="pad">
+    <div class="hd"><div class="num">01</div><div><h2>Gestão de Mudanças: <em>a transformação acontece nas pessoas</em></h2><div class="sub">O trabalho lê a TMG pela jornada individual de mudança — ADKAR — para saber onde a transformação trava e o que destrava cada etapa.</div></div><div class="sec">Contexto</div></div>
+    <div style="display:grid;grid-template-columns:330px 1fr;gap:22px">
+      <div class="grid" style="align-content:start">
+        <div class="card nv" data-a="left"><div class="eye" style="color:var(--yellow)">Por que Gestão de Mudanças</div><p>A TMG conduz <b style="color:#fff">operação e transformação ao mesmo tempo</b> (sistemas, processos, papéis). Sem gestão da mudança, o novo modelo vira documento — e as pessoas voltam ao jeito antigo.</p></div>
+        <div class="card" data-a="left" style="--d:1"><div class="eye">Como usamos o ADKAR</div><ul><li>Cada relato foi lido como sinal de uma etapa.</li><li>A <b>etapa mais frágil</b> é a barreira — não adianta avançar as seguintes.</li><li>Cada recomendação ataca uma barreira específica.</li></ul></div>
+        <div data-a="left" style="--d:2"><span class="hint">clique em cada letra</span></div>
+      </div>
+      <div>
+        <div id="adkarRow" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;height:440px"></div>
+        <div style="margin-top:14px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink2)"><svg width="640" height="18"><defs><marker id="arA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#0085CA"/></marker></defs><line x1="4" y1="9" x2="630" y2="9" stroke="#0085CA" stroke-width="2" marker-end="url(#arA)" class="flow"/></svg><b style="color:var(--navy)">Sequencial:</b> a mudança só se sustenta quando todas as etapas estão presentes.</div>
+      </div>
+    </div>
+    <div data-a="up" style="--d:7;margin-top:18px;display:grid;grid-template-columns:200px repeat(3,1fr);gap:10px;align-items:stretch">
+      <div style="background:var(--navy);color:#fff;border-radius:3px;padding:14px 16px;display:flex;flex-direction:column;justify-content:center"><div class="eye" style="color:var(--yellow)">Fio condutor</div><div style="font:700 18px/1.2 var(--fh)">Como o ADKAR sustenta esta leitura</div></div>
+      <div class="card" style="border-left:5px solid var(--blue)"><div class="eye">1 · Diagnóstico</div><p style="font-size:14px">Cada padrão recorrente é lido como sinal de uma etapa — revelando <b>onde</b> a mudança trava.</p></div>
+      <div class="card" style="border-left:5px solid var(--gold)"><div class="eye" style="color:var(--gold)">2 · Reorganização</div><p style="font-size:14px">Cada pilar (cultura, operação, governança, estrutura) é desenhado para destravar <b>etapas específicas</b>.</p></div>
+      <div class="card" style="border-left:5px solid var(--green)"><div class="eye" style="color:var(--green)">3 · Modelo futuro</div><p style="font-size:14px">Cada ação por nível é <b>etiquetada com a etapa</b> que ataca — e medida em 30/60/90 dias.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 COMO OUVIMOS -->
+<section class="slide" data-t="Como ouvimos a organização" data-sec="Método" data-src="Fonte: 12 arquivos de entrevistas (ago–set/2026). Duração das entrevistas não registrada. Leitura consolidada; nenhum achado é atribuído a pessoas.">
+  <div class="pad">
+    <div class="hd"><div class="num">02</div><div><h2>Como ouvimos: <em>uma leitura consolidada, não individual</em></h2><div class="sub">Entrevistas estruturadas sobre como a TMG resolve problemas na prática. As respostas representam a percepção dos participantes sobre a empresa como um todo.</div></div><div class="sec">Método</div></div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px" id="methodKpis"></div>
+    <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:22px;margin-top:18px">
+      <div class="card" data-a="up" style="--d:6"><div class="eye">Modelo da entrevista</div>
+        <svg viewBox="0 0 700 150" width="700" height="150" id="methodFlow"></svg>
+        <p class="small" style="margin-top:4px">Situações reais, 4 alternativas sem opção neutra, pedido de caso concreto. Escalas de 1–4, 1–5 e % harmonizadas para 0–100.</p></div>
+      <div class="card soft" data-a="up" style="--d:7"><div class="eye">Como ler cada tela</div>
+        <div class="fdii" style="margin-top:6px"><div class="f"><span class="k">Fato</span>O que está registrado</div><div class="d"><span class="k">Dado</span>Número ou recorrência</div><div class="i"><span class="k">Insight</span>O que isso revela</div><div class="m"><span class="k">Implicação</span>O que muda para a TMG</div></div>
+        <p class="small" style="margin-top:12px"><b style="color:var(--navy)">Regra de validação:</b> nenhum sinal vira conclusão sem caso concreto, consequência observável e confirmação por outra fonte. Percepções não são prova estatística.</p></div>
+    </div>
+    <div class="card" data-a="up" style="--d:8;margin-top:18px"><div style="display:flex;justify-content:space-between;align-items:baseline"><div class="eye">Profundidade da evidência · nº de leituras estruturadas por dimensão</div><span class="small">passe o mouse nas barras · dimensões com 1–2 leituras pedem validação adicional</span></div>
+      <div id="depth" style="display:grid;grid-template-columns:repeat(10,1fr);gap:10px;align-items:end;height:150px;margin-top:10px"></div></div>
+  </div>
+</section>
+
+<!-- 04 DASHBOARD -->
+<section class="slide" data-t="Dashboard de maturidade" data-sec="Diagnóstico" data-src="Índice harmonizado 0–100 por dimensão (média das fontes). Faixas do Termômetro de Sinergia: Crítica <37,5 · Frágil 37,5–62,5 · Equilibrada 62,5–87,5 · Forte ≥87,5.">
+  <div class="pad">
+    <div class="hd"><div class="num">03</div><div><h2>Diagnóstico: <em>direção clara, execução transversal frágil</em></h2><div class="sub">Maturidade consolidada por dimensão. Clique numa dimensão para ver a evidência.</div></div><div class="sec">Diagnóstico</div></div>
+    <div style="display:grid;grid-template-columns:360px 1fr 360px;gap:18px">
+      <div class="card nv" data-a="left" style="text-align:center;padding:18px">
+        <div class="eye" style="color:var(--yellow)">Temperatura geral</div>
+        <svg viewBox="0 0 300 250" width="300" height="250" id="gauge"></svg>
+        <div class="small" style="color:#9DB7CE;margin-top:-6px">Frágil, no limiar da faixa crítica · nenhuma leitura estruturada atinge “Equilibrada”</div>
+      </div>
+      <div id="dimGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px"></div>
+      <div class="card" id="dimDetail" data-a="fade" style="--d:4;border-top:4px solid var(--blue)"></div>
+    </div>
+    <div class="fdii" data-a="up" style="--d:6;margin-top:16px">
+      <div class="f"><span class="k">Fato</span>Nenhuma das 6 leituras estruturadas alcança a faixa Equilibrada.</div>
+      <div class="d"><span class="k">Dado</span>Direção <b>79</b> × Silos <b>20</b>, Mudança <b>25</b>, Governança <b>35</b>.</div>
+      <div class="i"><span class="k">Insight</span>A TMG sabe <b>para onde</b> ir; trava em <b>como decidir e integrar</b>.</div>
+      <div class="m"><span class="k">Implicação</span>Atuar em governança, interfaces e sustentação — não em estratégia.</div>
+    </div>
+    <div data-a="up" style="--d:7;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px">
+      <div class="card" style="border-left:5px solid var(--green)"><div class="eye" style="color:var(--green)">Forças a preservar</div><p style="font-size:14px"><b>Alinhamento estratégico 79</b> — o “para onde” é claro. <b>Colaboração 54</b> — apoio pontual entre pessoas existe.</p></div>
+      <div class="card" style="border-left:5px solid var(--gold)"><div class="eye" style="color:var(--gold)">Pontos de atenção</div><p style="font-size:14px"><b>Cultura 47 · Liderança 47 · Papéis 40</b> — faixa Frágil, com fontes que divergem entre si.</p></div>
+      <div class="card" style="border-left:5px solid var(--crit)"><div class="eye" style="color:var(--crit)">Gaps críticos</div><p style="font-size:14px"><b>Governança 35 · Mudança 25 · Silos 20</b>. Processos 17 e Comunicação 0 têm 1 fonte só: sinal, não conclusão.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 EVIDÊNCIAS: PADRÕES -->
+<section class="slide" data-t="Evidências: padrões recorrentes" data-sec="Evidências" data-src="Contagem de entrevistas com menção explícita (+ indireta) ao tema, sobre 7. Codificação temática das evidências registradas.">
+  <div class="pad">
+    <div class="hd"><div class="num">04</div><div><h2>Evidências: <em>o mesmo padrão, contado por pessoas diferentes</em></h2><div class="sub">Antes de revelar: quantas das 7 entrevistas você acha que citaram cada tema? Clique no card para conferir.</div></div><div class="sec">Evidências</div></div>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px"><span class="hint">adivinhe e clique para revelar</span><button id="revealAll" class="pill" style="border:0;background:var(--navy);color:#fff;padding:8px 14px">Revelar todos</button><span id="revealCount" class="small"></span></div>
+    <div id="patternCards" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;height:520px"></div>
+    <div class="fdii" data-a="up" style="--d:8;margin-top:14px">
+      <div class="f"><span class="k">Fato</span>Temas codificados a partir de 46 evidências.</div>
+      <div class="d"><span class="k">Dado</span><b>10 padrões</b> em ≥4 de 7 entrevistas; <b>3 unânimes</b>.</div>
+      <div class="i"><span class="k">Insight</span>Não são queixas isoladas: é um <b>sistema de comportamentos</b>.</div>
+      <div class="m"><span class="k">Implicação</span>Mudar regras sem mudar comportamentos não sustenta o resultado.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 LEITURA ADKAR DA TMG -->
+<section class="slide" data-t="Leitura ADKAR da TMG" data-sec="Diagnóstico ADKAR" data-src="Classificação por etapa: interpretação consolidada a partir da recorrência dos temas e dos índices por dimensão.">
+  <div class="pad">
+    <div class="hd"><div class="num">05</div><div><h2>Onde a mudança trava: <em>Knowledge, Ability e Reinforcement</em></h2><div class="sub">A TMG entende o “para onde”. A barreira está em saber o próprio papel, ter capacidade para executar e sustentar o novo depois do lançamento.</div></div><div class="sec">Diagnóstico ADKAR</div></div>
+    <div id="adkarDiag" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px"></div>
+    <div class="card soft" id="adkarDiagDetail" style="margin-top:12px;min-height:150px"></div>
+    <div data-a="up" style="--d:6;margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="card nv"><div class="eye" style="color:var(--yellow)">Leitura sequencial</div><p style="font-size:16px;color:#fff;line-height:1.45">O ADKAR é cumulativo: a <b style="color:#FCBF00">primeira etapa crítica é a barreira</b>. Na TMG, ela está em <b style="color:#5CB8E6">Knowledge</b> — antes de pedir nova prática (Ability) e sustentação (Reinforcement), as pessoas precisam saber quem decide e qual é o seu papel.</p></div>
+      <div class="card"><div class="eye">O que isso muda na reorganização</div><div id="adkSeq" style="display:flex;gap:6px;margin-top:10px;align-items:stretch"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 07 MATRIZ: SIMULADOR -->
+<section class="slide" data-t="Simulador de matriz" data-sec="Modelo de operação" data-src="Tipologia de estruturas: PMI (PMBOK® Guide, 5ª ed., Tabela 2-1). Posição da TMG: leitura interpretativa dos relatos — não é classificação formal.">
+  <div class="pad">
+    <div class="hd"><div class="num">06</div><div><h2>Matriz fraca, equilibrada ou forte: <em>arraste e veja o que muda</em></h2><div class="sub">Os comportamentos relatados são compatíveis com uma matriz fraca. A proposta é evoluir para uma matriz equilibrada — com regras claras de quem decide o quê.</div></div><div class="sec">Modelo de operação</div></div>
+    <div style="display:grid;grid-template-columns:1fr 440px;gap:22px">
+      <div>
+        <div style="display:flex;justify-content:space-between;font:700 16px var(--fh);color:var(--navy);margin-bottom:8px" id="mxLabels"></div>
+        <input type="range" id="mx" min="0" max="4" step="1" value="1" aria-label="Tipo de estrutura">
+        <div style="position:relative;height:26px;margin-top:6px" id="mxMarks"></div>
+        <div style="display:grid;grid-template-columns:240px 1fr;gap:18px;margin-top:10px">
+          <svg viewBox="0 0 240 380" width="240" height="380" id="mxBar"></svg>
+          <div id="mxInfo"></div>
+        </div>
+      </div>
+      <div class="grid" style="align-content:start">
+        <div class="card" style="border-top:4px solid var(--gold)"><h4>8 de 8 sinais de matriz fraca aparecem nos relatos</h4><div id="weakChecks" style="display:grid;gap:5px;margin-top:6px"></div></div>
+        <div class="small" style="background:#FFF6E0;border:1px dashed #E3C173;padding:10px 12px;border-radius:3px;color:#6B4A00"><b>Ressalva:</b> leitura de comportamentos relatados, com variações entre áreas e níveis. Validar com organograma, alçadas e fluxo real de decisão.</div>
+        <div class="card nv"><div class="eye" style="color:var(--yellow)">Na matriz equilibrada proposta</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px">
+            <div style="border-top:3px solid #5CB8E6;padding-top:8px"><div style="font:700 16px var(--fh);color:#fff">Gerente de Área</div><div style="font-size:13px;color:#C8DBEB;line-height:1.4;margin-top:4px">Quem aloca, quanto de capacidade, padrão técnico, desenvolvimento das pessoas</div></div>
+            <div style="border-top:3px solid #FCBF00;padding-top:8px"><div style="font:700 16px var(--fh);color:#fff">Líder de Comunidade</div><div style="font-size:13px;color:#C8DBEB;line-height:1.4;margin-top:4px">Prioridade, backlog, escopo e aceite da entrega</div></div>
+          </div>
+          <div style="font-size:12.5px;color:#9DB7CE;margin-top:10px">Conflito → fórum de portfólio, com critério e registro.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 08 SISTEMA DE CAUSAS -->
+<section class="slide" data-t="Sistema de causas" data-sec="Diagnóstico" data-src="Nós: temas recorrentes (entrevistas com menção). Setas: hipóteses de causa-efeito — interpretação, não medição.">
+  <div class="pad">
+    <div class="hd"><div class="num">07</div><div><h2>Um sistema que se retroalimenta: <em>clique numa causa e siga a cadeia</em></h2><div class="sub">Os sintomas não são independentes. Tratar um só (ex.: chamados do sistema) sem mexer nas causas (papéis, decisão, liderança) faz o problema voltar.</div></div><div class="sec">Diagnóstico</div></div>
+    <div style="display:grid;grid-template-columns:1fr 360px;gap:18px">
+      <svg viewBox="0 0 1100 690" width="1094" height="686" id="causeMap"></svg>
+      <div class="grid" style="align-content:start">
+        <span class="hint">clique num nó</span>
+        <div class="card nv" id="causeDetail"></div>
+        <div class="card soft"><h4>Leitura</h4><p>Três raízes explicam a maior parte da cadeia: <b>liderança desalinhada</b>, <b>papéis sobrepostos</b> e <b>evitação de conflito</b>. Elas são o alvo prioritário da reorganização.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 09 BENCHMARKS -->
+<section class="slide" data-t="Benchmarks" data-sec="Benchmarks" data-src="Fontes: Bayer (bayer.com, 2026; CNBC 23/10/2025) · Cargill (Reuters 17/11/2015 e 08/08/2024) · Ford (The Oakland Press 28/01/2010; Acertitude) · Unilever (press release 25/01/2022).">
+  <div class="pad">
+    <div class="hd"><div class="num">08</div><div><h2>Quem já enfrentou o mesmo problema — <em>e o que os números mostram</em></h2><div class="sub">2 casos do agronegócio e 2 de outras indústrias. Resultados não são atribuíveis só à reorganização; servem como referência de direção.</div></div><div class="sec">Benchmarks</div></div>
+    <div class="tabs" id="benchTabs"></div>
+    <div id="benchPanes" style="margin-top:12px"></div>
+    <div data-a="up" style="--d:5;position:absolute;left:64px;right:64px;top:668px;display:grid;grid-template-columns:220px repeat(3,1fr);gap:10px">
+      <div style="background:var(--navy);color:#fff;border-radius:3px;padding:12px 16px;display:flex;flex-direction:column;justify-content:center"><div class="eye" style="color:var(--yellow)">Padrão comum</div><div style="font:700 18px/1.2 var(--fh)">O que os 4 casos ensinam à TMG</div></div>
+      <div class="card"><h4>Dono claro do resultado</h4><p style="font-size:13.5px">Times com dono (Bayer) e Business Groups com P&amp;L (Unilever).</p><div style="display:flex;gap:4px;margin-top:6px"><span class="pill">Bayer</span><span class="pill">Unilever</span></div></div>
+      <div class="card"><h4>Menos camadas para decidir</h4><p style="font-size:13.5px">Níveis e cargos de gestão reduzidos; estrutura executiva simplificada.</p><div style="display:flex;gap:4px;margin-top:6px"><span class="pill">Bayer</span><span class="pill">Cargill</span><span class="pill">Unilever</span></div></div>
+      <div class="card"><h4>Cadência única com dados comuns</h4><p style="font-size:13.5px">Revisão semanal de todos os executivos (Ford); ciclos de 90 dias (Bayer).</p><div style="display:flex;gap:4px;margin-top:6px"><span class="pill">Ford</span><span class="pill">Bayer</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 PRINCÍPIOS -->
+<section class="slide" data-t="Princípios da reorganização" data-sec="Reorganização" data-src="Princípio registrado no diagnóstico: “redesenhar interfaces, fóruns e ownership antes de considerar mudanças hierárquicas”.">
+  <div class="pad">
+    <div class="hd"><div class="num">09</div><div><h2>Não é criar uma nova área: <em>é evoluir como a TMG trabalha junta</em></h2><div class="sub">A reorganização combina Gestão de Mudanças e redesenho do modelo — em quatro pilares, nos três níveis da organização.</div></div><div class="sec">Reorganização</div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px">
+      <div>
+        <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px" id="pillars"></div>
+      </div>
+      <div class="grid" style="align-content:start">
+        <div class="card nv" data-a="up"><div class="eye" style="color:var(--yellow)">Princípio de desenho</div><p style="font-size:19px;color:#fff;line-height:1.4">“Redesenhar interfaces, fóruns e ownership <b style="color:#5CB8E6">antes</b> de considerar mudanças hierárquicas.”</p><p class="small" style="color:#9DB7CE;margin-top:6px">Recomendação já registrada no próprio diagnóstico</p></div>
+        <div class="card" data-a="up" style="--d:1"><h4>O que muda × o que não muda</h4>
+          <table class="tbl" style="margin-top:6px"><tr><th>Não muda</th><th>Muda</th></tr>
+          <tr><td>Linhas de reporte das áreas (no início)</td><td>Como as áreas <b>decidem e entregam juntas</b></td></tr>
+          <tr><td>Especialização técnica das áreas</td><td>Pessoas e capacidades <b>compartilhadas</b> por demanda</td></tr>
+          <tr><td>Direção estratégica (já clara)</td><td><b>Portfólio único</b> e priorização por critério</td></tr>
+          <tr><td>Gestão de pessoas pelo gerente</td><td>Prioridade da entrega pelo <b>líder da comunidade/squad</b></td></tr></table></div>
+        <div class="card soft" data-a="up" style="--d:2"><h4>Três níveis conectados</h4><p><b>Executivo</b> decide prioridades e regras · <b>Gerencial</b> aloca capacidade e integra · <b>Operacional</b> entrega em squads e sustenta.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 REORGANIZAÇÃO CULTURAL -->
+<section class="slide" data-t="Reorganização cultural" data-sec="Reorganização cultural" data-src="Comportamentos “hoje”: padrões recorrentes nas entrevistas. Comportamentos “futuro” e rituais: proposta.">
+  <div class="pad">
+    <div class="hd"><div class="num">10</div><div><h2>Reorganização cultural: <em>seis comportamentos que precisam virar</em></h2><div class="sub">Alterne entre HOJE e FUTURO — ou clique em cada card. Cada comportamento-alvo vem com o ritual que o sustenta.</div></div><div class="sec">Cultural</div></div>
+    <div style="display:flex;gap:14px;align-items:center;margin-bottom:12px"><div class="seg" id="cultSeg"><button class="on" data-v="0">HOJE (relatos)</button><button data-v="1">FUTURO (proposta)</button></div><span class="hint">clique para virar</span></div>
+    <div id="cultCards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;height:470px"></div>
+    <div class="fdii" style="margin-top:14px">
+      <div class="f"><span class="k">Fato</span>Discurso duplo, evitação de conflito e culpa aparecem de forma recorrente.</div>
+      <div class="d"><span class="k">Dado</span>Comunicação de corredor <b>5–6 de 7</b>; accountability difusa <b>6–7 de 7</b>.</div>
+      <div class="i"><span class="k">Insight</span>Sem segurança para divergir na sala, a decisão é refeita fora dela.</div>
+      <div class="m"><span class="k">Implicação</span>A liderança precisa <b>modelar</b> os novos comportamentos primeiro.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 12 REORGANIZAÇÃO TÁTICA: MATRIZ EQUILIBRADA -->
+<section class="slide" data-t="Modelo de operação matricial" data-sec="Reorganização tática" data-src="Referência metodológica: modelo de operação matricial equilibrado A&M (comunidades de entrega × capacidades compartilhadas). Nomes de comunidades: ilustrativos, a definir em workshop.">
+  <div class="pad">
+    <div class="hd"><div class="num">11</div><div><h2>Modelo de operação: <em>matriz equilibrada, capacidades compartilhadas</em></h2><div class="sub">Verticais entregam valor ao negócio; horizontais compartilham pessoas, métodos e dados. Clique numa interseção para ver quem decide.</div></div><div class="sec">Tático-operacional</div></div>
+    <div style="display:grid;grid-template-columns:1fr 400px;gap:20px">
+      <div id="matrixGrid"></div>
+      <div class="grid" style="align-content:start">
+        <div class="card nv" id="matrixDetail"></div>
+        <div class="card"><h4>Papéis na matriz equilibrada</h4>
+          <div style="display:grid;gap:8px;margin-top:6px" id="roles"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 13 SQUADS, PORTFÓLIO E CAPACIDADE -->
+<section class="slide" data-t="Squads, portfólio e capacidade" data-sec="Reorganização operacional" data-src="Regras de demanda × capacidade adaptadas de Lovelock & Wirtz (2016) e do método de portfólio A&M. Faixas de utilização: referência a calibrar para a TMG.">
+  <div class="pad">
+    <div class="hd"><div class="num">12</div><div><h2>Da demanda à entrega: <em>fluxo único, squads e capacidade gerida</em></h2><div class="sub">Toda demanda entra por uma porta, passa por critério e cai num squad com dono. Simule a carga e veja a regra de decisão.</div></div><div class="sec">Operacional</div></div>
+    <svg viewBox="0 0 1470 150" width="1470" height="150" id="demandFlow"></svg>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:10px">
+      <div class="card"><div class="eye">Simulador demanda × capacidade</div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted)"><span>50%</span><span>capacidade utilizada</span><span>120%</span></div>
+        <input type="range" id="cap" min="50" max="120" value="104" aria-label="Capacidade utilizada">
+        <div id="capBand" style="display:flex;height:22px;margin-top:6px;border-radius:3px;overflow:hidden;font:700 10.5px var(--fb);color:#fff;letter-spacing:.04em"></div>
+        <div style="display:grid;grid-template-columns:150px 1fr;gap:16px;margin-top:12px;align-items:center">
+          <div style="text-align:center"><div class="big" id="capVal" style="font-size:56px">104%</div><div id="capZone" class="tagx" style="margin-top:4px">—</div></div>
+          <div><h4 id="capAct">—</h4><p id="capTxt" style="font-size:13.5px;color:var(--ink2);line-height:1.45"></p></div>
+        </div>
+        <p class="small" style="margin-top:8px">Relatos: um coordenador atende 23 projetos e o principal key user já está na operação — sinais de operação acima da capacidade máxima.</p>
+      </div>
+      <div class="card"><div class="eye">Squad multifuncional · monte o seu</div>
+        <div id="squadPick" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        <div style="display:grid;grid-template-columns:150px 1fr;gap:14px;margin-top:12px;align-items:center">
+          <svg viewBox="0 0 150 150" width="150" height="150" id="squadRing"></svg>
+          <div><h4 id="squadMsg">Selecione os papéis</h4><p class="small" id="squadSub">Um squad resolve a demanda de ponta a ponta sem depender de escalonamento.</p></div>
+        </div>
+      </div>
+    </div>
+    <div data-a="up" style="--d:6;display:grid;grid-template-columns:220px repeat(4,1fr);gap:10px;margin-top:16px">
+      <div style="background:var(--navy);color:#fff;border-radius:3px;padding:12px 16px;display:flex;flex-direction:column;justify-content:center"><div class="eye" style="color:var(--yellow)">Como medir o fluxo</div><div style="font:700 17px/1.2 var(--fh)">Indicadores de entrega</div></div>
+      <div class="card"><div class="eye">Lead time</div><p style="font-size:13.5px">Da entrada da demanda até a entrega.</p><div class="small" style="margin-top:4px">linha de base: a medir</div></div>
+      <div class="card"><div class="eye">Cycle time</div><p style="font-size:13.5px">Do início do trabalho no squad até a entrega.</p><div class="small" style="margin-top:4px">linha de base: a medir</div></div>
+      <div class="card"><div class="eye">Frequência de entrega</div><p style="font-size:13.5px">Entregas em produção por período.</p><div class="small" style="margin-top:4px">linha de base: a medir</div></div>
+      <div class="card"><div class="eye">Demanda pela entrada única</div><p style="font-size:13.5px">% das demandas que passaram pela triagem.</p><div class="small" style="margin-top:4px">meta proposta: 100%</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 14 MODELO FUTURO INTEGRADO -->
+<section class="slide" data-t="Modelo futuro integrado" data-sec="Modelo futuro" data-src="Proposta. Combina Gestão de Mudanças (ADKAR) e redesenho organizacional nos três níveis.">
+  <div class="pad">
+    <div class="hd"><div class="num">13</div><div><h2>Modelo futuro: <em>quatro pilares em cada nível</em></h2><div class="sub">Clique em qualquer célula. As colunas mostram o que muda; as linhas, quem faz acontecer.</div></div><div class="sec">Modelo futuro</div></div>
+    <div style="display:grid;grid-template-columns:1fr 390px;gap:20px">
+      <div id="futureGrid"></div>
+      <div class="grid" style="align-content:start">
+        <div class="card nv" id="futureDetail" style="min-height:250px"></div>
+        <div class="card soft"><h4>Fóruns de decisão</h4><div id="forums" style="display:grid;gap:6px;margin-top:6px"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 15 RECOMENDAÇÕES -->
+<section class="slide dark" data-t="Recomendações e decisões" data-sec="Recomendações" data-src="Roadmap e indicadores: proposta. Linha de base: índices do diagnóstico (set/2026).">
+  <div class="pad">
+    <div class="hd" style="border-color:rgba(255,255,255,.15)"><div class="num" style="color:var(--yellow)">14</div><div><h2 style="color:#fff">Recomendações: <em style="color:#5CB8E6">90 dias para criar as condições</em></h2><div class="sub" style="color:#C8DBEB">Marque as decisões que a liderança assume hoje e veja a prontidão da transformação subir.</div></div><div class="sec" style="color:#9DB7CE">Recomendações</div></div>
+    <div id="road" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px"></div>
+    <div style="display:grid;grid-template-columns:1fr 330px 1fr;gap:18px;margin-top:16px">
+      <div id="decisions" style="display:grid;gap:10px"></div>
+      <div style="text-align:center"><svg viewBox="0 0 220 220" width="280" height="280" id="ready"></svg><div class="small" style="color:#9DB7CE">prontidão para iniciar</div></div>
+      <div><div class="eye" style="color:var(--yellow)">Indicadores · linha de base → meta</div><div id="kpis" style="display:grid;gap:7px"></div></div>
+    </div>
+  </div>
+</section>
+
+</div></div>
+<div id="controls"><button class="g" id="bPrev"><span style="transform:rotate(180deg);display:inline-block">➜</span><span class="lb">Voltar</span></button><span class="c" id="cnt">1 / 15</span><button class="p" id="bNext"><span class="lb">Avançar</span>➜</button></div>
+<div id="dots"></div>
+<div id="tip"><b></b><span></span></div>
+<script>
+"use strict";
+const NS="http://www.w3.org/2000/svg",$=id=>document.getElementById(id);
+function S(t,a,p){const e=document.createElementNS(NS,t);if(a)for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
+function H(t,a,p,x){const e=document.createElement(t);if(a)for(const k in a){if(k==="class")e.className=a[k];else if(k==="style")e.style.cssText=a[k];else if(k==="html")e.innerHTML=a[k];else e.setAttribute(k,a[k])}if(x!=null)e.textContent=x;if(p)p.appendChild(e);return e}
+function T(p,x,y,s,a){const t=S("text",Object.assign({x,y},a||{}),p);t.textContent=s;return t}
+function tip(el,v,l){el.setAttribute("data-tv",v);el.setAttribute("data-tl",l||"")}
+function mk(svg,id,c){const d=S("defs",null,svg),m=S("marker",{id,viewBox:"0 0 10 10",refX:"9",refY:"5",markerWidth:"7",markerHeight:"7",orient:"auto-start-reverse"},d);S("path",{d:"M0 0L10 5L0 10z",fill:c},m)}
+const ST={crit:["Crítico","var(--crit)","#BC0404"],frag:["Frágil","var(--fragil)","#CE8E00"],parc:["Parcial","var(--equil)","#5E8AB4"],forte:["Fortaleza","var(--forte)","#02624B"]};
+function zone(v){return v<37.5?["Crítica","#BC0404"]:v<62.5?["Frágil","#CE8E00"]:v<87.5?["Equilibrada","#5E8AB4"]:["Forte","#02624B"]}
+function confetti(){const st=$("stage");const cols=["#0085CA","#CE8E00","#02624B","#FCBF00","#5E8AB4","#E23500"];for(let i=0;i<60;i++){const c=H("div",{class:"confetti",style:`left:${Math.random()*1600}px;background:${cols[i%6]};animation-delay:${Math.random()*.5}s`},st);setTimeout(()=>c.remove(),2600)}}
+
+/* ---------- CAPA ---------- */
+(function(){const s=$("coverSvg");const L=["Liderança","Cultura","Decisão","Papéis","Silos","Governança","Portfólio","Mudança"],cx=350,cy=380,R=240;
+const P=L.map((_,i)=>{const a=-Math.PI/2+i*2*Math.PI/L.length;return[cx+R*Math.cos(a),cy+R*Math.sin(a)]});
+S("circle",{cx,cy,r:300,fill:"none",stroke:"rgba(255,255,255,.1)","stroke-dasharray":"3 9"},s);
+P.forEach((p,i)=>{const q=P[(i+1)%P.length];S("line",{x1:p[0],y1:p[1],x2:q[0],y2:q[1],stroke:"rgba(255,255,255,.12)"},s);S("line",{x1:cx,y1:cy,x2:p[0],y2:p[1],stroke:"rgba(92,184,230,.55)","stroke-width":"1.5",class:"flow"},s);
+const g=S("g",{class:"pulse",style:`animation-delay:${i*.3}s`},s);S("circle",{cx:p[0],cy:p[1],r:28,fill:"rgba(0,133,202,.25)",stroke:"#5CB8E6","stroke-width":"1.5"},g);S("circle",{cx:p[0],cy:p[1],r:6,fill:i%2?"#FCBF00":"#fff"},g);
+T(s,p[0],p[1]+(p[1]>cy?50:-40),L[i],{"text-anchor":"middle",fill:"#DDEAF5",style:"font:600 15px var(--fb)"})});
+S("circle",{cx,cy,r:92,fill:"#0085CA",class:"pulse"},s);T(s,cx,cy+6,"TMG",{"text-anchor":"middle",fill:"#fff",style:"font:800 italic 42px var(--fb)"});T(s,cx,cy+32,"MODELO FUTURO",{"text-anchor":"middle",fill:"#D5ECF8",style:"font:700 11px var(--fb);letter-spacing:.16em"})})();
+
+/* ---------- ADKAR (educativo) ---------- */
+const ADK=[["A","Awareness","Consciência","Por que mudar?","Entender a razão da mudança e o risco de não mudar.","“Não vejo problema no jeito atual.”","Narrativa única da liderança, com dados."],
+["D","Desire","Desejo","Quero fazer parte?","Decisão pessoal de apoiar e participar da mudança.","Resistência velada, apoio só no discurso.","Patrocínio visível e tratar o “o que ganho / perco”."],
+["K","Knowledge","Conhecimento","Sei o que fazer?","Saber como mudar: papéis, processos, ferramentas.","Confusão de papéis; “quem decide isso?”.","Papéis claros, treinamento, processos definidos."],
+["Ab","Ability","Habilidade","Consigo fazer no dia a dia?","Transformar conhecimento em prática, com tempo e capacidade.","Sobrecarga; volta ao jeito antigo sob pressão.","Capacidade protegida, prática assistida, suporte."],
+["R","Reinforcement","Reforço","Vai durar?","Sustentar o novo comportamento até virar rotina.","Regressão depois do lançamento.","Métricas de adoção, reconhecimento, accountability."]];
+(function(){const box=$("adkarRow");const cols=["#002B49","#0E4067","#0085CA","#5E8AB4","#02624B"];
+ADK.forEach((a,i)=>{const f=H("div",{class:"flip clk","data-a":"up",style:`--d:${i+1};height:100%`},box);const inn=H("div",{class:"in"},f);
+const fr=H("div",{class:"fr",style:`background:${cols[i]};color:#fff;padding:22px 18px;display:flex;flex-direction:column`},inn);
+H("div",{style:"font:700 96px/.9 var(--fh)"},fr,a[0]);H("div",{style:"font:700 24px var(--fh);margin-top:6px"},fr,a[1]);H("div",{style:"font-size:13px;opacity:.8"},fr,a[2]);
+H("div",{style:"margin-top:auto;font:600 17px/1.3 var(--fb)"},fr,a[3]);H("div",{style:"margin-top:10px;font:700 10.5px var(--fb);letter-spacing:.12em;opacity:.7"},fr,"CLIQUE PARA VIRAR ↻");
+const bk=H("div",{class:"bk",style:`background:#fff;border:2px solid ${cols[i]};padding:18px 16px;display:flex;flex-direction:column;gap:10px`},inn);
+H("div",{style:`font:700 26px var(--fh);color:${cols[i]}`},bk,a[1]);
+[["O que é",a[4]],["Sinal de ausência",a[5]],["O que destrava",a[6]]].forEach(([k,v])=>{const d=H("div",null,bk);H("div",{style:"font:700 10px var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)"},d,k);H("div",{style:"font-size:13.5px;line-height:1.4;color:var(--ink2)"},d,v)});
+f.addEventListener("click",()=>f.classList.toggle("on"))})})();
+
+/* ---------- MÉTODO ---------- */
+(function(){const k=[["7","entrevistas","6 estruturadas + 1 registro livre"],["77","perguntas respondidas","71 fechadas + 6 abertas"],["46","evidências qualitativas","casos reais descritos"],["5","instrumentos","7 lentes organizacionais"],["n/r","horas de entrevista","não registradas nos arquivos"]];
+k.forEach(([n,l,s],i)=>{const c=H("div",{class:"card","data-a":"up",style:`--d:${i};border-top:4px solid ${i===4?"var(--gold)":"var(--blue)"}`},$("methodKpis"));H("div",{class:"big",style:i===4?"color:var(--gold)":""},c,n);H("div",{style:"font:600 14px var(--fb);color:var(--navy);margin-top:4px"},c,l);H("div",{class:"small"},c,s)});
+const s=$("methodFlow"),st=["Situação real","4 alternativas","Caso concreto","Evidência"],c=["#002B49","#0E4067","#0085CA","#5E8AB4"];
+st.forEach((t,i)=>{const x=i*172;S("path",{d:`M${x} 20 h150 l20 45 l-20 45 h-150 ${i?"l20 -45":""} z`,fill:c[i]},s);T(s,x+(i?38:18),72,t,{fill:"#fff",style:"font:700 17px var(--fh)"})})})();
+
+/* ---------- DASHBOARD ---------- */
+const DIMS=[["Alinhamento estratégico",79,2,"forte","Impacto estratégico é o critério de prioridade; “para onde queremos chegar está claro”.","Preservar: é a base para o pacto executivo."],
+["Colaboração transversal",54,5,"frag","Apoio pontual entre pessoas existe; trade-offs corporativos não. Fontes discordam (amplitude 100).","Formalizar metas compartilhadas por cadeia de valor."],
+["Cultura & conflito",47,5,"frag","Debate visto como desrespeito; “não desagradar, busca um meio-termo”.","Protocolo de divergência na sala, modelado pela liderança."],
+["Liderança",47,5,"frag","“O alinhamento até acontece; a realização falha.” Fontes discordam (amplitude 100).","Pacto executivo e contrato de comportamentos."],
+["Papéis & accountability",40,5,"frag","Papéis sobrepostos; “ninguém se responsabiliza, nem o responsável”.","RACI/DRI nas interfaces críticas e owners E2E."],
+["Governança & decisão",35,6,"crit","Decisão por influência ou escalonamento; fóruns redundantes; decisões não registradas.","Direitos de decisão, portfólio único e log."],
+["Mudança & aprendizado",25,4,"crit","Atenção migra após o lançamento; contornos em vez de revisar decisões.","Accountability de adoção 30/60/90."],
+["Silos / visão empresa",20,5,"crit","Prioridade fica com a área mais influente; “existem duas TMG”.","Comunidades de entrega com metas comuns."],
+["Processos & operação",17,1,"crit","Cada área controla sua parte; o fluxo perde nas interfaces. Evidência estreita (1 instrumento).","Fluxo único de demanda e owners de processo."],
+["Comunicação",0,1,"crit","Comunicação executiva 1,0/5; canais indefinidos; relatos de corredor em 5–6 de 7 entrevistas.","Cascata de mensagens e log de decisões."]];
+(function(){const g=$("gauge"),cx=150,cy=160,r=120;const arc=(a0,a1,col)=>{const p=a=>[cx+r*Math.cos(Math.PI*(1-a/100)),cy-r*Math.sin(Math.PI*(1-a/100))];const[x0,y0]=p(a0),[x1,y1]=p(a1);S("path",{d:`M${x0} ${y0} A${r} ${r} 0 0 1 ${x1} ${y1}`,stroke:col,"stroke-width":22,fill:"none"},g)};
+arc(0,37.3,"#BC0404");arc(37.7,62.3,"#CE8E00");arc(62.7,87.3,"#5E8AB4");arc(87.7,100,"#02624B");
+const nd=S("g",{id:"needle"},g);S("line",{x1:cx,y1:cy,x2:cx-92,y2:cy,stroke:"#fff","stroke-width":5,"stroke-linecap":"round"},nd);S("circle",{cx,cy,r:10,fill:"#fff"},g);
+T(g,cx,cy+62,"39",{"text-anchor":"middle",fill:"#fff",style:"font:700 52px var(--fh)"});T(g,cx,cy+84,"/100 · FRÁGIL",{"text-anchor":"middle",fill:"#FCBF00",style:"font:700 12px var(--fb);letter-spacing:.1em"});
+nd.style.transformOrigin=`${cx}px ${cy}px`;nd.dataset.deg=(39/100)*180;
+const grid=$("dimGrid");DIMS.forEach((d,i)=>{const [nm,v,n,st]=d;const c=H("div",{class:"card clk","data-a":"up",style:`--d:${i*0.5};padding:12px 14px;display:grid;grid-template-columns:1fr 54px;gap:6px;align-items:center`},grid);
+const l=H("div",null,c);H("div",{style:"font:600 13.5px var(--fb);color:var(--navy)"},l,nm);const tr=H("div",{style:"height:8px;background:var(--line2);border-radius:0 4px 4px 0;margin-top:6px"},l);H("div",{"data-a":"grow",style:`--d:${3+i*0.4};height:8px;width:${Math.max(2,v)}%;background:${ST[st][2]};border-radius:0 4px 4px 0`},tr);
+H("div",{style:"font:700 26px var(--fh);color:var(--navy);text-align:right"},c,String(v));c.addEventListener("click",()=>dimSel(i));if(i===5)c.classList.add("sel")});dimSel(5)})();
+(function(){const box=$("depth");DIMS.forEach(([nm,v,n,st])=>{const c=H("div",{style:"display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px"},box);H("div",{style:"font:700 18px var(--fh);color:var(--navy)"},c,String(n));const b=H("div",{"data-a":"grow",style:`--d:${9};width:70%;height:${n/6*90}px;background:${n<=2?"#CE8E00":"#0085CA"};border-radius:3px 3px 0 0`},c);tip(b,`${n} leitura${n>1?"s":""}`,nm);H("div",{style:"font:600 11.5px/1.15 var(--fb);color:var(--ink2);text-align:center;height:28px"},c,nm.split(" ")[0].replace("/",""))})})();
+function dimSel(i){document.querySelectorAll("#dimGrid .card").forEach((c,k)=>c.classList.toggle("sel",k===i));const [nm,v,n,st,ev,imp]=DIMS[i],z=zone(v),box=$("dimDetail");box.innerHTML="";
+H("span",{class:"tagx",style:`background:${ST[st][2]}`},box,st==="forte"?"Fortaleza":st==="frag"?"Ponto de atenção":"Gap crítico");H("h3",{style:"margin-top:10px"},box,nm);
+const b=H("div",{style:"display:flex;align-items:baseline;gap:8px"},box);H("div",{class:"big"},b,String(v));H("div",{class:"small"},b,`/100 · faixa ${z[0]} · ${n} fonte${n>1?"s":""}`);
+H("div",{class:"eye",style:"margin-top:10px"},box,"Evidência");H("p",{style:"font-size:14px;color:var(--ink2);line-height:1.45"},box,ev);
+H("div",{class:"eye",style:"margin-top:10px;color:var(--green)"},box,"Implicação");H("p",{style:"font-size:14px;color:var(--ink2);line-height:1.45"},box,imp);
+if(n<=2)H("p",{class:"small",style:"margin-top:8px;color:var(--gold)"},box,"Evidência estreita: poucas fontes com pergunta dedicada.")}
+
+/* ---------- PADRÕES (jogo) ---------- */
+const PAT=[["Liderança desalinhada",7,0,"O alinhamento até acontece; a realização falha."],["Papéis sobrepostos",7,0,"Normalmente não tem ninguém que se responsabiliza."],["Mudança não sustentada",7,0,"Depois do lançamento, a atenção migra para outras prioridades."],["Silos e agenda local",6,1,"Existem duas TMG: negócio versus pesquisa."],["Accountability difusa",6,1,"Sempre se responsabilizam outras áreas, nunca a própria."],["Escalonamento constante",5,1,"O assunto costuma subir de nível para alguém definir."],["Comunicação de corredor",5,1,"Na frente fala bom, atrás fala ruim."],["Decisão por influência",4,1,"Quem tem mais influência tem o poder de decisão."],["Evitação de conflito",4,1,"Não desagradar, busca um meio-termo — e a empresa perde."],["Fóruns ineficazes",4,1,"Reuniões intermináveis; os fóruns não são efetivos."]];
+(function(){const box=$("patternCards");let rev=0;const upd=()=>$("revealCount").textContent=`${rev} de ${PAT.length} revelados`;
+PAT.forEach(([t,n,ni,q],i)=>{const f=H("div",{class:"flip clk","data-a":"zoom",style:`--d:${i*0.4};height:100%`},box);const inn=H("div",{class:"in"},f);
+const fr=H("div",{class:"fr",style:"background:var(--ice2);border:1px solid var(--line);padding:14px;display:flex;flex-direction:column;justify-content:space-between"},inn);
+H("div",{style:"font:700 19px/1.15 var(--fh);color:var(--navy)"},fr,t);H("div",{style:"font:700 44px var(--fh);color:var(--steel);text-align:center"},fr,"? / 7");H("div",{class:"small",style:"text-align:center"},fr,"quantas entrevistas?");
+const col=n===7?"#002B49":n>=5?"#0085CA":"#5E8AB4";
+const bk=H("div",{class:"bk",style:`background:${col};color:#fff;padding:14px;display:flex;flex-direction:column;gap:6px`},inn);
+H("div",{style:"font:700 15px/1.15 var(--fh);opacity:.85"},bk,t);const b=H("div",{style:"font:700 50px/1 var(--fh)"},bk,`${n}/7`);if(ni)H("div",{class:"small",style:"color:#D5ECF8"},bk,`+${ni} menção indireta`);
+const dots=H("div",{style:"display:flex;gap:3px"},bk);for(let k=0;k<7;k++)H("span",{style:`width:12px;height:12px;border-radius:50%;background:${k<n?"#fff":k<n+ni?"rgba(255,255,255,.5)":"rgba(255,255,255,.15)"}`},dots);
+H("div",{style:"margin-top:auto;font-size:12.5px;line-height:1.35;font-style:italic;color:#E6F1F8"},bk,"“"+q+"”");
+f.addEventListener("click",()=>{if(!f.classList.contains("on")){rev++;upd();if(rev===PAT.length)confetti()}f.classList.add("on")})});
+$("revealAll").addEventListener("click",()=>{box.querySelectorAll(".flip").forEach((f,i)=>setTimeout(()=>f.classList.add("on"),i*90));rev=PAT.length;upd();setTimeout(confetti,900)});upd()})();
+
+/* ---------- ADKAR DIAGNÓSTICO ---------- */
+const ADD=[["A","Awareness","parc",2.5,"Direção & prioridades 79/100","Falhas de comunicação em 5–6 de 7 entrevistas; comunicação executiva 1,0/5.","O “para onde” é claro no topo; o “por quê e como” não chega às equipes.","Narrativa única da liderança e cascata de mensagens."],
+["D","Desire","frag",2,"Evitação de conflito 4–5 de 7","Discurso duplo em 5–6 de 7; resistência e “boicote velado” relatados.","Há adesão no discurso, não no comportamento: a decisão é refeita no corredor.","Patrocínio visível e tratar objeções no fórum, não fora dele."],
+["K","Knowledge","crit",1.5,"Papéis sobrepostos 7 de 7","RACI aplicada e descartada; key users sem definição de papel.","As pessoas não sabem quem decide nem qual é o próprio papel no novo modelo.","Papéis/DRI nas interfaces e trilhas de capacitação por papel."],
+["Ab","Ability","crit",1.5,"Sobrecarga operação × projeto 3–5 de 7","Um coordenador atende 23 projetos; principal key user já na operação; lacunas visíveis só quando afetam a execução.","Mesmo sabendo o que fazer, não há capacidade para fazer.","Capacidade protegida, squads e gestão de demanda × capacidade."],
+["R","Reinforcement","crit",1,"Mudança não sustentada 7 de 7","Mudança & aprendizado 25/100; acompanhamento de entregas “muitas vezes não acontece”.","Sem reforço, cada mudança regride depois do lançamento.","Métricas 30/60/90, reconhecimento e accountability de adoção."]];
+(function(){const box=$("adkarDiag");ADD.forEach((a,i)=>{const [L,nm,st,lv,head]=a,s=ST[st];const c=H("div",{class:"card clk","data-a":"up",style:`--d:${i};padding:18px 16px;border-top:5px solid ${s[2]}`},box);
+const top=H("div",{style:"display:flex;justify-content:space-between;align-items:flex-start"},c);H("div",{style:`font:700 72px/.9 var(--fh);color:${s[2]}`},top,L);H("span",{class:"tagx",style:`background:${s[2]}`},top,s[0]);
+H("div",{style:"font:700 19px var(--fh);color:var(--navy);margin-top:4px"},c,nm);
+const m=H("div",{style:"display:flex;gap:4px;margin-top:10px"},c);for(let k=1;k<=4;k++)H("div",{style:`flex:1;height:10px;border-radius:2px;background:${k<=Math.ceil(lv)?(k<=lv?s[2]:s[2]+"88"):"#E8EDF2"}`},m);
+H("div",{class:"small",style:"margin-top:4px"},c,"nível consolidado · de 4");H("div",{style:"font:600 13px var(--fb);color:var(--navy);margin-top:10px"},c,head);
+c.addEventListener("click",()=>adkSel(i))});adkSel(2);(function(){const F=[["A","Comunicar o porquê","#5E8AB4"],["D","Patrocínio visível","#CE8E00"],["K","Papéis e decisões · 1º","#BC0404"],["Ab","Capacidade protegida","#BC0404"],["R","Medir adoção","#BC0404"]];F.forEach(([l,t,c],i)=>{const d=H("div",{style:`flex:1;border-top:4px solid ${c};background:${i===2?"#FBEDEA":"var(--ice2)"};padding:10px 10px;border-radius:3px`},$("adkSeq"));H("div",{style:`font:700 28px/1 var(--fh);color:${c}`},d,l);H("div",{style:"font:600 13px/1.25 var(--fb);color:var(--navy);margin-top:6px"},d,t)})})()})();
+function adkSel(i){document.querySelectorAll("#adkarDiag .card").forEach((c,k)=>c.classList.toggle("sel",k===i));const a=ADD[i],b=$("adkarDiagDetail");b.innerHTML="";
+H("div",{class:"eye"},b,`${a[1]} · ${ST[a[2]][0]} · clique nas outras etapas`);const f=H("div",{class:"fdii"},b);
+[["f","Fato",a[4]],["d","Dado",a[5]],["i","Insight",a[6]],["m","Implicação",a[7]]].forEach(([c,k,v])=>{const d=H("div",{class:c},f);H("span",{class:"k"},d,k);d.appendChild(document.createTextNode(v))})}
+
+/* ---------- SIMULADOR DE MATRIZ ---------- */
+const MX=[["Funcional",100,"Gerente funcional decide tudo; não há papel formal de entrega transversal.","Sobem pela hierarquia da área.","Cada área responde pela sua etapa.","Depende de favores entre áreas.","Silos e lentidão em temas transversais."],
+["Matriz fraca",75,"Gerente funcional detém pessoas e orçamento; o líder da entrega só coordena.","Temas transversais sobem ou avançam por influência.","Responsabilidade pela entrega sem autoridade.","Depende de “pontes” pessoais.","Escalonamento, silos, dependência de pessoas-chave."],
+["Matriz equilibrada",50,"Autoridade compartilhada com regras claras: gerente cuida de capacidade e padrão; líder de comunidade cuida de prioridade e entrega.","Direitos de decisão definidos antes do conflito; fórum com critério.","RACI/DRI pactuado nas interfaces.","Prevista no desenho: metas comuns e squads.","Ambiguidade se as regras não forem respeitadas."],
+["Matriz forte",25,"Líder de produto/entrega decide prioridades e orçamento; áreas fornecem especialistas.","Owner decide dentro das alçadas.","Dono único do resultado.","Estrutural: times dedicados.","Duplicação de recursos, perda de padrão técnico."],
+["Projetizada",0,"Tudo organizado por projeto/produto.","Gerente do projeto decide.","Time dedicado.","Total, dentro do projeto.","Pouco compartilhamento entre projetos."]];
+(function(){const lab=$("mxLabels");MX.forEach(m=>H("span",null,lab,m[0]));const marks=$("mxMarks");
+[[1,"◆ sinais da TMG hoje","#CE8E00"],[2,"▲ proposta","#02624B"]].forEach(([p,t,c])=>H("span",{style:`position:absolute;left:${p*25}%;transform:translateX(-50%);font:700 12px var(--fb);color:${c};white-space:nowrap`},marks,t));
+const w=$("weakChecks");[["Liderança pouco consistente",7],["Decisões por influência ou escalada",5],["Silos entre áreas",6],["Sobreposição de papéis",7],["Falta de clareza de responsabilidades",6],["Baixa atuação transversal",6],["Dificuldade de responsabilização",6],["Necessidade constante de aprovação",4]].forEach(([t,n],i)=>{const r=H("div",{style:"display:grid;grid-template-columns:18px 1fr 110px;gap:8px;align-items:center;font-size:13px;color:var(--ink2)"},w);H("span",{style:"color:var(--green);font-weight:700"},r,"✓");H("span",null,r,t);const d=H("div",{style:"display:flex;gap:2px"},r);for(let k=0;k<7;k++)H("span",{style:`width:11px;height:11px;border-radius:50%;background:${k<n?"var(--navy)":"#E1E7ED"}`},d)});
+const inp=$("mx");inp.addEventListener("input",()=>mxDraw(+inp.value));mxDraw(1)})();
+function mxDraw(i){const m=MX[i],s=$("mxBar");s.innerHTML="";const h=320,fh=h*m[1]/100;
+if(h-fh>0)S("rect",{x:60,y:20,width:120,height:h-fh-(fh?2:0),fill:"#0085CA",rx:3},s);if(fh>0)S("rect",{x:60,y:20+h-fh,width:120,height:fh,fill:"#002B49",rx:3},s);
+T(s,120,366,"autoridade",{"text-anchor":"middle",fill:"#6B7B8C",style:"font:600 12px var(--fb)"});
+if(h-fh>36)T(s,120,20+(h-fh)/2+5,"entrega",{"text-anchor":"middle",fill:"#fff",style:"font:700 13px var(--fb)"});if(fh>36)T(s,120,20+h-fh/2+5,"área funcional",{"text-anchor":"middle",fill:"#fff",style:"font:700 13px var(--fb)"});
+const b=$("mxInfo");b.innerHTML="";const hd=H("div",{style:"display:flex;gap:10px;align-items:center"},b);H("h3",{style:"font:700 34px var(--fh);color:var(--navy)"},hd,m[0]);if(i===1)H("span",{class:"tagx",style:"background:var(--gold)"},hd,"TMG hoje");if(i===2)H("span",{class:"tagx",style:"background:var(--green)"},hd,"Proposta");
+[["Quem tem autoridade",m[2]],["Como se decide",m[3]],["Papéis",m[4]],["Atuação transversal",m[5]],["Risco típico",m[6]]].forEach(([k,v])=>{const r=H("div",{style:"display:grid;grid-template-columns:160px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line2)"},b);H("div",{style:"font:700 11px var(--fb);letter-spacing:.1em;text-transform:uppercase;color:"+(k==="Risco típico"?"var(--crit)":"var(--muted)")},r,k);H("div",{style:"font-size:16px;line-height:1.4;color:var(--ink2)"},r,v)})}
+
+/* ---------- MAPA DE CAUSAS ---------- */
+const CN=[["Liderança desalinhada",7,"Alinhamento sem realização; prioridades conflitantes entre executivos."],["Papéis sobrepostos",7,"Fronteiras difusas; RACI descartada; key users sem papel."],["Accountability difusa",6,"A falha é sempre da outra área."],["Escalonamento",5,"Temas sobem até alguém com autoridade decidir."],["Decisão por influência",4,"Prioridade com quem tem mais influência."],["Silos e agenda local",6,"“Duas TMG”: negócio × pesquisa."],["Fóruns ineficazes",4,"Reuniões longas, decisões sem registro."],["Comunicação de corredor",5,"Na sala uma coisa, fora outra."],["Evitação de conflito",4,"Não desagradar; meio-termo que não resolve."],["Dependência de pessoas-chave",2,"Pontes informais sustentam o fluxo."],["Sobrecarga operação × projeto",3,"Mesmas pessoas na operação e no projeto."],["Mudança não sustentada",7,"Atenção migra após o lançamento."]];
+const CE=[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[8,7],[7,6],[0,11],[11,10],[10,9],[0,8]];
+(function(){const s=$("causeMap"),cx=550,cy=340,rx=418,ry=262,bw=236,bh=58;mk(s,"arC","#CE8E00");mk(s,"arCg","#D6DEE6");
+const P=CN.map((_,i)=>{const a=-Math.PI/2+i*2*Math.PI/CN.length;return[cx+rx*Math.cos(a),cy+ry*Math.sin(a)+(i===0?-34:i===CN.length/2?34:0)]});
+const trim=(a,b,p)=>{const dx=b[0]-a[0],dy=b[1]-a[1],t=Math.min((bw/2+p)/Math.abs(dx||1e-6),(bh/2+p)/Math.abs(dy||1e-6));return[a[0]+dx*t,a[1]+dy*t]};
+P.forEach(p=>S("line",{x1:cx,y1:cy,x2:p[0],y2:p[1],stroke:"#E3EAF0","stroke-width":1.5},s));
+const edges=CE.map(([a,b])=>{const A=trim(P[a],P[b],4),B=trim(P[b],P[a],8);let d=`M${A[0]} ${A[1]} L${B[0]} ${B[1]}`;if(a===0&&b===8){d=`M${P[0][0]-bw/2-4} ${P[0][1]} C ${cx-300} ${cy-240}, ${cx-470} ${cy-40}, ${P[8][0]+10} ${P[8][1]-bh/2-6}`}return[a,b,S("path",{d,stroke:"#D6DEE6","stroke-width":2.2,fill:"none","marker-end":"url(#arCg)"},s)]});
+S("circle",{cx,cy,r:70,fill:"#002B49",class:"pulse"},s);T(s,cx,cy+4,"TMG",{"text-anchor":"middle",fill:"#fff",style:"font:800 italic 30px var(--fb)"});T(s,cx,cy+24,"decisão e execução",{"text-anchor":"middle",fill:"#9DB7CE",style:"font:600 10.5px var(--fb)"});
+const nodes=CN.map((n,i)=>{const g=S("g",{style:"cursor:pointer"},s),[x,y]=P[i],col=n[1]===7?"#002B49":n[1]>=5?"#0085CA":"#5E8AB4";const r=S("rect",{x:x-bw/2,y:y-bh/2,width:bw,height:bh,rx:4,fill:"#fff",stroke:"#C5D2DE","stroke-width":1.5},g);S("rect",{x:x-bw/2,y:y-bh/2,width:6,height:bh,fill:col},g);
+T(g,x-bw/2+14,y-4,n[0],{fill:"#002B49",style:"font:700 13.5px var(--fb)"});T(g,x-bw/2+14,y+15,`${n[1]} de 7 entrevistas`,{fill:"#6B7B8C",style:"font:600 11px var(--fb)"});g.addEventListener("click",()=>pick(i));return r});
+function pick(i){const reach=new Set([i]);let ch=true;while(ch){ch=false;CE.forEach(([a,b])=>{if(reach.has(a)&&!reach.has(b)){reach.add(b);ch=true}})}
+nodes.forEach((r,k)=>{r.setAttribute("stroke",k===i?"#CE8E00":reach.has(k)?"#0085CA":"#C5D2DE");r.setAttribute("stroke-width",k===i?3.5:reach.has(k)?2.5:1.5);r.setAttribute("fill",reach.has(k)?"#F2F7FB":"#fff")});
+edges.forEach(([a,b,p])=>{const on=reach.has(a)&&reach.has(b);p.setAttribute("stroke",on?"#CE8E00":"#D6DEE6");p.setAttribute("marker-end",on?"url(#arC)":"url(#arCg)");p.classList.toggle("flow",on)});
+const d=$("causeDetail");d.innerHTML="";H("div",{class:"eye",style:"color:var(--yellow)"},d,`${CN[i][1]} de 7 entrevistas`);H("h3",null,d,CN[i][0]);H("p",null,d,CN[i][2]);
+const ds=[...reach].filter(k=>k!==i).map(k=>CN[k][0]);H("p",{style:"margin-top:8px"},d,ds.length?`Alimenta ${ds.length} efeito${ds.length>1?"s":""}: ${ds.join(" → ")}.`:"É um efeito final da cadeia — tratar a causa, não o sintoma.")}
+pick(0)})();
+
+/* ---------- BENCHMARKS ---------- */
+const BM=[{n:"Bayer",s:"Agro · sementes e defensivos",y:"2024–2026",f:"Hierarquia de muitas camadas, silos e ciclos longos de planejamento, segundo a própria empresa.",d:"−50% de níveis hierárquicos; −2/3 dos cargos de gestão; €2 bi de economia organizacional planejada (2023–2026).",i:"Times multifuncionais em ciclos de 90 dias, decidindo perto do trabalho, encurtaram ciclos de desenvolvimento.",m:"Juntar pesquisa e negócio em times com dono do resultado e ciclos curtos — as “duas TMG” numa mesma entrega.",note:"Resultados divulgados pela própria empresa.",chart:"bayer"},
+{n:"Cargill",s:"Agro · trading e alimentos",y:"2015 · 2024",f:"Estrutura executiva em dois níveis; complexidade e necessidade de decidir mais rápido.",d:"2015: 2 níveis executivos → 1 time único. 2024: menos de 1/3 dos negócios bateu a meta de lucro; 5 negócios consolidados em 3.",i:"Simplificar estrutura é um movimento recorrente, disparado por velocidade de decisão e resultado.",m:"Medir velocidade de decisão e revisitar o desenho periodicamente — o modelo não é “implantar uma vez”.",note:"Fontes não divulgam resultados posteriores a 2024.",chart:"cargill"},
+{n:"Ford",s:"Automotivo",y:"2006–2009",f:"Empresa “dividida por disputas internas”; relatórios de status verdes enquanto perdia bilhões.",d:"Prejuízo de US$ 12,7 bi (2006) e US$ 14,6 bi (2008); lucro de US$ 2,7 bi em 2009, o primeiro em 4 anos.",i:"Um único fórum semanal, com dados comuns e segurança para mostrar o “vermelho”, trocou o corredor pela sala.",m:"Substituir conversas de corredor por um fórum de portfólio com dados comuns e log de decisões.",note:"A linha de crédito obtida em 2006 também foi decisiva.",chart:"ford"},
+{n:"Unilever",s:"Bens de consumo",y:"2022",f:"Estrutura matricial difusa, com accountability pouco clara pelo resultado.",d:"Saída da matriz para 5 Business Groups com dono do resultado; −15% dos cargos de alta gestão e −5% dos demais (~1.500 cargos).",i:"Accountability “cristalina” exige dono único por resultado — com plataforma comum de operações.",m:"Na matriz equilibrada, cada comunidade de entrega tem um dono do resultado; capacidades comuns ficam compartilhadas.",note:"Resultados posteriores não atribuíveis só à mudança.",chart:"unilever"}];
+(function(){const tb=$("benchTabs"),pn=$("benchPanes");BM.forEach((b,i)=>{const t=H("button",{class:i?"":"on"},tb);t.appendChild(document.createTextNode(b.n));H("small",null,t,`${b.s} · ${b.y}`);
+const p=H("div",{class:"pane"+(i?"":" on")},pn);const g=H("div",{style:"display:grid;grid-template-columns:1fr 560px;gap:22px"},p);const l=H("div",null,g);
+const f=H("div",{class:"fdii",style:"grid-template-columns:1fr 1fr"},l);[["f","Fato",b.f],["d","Dado",b.d],["i","Insight",b.i],["m","Implicação para a TMG",b.m]].forEach(([c,k,v],j)=>{const d=H("div",{class:c,style:`min-height:150px;font-size:15px;${j>=2?"border-top:1px solid var(--line)":""}`},f);H("span",{class:"k"},d,k);d.appendChild(document.createTextNode(v))});
+H("p",{class:"small",style:"margin-top:10px"},l,"Ressalva: "+b.note);const c=H("div",{class:"card"},g);const svg=S("svg",{viewBox:"0 0 520 400",width:520,height:400},c);chart(b.chart,svg);
+t.addEventListener("click",()=>{tb.querySelectorAll("button").forEach((x,k)=>x.classList.toggle("on",k===i));pn.querySelectorAll(".pane").forEach((x,k)=>x.classList.toggle("on",k===i))})})})();
+function hbar(svg,y,label,v,max,col,txt){T(svg,0,y+16,label,{fill:"#002B49",style:"font:600 13px var(--fb)"});const w=Math.max(3,250*Math.abs(v)/max);const r=S("rect",{x:180,y,width:w,height:24,fill:col,rx:3},svg);T(svg,188+w,y+17,txt,{fill:"#002B49",style:"font:700 14px var(--fb)"});tip(r,txt,label)}
+function chart(k,s){const h=(t,y)=>T(s,0,y,t,{fill:"#6B7B8C",style:"font:700 11px var(--fb);letter-spacing:.1em"});
+if(k==="bayer"){h("ESTRUTURA (índice, antes = 100)",18);hbar(s,34,"Níveis · antes",100,100,"#C5D2DE","100");hbar(s,64,"Níveis · depois",50,100,"#0085CA","50 (−50%)");hbar(s,104,"Cargos de gestão · antes",100,100,"#C5D2DE","100");hbar(s,134,"Cargos de gestão · depois",33,100,"#0085CA","33 (−2/3)");
+h("CICLOS DE DESENVOLVIMENTO (anos)",200);hbar(s,216,"Praga · Brasil · antes",7,7,"#C5D2DE","~7");hbar(s,246,"Praga · Brasil · depois",4.5,7,"#02624B","~4,5");hbar(s,286,"Tar spot · EUA · antes",5,7,"#C5D2DE","5");hbar(s,316,"Tar spot · EUA · depois",2,7,"#02624B","2");T(s,0,372,"€2 bi de economia organizacional planejada · 2023–2026",{fill:"#002B49",style:"font:700 15px var(--fb)"})}
+if(k==="cargill"){h("UNIDADES DE NEGÓCIO",18);[[5,"2023"],[3,"2024"]].forEach(([n,y],j)=>{T(s,0,60+j*60,y,{fill:"#002B49",style:"font:700 14px var(--fb)"});for(let i=0;i<n;i++)S("rect",{x:70+i*56,y:34+j*60,width:46,height:40,rx:4,fill:j?"#0085CA":"#C5D2DE"},s)});
+h("NÍVEIS DO TIME EXECUTIVO",176);[[2,"antes de 2015"],[1,"a partir de 2015"]].forEach(([n,y],j)=>{T(s,0,214+j*40,y,{fill:"#002B49",style:"font:600 13px var(--fb)"});for(let i=0;i<n;i++)S("rect",{x:150+i*60,y:196+j*40,width:52,height:26,rx:3,fill:j?"#0085CA":"#C5D2DE"},s)});
+h("NEGÓCIOS NA META DE LUCRO · FY2024",306);S("circle",{cx:60,cy:354,r:38,fill:"none",stroke:"#E8EDF2","stroke-width":16},s);S("circle",{cx:60,cy:354,r:38,fill:"none",stroke:"#BC0404","stroke-width":16,pathLength:1,"stroke-dasharray":"0.32 1",transform:"rotate(-90 60 354)"},s);T(s,120,360,"menos de 1/3",{fill:"#BC0404",style:"font:700 26px var(--fh)"})}
+if(k==="ford"){h("RESULTADO LÍQUIDO (US$ bi)",18);const base=210,sc=11;S("line",{x1:40,x2:500,y1:base,y2:base,stroke:"#98A6B3"},s);[["2006",-12.7],["2008",-14.6],["2009",2.7]].forEach(([y,v],j)=>{const x=80+j*150,hh=Math.abs(v)*sc;const r=S("rect",{x,y:v<0?base:base-hh,width:70,height:hh,fill:v<0?"#BC0404":"#02624B",rx:3},s);tip(r,`US$ ${String(v).replace(".",",")} bi`,y);T(s,x+35,v<0?base+hh+20:base-hh-8,(v>0?"+":"")+String(v).replace(".",","),{"text-anchor":"middle",fill:"#002B49",style:"font:700 16px var(--fb)"});T(s,x+35,v<0?base-8:base+20,y,{"text-anchor":"middle",fill:"#6B7B8C",style:"font:700 13px var(--fb)"})});
+T(s,0,392,"Business Plan Review semanal: todos os executivos, dados comuns, status por cores.",{fill:"#002B49",style:"font:600 13px var(--fb)"})}
+if(k==="unilever"){h("REDUÇÃO DE CARGOS DE GESTÃO",18);hbar(s,34,"Alta gestão",15,20,"#0085CA","−15%");hbar(s,70,"Demais níveis de gestão",5,20,"#5E8AB4","−5%");T(s,0,150,"~1.500",{fill:"#002B49",style:"font:700 56px var(--fh)"});T(s,150,150,"cargos no total",{fill:"#6B7B8C",style:"font:600 14px var(--fb)"});
+h("DE MATRIZ PARA DONOS DO RESULTADO",200);["Beauty & Wellbeing","Personal Care","Home Care","Nutrition","Ice Cream"].forEach((g,i)=>{S("rect",{x:i*102,y:216,width:94,height:70,rx:4,fill:"#002B49"},s);g.split(" ").slice(0,2).forEach((w,j)=>T(s,i*102+47,244+j*16,w,{"text-anchor":"middle",fill:"#fff",style:"font:600 11.5px var(--fb)"}))});S("rect",{x:0,y:296,width:500,height:34,rx:4,fill:"#E5F2FA"},s);T(s,250,318,"Plataforma comum: Unilever Business Operations",{"text-anchor":"middle",fill:"#002B49",style:"font:700 13px var(--fb)"})}}
+
+/* ---------- PILARES ---------- */
+(function(){const P=[["Cultura","“Não desagradar”, divergência no corredor, culpa","Divergir na sala, decidir por critério, sustentar fora","D · R","#E23500"],["Modelo de operação","Cada área cuida da sua etapa; pontes informais","Comunidades de entrega + capacidades compartilhadas + squads","K · Ab","#0085CA"],["Governança","Influência e escalonamento; fóruns redundantes","Direitos de decisão, portfólio único, fóruns com log","A · K","#002B49"],["Estrutura","Reporte funcional rígido, sem papel transversal","Matriz equilibrada sobre as linhas atuais — sem nova área","Ab · R","#02624B"]];
+P.forEach(([n,de,para,ad,c],i)=>{const d=H("div",{class:"card","data-a":"up",style:`--d:${i};border-top:5px solid ${c};display:flex;flex-direction:column;gap:8px;min-height:300px`},$("pillars"));H("h3",null,d,n);
+const a=H("div",{style:"background:#FBEDEA;border-radius:3px;padding:8px 10px"},d);H("div",{style:"font:700 10px var(--fb);letter-spacing:.12em;color:var(--crit)"},a,"DE");H("div",{style:"font-size:13.5px;color:var(--ink2);line-height:1.35"},a,de);
+H("div",{style:`text-align:center;color:${c};font-size:20px`},d,"↓");const b=H("div",{style:"background:#EAF5F0;border-radius:3px;padding:8px 10px"},d);H("div",{style:"font:700 10px var(--fb);letter-spacing:.12em;color:var(--green)"},b,"PARA");H("div",{style:"font-size:13.5px;color:var(--navy);font-weight:600;line-height:1.35"},b,para);
+H("div",{class:"small",style:"margin-top:auto"},d,"Etapas ADKAR atacadas: "+ad)})})();
+
+/* ---------- CULTURA ---------- */
+const CU=[["Divergir no corredor","“Na frente fala bom, atrás fala ruim.”","Divergir na sala, sustentar fora","Protocolo de reunião: ouvir, parafrasear, testar premissas, decidir, registrar."],
+["“Não desagradar”","Meio-termo que não resolve — “em alguns momentos a empresa é que perde”.","Decidir por critério explícito","Matriz de trade-off e log de decisões visível a todos."],
+["A falha é da outra área","“Sempre se responsabilizam outras áreas, nunca a própria.”","Minha parcela primeiro","Retrospectiva sem culpa: minha parcela, causa, owner, prazo."],
+["Proteger a agenda da área","Prioridade fica com quem tem mais influência.","Meta compartilhada da cadeia","KPI comum por comunidade de entrega."],
+["Conhecimento em pessoas-chave","Pontes informais; “sozinha não salva o projeto”.","Conhecimento na comunidade","Comunidades de prática e base de conhecimento."],
+["Patrocínio só no lançamento","A atenção da liderança migra após o go-live.","Liderança dona da adoção","Check de adoção 30/60/90 dias com o sponsor."]];
+(function(){const box=$("cultCards");CU.forEach(([h,q,f,r],i)=>{const fl=H("div",{class:"flip clk","data-a":"up",style:`--d:${i*0.5};height:100%`},box),inn=H("div",{class:"in"},fl);
+const fr=H("div",{class:"fr",style:"background:#FBEDEA;border:1px solid #F1C9C0;padding:18px;display:flex;flex-direction:column;gap:10px"},inn);H("span",{class:"tagx",style:"background:var(--crit);align-self:flex-start"},fr,"Hoje");H("div",{style:"font:700 26px/1.1 var(--fh);color:var(--navy)"},fr,h);H("div",{style:"font-size:14px;font-style:italic;color:var(--ink2);line-height:1.4"},fr,q);H("div",{class:"small",style:"margin-top:auto"},fr,"relato recorrente · clique ↻");
+const bk=H("div",{class:"bk",style:"background:#EAF5F0;border:1px solid #BFDCD0;padding:18px;display:flex;flex-direction:column;gap:10px"},inn);H("span",{class:"tagx",style:"background:var(--green);align-self:flex-start"},bk,"Futuro");H("div",{style:"font:700 26px/1.1 var(--fh);color:var(--green)"},bk,f);H("div",{style:"font:700 10px var(--fb);letter-spacing:.12em;color:var(--muted);margin-top:4px"},bk,"RITUAL QUE SUSTENTA");H("div",{style:"font-size:14px;color:var(--navy);line-height:1.4"},bk,r);
+fl.addEventListener("click",()=>fl.classList.toggle("on"))});
+$("cultSeg").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{$("cultSeg").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));box.querySelectorAll(".flip").forEach((f,i)=>setTimeout(()=>f.classList.toggle("on",b.dataset.v==="1"),i*80))}))})();
+
+/* ---------- MATRIZ EQUILIBRADA ---------- */
+const V=["Linha de produto A","Linha de produto B","Jornada comercial e safra","Sistemas e sustentação"],Vs=["ex.: soja","ex.: milho e algodão","janela de 60 dias","ARCO · chamados"];
+const HZ=["Pesquisa e desenvolvimento","Planejamento e execução","Processos, dados e sistemas","Supply e operações","Pessoas e capacitação"];
+(function(){const g=H("div",{style:`display:grid;grid-template-columns:200px repeat(${V.length},1fr);gap:6px`},$("matrixGrid"));
+H("div",{style:"font:700 11px var(--fb);letter-spacing:.1em;color:var(--muted);align-self:end;padding-bottom:6px"},g,"CAPACIDADES COMPARTILHADAS ↓ · COMUNIDADES DE ENTREGA →");
+V.forEach((v,j)=>{const c=H("div",{style:"background:var(--navy);color:#fff;padding:10px 12px;border-radius:3px"},g);H("div",{style:"font:700 16px/1.1 var(--fh)"},c,v);H("div",{style:"font-size:11.5px;color:#9DB7CE;margin-top:3px"},c,Vs[j])});
+HZ.forEach((hz,i)=>{H("div",{style:"background:var(--blue);color:#fff;padding:10px 12px;border-radius:3px;font:700 15px/1.15 var(--fh);display:flex;align-items:center"},g,hz);
+V.forEach((v,j)=>{const c=H("div",{class:"clk",style:"border:1px solid var(--line);border-radius:3px;display:grid;place-items:center;height:80px;background:#fff"},g);const n=((i+j)%3)+1;const d=H("div",{style:"display:flex;gap:4px"},c);for(let k=0;k<3;k++)H("span",{style:`width:12px;height:12px;border-radius:50%;background:${k<n?"var(--steel)":"#E8EDF2"}`},d);
+c.addEventListener("click",()=>mxSel(c,i,j))})});
+H("p",{class:"small",style:"margin-top:8px"},$("matrixGrid"),"● Intensidade de alocação ILUSTRATIVA — a dimensionar. Nomes das comunidades a definir em workshop com as lideranças.");
+const R=[["Gerente de Área","Capacidade, pessoas, padrão técnico","#002B49"],["Líder de Comunidade","Prioridade, backlog e resultado da entrega","#0085CA"],["Product owner / key user","Requisitos, aceite e adoção","#CE8E00"],["Membro de squad","Execução e conhecimento compartilhado","#02624B"]];
+R.forEach(([n,d,c])=>{const r=H("div",{style:`display:grid;grid-template-columns:8px 1fr;gap:10px`},$("roles"));H("div",{style:`background:${c};border-radius:2px`},r);const t=H("div",null,r);H("div",{style:"font:700 14px var(--fb);color:var(--navy)"},t,n);H("div",{class:"small"},t,d)});
+mxSel(g.querySelectorAll(".clk")[6],1,2)})();
+function mxSel(c,i,j){document.querySelectorAll("#matrixGrid .clk").forEach(x=>x.classList.toggle("sel",x===c));const d=$("matrixDetail");d.innerHTML="";H("div",{class:"eye",style:"color:var(--yellow)"},d,"Interseção · quem decide o quê");H("h3",null,d,`${HZ[i]} × ${V[j]}`);
+[["Líder da comunidade “"+V[j]+"”","decide prioridade, escopo e aceite da entrega"],["Gerente de “"+HZ[i]+"”","decide quem aloca, quanto de capacidade e o padrão técnico"],["Conflito de prioridade ou capacidade","vai ao Fórum de portfólio, com critério e registro"]].forEach(([a,b])=>{const r=H("div",{style:"margin-top:8px"},d);H("div",{style:"font:700 13px var(--fb);color:#fff"},r,a);H("div",{style:"font-size:13px;color:#C8DBEB"},r,b)})}
+
+/* ---------- FLUXO / CAPACIDADE / SQUAD ---------- */
+(function(){const s=$("demandFlow");mk(s,"arD","#0085CA");const st=[["Entrada única","todas as demandas, um canal"],["Triagem","bug · melhoria · projeto · dúvida"],["Impacto e risco","valor, criticidade, dependências"],["Gate de capacidade","prioriza no portfólio único"],["Squad dono","Scrum (projeto) · Kanban (sustentação)"],["Entrega e adoção","check 30/60/90 dias"]];
+const bw=218,gap=(1470-st.length*bw)/(st.length-1);st.forEach(([t,d],i)=>{const x=i*(bw+gap),g=S("g",{"data-a":"up",style:`--d:${i*0.5}`},s);S("rect",{x,y:24,width:bw,height:96,rx:4,fill:i===3?"#002B49":"#fff",stroke:i===3?"#002B49":"#C5D2DE"},g);T(g,x+14,50,String(i+1).padStart(2,"0"),{fill:i===3?"#FCBF00":"#0085CA",style:"font:700 14px var(--fb)"});T(g,x+14,76,t,{fill:i===3?"#fff":"#002B49",style:"font:700 17px var(--fh)"});T(g,x+14,100,d,{fill:i===3?"#C8DBEB":"#6B7B8C",style:"font:500 11.5px var(--fb)"});
+if(i<st.length-1)S("path",{d:`M${x+bw+3} 72 L${x+bw+gap-5} 72`,stroke:"#0085CA","stroke-width":2.5,fill:"none","marker-end":"url(#arD)",class:"flow"},s)});
+const Z=[[75,"Ociosa","#5E8AB4","Investir em autonomia","Capacitação, documentação, redução de dívida técnica e internalização de conhecimento."],[90,"Equilíbrio","#02624B","Executar o roadmap","Evoluções planejadas, validação adequada e baixa dependência emergencial."],[100,"Acima da ótima","#CE8E00","Reduzir escopo e modularizar","Fatiar entregas, limitar trabalho simultâneo (WIP), proteger a qualidade."],[999,"Sobrecarga","#BC0404","Repriorizar e reforçar","Repriorizar o backlog no fórum, suspender baixa criticidade, acionar reforço temporário."]];
+const cap=$("cap"),u=()=>{const v=+cap.value,z=Z.find(z=>v<z[0]);$("capVal").textContent=v+"%";$("capVal").style.color=z[2];$("capZone").textContent=z[1];$("capZone").style.background=z[2];$("capAct").textContent=z[3];$("capTxt").textContent=z[4]};cap.addEventListener("input",u);u();;[[25,"#5E8AB4","<75% ociosa"],[15,"#02624B","75–90%"],[10,"#CE8E00","90–100%"],[20,"#BC0404",">100% sobrecarga"]].forEach(([w,c,t])=>H("div",{style:`width:${w/70*100}%;background:${c};display:grid;place-items:center;white-space:nowrap;overflow:hidden`},$("capBand"),t));
+const RO=[["Líder de squad / PO",1],["Key user do negócio",1],["Analista de processos",1],["Especialista de sistemas",1],["Qualidade e testes",1],["Dados e BI",0],["Pesquisa (quando aplicável)",0]];const sel=new Set();let done=false;
+RO.forEach(([r,req],i)=>{const b=H("button",{class:"pill",style:"border:1px solid var(--line);background:#fff;padding:8px 12px"},$("squadPick"),(req?"★ ":"")+r);b.addEventListener("click",()=>{sel.has(i)?sel.delete(i):sel.add(i);b.style.background=sel.has(i)?"var(--navy)":"#fff";b.style.color=sel.has(i)?"#fff":"var(--navy)";ring()})});
+function ring(){const s=$("squadRing");s.innerHTML="";S("circle",{cx:75,cy:75,r:58,fill:"none",stroke:"#E8EDF2","stroke-width":14},s);const ok=RO.every(([r,q],i)=>!q||sel.has(i));S("circle",{cx:75,cy:75,r:58,fill:"none",stroke:ok?"#02624B":"#0085CA","stroke-width":14,pathLength:1,"stroke-dasharray":`${sel.size/RO.length} 1`,transform:"rotate(-90 75 75)","stroke-linecap":"round"},s);T(s,75,84,`${sel.size}/7`,{"text-anchor":"middle",fill:"#002B49",style:"font:700 30px var(--fh)"});
+const miss=RO.filter(([r,q],i)=>q&&!sel.has(i)).map(x=>x[0]);$("squadMsg").textContent=ok?"Squad completo ✓":`Faltam ${miss.length} papel(éis) essencial(is)`;$("squadSub").textContent=ok?"Resolve a demanda de ponta a ponta, sem escalonamento. ★ = papel essencial.":"Essenciais (★): "+miss.join(", ")+".";if(ok&&!done){done=true;confetti()}if(!ok)done=false}ring()})();
+
+/* ---------- MODELO FUTURO ---------- */
+const FC=["Cultura","Modelo de operação","Governança","Estrutura"],FR=["Executivo","Gerencial","Operacional"];
+const FG=[[["Pacto de liderança e posição única; divergência tratada na sala.","D"],["Portfólio único com critérios de valor e capacidade.","A"],["Comitê de portfólio; mapa de 8–12 decisões críticas, alçadas e log.","K"],["Patrocínio da matriz equilibrada — sem criar nova área no início.","R"]],
+[["Metas compartilhadas e reconhecimento pela contribuição transversal.","D"],["Gestão de capacidade entre comunidades; owners de processo ponta a ponta.","Ab"],["Fórum mensal de portfólio e fórum quinzenal de integração entre squads.","K"],["Gerente de Área × Líder de Comunidade com RACI pactuado.","K"]],
+[["Retrospectiva sem culpa; comunidades de prática.","R"],["Squads multifuncionais: Scrum para projetos, Kanban para sustentação.","Ab"],["Rituais ágeis e aprovação de mudanças em produção.","Ab"],["Key users com dedicação protegida; owner nomeado por frente sistêmica.","Ab"]]];
+(function(){const g=H("div",{style:"display:grid;grid-template-columns:150px repeat(4,1fr);gap:6px"},$("futureGrid"));H("div",null,g);const cc=["#E23500","#0085CA","#002B49","#02624B"];
+FC.forEach((c,j)=>H("div",{style:`background:${cc[j]};color:#fff;padding:10px 12px;border-radius:3px;font:700 17px var(--fh)`},g,c));
+FR.forEach((r,i)=>{H("div",{style:"background:var(--ice2);border-left:5px solid var(--navy);padding:10px 12px;font:700 18px var(--fh);color:var(--navy);display:flex;align-items:center"},g,r);
+FC.forEach((c,j)=>{const x=H("div",{class:"card clk","data-a":"zoom",style:`--d:${i*2+j*0.4};height:160px;padding:12px 14px;font-size:14px;line-height:1.4;color:var(--ink2);display:flex;flex-direction:column`},g);x.appendChild(document.createTextNode(FG[i][j][0]));H("span",{class:"pill",style:"margin-top:auto;align-self:flex-start;font-size:10.5px"},x,"ADKAR · "+FG[i][j][1]);x.addEventListener("click",()=>fSel(x,i,j))})});
+const F=[["Estratégico","Trimestral","Comitê de portfólio: prioridades, capacidade, decisões críticas"],["Tático","Mensal","Fórum de portfólio e capacidade: status, riscos, dependências"],["Tático","Quinzenal","Integração entre squads: dependências e impedimentos"],["Operacional","Contínuo","Planning, daily, review, retro; aprovação de mudanças"]];
+F.forEach(([n,c,d])=>{const r=H("div",{style:"display:grid;grid-template-columns:96px 1fr;gap:8px;font-size:12.5px"},$("forums"));const a=H("div",null,r);H("div",{style:"font:700 13px var(--fb);color:var(--navy)"},a,n);H("div",{class:"small"},a,c);H("div",{style:"color:var(--ink2);line-height:1.35"},r,d)});
+fSel(g.querySelectorAll(".clk")[2],0,2)})();
+function fSel(x,i,j){document.querySelectorAll("#futureGrid .clk").forEach(e=>e.classList.toggle("sel",e===x));const d=$("futureDetail");d.innerHTML="";H("div",{class:"eye",style:"color:var(--yellow)"},d,`${FR[i]} · ${FC[j]}`);H("h3",{style:"font-size:24px"},d,FG[i][j][0]);
+const a=ADK.find(z=>z[0]===FG[i][j][1]);H("p",{style:"margin-top:10px"},d,`Etapa ADKAR atacada: ${a[1]} — ${a[3]}`);H("p",{style:"margin-top:8px"},d,`Conecta: o nível ${FR[i].toLowerCase()} ${i===0?"define as regras que o gerencial aplica":i===1?"traduz decisões executivas em capacidade para o operacional":"gera os dados e sinais que sobem aos fóruns"}.`)}
+
+/* ---------- RECOMENDAÇÕES ---------- */
+(function(){const R=[["0–30 dias","Decidir",["Pacto executivo e agenda única","Mapa de decisões críticas","Key users e owners nomeados","Estabilizar o ARCO na janela"]],["31–60 dias","Desenhar",["Comunidades e capacidades compartilhadas","RACI nas interfaces críticas","Fóruns redesenhados","Fluxo único de demanda"]],["61–90 dias","Pilotar",["2 squads piloto na matriz equilibrada","Portfólio único ativo","Protocolo cultural nos fóruns","Métricas 30/60/90"]],["90+ dias","Escalar",["Re-medir a temperatura","Ajustar o desenho","Expandir squads","Reforçar o que funcionou"]]];
+R.forEach(([p,v,it],i)=>{const c=H("div",{"data-a":"up",style:`--d:${i};background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-top:4px solid ${i===3?"#FCBF00":"#5CB8E6"};padding:12px 14px;border-radius:3px`},$("road"));H("div",{style:"font:700 22px var(--fh);color:#fff"},c,`${p} · ${v}`);const u=H("ul",{style:"padding-left:16px;margin-top:4px"},c);it.forEach(t=>H("li",{style:"font-size:14px;color:#C8DBEB;line-height:1.6"},u,t))});
+const D=["Patrocinar o pacto executivo e a agenda única","Aprovar o mapa de decisões críticas e o log","Nomear owners e proteger os key users","Instalar os fóruns de portfólio e integração","Autorizar 2 squads piloto na matriz equilibrada","Re-medir o ambiente em 90 dias"];const on=new Set();let fired=false;
+D.forEach((t,i)=>{const b=H("button",{style:"display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:center;text-align:left;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:3px;padding:13px 14px;color:#fff;font-size:15px"},$("decisions"));const box=H("span",{style:"width:24px;height:24px;border:2px solid #5CB8E6;border-radius:4px;display:grid;place-items:center;font-weight:700"},b,"");b.appendChild(document.createTextNode(t));
+b.addEventListener("click",()=>{on.has(i)?on.delete(i):on.add(i);box.textContent=on.has(i)?"✓":"";box.style.background=on.has(i)?"#02624B":"transparent";gauge()})});
+function gauge(){const s=$("ready");s.innerHTML="";const p=on.size/D.length;S("circle",{cx:110,cy:110,r:88,fill:"none",stroke:"rgba(255,255,255,.12)","stroke-width":18},s);S("circle",{cx:110,cy:110,r:88,fill:"none",stroke:p===1?"#02624B":p>=.5?"#CE8E00":"#5CB8E6","stroke-width":18,"stroke-linecap":"round",pathLength:1,"stroke-dasharray":`${p} 1`,transform:"rotate(-90 110 110)",style:"transition:stroke-dasharray .5s"},s);T(s,110,122,Math.round(p*100)+"%",{"text-anchor":"middle",fill:"#fff",style:"font:700 52px var(--fh)"});if(p===1&&!fired){fired=true;confetti()}if(p<1)fired=false}gauge();
+const K=[["Temperatura geral",39,"≥62,5"],["Governança & decisão",35,"≥62,5"],["Silos / visão empresa",20,"≥62,5"],["Mudança & aprendizado",25,"≥62,5"],["Decisões registradas no log","a medir","100%"]];
+K.forEach(([n,b,m])=>{const r=H("div",{style:"display:grid;grid-template-columns:1fr 60px 16px 62px;gap:6px;align-items:center;font-size:14px;color:#C8DBEB;border-bottom:1px solid rgba(255,255,255,.1);padding:11px 0"},$("kpis"));H("span",null,r,n);H("b",{style:"color:#fff;text-align:right"},r,String(b));H("span",{style:"color:#FCBF00"},r,"→");H("b",{style:"color:#5CB8E6"},r,m)});
+H("div",{class:"small",style:"color:#9DB7CE;margin-top:6px"},$("kpis"),"Metas: referência de faixa Equilibrada (proposta).")})();
+
+/* ---------- NAVEGAÇÃO ---------- */
+const slides=[...document.querySelectorAll(".slide")],N=slides.length;let cur=0;
+slides.forEach((s,i)=>{if(s.hasAttribute("data-nofoot"))return;const f=H("div",{class:"foot"},s);H("b",null,f,"TMG · DIAGNÓSTICO E REORGANIZAÇÃO");H("span",null,f,"Confidencial · 2026");if(s.dataset.src)H("span",{class:"s",title:s.dataset.src},f,s.dataset.src);H("span",{class:"n"},f,`${i+1} / ${N}`)});
+slides.forEach((s,i)=>{const b=H("button",{title:s.dataset.t,"aria-label":s.dataset.t},$("dots"));b.addEventListener("click",()=>go(i))});
+function fit(){const vw=innerWidth,vh=innerHeight,pad=vw<720?8:16,bot=66,sc=Math.min((vw-pad*2)/1600,(vh-pad-bot)/900),st=$("stage");st.style.left=vw/2+"px";st.style.top=(pad+(vh-pad-bot)/2)+"px";st.style.transform=`translate(-50%,-50%) scale(${sc})`}
+addEventListener("resize",fit);
+function go(i,inst){i=Math.max(0,Math.min(N-1,i));const back=i<cur;slides[cur].classList.remove("active","entering","play","back");const n=slides[i];n.classList.remove("play","entering","back");void n.offsetWidth;n.classList.add("active","play");if(!inst){n.classList.add("entering");if(back)n.classList.add("back")}cur=i;
+$("cnt").textContent=`${i+1} / ${N}`;$("progress").style.width=((i+1)/N*100)+"%";$("bPrev").disabled=i===0;$("bNext").disabled=i===N-1;document.querySelectorAll("#dots button").forEach((b,k)=>b.classList.toggle("on",k===i));history.replaceState(null,"","#"+(i+1));
+const nd=n.querySelector("#needle");if(nd&&nd.animate)nd.animate([{transform:"rotate(0deg)"},{transform:`rotate(${nd.dataset.deg}deg)`}],{duration:1400,delay:300,easing:"cubic-bezier(.2,.7,.2,1)",fill:"forwards"})}
+$("bNext").onclick=()=>go(cur+1);$("bPrev").onclick=()=>go(cur-1);
+addEventListener("keydown",e=>{if(e.target.tagName==="INPUT")return;if(["ArrowRight","PageDown"," "].includes(e.key)){e.preventDefault();go(cur+1)}else if(["ArrowLeft","PageUp"].includes(e.key)){e.preventDefault();go(cur-1)}else if(e.key==="Home")go(0);else if(e.key==="End")go(N-1);else if(e.key==="f"||e.key==="F"){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen?.()}});
+let tx=null;addEventListener("touchstart",e=>{tx=e.touches[0].clientX},{passive:true});addEventListener("touchend",e=>{if(tx==null||e.target.tagName==="INPUT")return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>60)dx<0?go(cur+1):go(cur-1);tx=null},{passive:true});
+const tp=$("tip");addEventListener("pointermove",e=>{const el=e.target.closest&&e.target.closest("[data-tv]");if(el){tp.querySelector("b").textContent=el.dataset.tv;tp.querySelector("span").textContent=el.dataset.tl;tp.classList.add("on");tp.style.left=Math.min(e.clientX+14,innerWidth-330)+"px";tp.style.top=(e.clientY+14)+"px"}else tp.classList.remove("on")});
+fit();const h0=parseInt(location.hash.slice(1),10);go(isNaN(h0)?0:h0-1,true);
+</script>
+</body>
+</html>
