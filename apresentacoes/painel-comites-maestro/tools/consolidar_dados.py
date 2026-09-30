@@ -73,10 +73,16 @@ def status_ponto(s):
 
 
 def iso(y, dm):
-    m = re.search(r'(\d{1,2})/(\d{1,2})', dm or '')
-    if not m:
+    """Prazo 'dd/mm' -> ISO. Com mais de uma data na célula, vale a última (a mais recente escrita)."""
+    ms = re.findall(r'(\d{1,2})/(\d{1,2})(?!/?\d{3})', dm or '')
+    if not ms:
         return None
-    return date(y, int(m.group(2)), int(m.group(1))).isoformat()
+    d, m = ms[-1]
+    try:
+        return date(y, int(m), int(d)).isoformat()
+    except ValueError:
+        print(f'aviso: prazo inválido ignorado: {dm!r}', file=sys.stderr)
+        return None
 
 
 def apresentado(item, edicao):

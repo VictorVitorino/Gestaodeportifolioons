@@ -923,8 +923,8 @@
       {
        "edicao": "2026-09-09",
        "status": "em_atraso",
-       "prazo": "04/09 09/09",
-       "prazo_iso": "2026-09-04",
+       "prazo": "09/09",
+       "prazo_iso": "2026-09-09",
        "slide": 32,
        "obs": "Em consolidação: FEL e FEN"
       },

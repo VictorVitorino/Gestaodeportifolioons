@@ -19,10 +19,24 @@ MONTHS = {'janeiro': 1, 'fevereiro': 2, 'março': 3, 'marco': 3, 'abril': 4, 'ma
           'julho': 7, 'agosto': 8, 'setembro': 9, 'outubro': 10, 'novembro': 11, 'dezembro': 12}
 
 
-def text_of(el):
+def riscado(run):
+    rpr = run.find('a:rPr', NS)
+    return rpr is not None and rpr.get('strike') in ('sngStrike', 'dblStrike')
+
+
+def text_of(el, ignorar_riscado=False):
+    """Texto do elemento; com ignorar_riscado, descarta runs tachados (ex.: prazo antigo 04/09 riscado ao lado do novo)."""
     paras = []
     for p in el.iter('{%s}p' % NS['a']):
-        paras.append(''.join(t.text or '' for t in p.iter('{%s}t' % NS['a'])))
+        partes = []
+        for r in p:
+            tag = etree.QName(r).localname
+            if tag not in ('r', 'fld'):
+                continue
+            if ignorar_riscado and riscado(r):
+                continue
+            partes.extend(t.text or '' for t in r.iter('{%s}t' % NS['a']))
+        paras.append(''.join(partes))
     return '\n'.join(x for x in paras if x.strip()).strip()
 
 
@@ -149,7 +163,7 @@ def tables(frames):
             for tc in tr.findall('a:tc', NS):
                 tcPr = tc.find('a:tcPr', NS)
                 cells.append({
-                    'text': text_of(tc),
+                    'text': text_of(tc, ignorar_riscado=True),
                     'fill': color_of(tcPr) if tcPr is not None else None,
                     'rowSpan': int(tc.get('rowSpan', 1)), 'vMerge': tc.get('vMerge') == '1',
                     'gridSpan': int(tc.get('gridSpan', 1)), 'hMerge': tc.get('hMerge') == '1',

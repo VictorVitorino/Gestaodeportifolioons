@@ -32,13 +32,15 @@ Segue a linguagem visual das apresentações executivas A&M do repositório: pal
 | A mesma atividade é reconhecida entre reuniões pela descrição normalizada. Variantes de redação só se juntam quando nunca aparecem na mesma reunião, têm similaridade ≥ 0,93, o mesmo verbo inicial e os mesmos números. Assim, "Agendamento" e "Realização" do workshop ficam separados, assim como a "3ª" e a "4ª Sessão". As junções ficam registradas em `aliases`. | DECISAO_FUNCIONAL_PRODUTO |
 | **Prazo vencido sem conclusão**: prazo anterior à data da reunião e status diferente de concluído. | Derivado · A_VALIDAR_FEG |
 | **Saíram da pauta sem desfecho**: a última menção da atividade não é "concluído". Pode ser atividade encerrada sem registro ou atividade renomeada de forma livre. | Derivado · A_VALIDAR_FEG |
+| Texto tachado nas células (ex.: prazo antigo riscado) é ignorado. Se sobrar mais de uma data, vale a última. | FONTE (leitura) |
 | O status dos pontos de atenção é o texto da tabela ("Em acompanhamento" ou "Fechado"). Uma reprogramação é contada a cada mudança de prazo entre reuniões. | FONTE / Derivado |
 | A classificação de impacto (Dentro do plano, Risco moderado, Impacto relevante) só existe no slide "Gestão de riscos" do Gestor (base 22/07). Não é extrapolada para os pontos de atenção. | FONTE |
 
 ## Verificação feita na v1
 
-- As 253 linhas extraídas (atividades, pontos de atenção e riscos) foram conferidas uma a uma contra as imagens dos slides das 17 reuniões, por verificadores independentes. Houve divergência zero em status, prazo e texto das atividades.
-- O pipeline é reprodutível: rodar `tools/atualizar_painel.py` sobre os `.pptx` armazenados gera exatamente o `dados/dados-comites.json` verificado.
+- **Extração.** As 253 linhas extraídas (atividades, pontos de atenção e riscos) foram conferidas uma a uma contra as imagens dos slides das 17 reuniões, por verificadores independentes. Não houve divergência de status nem de texto das atividades.
+- **Revisão adversarial do painel.** Três frentes independentes (números recalculados do zero a partir do `.pptx`, lógica e QA visual) apontaram achados, e cada um foi reproduzido por um verificador cético antes de ser corrigido. O único achado de dados foi um prazo **riscado** no deck: no Gestor de 09/09, o prazo "04/09" aparece tachado ao lado de "09/09". A extração agora descarta texto tachado e, se a célula tiver mais de uma data, usa a última. Os KPIs de atividades e de riscos foram conferidos em quatro cenários (Gestor 30/09 e 12/08, Executivo 02/10 e 21/08) e as colunas do modo "reunião" nas 17 reuniões; todos batem.
+- **Reprodutível.** Rodar `tools/atualizar_painel.py` sobre os `.pptx` armazenados gera exatamente o `dados/dados-comites.json` publicado.
 
 ## Atualizar com um deck novo
 
