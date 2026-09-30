@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TMG · Cultura em Movimento</title>
+<meta name="description" content="Status report executivo da reorganização cultural e operacional da TMG: cultura, liderança, papéis e responsabilidades (RASCI), desconstrução de silos e sinergia entre áreas — onde estamos e aonde podemos chegar.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#002B49;--blue:#0085CA;--steel:#5E8AB4;--gold:#CE8E00;--orange:#E23500;--green:#02624B;--purple:#500260;--red:#BC0404;--yellow:#FCBF00;--grey:#D9D9D9;
+  --ice:#E5F2FA;--ice2:#F2F7FB;--ink:#002B49;--ink2:#35516A;--muted:#6B7B8C;--line:#D6DEE6;--line2:#E8EDF2;--paper:#fff;
+  --crit:#BC0404;--fragil:#CE8E00;--equil:#5E8AB4;--forte:#02624B;
+  --fh:"Arial Nova Cond","Barlow Condensed","Arial Narrow",sans-serif;--fb:"Inter","Helvetica Neue",Arial,sans-serif;--ease:cubic-bezier(.2,.7,.2,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#07131F;color:var(--ink);font-family:var(--fb);overflow:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer;color:inherit}
+#viewport{position:fixed;inset:0;overflow:hidden}
+#stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform:translate(-50%,-50%);transform-origin:center;background:#fff;box-shadow:0 30px 90px rgba(0,0,0,.5);overflow:hidden}
+.slide{position:absolute;inset:0;display:none;background:#fff}
+.slide.active{display:block}
+.slide.entering{animation:sIn .55s var(--ease) both}
+@keyframes sIn{from{opacity:0;transform:translateX(34px)}to{opacity:1;transform:none}}
+.slide.back.entering{animation-name:sInB}@keyframes sInB{from{opacity:0;transform:translateX(-34px)}to{opacity:1;transform:none}}
+[data-a]{opacity:0}
+.play [data-a]{animation:.75s var(--ease) both;animation-delay:calc(var(--d,0)*80ms + 120ms)}
+.play [data-a=up]{animation-name:aUp}.play [data-a=fade]{animation-name:aF}.play [data-a=zoom]{animation-name:aZ}.play [data-a=left]{animation-name:aL}.play [data-a=grow]{animation-name:aG;transform-origin:left}
+@keyframes aUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}@keyframes aF{from{opacity:0}to{opacity:1}}@keyframes aZ{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:none}}@keyframes aL{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}@keyframes aG{from{opacity:1;transform:scaleX(0)}to{opacity:1;transform:none}}
+.flow{stroke-dasharray:6 7;animation:fl 1.1s linear infinite}@keyframes fl{to{stroke-dashoffset:-26}}
+.pulse{animation:pu 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}@keyframes pu{50%{transform:scale(1.08);opacity:.8}}
+@media (prefers-reduced-motion:reduce){[data-a]{opacity:1!important;animation:none!important}.slide.entering{animation:none}.flow,.pulse{animation:none}}
+
+/* chrome A&M-like */
+.pad{position:absolute;inset:0;padding:46px 64px 70px}
+.hd{display:flex;align-items:flex-end;gap:18px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:18px}
+.hd .num{font:700 44px/0.9 var(--fh);color:var(--blue);min-width:56px}
+.hd h2{font:700 38px/1.05 var(--fh);color:var(--navy);letter-spacing:-.005em}
+.hd h2 em{font-style:normal;color:var(--blue)}
+.hd .sub{font-size:15px;color:var(--ink2);margin-top:5px;line-height:1.35;max-width:1150px}
+.hd .sec{margin-left:auto;font:700 11px var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);white-space:nowrap;padding-bottom:4px}
+.foot{position:absolute;left:64px;right:64px;bottom:22px;display:flex;gap:16px;font-size:11px;color:var(--muted);border-top:1px solid var(--line2);padding-top:10px}
+.foot b{color:var(--navy);letter-spacing:.06em}.foot .n{margin-left:auto;font-weight:700;color:var(--navy)}
+.foot .s{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:980px}
+.dark{background:radial-gradient(1100px 700px at 78% 28%,#07558A 0%,#003A63 40%,var(--navy) 75%);color:#fff}
+.dark .foot{border-color:rgba(255,255,255,.15);color:#9DB7CE}.dark .foot b,.dark .foot .n{color:#fff}
+
+/* FDII strip: Fato → Dado → Insight → Implicação */
+.fdii{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.fdii>div{padding:12px 16px;position:relative;font-size:13.5px;line-height:1.42;color:var(--ink2);background:#fff}
+.fdii>div+div{border-left:1px solid var(--line)}
+.fdii>div::after{content:"";position:absolute;right:-8px;top:50%;width:14px;height:14px;background:inherit;border-top:1px solid var(--line);border-right:1px solid var(--line);transform:translateY(-50%) rotate(45deg);z-index:2}
+.fdii>div:last-child::after{display:none}
+.fdii .k{display:block;font:700 10.5px var(--fb);letter-spacing:.14em;text-transform:uppercase;margin-bottom:4px}
+.fdii .f .k{color:var(--navy)}.fdii .d .k{color:var(--blue)}.fdii .i .k{color:var(--gold)}.fdii .m .k{color:var(--green)}
+.fdii .m{background:#F1F8F5}
+.fdii b{color:var(--navy)}
+
+.card{background:#fff;border:1px solid var(--line);border-radius:3px;padding:16px 18px}
+.card.soft{background:var(--ice2);border-color:var(--line2)}
+.card.nv{background:var(--navy);border-color:var(--navy);color:#fff}
+.card h3{font:700 22px/1.1 var(--fh);color:var(--navy);margin-bottom:6px}.card.nv h3{color:#fff}
+.card h4{font:700 14.5px/1.3 var(--fb);color:var(--navy);margin-bottom:4px}
+.card p,.card li{font-size:14px;line-height:1.45;color:var(--ink2)}.card.nv p,.card.nv li{color:#C8DBEB}
+.card ul{padding-left:17px}.card li+li{margin-top:3px}
+.eye{font:700 11px var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue);margin-bottom:8px}
+.big{font:700 60px/.95 var(--fh);color:var(--navy)}.big small{font-size:24px;color:var(--muted)}
+.small{font-size:12px;color:var(--muted);line-height:1.4}
+.pill{display:inline-block;font:600 11.5px/1 var(--fb);padding:6px 10px;border-radius:99px;background:var(--ice);color:var(--navy)}
+.tagx{display:inline-block;font:700 10px var(--fb);letter-spacing:.1em;text-transform:uppercase;padding:5px 8px;border-radius:2px;color:#fff;background:var(--steel)}
+.hint{display:inline-flex;align-items:center;gap:6px;font:700 11px var(--fb);letter-spacing:.08em;text-transform:uppercase;color:var(--gold);background:#FFF6E0;border:1px dashed #E3C173;padding:5px 10px;border-radius:99px}
+.hint::before{content:"👆"}
+.grid{display:grid;gap:14px}
+.st-crit{background:var(--crit)}.st-frag{background:var(--fragil)}.st-equil{background:var(--equil)}.st-forte{background:var(--forte)}
+
+/* interactive bits */
+.clk{cursor:pointer;transition:transform .18s,box-shadow .18s,border-color .18s}
+.clk:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(0,43,73,.14)}
+.clk.sel{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,133,202,.25)}
+.flip{perspective:1000px}
+.flip .in{position:relative;width:100%;height:100%;transition:transform .6s var(--ease);transform-style:preserve-3d}
+.flip.on .in{transform:rotateY(180deg)}
+.flip .fr,.flip .bk{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:3px}
+.flip .bk{transform:rotateY(180deg)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:99px;background:linear-gradient(90deg,var(--steel),var(--blue));outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:#fff;border:4px solid var(--navy);box-shadow:0 3px 10px rgba(0,0,0,.25);cursor:grab}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:4px solid var(--navy);cursor:grab}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:99px;overflow:hidden;background:#fff}
+.seg button{border:0;background:none;padding:9px 16px;font:600 13px var(--fb);color:var(--ink2)}
+.seg button.on{background:var(--navy);color:#fff}
+.tabs{display:flex;gap:8px}
+.tabs button{border:1px solid var(--line);background:#fff;border-radius:3px;padding:10px 16px;font:700 16px var(--fh);color:var(--navy);text-align:left}
+.tabs button small{display:block;font:500 11px var(--fb);color:var(--muted)}
+.tabs button.on{background:var(--navy);color:#fff;border-color:var(--navy)}.tabs button.on small{color:#9DB7CE}
+.pane{display:none}.pane.on{display:block;animation:aF .4s both}
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.tbl th{font:700 10.5px var(--fb);letter-spacing:.1em;text-transform:uppercase;background:var(--navy);color:#fff;text-align:left;padding:9px 11px}
+.tbl td{padding:9px 11px;border-bottom:1px solid var(--line2);color:var(--ink2);vertical-align:top;line-height:1.38}
+.tbl td b{color:var(--navy)}
+.confetti{position:absolute;width:9px;height:14px;top:-20px;z-index:40;pointer-events:none;animation:cf 1.8s ease-in forwards}
+@keyframes cf{to{transform:translateY(960px) rotate(720deg);opacity:.2}}
+svg text{font-family:var(--fb)}
+svg.i{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;width:22px;height:22px}
+
+/* ui */
+#progress{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--blue),var(--gold));z-index:50;transition:width .5s var(--ease)}
+#controls{position:fixed;right:20px;bottom:16px;z-index:60;display:flex;gap:8px;align-items:center}
+#controls button{border:0;border-radius:3px;height:44px;padding:0 16px;font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:8px;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+#controls .g{background:rgba(255,255,255,.93);color:var(--navy)}#controls .p{background:var(--blue);color:#fff}
+#controls button:disabled{opacity:.4;cursor:not-allowed}
+#controls .c{background:rgba(0,43,73,.9);color:#fff;border-radius:3px;height:44px;display:inline-flex;align-items:center;padding:0 14px;font:600 13px var(--fb)}
+#dots{position:fixed;left:20px;bottom:30px;z-index:60;display:flex;gap:6px}
+#dots button{width:10px;height:10px;border-radius:50%;border:0;background:rgba(255,255,255,.3);padding:0}
+#dots button.on{background:var(--gold);width:26px;border-radius:99px}
+#tip{position:fixed;z-index:99;pointer-events:none;background:#fff;border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,20,40,.25);border-radius:4px;padding:9px 12px;font:13px/1.4 var(--fb);max-width:320px;opacity:0;transition:opacity .12s}
+#tip.on{opacity:1}#tip b{display:block;font-size:15px;color:var(--navy)}#tip span{color:var(--muted);font-size:12px}
+@media (max-width:760px){#dots{display:none}#controls .lb{display:none}}
+@media print{html,body{overflow:visible;background:#fff}#controls,#progress,#dots,#tip{display:none!important}#viewport{position:static}#stage{position:relative;left:auto!important;top:auto!important;transform:none!important;height:auto;box-shadow:none}.slide{position:relative;display:block!important;height:900px;break-after:page}[data-a]{opacity:1!important;animation:none!important}.pane{display:block!important}@page{size:1600px 900px;margin:0}}
+
+/* ===== STATUS REPORT CHROME ===== */
+.slide{background-color:#F5F8FB;background-image:linear-gradient(#E9EFF4 1px,transparent 1px),linear-gradient(90deg,#E9EFF4 1px,transparent 1px);background-size:40px 40px}
+.sr-top{position:absolute;left:24px;right:24px;top:16px;height:80px;background:linear-gradient(100deg,#002B49 0%,#00365C 60%,#004B7C 100%);border-radius:14px;display:flex;align-items:center;gap:16px;padding:0 24px;color:#fff;z-index:3}
+.sr-logo{display:flex;align-items:center;gap:10px;min-width:220px}
+.sr-logo .t{font:500 15px/1.08 var(--fb);color:#fff;border-left:3px solid #fff;padding-left:9px}
+.sr-logo .t b{font-weight:800}
+.sr-pill{background:#fff;color:var(--navy);border-radius:10px;height:54px;display:flex;align-items:center;padding:0 26px;font:700 23px var(--fh);letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
+.sr-date{background:#fff;color:var(--navy);border-radius:10px;height:54px;display:flex;flex-direction:column;justify-content:center;padding:0 18px;text-align:center;font:800 13px var(--fb);letter-spacing:.04em}
+.sr-date span{font:500 15px var(--fb);letter-spacing:0}
+.sr-right{margin-left:auto;text-align:right;line-height:1.15}
+.sr-right b{display:block;font:800 19px var(--fb)}.sr-right span{font:400 17px var(--fb);color:#CFE2F0}
+.sr-dec{position:absolute;top:2px;right:26px;font:10px/1 var(--fb);letter-spacing:5px;color:#0085CA;z-index:4}
+.sr-band{position:absolute;left:24px;right:24px;top:106px;height:50px;border-radius:14px 14px 0 0;display:flex;align-items:center;gap:10px;padding:0 24px;font:700 25px var(--fh);color:#fff;letter-spacing:.03em;text-transform:uppercase;z-index:2}
+.sr-band small{margin-left:auto;font:500 14px var(--fb);text-transform:none;letter-spacing:0;opacity:.92}
+.c-navy{background:linear-gradient(90deg,#002B49,#0E4067 60%,#1B5A8A)}.c-green{background:linear-gradient(90deg,#02624B,#0A7A5C 60%,#2E9A6E)}
+.c-blue{background:linear-gradient(90deg,#00558A,#0085CA 70%,#3AA3DA)}.c-gold{background:linear-gradient(90deg,#9A6600,#CE8E00 60%,#E3AE2E)}
+.c-steel{background:linear-gradient(90deg,#34628C,#5E8AB4 70%,#85A9CB)}.c-purple{background:linear-gradient(90deg,#3E0150,#500260 50%,#7B2F8C)}
+.c-red{background:linear-gradient(90deg,#860202,#BC0404 70%,#D8453A)}
+.body{position:absolute;left:24px;right:24px;top:156px;bottom:40px;border:1px solid var(--line);border-top:0;border-radius:0 0 14px 14px;padding:14px 22px;background:rgba(255,255,255,.96)}
+.foot{left:32px;right:32px;bottom:11px;border-top:0;padding-top:0}
+.kt-lab{font:700 13px var(--fb);color:var(--ink2);margin-bottom:6px}
+/* Key target card */
+.kt{border:1.5px solid #D5DEE7;border-radius:10px;background:#fff;padding:12px 16px;display:grid;grid-template-columns:62px 1fr;gap:12px;align-items:center}
+.kt .ic{width:60px;height:60px;border-radius:50%;display:grid;place-items:center}
+.kt .ic svg{width:32px;height:32px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.kt .tt{font:500 17px var(--fb);color:var(--navy);border-bottom:1px solid var(--line2);padding-bottom:4px}
+.kt .vr{display:flex;align-items:flex-end;justify-content:space-between;margin-top:2px}
+.kt .v{font:800 46px/1 var(--fh);letter-spacing:-.01em}
+.kt .mt{font:700 11.5px var(--fb);color:var(--navy);border:1px solid #BFCBD6;background:#F2F5F8;border-radius:4px;padding:3px 7px;margin-bottom:6px}
+/* level bar */
+.lv{position:relative;height:14px;border-radius:99px;background:#E6ECF1;overflow:visible}
+.lv .bd{position:absolute;inset:0;display:flex;border-radius:99px;overflow:hidden}
+.lv .bd i{display:block;height:100%}
+.lv .fl{position:absolute;left:0;top:0;bottom:0;border-radius:99px;transition:width 1.1s var(--ease)}
+.lv .mk{position:absolute;top:-5px;width:3px;height:24px;border-radius:2px;background:var(--navy);transform:translateX(-50%)}
+.lv .mk.m6{background:#8FA6BA}
+.lv .mk::after{content:attr(data-l);position:absolute;top:-15px;left:50%;transform:translateX(-50%);font:700 9.5px var(--fb);color:var(--muted);white-space:nowrap}
+.lv.sm{height:10px}.lv.sm .mk{height:18px;top:-4px}
+/* semáforo */
+.dot{display:inline-block;width:18px;height:18px;border-radius:50%;box-shadow:inset 0 -3px 4px rgba(0,0,0,.18)}
+.d-r{background:radial-gradient(circle at 35% 35%,#E0443A,#9C0303)}.d-a{background:radial-gradient(circle at 35% 35%,#F2C24B,#B67B00)}.d-g{background:radial-gradient(circle at 35% 35%,#2E9A6E,#02513E)}.d-n{background:#C9D3DC}
+.ins{background:#EAF4EE;border:1.5px solid #CFE5D8;border-radius:12px;padding:14px 18px}
+.ins h3{font:800 22px var(--fh);color:#02624B;letter-spacing:.03em;margin-bottom:6px}
+.ins li{font-size:13.5px;line-height:1.45;color:var(--ink2);margin-left:16px}.ins li+li{margin-top:6px}.ins li b{color:#02624B}
+.ttl{font:800 17px var(--fh);letter-spacing:.04em;text-transform:uppercase}
+.pbtn{display:inline-block;border-radius:8px;padding:7px 18px;font:800 16px var(--fh);letter-spacing:.05em;color:#fff;text-transform:uppercase}
+.person{width:22px;height:48px}
+.rasci td.cell{cursor:pointer;text-align:center;font:800 18px var(--fh);transition:background .2s,transform .15s;user-select:none}
+.rasci td.cell:hover{background:#EEF5FB}
+.slide.dark{background:radial-gradient(1100px 700px at 78% 28%,#07558A 0%,#003A63 40%,#002B49 75%)}
+.tip2{font-size:11.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div id="viewport"><div id="stage">
+<!-- 01 CAPA -->
+<section class="slide dark" data-t="Capa" data-nofoot>
+  <svg viewBox="0 0 760 760" style="position:absolute;right:30px;top:70px;width:740px;height:740px" id="coverSvg" aria-hidden="true"></svg>
+  <div style="position:absolute;left:84px;top:70px;right:820px">
+    <div data-a="fade" style="display:flex;gap:12px;align-items:center"><span id="coverLogo"></span><span class="tagx" style="background:rgba(255,255,255,.14)">Status report executivo</span></div>
+    <div class="eye" data-a="fade" style="--d:1;color:var(--yellow);margin-top:96px">Reorganização cultural e operacional</div>
+    <h1 data-a="up" style="--d:2;font:700 94px/.92 var(--fh);color:#fff;margin-top:12px">Cultura TMG <span style="color:#5CB8E6">em movimento</span></h1>
+    <p data-a="up" style="--d:3;font-size:21px;line-height:1.45;color:#C8DBEB;margin-top:22px;max-width:680px">Onde a cultura está hoje, até onde ela pode chegar com um bom trabalho — e o caminho para ir de <b style="color:#fff">silos</b> a <b style="color:#fff">sinergia</b>.</p>
+    <div data-a="up" style="--d:4;display:grid;grid-template-columns:repeat(4,auto);gap:34px;margin-top:38px;justify-content:start">
+      <div><div class="big" style="color:#fff;font-size:52px">39%</div><div class="small" style="color:#9DB7CE">temperatura de sinergia hoje</div></div>
+      <div><div class="big" style="color:#FCBF00;font-size:52px">≥62,5%</div><div class="small" style="color:#9DB7CE">meta proposta em 12 meses</div></div>
+      <div><div class="big" style="color:#fff;font-size:52px">7</div><div class="small" style="color:#9DB7CE">entrevistas consolidadas</div></div>
+      <div><div class="big" style="color:#fff;font-size:52px">5</div><div class="small" style="color:#9DB7CE">frentes de trabalho</div></div>
+    </div>
+    <div data-a="up" style="--d:5;display:flex;flex-wrap:wrap;gap:8px;margin-top:36px" id="coverFronts"></div>
+  </div>
+</section>
+
+<!-- RESUMO EXECUTIVO -->
+<section class="slide" data-p="Contexto" data-t="Resumo executivo" data-band="Resumo executivo · o que está acontecendo na TMG" data-c="c-navy" data-bs="Para deixar todos na mesma página" data-src="Base: 7 entrevistas estruturadas (ago–set/2026), 77 perguntas, 46 evidências qualitativas. Leitura consolidada, sem atribuição individual. Metas: propostas, a calibrar com a liderança.">
+  <div class="body">
+    <div style="display:grid;grid-template-columns:1fr 420px;gap:22px">
+      <div class="grid" style="gap:10px" id="execText">
+        <div class="card" data-a="up" style="border-radius:12px;border-left:6px solid var(--steel)"><div class="eye" style="color:var(--steel)">O que fizemos</div><p style="font-size:15px">Entre agosto e setembro de 2026 ouvimos a TMG em <b>7 entrevistas estruturadas</b> (77 perguntas e 46 evidências qualitativas) sobre como a empresa resolve problemas na prática. A leitura é <b>consolidada</b>: representa padrões recorrentes, não opiniões individuais.</p></div>
+        <div class="card" data-a="up" style="--d:1;border-radius:12px;border-left:6px solid var(--gold)"><div class="eye" style="color:var(--gold)">O que está acontecendo · cultura</div><p style="font-size:15px">A TMG sabe <b>para onde</b> quer ir (alinhamento estratégico em 79%), mas tem dificuldade em <b>realizar junto</b>: a temperatura de sinergia está em <b>39%</b>, faixa Frágil, no limiar da Crítica. A cultura é de relacionamento — as pessoas se ajudam, mas evitam o conflito aberto; a divergência vai para o corredor e a decisão é refeita fora da sala. Três padrões aparecem em <b>todas</b> as entrevistas: liderança desalinhada na execução, papéis sobrepostos e mudanças que não se sustentam depois do lançamento.</p></div>
+        <div class="card" data-a="up" style="--d:2;border-radius:12px;border-left:6px solid var(--blue)"><div class="eye">O que está acontecendo · organização</div><p style="font-size:15px">As áreas trabalham como <b>ilhas</b> (silos em 20%): a colaboração depende de pontes pessoais e de pessoas-chave, não de acordos. Temas transversais <b>sobem por escalonamento</b> ou avançam por influência (governança em 35%), e a responsabilidade pelo resultado fica difusa (papéis em 40%). Os comportamentos relatados são compatíveis com uma <b>matriz fraca</b> — leitura interpretativa, a validar com organograma e alçadas.</p></div>
+        <div class="card nv" data-a="up" style="--d:3;border-radius:12px"><div class="eye" style="color:var(--yellow)">O que propomos</div><p style="font-size:15px">Uma reorganização <b style="color:#fff">cultural e operacional</b> — sem criar uma nova área: contrato de liderança, papéis claros com <b style="color:#fff">RASCI</b> nas interfaces críticas, desconstrução de silos com metas compartilhadas, fórum de integração e alçadas de decisão. Com um bom trabalho, a meta é levar todas as frentes à faixa <b style="color:#FCBF00">Equilibrada (≥62,5%) em 12 meses</b>.</p></div>
+      </div>
+      <div class="grid" style="align-content:start;gap:12px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div class="kt" style="grid-template-columns:1fr;text-align:center;padding:12px 8px"><div style="font:800 40px var(--fh);color:#CE8E00">39%</div><div class="small">temperatura hoje</div></div>
+          <div class="kt" style="grid-template-columns:1fr;text-align:center;padding:12px 8px"><div style="font:800 40px var(--fh);color:#BC0404">3</div><div class="small">padrões unânimes (7/7)</div></div>
+          <div class="kt" style="grid-template-columns:1fr;text-align:center;padding:12px 8px"><div style="font:800 40px var(--fh);color:#02624B">≥62,5%</div><div class="small">meta em 12 meses</div></div>
+        </div>
+        <div class="ttl" style="color:var(--navy);margin-top:4px">Roteiro desta apresentação</div>
+        <div id="agenda" style="display:grid;gap:8px"></div>
+        <div class="small">Clique numa parte para ir direto a ela.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 PAINEL EXECUTIVO -->
+<section class="slide" data-p="1 · Cultura" data-t="Termômetro cultural" data-band="Termômetro cultural · onde estamos e aonde podemos chegar" data-c="c-navy" data-bs="Índice de maturidade 0–100% · base: 7 entrevistas (ago–set/2026)" data-src="Índice harmonizado 0–100% por dimensão (média das fontes). Faixas: Crítica <37,5 · Frágil 37,5–62,5 · Equilibrada 62,5–87,5 · Forte ≥87,5. Marco 6 meses e meta 12 meses: propostas, a calibrar com a liderança.">
+  <div class="body">
+    <div style="display:flex;align-items:center;gap:14px"><div class="kt-lab" style="margin:0">Key Targets · frentes da reorganização</div><div class="seg" id="scenSeg" style="margin-left:auto"><button class="on" data-s="0">HOJE</button><button data-s="1">MARCO 6 MESES</button><button data-s="2">META 12 MESES · BOM TRABALHO</button></div><span class="hint">simule o cenário</span></div>
+    <div id="ktRow" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:10px"></div>
+    <div style="display:grid;grid-template-columns:380px 1fr 400px;gap:16px;margin-top:14px;height:500px">
+      <div class="card nv" data-a="left" style="border-radius:12px;text-align:center;padding:26px 16px">
+        <div class="eye" style="color:var(--yellow)">Temperatura de sinergia</div>
+        <svg viewBox="0 0 320 250" width="320" height="250" id="gauge"></svg>
+        <div id="gDelta" style="font:700 15px var(--fb);color:#5CB8E6;margin-top:2px">faixa Frágil · no limiar da Crítica</div>
+        <div class="small" style="color:#9DB7CE;margin-top:8px">Nenhuma leitura estruturada atinge hoje a faixa Equilibrada.</div>
+      </div>
+      <div class="card" style="border-radius:12px;padding:14px 18px">
+        <div style="display:flex;align-items:baseline;gap:12px"><div class="ttl" style="color:var(--navy)">Barras de nivelamento</div><span class="small">▮ atual · <b style="color:#8FA6BA">|</b> marco 6m · <b style="color:var(--navy)">|</b> meta 12m</span></div>
+        <div id="lvList" style="display:grid;gap:17px;margin-top:22px"></div>
+      </div>
+      <div class="ins" data-a="up" style="--d:6">
+        <h3>INSIGHTS</h3>
+        <ul>
+          <li><b>Direção clara:</b> alinhamento estratégico em 79% — a TMG sabe <i>para onde</i> ir.</li>
+          <li><b>Execução transversal frágil:</b> silos (20%), governança (35%) e papéis (40%) travam o <i>como</i>.</li>
+          <li><b>Potencial:</b> com um bom trabalho, todas as frentes podem chegar à faixa Equilibrada (≥62,5%) — ganho de <b>+23,5 pts</b> na temperatura.</li>
+          <li><b>Maior salto:</b> silos (+42,5 pts). Maior alavanca: liderança, que modela os demais comportamentos.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 MAPA COGNITIVO -->
+<section class="slide" data-p="1 · Cultura" data-t="Mapa cognitivo" data-band="Mapa cognitivo · o que as 7 entrevistas contam" data-c="c-green" data-bs="Leitura consolidada · sem identificação individual" data-src="Contagem de entrevistas com menção explícita (cor sólida) e indireta (cor clara) a cada tema, sobre 7. Codificação temática das 46 evidências registradas.">
+  <div class="body">
+    <div data-a="up" style="background:#F1F3F4;border:1.5px solid #CFE5D8;border-radius:20px;padding:14px 26px;display:grid;grid-template-columns:260px 1fr 470px;gap:24px;align-items:center">
+      <div style="display:flex;align-items:center;gap:14px"><svg viewBox="0 0 48 48" width="52" height="52"><circle cx="24" cy="24" r="21" fill="none" stroke="#BC0404" stroke-width="3"/><path d="M24 13v22M15 27l9 9 9-9" fill="none" stroke="#BC0404" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg><div><div style="font:500 50px/1 var(--fh);color:#BC0404">3</div><div style="font:800 16px var(--fb);color:#BC0404">temas unânimes</div><div class="small">7 de 7 entrevistas</div></div></div>
+      <div style="text-align:center"><div id="evoPeople" style="display:flex;justify-content:center;gap:5px"></div><div style="font:700 14px var(--fb);color:#02624B;margin-top:4px">5 de 7 entrevistas já registram <u>sinais de evolução</u> — a cultura não é estática</div></div>
+      <div id="quoteBox" style="background:#fff;border-left:5px solid #02624B;border-radius:8px;padding:12px 16px;min-height:96px"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:12px"><span class="pbtn" style="background:linear-gradient(90deg,#02624B,#2E9A6E)">Padrões culturais recorrentes</span><span class="hint">clique num tema para ouvir a organização</span><span class="small" style="margin-left:auto">■ menção explícita · <span style="color:#9CC9B2">■</span> menção indireta · <span style="color:#C9D3DC">■</span> sem menção</span></div>
+    <div id="picto" style="display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;margin-top:10px"></div>
+  </div>
+</section>
+
+<!-- 04 DNA CULTURAL -->
+<section class="slide" data-p="1 · Cultura" data-t="Código cultural" data-band="Código cultural · como a cultura opera hoje e para onde vira" data-c="c-green" data-bs="Hoje: relatos recorrentes · Futuro: proposta" data-src="Comportamentos “hoje”: padrões recorrentes nas entrevistas (citações sem atribuição). Comportamentos “futuro” e rituais: proposta de reorganização cultural.">
+  <div class="body">
+    <div style="display:grid;grid-template-columns:1fr 330px;gap:18px;height:100%">
+      <div>
+        <div style="display:flex;gap:12px;align-items:center"><div class="seg" id="cultSeg"><button class="on" data-v="0">HOJE · relatos</button><button data-v="1">FUTURO · proposta</button></div><span class="hint">vire as cartas</span><span id="cultCount" class="small" style="margin-left:auto"></span></div>
+        <div id="cultCards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;height:548px;margin-top:12px"></div>
+      </div>
+      <div class="grid" style="align-content:start">
+        <div class="ttl" style="color:#02624B">O que já funciona</div>
+        <div class="kt" style="grid-template-columns:1fr"><div class="small" style="font-weight:700;color:var(--ink2)">Direção estratégica clara</div><div style="display:flex;align-items:baseline;gap:8px"><span class="v" style="font:800 40px var(--fh);color:#02624B">79%</span><span class="small">alinhamento · faixa Equilibrada</span></div><div class="lv sm" data-lv="79" data-c="#02624B"></div></div>
+        <div class="kt" style="grid-template-columns:1fr"><div class="small" style="font-weight:700;color:var(--ink2)">Apoio pontual entre pessoas</div><div style="display:flex;align-items:baseline;gap:8px"><span class="v" style="font:800 40px var(--fh);color:#CE8E00">54%</span><span class="small">colaboração transversal</span></div><div class="lv sm" data-lv="54" data-c="#CE8E00"></div></div>
+        <div class="kt" style="grid-template-columns:1fr"><div class="small" style="font-weight:700;color:var(--ink2)">Abertura para evoluir</div><div style="display:flex;align-items:baseline;gap:8px"><span class="v" style="font:800 40px var(--fh);color:#02624B">5 de 7</span><span class="small">entrevistas com sinais de evolução</span></div></div>
+        <div class="card nv" style="border-radius:10px"><div class="eye" style="color:var(--yellow)">Leitura</div><p style="font-size:14px">A cultura da TMG é de <b style="color:#fff">relacionamento</b>: as pessoas se ajudam, mas evitam o conflito aberto. A virada é levar a colaboração do <b style="color:#5CB8E6">favor pessoal</b> para o <b style="color:#5CB8E6">acordo explícito</b>.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 LIDERANÇA -->
+<section class="slide" data-p="1 · Cultura" data-t="Liderança" data-band="Liderança · do alinhamento à realização" data-c="c-blue" data-bs="A alavanca que move as demais frentes" data-src="Alinhamento estratégico 79% e Liderança 47%: índices harmonizados. “Liderança desalinhada”: 7 de 7 entrevistas. Compromissos do contrato de liderança: proposta.">
+  <div class="body">
+    <div style="display:grid;grid-template-columns:520px 1fr;gap:20px">
+      <div class="grid" style="align-content:start">
+        <div class="card" style="border-radius:12px">
+          <div class="ttl" style="color:var(--navy)">Gap de realização</div>
+          <svg viewBox="0 0 470 250" width="470" height="250" id="gapChart"></svg>
+          <div style="font-size:14px;color:var(--ink2);line-height:1.45">A liderança concorda sobre <b>o quê</b> — mas não executa <b>junto</b>. Fontes divergem muito entre si (amplitude de 100 pts), sinal de experiências diferentes com a liderança.</div>
+        </div>
+        <div class="card nv" style="border-radius:12px"><div class="eye" style="color:var(--yellow)">7 de 7 entrevistas</div><p style="font:600 22px/1.3 var(--fh);color:#fff">“O alinhamento até acontece; a realização falha.”</p>
+          <div style="margin-top:10px"><div class="small" style="color:#9DB7CE;margin-bottom:16px">Liderança · hoje 47% → marco 55% → meta ≥62,5%</div><div class="lv" data-lv="47" data-t6="55" data-t12="62.5" data-c="#5CB8E6"></div></div></div>
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;gap:12px"><div class="ttl" style="color:var(--blue)">Contrato de liderança</div><span class="hint">assine cada compromisso</span><div style="margin-left:auto;display:flex;align-items:center;gap:10px"><span class="small">força do pacto</span><div style="width:220px"><div class="lv" id="pactBar"><div class="fl" style="width:0;background:linear-gradient(90deg,#0085CA,#02624B)"></div></div></div><b id="pactN" style="font:800 22px var(--fh);color:var(--navy)">0/5</b></div></div>
+        <div id="pact" style="display:grid;gap:10px;margin-top:12px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 HEATMAP + MATRIZ -->
+<section class="slide" data-p="1 · Cultura" data-t="Riscos e criticidade" data-band="Riscos & criticidade · onde a cultura pode travar a mudança" data-c="c-red" data-bs="Heatmap · matriz de prioridade" data-src="Índice: faixas do Termômetro. Recorrência: tema principal da dimensão, entrevistas com menção explícita (sobre 7). Evidência: nº de leituras estruturadas. Onda 1 = índice na faixa Crítica ou tema unânime. Interpretação consolidada.">
+  <div class="body">
+    <div style="display:grid;grid-template-columns:1fr 560px;gap:18px">
+      <div>
+        <div style="font:800 24px var(--fh);color:var(--gold);letter-spacing:.02em">LEITURA ANALÍTICA — INTENSIDADE DA MUDANÇA</div>
+        <div style="font:700 14px var(--fb);color:var(--gold);margin:2px 0 10px">➤ 5 das 8 frentes estão na Onda 1 (e 1 a validar) → a mudança é estrutural na forma de trabalhar, não pontual</div>
+        <div style="border:1.5px solid #F0DDB0;border-radius:12px;overflow:hidden;background:#fff"><table class="tbl" id="heat" style="font-size:13px"></table></div>
+        <div class="small" style="margin-top:8px">● semáforo: <span class="dot d-r" style="width:11px;height:11px"></span> crítico · <span class="dot d-a" style="width:11px;height:11px"></span> atenção · <span class="dot d-g" style="width:11px;height:11px"></span> adequado · <span class="dot d-n" style="width:11px;height:11px"></span> evidência estreita. Clique numa linha ou bolha.</div>
+        <div class="ttl" style="color:#BC0404;margin-top:12px">Riscos de não agir</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:6px">
+          <div class="card" data-a="up" style="--d:4;border-radius:10px;border-top:4px solid #BC0404;padding:10px 12px"><h4>Regressão da mudança</h4><p style="font-size:12.5px">Sem reforço, cada entrega volta ao jeito antigo — <b>7 de 7</b> entrevistas.</p></div>
+          <div class="card" data-a="up" style="--d:5;border-radius:10px;border-top:4px solid #BC0404;padding:10px 12px"><h4>Sobrecarga em pessoas-chave</h4><p style="font-size:12.5px">Um coordenador atende <b>23 projetos</b>; o principal key user já está na operação.</p></div>
+          <div class="card" data-a="up" style="--d:6;border-radius:10px;border-top:4px solid #CE8E00;padding:10px 12px"><h4>Decisão refeita no corredor</h4><p style="font-size:12.5px">Corredor <b>5 (+1)/7</b> e decisão por influência <b>4 (+1)/7</b>.</p></div>
+          <div class="card" data-a="up" style="--d:7;border-radius:10px;border-top:4px solid #CE8E00;padding:10px 12px"><h4>Entregas travadas entre áreas</h4><p style="font-size:12.5px">“Duas TMG” e silos em <b>6 (+1)/7</b>: a prioridade fica com quem pesa mais.</p></div>
+        </div>
+      </div>
+      <div class="grid" style="align-content:start">
+        <div style="text-align:center"><span class="pbtn" style="background:linear-gradient(90deg,#9A6600,#CE8E00)">Matriz de prioridade</span></div>
+        <svg viewBox="0 0 560 410" width="560" height="410" id="bubble"></svg>
+        <div class="card" id="heatDetail" style="border-radius:10px;border-left:5px solid var(--gold);min-height:96px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MODELO DE MATRIZ -->
+<section class="slide" data-p="2 · Organização" data-t="Modelo de matriz" data-band="Modelo de matriz · como a TMG se organiza para entregar" data-c="c-blue" data-bs="Arraste e veja o que muda em cada modelo" data-src="Tipologia de estruturas: PMI (PMBOK® Guide, 5ª ed., Tabela 2-1). Posição da TMG: leitura interpretativa dos relatos — não é classificação formal. Critérios de matriz fraca: entrevistas com evidência (de 7).">
+  <div class="body">
+    <div style="display:grid;grid-template-columns:1fr 450px;gap:22px">
+      <div>
+        <div style="display:flex;justify-content:space-between;font:700 17px var(--fh);color:var(--navy);margin:6px 0 8px" id="mxLabels"></div>
+        <input type="range" id="mx" min="0" max="4" step="1" value="1" aria-label="Tipo de estrutura">
+        <div style="position:relative;height:26px;margin-top:6px" id="mxMarks"></div>
+        <div style="display:grid;grid-template-columns:240px 1fr;gap:18px;margin-top:6px">
+          <svg viewBox="0 0 240 380" width="240" height="380" id="mxBar"></svg>
+          <div id="mxInfo"></div>
+        </div>
+      </div>
+      <div class="grid" style="align-content:start;gap:10px">
+        <div class="card" style="border-top:4px solid var(--gold);border-radius:10px"><h4>8 de 8 sinais de matriz fraca aparecem nos relatos</h4><div id="weakChecks" style="display:grid;gap:5px;margin-top:6px"></div></div>
+        <div class="small" style="background:#FFF6E0;border:1px dashed #E3C173;padding:10px 12px;border-radius:6px;color:#6B4A00"><b>Ressalva:</b> leitura de comportamentos relatados, com variações entre áreas e níveis. Não afirmamos que toda a TMG é uma matriz fraca — validar com organograma, alçadas e fluxo real de decisão.</div>
+        <div class="card nv" style="border-radius:10px"><div class="eye" style="color:var(--yellow)">Na matriz equilibrada proposta · sem nova área</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px">
+            <div style="border-top:3px solid #5CB8E6;padding-top:8px"><div style="font:700 16px var(--fh);color:#fff">Gerente funcional</div><div style="font-size:13px;color:#C8DBEB;line-height:1.4;margin-top:4px">Pessoas, capacidade, padrão técnico e desenvolvimento</div></div>
+            <div style="border-top:3px solid #FCBF00;padding-top:8px"><div style="font:700 16px var(--fh);color:#fff">Dono do processo / interface</div><div style="font-size:13px;color:#C8DBEB;line-height:1.4;margin-top:4px">Prioridade, fluxo ponta a ponta e resultado transversal</div></div>
+          </div>
+          <div style="font-size:12.5px;color:#9DB7CE;margin-top:10px">Conflito → fórum de integração, com critério e registro.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 08 SILOS → SINERGIA -->
+<section class="slide" data-p="2 · Organização" data-t="Silos e sinergia" data-band="Modelo de silos · da ilha à sinergia entre áreas" data-c="c-steel" data-bs="De pontes pessoais a pontes formais" data-src="Silos 20% e Colaboração transversal 54%: índices harmonizados. “Silos e agenda local”: 6 (+1) de 7; “dependência de pessoas-chave”: 2 (+1) de 7. Áreas do diagrama: ILUSTRATIVAS.">
+  <div class="body">
+    <div style="display:grid;grid-template-columns:830px 1fr;gap:18px">
+      <div>
+        <div style="display:flex;align-items:center;gap:12px"><div class="seg" id="siloSeg"><button class="on" data-v="0">HOJE · ilhas</button><button data-v="1">FUTURO · rede</button></div><span class="hint">alterne e veja as pontes</span></div>
+        <svg viewBox="0 0 830 540" width="830" height="540" id="siloNet" style="margin-top:6px"></svg>
+      </div>
+      <div class="grid" style="align-content:start;gap:10px">
+        <div class="kt" style="grid-template-columns:1fr;gap:6px"><div style="display:flex;justify-content:space-between;align-items:baseline"><span class="small" style="font-weight:700;color:var(--ink2)">Silos / visão de empresa</span><span style="font:800 32px var(--fh);color:#BC0404">20% <small style="font-size:15px;color:var(--muted)">→ ≥62,5%</small></span></div><div class="lv" data-lv="20" data-t6="41" data-t12="62.5" data-c="#BC0404" style="margin-top:12px"></div></div>
+        <div class="kt" style="grid-template-columns:1fr;gap:6px"><div style="display:flex;justify-content:space-between;align-items:baseline"><span class="small" style="font-weight:700;color:var(--ink2)">Sinergia · colaboração transversal</span><span style="font:800 32px var(--fh);color:#CE8E00">54% <small style="font-size:15px;color:var(--muted)">→ ≥62,5%</small></span></div><div class="lv" data-lv="54" data-t6="58" data-t12="62.5" data-c="#CE8E00" style="margin-top:12px"></div></div>
+        <div class="ttl" style="color:var(--steel);margin-top:4px">5 pontes formais</div>
+        <div id="bridges" style="display:grid;gap:7px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 07 RASCI -->
+<section class="slide" data-p="2 · Organização" data-t="Papéis e responsabilidades" data-band="Papéis & responsabilidades · matriz RASCI" data-c="c-gold" data-bs="Um dono por decisão" data-src="“Papéis sobrepostos”: 7 de 7 entrevistas; “accountability difusa”: 6 (+1) de 7; RACI já aplicada e descartada. Matriz: decisões e papéis ILUSTRATIVOS, a pactuar com as lideranças.">
+  <div class="body">
+    <div style="display:grid;grid-template-columns:1fr 380px;gap:18px">
+      <div>
+        <div style="display:flex;align-items:center;gap:12px"><div class="seg" id="rasSeg"><button class="on" data-m="hoje">HOJE · padrão relatado</button><button data-m="prop">PROPOSTA</button><button data-m="free">MONTE VOCÊ</button></div><span class="hint">clique nas células</span><span class="small" style="margin-left:auto" id="rasNote"></span></div>
+        <div style="border:1.5px solid #F0DDB0;border-radius:12px;overflow:hidden;background:#fff;margin-top:10px"><table class="tbl rasci" id="rasci"></table></div>
+        <div id="rasLegend" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px"></div>
+      </div>
+      <div class="grid" style="align-content:start">
+        <div class="card" style="border-radius:12px;text-align:center"><div class="eye">Clareza de papéis</div><svg viewBox="0 0 200 200" width="190" height="190" id="rasRing"></svg><div id="rasMsg" style="font:700 15px var(--fb);color:var(--navy)"></div><div class="small">regra de ouro: <b>1 único A</b> e pelo menos <b>1 R</b> por decisão</div></div>
+        <div class="kt" style="grid-template-columns:1fr"><div class="small" style="font-weight:700;color:var(--ink2)">Papéis & responsabilidades</div><div style="display:flex;align-items:baseline;gap:10px"><span style="font:800 40px var(--fh);color:#CE8E00">40%</span><span class="small">→ marco 51% → meta ≥62,5%</span></div><div class="lv" data-lv="40" data-t6="51" data-t12="62.5" data-c="#CE8E00" style="margin-top:14px"></div></div>
+        <div class="card soft" style="border-radius:10px"><p style="font-size:13.5px"><b>Por que a RACI anterior não pegou?</b> Foi aplicada como documento, sem pacto nem ritual de revisão. Aqui a matriz nasce em workshop, vale para as <b>interfaces críticas</b> e é revisada no fórum.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 09 GOVERNANÇA -->
+<section class="slide" data-p="2 · Organização" data-t="Governança e decisão" data-band="Governança & decisão · quem decide o quê" data-c="c-purple" data-bs="Da escalada à alçada" data-src="Governança & decisão 35%: índice harmonizado. Escalonamento 5 (+1), decisão por influência 4 (+1), fóruns ineficazes 4 (+1) de 7. Cenários do jogo e mapa de alçadas: ILUSTRATIVOS / proposta.">
+  <div class="body">
+    <div id="govKpi" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px"></div>
+    <div style="display:grid;grid-template-columns:1fr 470px;gap:18px;margin-top:14px">
+      <div class="card" style="border-radius:12px">
+        <div style="display:flex;align-items:center;gap:12px"><div class="ttl" style="color:var(--purple)">Jogo · quem decide?</div><span class="hint">escolha o nível</span><b id="quizScore" style="margin-left:auto;font:800 22px var(--fh);color:var(--purple)">0/4</b></div>
+        <div id="quiz" style="display:grid;gap:10px;margin-top:10px"></div>
+      </div>
+      <div class="grid" style="align-content:start">
+        <div class="ttl" style="color:var(--purple)">Mapa de alçadas (proposta)</div>
+        <div id="alcadas" style="display:grid;gap:8px"></div>
+        <div class="card soft" style="border-radius:10px"><p style="font-size:13.5px"><b>Log de decisões:</b> toda decisão transversal é registrada (o quê, quem, critério, data) e comunicada — fim da decisão refeita no corredor.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BENCHMARKS -->
+<section class="slide" data-p="3 · Benchmarks" data-t="Benchmarks" data-band="Benchmarks · quem já enfrentou o mesmo desafio" data-c="c-steel" data-bs="2 casos do agronegócio · 2 de outras indústrias" data-src="Fontes: Bayer (bayer.com, 2026; CNBC 23/10/2025) · Cargill (Reuters 17/11/2015 e 08/08/2024) · Ford (The Oakland Press 28/01/2010; Acertitude) · Unilever (press release 25/01/2022). Resultados não atribuíveis só à reorganização.">
+  <div class="body">
+    <div class="tabs" id="benchTabs"></div>
+    <div id="benchPanes" style="margin-top:10px"></div>
+    <div data-a="up" style="--d:5;display:grid;grid-template-columns:220px repeat(3,1fr);gap:10px;margin-top:10px">
+      <div style="background:var(--navy);color:#fff;border-radius:10px;padding:10px 16px;display:flex;flex-direction:column;justify-content:center"><div class="eye" style="color:var(--yellow);margin-bottom:4px">Padrão comum</div><div style="font:700 17px/1.2 var(--fh)">O que os 4 casos ensinam à TMG</div></div>
+      <div class="card" style="border-radius:10px;padding:10px 14px"><h4>Dono claro do resultado</h4><p style="font-size:13px">Times com dono (Bayer) e Business Groups com P&amp;L (Unilever).</p></div>
+      <div class="card" style="border-radius:10px;padding:10px 14px"><h4>Menos camadas para decidir</h4><p style="font-size:13px">Níveis e cargos de gestão reduzidos; estrutura executiva simplificada (Bayer, Cargill, Unilever).</p></div>
+      <div class="card" style="border-radius:10px;padding:10px 14px"><h4>Cadência única com dados comuns</h4><p style="font-size:13px">Revisão semanal de todos os executivos (Ford); ciclos de 90 dias (Bayer).</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 CRONOLOGIA -->
+<section class="slide" data-p="4 · Proposta" data-t="Proposta · cultura" data-band="Proposta 1 · reorganização cultural — plano de trabalho" data-c="c-green" data-bs="Cronologia com ciclos de refinamento · clique em cada marco" data-src="Plano cultural, entregáveis e temperatura esperada por marco: proposta. Temperatura de base 39% (diagnóstico set/2026); marco e meta a confirmar pela reaplicação do mesmo instrumento.">
+  <div class="body">
+    <div style="text-align:center"><span class="pbtn" style="background:linear-gradient(90deg,#02624B,#2E9A6E,#02624B);padding:8px 90px;font-size:20px">Cronologia da mudança cultural</span></div>
+    <svg viewBox="0 0 1500 372" width="1500" height="372" id="timeline" style="margin-top:4px"></svg>
+    <div id="tlDetail" style="display:grid;grid-template-columns:260px 1fr 1fr 260px;gap:14px;margin-top:2px"></div>
+    <div id="cultLv" style="display:grid;grid-template-columns:200px repeat(4,1fr);gap:14px;margin-top:10px;align-items:center"></div>
+  </div>
+</section>
+
+<!-- PROPOSTA REORGANIZAÇÃO -->
+<section class="slide" data-p="4 · Proposta" data-t="Proposta · organização" data-band="Proposta 2 · reorganização operacional — plano de trabalho e indicadores" data-c="c-navy" data-bs="Papéis · silos · governança · matriz equilibrada" data-src="Plano, frentes e metas: proposta, a calibrar com a liderança. Linha de base: índices do diagnóstico (set/2026). Marco 6 meses = metade do caminho até a faixa Equilibrada.">
+  <div class="body">
+    <div style="display:flex;align-items:center;gap:12px"><div class="ttl" style="color:var(--navy)">Plano de trabalho · 12 meses</div><span class="hint">passe o mouse nas barras</span><span class="small" style="margin-left:auto">▬ entrega · ◆ marco de medição · ┅ rotina contínua</span></div>
+    <svg viewBox="0 0 1508 300" width="1508" height="300" id="gantt" style="margin-top:6px"></svg>
+    <div style="display:grid;grid-template-columns:600px 1fr;gap:16px;margin-top:8px">
+      <div class="card" style="border-radius:12px;padding:12px 18px"><div class="ttl" style="color:var(--navy)">Indicadores de maturidade · hoje → 6m → 12m</div><div id="orgLv" style="display:grid;gap:14px;margin-top:16px"></div></div>
+      <div><div style="border:1.5px solid var(--line);border-radius:12px;overflow:hidden;background:#fff"><table class="tbl" id="score" style="font-size:12.5px"></table></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 12 INSIGHTS E DECISÕES -->
+<section class="slide" data-p="4 · Proposta" data-t="Resumo final" data-band="Proposta 3 · resumo final — insights e decisões" data-c="c-green" data-bs="O que a liderança assume hoje" data-src="Decisões e prontidão: proposta para deliberação da liderança.">
+  <div class="body">
+    <div style="display:grid;grid-template-columns:520px 1fr 330px;gap:18px">
+      <div class="ins" style="height:640px">
+        <h3>INSIGHTS</h3>
+        <div class="eye" style="color:#02624B;margin-top:4px">Cultura</div><ul style="font-size:14px">
+          <li><b>Termômetro:</b> 39% hoje → ≥62,5% em 12 meses com um bom trabalho.</li>
+          <li><b>Liderança:</b> 79% de alinhamento × 47% de realização — o contrato de liderança fecha o gap.</li>
+          <li><b>Comportamento:</b> levar a colaboração do favor pessoal para o acordo explícito; divergir na sala.</li>
+          <li><b>Risco:</b> sem reforço, a mudança regride após o lançamento (7 de 7).</li>
+        </ul>
+        <div class="eye" style="color:#0085CA;margin-top:12px">Organização</div><ul style="font-size:14px">
+          <li><b>Papéis:</b> RASCI nas interfaces críticas — um único A por decisão.</li>
+          <li><b>Silos:</b> maior salto (20% → ≥62,5%) com metas compartilhadas e donos de interface.</li>
+          <li><b>Governança:</b> alçadas claras, fórum de integração e log de decisões.</li>
+          <li><b>Matriz:</b> evoluir de fraca para equilibrada sobre as linhas atuais — sem nova área.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="ttl" style="color:#02624B">Decisões para hoje</div><div class="small" style="margin:2px 0 10px">marque o que a liderança assume</div>
+        <div id="decisions" style="display:grid;gap:10px"></div>
+      </div>
+      <div class="card nv" style="border-radius:12px;text-align:center;height:640px"><div class="eye" style="color:var(--yellow)">Prontidão para iniciar</div><svg viewBox="0 0 220 220" width="270" height="270" id="ready"></svg><div id="readyMsg" style="font:600 15px/1.4 var(--fb);color:#C8DBEB;margin-top:6px"></div>
+        <div style="margin-top:22px;border-top:1px solid rgba(255,255,255,.15);padding-top:16px"><div class="small" style="color:#9DB7CE">temperatura de sinergia</div><div style="font:800 48px var(--fh);color:#fff">39% <span style="color:#FCBF00">→ ≥62,5%</span></div><div class="small" style="color:#9DB7CE">hoje → meta 12 meses</div></div></div>
+    </div>
+  </div>
+</section>
+</div></div>
+<div id="controls"><button class="g" id="bPrev"><span style="transform:rotate(180deg);display:inline-block">➜</span><span class="lb">Voltar</span></button><span class="c" id="cnt">1 / 15</span><button class="p" id="bNext"><span class="lb">Avançar</span>➜</button></div>
+<div id="dots"></div>
+<div id="tip"><b></b><span></span></div>
+<script>
+"use strict";
+const NS="http://www.w3.org/2000/svg",$=id=>document.getElementById(id);
+function S(t,a,p){const e=document.createElementNS(NS,t);if(a)for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
+function H(t,a,p,x){const e=document.createElement(t);if(a)for(const k in a){if(k==="class")e.className=a[k];else if(k==="style")e.style.cssText=a[k];else if(k==="html")e.innerHTML=a[k];else e.setAttribute(k,a[k])}if(x!=null)e.textContent=x;if(p)p.appendChild(e);return e}
+function T(p,x,y,s,a){const t=S("text",Object.assign({x,y},a||{}),p);t.textContent=s;return t}
+function tip(el,v,l){el.setAttribute("data-tv",v);el.setAttribute("data-tl",l||"")}
+function mk(svg,id,c){const d=S("defs",null,svg),m=S("marker",{id,viewBox:"0 0 10 10",refX:"9",refY:"5",markerWidth:"7",markerHeight:"7",orient:"auto-start-reverse"},d);S("path",{d:"M0 0L10 5L0 10z",fill:c},m)}
+function confetti(){const st=$("stage");const cols=["#0085CA","#CE8E00","#02624B","#FCBF00","#5E8AB4","#E23500"];for(let i=0;i<70;i++){const c=H("div",{class:"confetti",style:`left:${Math.random()*1600}px;background:${cols[i%6]};animation-delay:${Math.random()*.5}s`},st);setTimeout(()=>c.remove(),2600)}}
+const pc=v=>(v%1?v.toFixed(1).replace(".",","):String(v))+"%";
+const zc=v=>v<37.5?"#BC0404":v<62.5?"#CE8E00":v<87.5?"#5E8AB4":"#02624B";
+const zn=v=>v<37.5?"Crítica":v<62.5?"Frágil":v<87.5?"Equilibrada":"Forte";
+const IC={people:'<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M15 14.5c3 0 6 2 6 5.5"/>',flag:'<path d="M5 21V4"/><path d="M5 4h12l-2.5 4L17 12H5"/>',clip:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2.5h6V4"/><path d="M8.5 10h7M8.5 14h7M8.5 18h4"/>',wall:'<rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 10h18M3 15h18M9 5v5M15 10v5M9 15v4"/>',link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',fork:'<path d="M12 21v-7M12 14 6 8M12 14l6-6M6 8V3M18 8V3"/>',refresh:'<path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/>',chat:'<path d="M4 5h16v11H9l-5 4z"/>',thermo:'<path d="M14 14.8V5a2 2 0 0 0-4 0v9.8a4 4 0 1 0 4 0z"/><path d="M12 9v7"/>',star:'<path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/>'};
+const icon=(k,c)=>`<svg viewBox="0 0 24 24" style="stroke:${c||"#fff"}">${IC[k]}</svg>`;
+const person=(c,w,h)=>`<svg class="person" viewBox="0 0 20 44" style="width:${w||22}px;height:${h||48}px"><circle cx="10" cy="5.5" r="5" fill="${c}"/><path d="M4 12h12a3 3 0 0 1 3 3v12h-3.2v15h-4.3V30h-3v12H4.2V27H1V15a3 3 0 0 1 3-3z" fill="${c}"/></svg>`;
+const LOGO='<svg width="44" height="44" viewBox="0 0 46 46" fill="none" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l11 14L5 37" stroke="#FCBF00"/><path d="M15 9l11 14-11 14" stroke="#0085CA"/><path d="M25 9l11 14-11 14" stroke="#5CB8E6"/></svg>';
+
+/* ---------- DADOS ---------- */
+const FR=[
+{k:"cult",n:"Cultura & conflito",s:"Cultura",v:47,n6:55,src:5,th:"Evitação de conflito",rec:4,ind:1,ic:"people",ev:"Debate visto como desrespeito; “não desagradar, busca um meio-termo”.",imp:"Protocolo de divergência na sala, modelado pela liderança."},
+{k:"lid",n:"Liderança",s:"Liderança",v:47,n6:55,src:5,th:"Liderança desalinhada",rec:7,ind:0,ic:"flag",ev:"“O alinhamento até acontece; a realização falha.” Fontes divergem (amplitude 100).",imp:"Contrato de liderança com compromissos observáveis."},
+{k:"pap",n:"Papéis & responsabilidades",s:"Papéis",v:40,n6:51,src:5,th:"Papéis sobrepostos",rec:7,ind:0,ic:"clip",ev:"Papéis sobrepostos; “ninguém se responsabiliza”; RACI aplicada e descartada.",imp:"RASCI pactuada nas interfaces críticas: um único A por decisão."},
+{k:"sil",n:"Silos / visão de empresa",s:"Silos",v:20,n6:41,src:5,th:"Silos e agenda local",rec:6,ind:1,ic:"wall",ev:"Prioridade fica com a área mais influente; “existem duas TMG”.",imp:"Metas compartilhadas por cadeia de valor e donos de interface."},
+{k:"sin",n:"Sinergia · colaboração",s:"Sinergia",v:54,n6:58,src:5,th:"Dependência de pessoas-chave",rec:2,ind:1,ic:"link",ev:"Apoio pontual entre pessoas existe; trade-offs corporativos não. Fontes divergem (amplitude 100).",imp:"Levar pontes pessoais para acordos de interface e fórum de integração."},
+{k:"gov",n:"Governança & decisão",s:"Governança",v:35,n6:49,src:6,th:"Escalonamento constante",rec:5,ind:1,ic:"fork",ev:"Decisão por influência ou escalonamento; fóruns redundantes; decisões não registradas.",imp:"Mapa de alçadas, fórum com critério e log de decisões."},
+{k:"mud",n:"Sustentação da mudança",s:"Sustentação",v:25,n6:44,src:4,th:"Mudança não sustentada",rec:7,ind:0,ic:"refresh",ev:"Atenção migra após o lançamento; contornos em vez de revisar decisões.",imp:"Check de adoção 30/60/90 e reaplicação do termômetro."},
+{k:"com",n:"Comunicação",s:"Comunicação",v:0,n6:31,src:1,th:"Comunicação de corredor",rec:5,ind:1,ic:"chat",ev:"Comunicação executiva 1,0/5; canais indefinidos. Evidência estreita (1 instrumento).",imp:"Cascata de mensagens e log de decisões; validar a medição."}];
+FR.forEach(f=>f.t12=62.5);
+const TEMP=[39,51,62.5];const val=(f,s)=>s===0?f.v:s===1?f.n6:f.t12;
+const onda=f=>f.src<=1?"Validar":(f.v<37.5||f.rec===7)?"Onda 1":"Onda 2";
+
+/* ---------- LEVEL BARS ---------- */
+function lvBuild(el,v,t6,t12,col){el.innerHTML="";const bd=H("div",{class:"bd"},el);[[37.5,"rgba(188,4,4,.10)"],[25,"rgba(206,142,0,.13)"],[25,"rgba(94,138,180,.14)"],[12.5,"rgba(2,98,75,.12)"]].forEach(([w,c])=>H("i",{style:`width:${w}%;background:${c}`},bd));
+const f=H("div",{class:"fl",style:`width:0;background:${col||zc(v)}`},el);f.dataset.w=v;
+if(t6!=null&&t6!==v)H("i",{class:"mk m6","data-l":(t12!=null&&t12-t6<7)?"":"6m",style:`left:${t6}%`},el);if(t12!=null&&t12!==v)H("i",{class:"mk","data-l":"12m",style:`left:${t12}%`},el);tip(el,pc(v)+(t12?` → meta ${pc(t12)}`:""),"atual → meta 12 meses");return f}
+document.querySelectorAll(".lv[data-lv]").forEach(e=>{const d=e.dataset;lvBuild(e,+d.lv,d.t6?+d.t6:null,d.t12?+d.t12:null,d.c)});
+
+/* ---------- CAPA ---------- */
+(function(){$("coverLogo").innerHTML=`<span style="display:inline-flex;align-items:center;gap:10px">${LOGO}<span class="sr-logo"><span class="t"><b>TMG</b><br>cultura &amp;<br>operação</span></span></span>`;
+const F=[["1","Cultura & liderança","flag"],["2","Papéis & RASCI","clip"],["3","Desconstrução de silos","wall"],["4","Sinergia entre áreas","link"],["5","Governança & decisão","fork"]];
+F.forEach(([n,t])=>H("span",{class:"pill",style:"background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);padding:9px 14px;font-size:13px"},$("coverFronts"),`${n} · ${t}`));
+const s=$("coverSvg"),cx=400,cy=380,r=225,L=2*Math.PI*r;
+S("circle",{cx,cy,r:330,fill:"none",stroke:"rgba(255,255,255,.08)","stroke-dasharray":"2 10"},s);
+S("circle",{cx,cy,r,fill:"none",stroke:"rgba(255,255,255,.09)","stroke-width":38},s);
+const pot=S("circle",{cx,cy,r,fill:"none",stroke:"#FCBF00","stroke-width":38,"stroke-dasharray":`${L*.235} ${L}`,"stroke-dashoffset":`${-L*.39}`,transform:`rotate(-90 ${cx} ${cy})`,opacity:".35"},s);
+const cur=S("circle",{cx,cy,r,fill:"none",stroke:"#5CB8E6","stroke-width":38,"stroke-linecap":"butt","stroke-dasharray":`0 ${L}`,transform:`rotate(-90 ${cx} ${cy})`,style:"transition:stroke-dasharray 1.8s cubic-bezier(.2,.7,.2,1)"},s);cur.id="coverArc";cur.dataset.full=`${L*.39} ${L}`;
+const a=2*Math.PI*.625-Math.PI/2;S("line",{x1:cx+(r-30)*Math.cos(a),y1:cy+(r-30)*Math.sin(a),x2:cx+(r+30)*Math.cos(a),y2:cy+(r+30)*Math.sin(a),stroke:"#FCBF00","stroke-width":4},s);T(s,cx+(r+48)*Math.cos(a),cy+(r+48)*Math.sin(a),"meta ≥62,5%",{"text-anchor":"end",fill:"#FCBF00",style:"font:700 15px var(--fb)"});
+T(s,cx,cy-40,"TEMPERATURA DE SINERGIA",{"text-anchor":"middle",fill:"#9DB7CE",style:"font:700 13px var(--fb);letter-spacing:.14em"});
+T(s,cx,cy+34,"39%",{"text-anchor":"middle",fill:"#fff",style:"font:700 96px var(--fh)"});
+T(s,cx,cy+72,"hoje  →  ≥62,5% com um bom trabalho",{"text-anchor":"middle",fill:"#FCBF00",style:"font:700 16px var(--fb)"});
+F.forEach(([n,t,ic],i)=>{const an=-Math.PI/2+i*2*Math.PI/5-.35,x=cx+305*Math.cos(an),y=cy+305*Math.sin(an);const g=S("g",{class:"pulse",style:`animation-delay:${i*.4}s`},s);S("circle",{cx:x,cy:y,r:30,fill:"#0085CA",stroke:"#5CB8E6","stroke-width":2},g);
+const fo=S("foreignObject",{x:x-15,y:y-15,width:30,height:30},g);fo.innerHTML=`<div xmlns="http://www.w3.org/1999/xhtml" style="width:30px;height:30px">${icon(ic)}</div>`;
+T(s,x,y+(y>cy?50:-40),t,{"text-anchor":"middle",fill:"#DDEAF5",style:"font:600 14px var(--fb)"})})})();
+
+/* ---------- PAINEL ---------- */
+const KT=[0,1,2,3].map(i=>FR[i]);let scen=0;
+(function(){const row=$("ktRow");KT.forEach((f,i)=>{const c=H("div",{class:"kt","data-a":"up",style:`--d:${i}`},row);const ic=H("div",{class:"ic",html:icon(f.ic),style:`background:${zc(f.v)}`},c);const r=H("div",null,c);H("div",{class:"tt"},r,f.n);const vr=H("div",{class:"vr"},r);const v=H("div",{class:"v",style:`color:${zc(f.v)}`},vr,pc(f.v));H("div",{class:"mt"},vr,"meta ≥62,5%");const lv=H("div",{class:"lv"},r);const fl=lvBuild(lv,f.v,null,62.5);f._kt={ic,v,fl}});
+const L=$("lvList");[...FR,{n:"Alinhamento estratégico",v:79,n6:79,t12:79,src:2,s:"Alinhamento"}].forEach(f=>{const r=H("div",{style:"display:grid;grid-template-columns:190px 1fr 62px;gap:12px;align-items:center"},L);H("div",{style:"font:600 13px var(--fb);color:var(--navy)"},r,f.n+(f.src<=1?" ⚠":""));const lv=H("div",{class:"lv sm"},r);const fl=lvBuild(lv,f.v,f.n6===f.v?null:f.n6,f.t12===f.v?null:f.t12);const v=H("b",{style:`font:800 20px var(--fh);color:${zc(f.v)};text-align:right`},r,pc(f.v));f._lv={fl,v}});
+const g=$("gauge"),cx=160,cy=170,rr=125;const arc=(a0,a1,col)=>{const p=a=>[cx+rr*Math.cos(Math.PI*(1-a/100)),cy-rr*Math.sin(Math.PI*(1-a/100))];const[x0,y0]=p(a0),[x1,y1]=p(a1);S("path",{d:`M${x0} ${y0} A${rr} ${rr} 0 0 1 ${x1} ${y1}`,stroke:col,"stroke-width":24,fill:"none"},g)};
+arc(0,37.2,"#BC0404");arc(37.8,62.2,"#CE8E00");arc(62.8,87.2,"#5E8AB4");arc(87.8,100,"#02624B");
+const m=a=>[cx+(rr+18)*Math.cos(Math.PI*(1-a/100)),cy-(rr+18)*Math.sin(Math.PI*(1-a/100))];const[mx,my]=m(62.5);S("circle",{cx:mx,cy:my,r:5,fill:"#FCBF00"},g);
+const nd=S("g",{id:"needle",style:`transform-origin:${cx}px ${cy}px;transition:transform 1.3s cubic-bezier(.2,.7,.2,1)`},g);S("line",{x1:cx,y1:cy,x2:cx-100,y2:cy,stroke:"#fff","stroke-width":5,"stroke-linecap":"round"},nd);S("circle",{cx,cy,r:10,fill:"#fff"},g);
+const gv=T(g,cx,cy+60,"39%",{"text-anchor":"middle",fill:"#fff",style:"font:700 54px var(--fh)"});gv.id="gVal";const gz=T(g,cx,cy+80,"FRÁGIL",{"text-anchor":"middle",fill:"#FCBF00",style:"font:700 12px var(--fb);letter-spacing:.12em"});gz.id="gZone";
+$("scenSeg").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{$("scenSeg").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));setScen(+b.dataset.s)}))})();
+function count(el,from,to){const t0=performance.now(),d=900;const st=t=>{const k=Math.min(1,(t-t0)/d),e=1-Math.pow(1-k,3),v=from+(to-from)*e;el.textContent=pc(k<1?Math.round(v):to);if(k<1)requestAnimationFrame(st)};requestAnimationFrame(st)}
+function setScen(s){const prev=scen;scen=s;KT.forEach(f=>{const a=val(f,prev),b=val(f,s);count(f._kt.v,a,b);f._kt.v.style.color=zc(b);f._kt.ic.style.background=zc(b);f._kt.fl.style.width=b+"%";f._kt.fl.dataset.w=b;f._kt.fl.style.background=zc(b)});
+FR.forEach(f=>{const b=val(f,s);f._lv.fl.style.width=b+"%";f._lv.fl.dataset.w=b;f._lv.fl.style.background=zc(b);count(f._lv.v,val(f,prev),b);f._lv.v.style.color=zc(b)});
+const t=TEMP[s];$("needle").style.transform=`rotate(${t/100*180}deg)`;count($("gVal"),TEMP[prev],t);$("gZone").textContent=zn(t).toUpperCase();
+$("gDelta").textContent=["faixa Frágil · no limiar da Crítica","marco 6 meses · +12 pts · metade do caminho","faixa Equilibrada · +23,5 pts com um bom trabalho"][s];if(s===2)confetti()}
+
+/* ---------- MAPA COGNITIVO ---------- */
+const PAT=[["Liderança desalinhada",7,0,"O alinhamento até acontece; a realização falha."],["Papéis sobrepostos",7,0,"Normalmente não tem ninguém que se responsabiliza."],["Mudança não sustentada",7,0,"Depois do lançamento, a atenção migra para outras prioridades."],["Silos e agenda local",6,1,"Existem duas TMG: negócio versus pesquisa."],["Accountability difusa",6,1,"Sempre se responsabilizam outras áreas, nunca a própria."],["Escalonamento constante",5,1,"O assunto costuma subir de nível para alguém definir."],["Comunicação de corredor",5,1,"Na frente fala bom, atrás fala ruim."],["Decisão por influência",4,1,"Quem tem mais influência tem o poder de decisão."],["Evitação de conflito",4,1,"Não desagradar, busca um meio-termo — e a empresa perde."],["Fóruns ineficazes",4,1,"Reuniões intermináveis; os fóruns não são efetivos."]];
+(function(){const ev=$("evoPeople");for(let i=0;i<7;i++){const d=H("div",{"data-a":"zoom",style:`--d:${2+i*.6}`,html:person(i<5?"#2E9A6E":"#C9D3DC",30,66)},ev)}
+const box=$("picto");const rows=[];PAT.forEach(([t,n,ni,q],i)=>{const r=H("div",{class:"clk",style:"display:grid;grid-template-columns:230px 1fr 76px;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 14px"},box);
+const l=H("div",null,r);H("div",{style:"font:700 15px var(--fb);color:var(--navy)"},l,t);H("div",{class:"small"},l,`${n} explícita${n>1?"s":""}${ni?` · +${ni} indireta`:""}`);
+const pp=H("div",{style:"display:flex;gap:6px"},r);for(let k=0;k<7;k++)H("div",{"data-a":"zoom",style:`--d:${3+i*.5+k*.25}`,html:person(k<n?(n===7?"#BC0404":"#CE8E00"):k<n+ni?(n===7?"#E8A29C":"#EBCB85"):"#D5DDE4")},pp);
+H("div",{style:`font:800 30px var(--fh);color:${n===7?"#BC0404":"#CE8E00"};text-align:right`},r,`${n}/7`);r.addEventListener("click",()=>sel(i));rows.push(r)});
+function sel(i){rows.forEach((r,k)=>r.classList.toggle("sel",k===i));const [t,n,ni,q]=PAT[i],b=$("quoteBox");b.innerHTML="";H("div",{class:"eye",style:"color:#02624B;margin-bottom:4px"},b,`${t} · ${n}${ni?` (+${ni})`:""} de 7 entrevistas`);H("div",{style:"font:italic 600 19px/1.3 var(--fb);color:var(--navy)"},b,"“"+q+"”");H("div",{class:"small",style:"margin-top:4px"},b,"relato recorrente · sem atribuição individual")}
+sel(0)})();
+
+/* ---------- CÓDIGO CULTURAL ---------- */
+const CU=[["Divergir no corredor","“Na frente fala bom, atrás fala ruim.”","Comunicação de corredor · 5 (+1) de 7","Divergir na sala, sustentar fora","Protocolo de reunião: ouvir, testar premissas, decidir e registrar."],
+["“Não desagradar”","Meio-termo que não resolve — “em alguns momentos a empresa é que perde”.","Evitação de conflito · 4 (+1) de 7","Decidir por critério explícito","Matriz de trade-off e log de decisões visível a todos."],
+["A falha é da outra área","“Sempre se responsabilizam outras áreas, nunca a própria.”","Accountability difusa · 6 (+1) de 7","Minha parcela primeiro","Retrospectiva sem culpa: minha parcela, causa, dono, prazo."],
+["Proteger a agenda da área","Prioridade fica com quem tem mais influência.","Silos e agenda local · 6 (+1) de 7","Meta compartilhada da cadeia","KPI comum entre as áreas de uma mesma cadeia de valor."],
+["Conhecimento em pessoas-chave","Pontes informais; “sozinha não salva o projeto”.","Dependência de pessoas-chave · 2 (+1) de 7","Conhecimento na rede","Comunidades de prática e base de conhecimento compartilhada."],
+["Patrocínio só no lançamento","A atenção da liderança migra após o go-live.","Mudança não sustentada · 7 de 7","Liderança dona da adoção","Check de adoção 30/60/90 dias com o sponsor."]];
+(function(){const box=$("cultCards");const upd=()=>$("cultCount").textContent=`${box.querySelectorAll(".flip.on").length} de 6 cartas no futuro`;
+CU.forEach(([h,q,d,f,r],i)=>{const fl=H("div",{class:"flip clk","data-a":"up",style:`--d:${i*.5};height:100%`},box),inn=H("div",{class:"in"},fl);
+const fr=H("div",{class:"fr",style:"background:#FCF3EE;border:1.5px solid #F1C9C0;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:9px"},inn);
+const top=H("div",{style:"display:flex;justify-content:space-between;align-items:center"},fr);H("span",{class:"tagx",style:"background:var(--crit)"},top,"Hoje");H("span",{style:"font:800 30px var(--fh);color:#E8B9AE"},top,"C"+(i+1));
+H("div",{style:"font:700 26px/1.1 var(--fh);color:var(--navy)"},fr,h);H("div",{style:"font-size:14px;font-style:italic;color:var(--ink2);line-height:1.4"},fr,q);
+H("div",{style:"margin-top:auto;font:700 12px var(--fb);color:#BC0404;background:#fff;border-radius:6px;padding:6px 9px;align-self:flex-start"},fr,d);H("div",{class:"small"},fr,"clique para virar ↻");
+const bk=H("div",{class:"bk",style:"background:#EAF5F0;border:1.5px solid #BFDCD0;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:9px"},inn);
+const t2=H("div",{style:"display:flex;justify-content:space-between;align-items:center"},bk);H("span",{class:"tagx",style:"background:var(--green)"},t2,"Futuro");H("span",{style:"font:800 30px var(--fh);color:#9CC9B2"},t2,"C"+(i+1));
+H("div",{style:"font:700 26px/1.1 var(--fh);color:var(--green)"},bk,f);H("div",{style:"font:700 10px var(--fb);letter-spacing:.12em;color:var(--muted);margin-top:4px"},bk,"RITUAL QUE SUSTENTA");H("div",{style:"font-size:14px;color:var(--navy);line-height:1.4"},bk,r);
+fl.addEventListener("click",()=>{fl.classList.toggle("on");upd();if(box.querySelectorAll(".flip.on").length===6)confetti()})});
+$("cultSeg").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{$("cultSeg").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));box.querySelectorAll(".flip").forEach((f,i)=>setTimeout(()=>{f.classList.toggle("on",b.dataset.v==="1");upd()},i*90))}));upd()})();
+
+/* ---------- HEATMAP + BOLHAS ---------- */
+(function(){const t=$("heat");const hd=H("tr",null,t);["Frente","Índice","Recorrência do tema","Leituras","Gap p/ meta","Onda"].forEach(x=>H("th",{style:"background:#FFF6E0;color:#9A6600"},hd,x));
+const dI=v=>v<37.5?"d-r":v<62.5?"d-a":"d-g",dR=n=>n>=6?"d-r":n>=4?"d-a":"d-g",dE=n=>n>=4?"d-g":n>=2?"d-a":"d-n";const rows=[];
+FR.forEach((f,i)=>{const r=H("tr",{class:"clk",style:"cursor:pointer"},t);H("td",{html:`<span style="display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:${onda(f)==="Onda 1"?"#9A6600":onda(f)==="Onda 2"?"#5E8AB4":"#98A6B3"};color:#fff;font:800 12px var(--fb);margin-right:8px">${i+1}</span><b style="font-size:14.5px">${f.n}</b>`},r);
+H("td",{html:`<span class="dot ${dI(f.v)}" style="vertical-align:middle"></span> <b style="margin-left:6px">${pc(f.v)}</b>`},r);
+H("td",{html:`<span class="dot ${dR(f.rec)}" style="vertical-align:middle"></span> <span style="margin-left:6px">${f.rec}${f.ind?` (+${f.ind})`:""}/7 · ${f.th}</span>`},r);
+H("td",{html:`<span class="dot ${dE(f.src)}" style="vertical-align:middle"></span> <b style="margin-left:6px">${f.src}</b>`},r);
+H("td",{html:`<b style="color:#9A6600">+${pc(62.5-f.v).replace("%"," pts")}</b>`},r);const o=onda(f);H("td",{html:`<span class="tagx" style="background:${o==="Onda 1"?"#9A6600":o==="Onda 2"?"#5E8AB4":"#98A6B3"}">${o}</span>`},r);r.addEventListener("click",()=>pick(i));rows.push(r)});
+const s=$("bubble"),x0=70,x1=530,y0=30,y1=360,X=n=>x0+(n/7.4)*(x1-x0),Y=c=>y1-((c-40)/60)*(y1-y0);
+S("rect",{x:X(4.5),y:y0,width:x1-X(4.5),height:Y(62.5)-y0,fill:"#FFF3D6",rx:6},s);T(s,x1-8,y0+16,"PRIORIDADE MÁXIMA",{"text-anchor":"end",fill:"#9A6600",style:"font:800 11px var(--fb);letter-spacing:.1em"});
+S("line",{x1:x0,y1:y1,x2:x1,y2:y1,stroke:"#98A6B3"},s);S("line",{x1:x0,y1:y0,x2:x0,y2:y1,stroke:"#98A6B3"},s);
+S("line",{x1:X(4.5),y1:y0,x2:X(4.5),y2:y1,stroke:"#E3C173","stroke-dasharray":"4 4"},s);S("line",{x1:x0,y1:Y(62.5),x2:x1,y2:Y(62.5),stroke:"#E3C173","stroke-dasharray":"4 4"},s);
+for(let n=0;n<=7;n++)T(s,X(n),y1+18,String(n),{"text-anchor":"middle",fill:"#6B7B8C",style:"font:600 11px var(--fb)"});T(s,(x0+x1)/2,y1+40,"RECORRÊNCIA · entrevistas com menção explícita (de 7)",{"text-anchor":"middle",fill:"#35516A",style:"font:700 11.5px var(--fb)"});
+[40,60,80,100].forEach(c=>T(s,x0-8,Y(c)+4,String(c),{"text-anchor":"end",fill:"#6B7B8C",style:"font:600 11px var(--fb)"}));
+T(s,20,(y0+y1)/2,"CRITICIDADE (100 − índice) · eixo a partir de 40",{"text-anchor":"middle",fill:"#35516A",style:"font:700 11px var(--fb)",transform:`rotate(-90 20 ${(y0+y1)/2})`});
+const df=S("defs",null,s);[["gO1","#F2C24B","#9A6600"],["gO2","#A9C4DD","#34628C"],["gV","#E1E7EC","#8A99A6"]].forEach(([id,a,b])=>{const g=S("radialGradient",{id,cx:".35",cy:".35",r:".8"},df);S("stop",{offset:"0","stop-color":a},g);S("stop",{offset:"1","stop-color":b},g)});
+const bs=FR.map((f,i)=>{const o=onda(f),cx=X(f.rec),cy=Y(100-f.v),r=6+f.src*2.4;const g=S("g",{style:"cursor:pointer"},s);const c=S("circle",{cx,cy,r,fill:`url(#${o==="Onda 1"?"gO1":o==="Onda 2"?"gO2":"gV"})`,stroke:"#fff","stroke-width":2},g);
+T(g,cx,cy+5,String(i+1),{"text-anchor":"middle",fill:o==="Validar"?"#35516A":"#fff",style:"font:800 14px var(--fb)"});tip(g,`${i+1} · ${f.n} · ${pc(f.v)}`,`${f.th}: ${f.rec}/7 · ${f.src} leituras · ${o}`);g.addEventListener("click",()=>pick(i));return c});
+function pick(i){rows.forEach((r,k)=>r.style.background=k===i?"#FFF6E0":"");bs.forEach((c,k)=>{c.setAttribute("stroke",k===i?"#002B49":"#fff");c.setAttribute("stroke-width",k===i?3.5:2)});const f=FR[i],d=$("heatDetail");d.innerHTML="";
+const h=H("div",{style:"display:flex;justify-content:space-between;align-items:baseline"},d);H("h3",{style:"font-size:21px"},h,f.n);H("b",{style:`font:800 26px var(--fh);color:${zc(f.v)}`},h,`${pc(f.v)} → ≥62,5%`);
+H("p",{style:"font-size:13.5px;margin-top:2px"},d,f.ev);H("p",{style:"font-size:13.5px;margin-top:4px;color:var(--green)",html:"<b>Implicação:</b> "+f.imp},d)}
+pick(3)})();
+
+/* ---------- LIDERANÇA ---------- */
+(function(){const s=$("gapChart"),X=v=>10+v*4.5;
+[[0,"Alinhamento estratégico · o QUÊ",79,"#02624B"],[1,"Liderança · o COMO, juntos",47,"#CE8E00"]].forEach(([i,l,v,c])=>{const y=30+i*95;T(s,10,y,l,{fill:"#002B49",style:"font:700 14px var(--fb)"});S("rect",{x:10,y:y+10,width:450,height:44,rx:8,fill:"#EEF2F5"},s);const r=S("rect",{x:10,y:y+10,width:0,height:44,rx:8,fill:c,style:"transition:width 1.2s cubic-bezier(.2,.7,.2,1)"},s);r.classList.add("gbar");r.dataset.w=X(v)-10;T(s,X(v)-10,y+40,pc(v),{"text-anchor":"end",fill:"#fff",style:"font:800 24px var(--fh)"})});
+S("rect",{x:X(47),y:115,width:X(79)-X(47),height:44,rx:6,fill:"none",stroke:"#BC0404","stroke-width":2.5,"stroke-dasharray":"6 5"},s);S("rect",{x:(X(47)+X(79))/2-50,y:125,width:100,height:24,rx:5,fill:"#fff"},s);T(s,(X(47)+X(79))/2,143,"gap 32 pts",{"text-anchor":"middle",fill:"#BC0404",style:"font:800 17px var(--fb)"});
+S("line",{x1:X(62.5),y1:14,x2:X(62.5),y2:180,stroke:"#002B49","stroke-width":2,"stroke-dasharray":"3 4"},s);T(s,X(62.5),200,"meta ≥62,5%",{"text-anchor":"middle",fill:"#002B49",style:"font:700 12px var(--fb)"});
+T(s,10,236,"Maior diferença entre duas dimensões do diagnóstico.",{fill:"#6B7B8C",style:"font:600 12px var(--fb)"});
+const P=[["Uma só voz","Discurso duplo: concorda na sala, diverge no corredor","Divergir na sala e sustentar a decisão fora dela","corredor 5 (+1)/7"],["Decidir por critério","Decisão pela influência de quem pesa mais","Critérios explícitos e decisão registrada em log","influência 4 (+1)/7"],["Dono do resultado","A falha é sempre da outra área","Um único dono (A) por resultado transversal","accountability 6 (+1)/7"],["Patrocínio até a adoção","A atenção migra depois do lançamento","Sponsor acompanha a adoção em 30/60/90 dias","não sustentada 7/7"],["Metas compartilhadas","Cada área protege a própria agenda","Metas comuns entre áreas da mesma cadeia","silos 6 (+1)/7"]];
+const on=new Set();let fired=false;const bar=$("pactBar").querySelector(".fl");
+P.forEach(([t,de,para,d],i)=>{const r=H("div",{class:"clk","data-a":"up",style:`--d:${i};display:grid;grid-template-columns:56px 190px 1fr 1fr 118px;gap:12px;align-items:center;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;min-height:98px`},$("pact"));
+const n=H("div",{style:"width:48px;height:48px;border-radius:50%;background:#E5F2FA;color:#0085CA;display:grid;place-items:center;font:800 24px var(--fh)"},r,String(i+1));H("div",{style:"font:700 20px/1.1 var(--fh);color:var(--navy)"},r,t);
+const a=H("div",{style:"background:#FBEDEA;border-radius:8px;padding:8px 10px"},r);H("div",{style:"font:700 10px var(--fb);letter-spacing:.12em;color:var(--crit)"},a,"DE");H("div",{style:"font-size:13px;color:var(--ink2);line-height:1.35"},a,de);
+const b=H("div",{style:"background:#EAF5F0;border-radius:8px;padding:8px 10px"},r);H("div",{style:"font:700 10px var(--fb);letter-spacing:.12em;color:var(--green)"},b,"PARA");H("div",{style:"font-size:13px;color:var(--navy);font-weight:600;line-height:1.35"},b,para);
+const st=H("div",{style:"text-align:center"},r);H("div",{class:"small",style:"font-weight:700"},st,d);const stamp=H("div",{style:"margin-top:6px;font:800 12px var(--fb);letter-spacing:.1em;color:#98A6B3;border:2px dashed #C5D2DE;border-radius:6px;padding:4px 6px"},st,"ASSINAR");
+r.addEventListener("click",()=>{on.has(i)?on.delete(i):on.add(i);const k=on.has(i);r.style.borderColor=k?"#02624B":"";r.style.background=k?"#F4FAF7":"#fff";n.style.background=k?"#02624B":"#E5F2FA";n.style.color=k?"#fff":"#0085CA";n.textContent=k?"✓":String(i+1);stamp.textContent=k?"ASSINADO":"ASSINAR";stamp.style.color=k?"#02624B":"#98A6B3";stamp.style.borderColor=k?"#02624B":"#C5D2DE";stamp.style.transform=k?"rotate(-6deg)":"none";
+bar.style.width=on.size/5*100+"%";$("pactN").textContent=`${on.size}/5`;if(on.size===5&&!fired){fired=true;confetti()}if(on.size<5)fired=false})})})();
+
+/* ---------- RASCI ---------- */
+const RR=["Comitê executivo","Gerente da área","Dono do processo","Key user","Sistemas / TI","Áreas impactadas"];
+const RD=["Priorizar demandas entre áreas","Definir requisitos de processo e sistema","Aprovar mudança de processo entre áreas","Aceitar a entrega e acompanhar a adoção","Comunicar mudanças às equipes","Resolver conflito de prioridade entre áreas"];
+const RP=[["A","R","C","I","C","I"],["I","C","A","R","S","C"],["I","R","A","C","S","C"],["I","S","A","R","S","C"],["S","R","A","S","I","I"],["A","R","C","I","I","C"]];
+const RH=[["A","A","?","?","R","A"],["?","?","?","R","R","?"],["A","A","?","C","?","A"],["?","?","?","?","?","?"],["I","?","?","?","?","?"],["A","A","?","?","?","A"]];
+const RSTY={A:"background:#002B49;color:#fff",R:"background:#0085CA;color:#fff",S:"background:#C9DAEA;color:#002B49",C:"background:#F6E3B4;color:#7A5200",I:"background:#E8EDF2;color:#6B7B8C","?":"color:#BC0404;background:repeating-linear-gradient(45deg,#FFF 0 6px,#FCEDEA 6px 12px)","":"color:#C5D2DE"};
+let RM=RH.map(r=>r.slice()),rasFired=false;
+(function(){const t=$("rasci");const h=H("tr",null,t);H("th",{style:"background:#FFF6E0;color:#9A6600;width:250px"},h,"Decisão \\ papel");RR.forEach(r=>H("th",{style:"background:#FFF6E0;color:#9A6600;text-align:center;font-size:10px"},h,r));H("th",{style:"background:#FFF6E0;color:#9A6600;width:170px"},h,"Status");
+RD.forEach((d,i)=>{const r=H("tr",null,t);H("td",{html:`<b>${d}</b>`,style:"font-size:13px"},r);RR.forEach((_,j)=>{const c=H("td",{class:"cell",style:"height:62px"},r);c.dataset.i=i;c.dataset.j=j;c.addEventListener("click",()=>{const O=["","R","A","S","C","I"];const cur=RM[i][j]==="?"?"":RM[i][j];RM[i][j]=O[(O.indexOf(cur)+1)%O.length];setMode("free",true);draw()})});H("td",{class:"st",style:"font-size:12.5px;font-weight:700"},r)});
+[["R","Responsável","executa o trabalho"],["A","Aprovador","dono único · responde pelo resultado"],["S","Suporte","apoia a execução"],["C","Consultado","opina antes da decisão"],["I","Informado","é avisado depois"]].forEach(([l,n,d])=>{const b=H("div",{style:"display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 9px"},$("rasLegend"));H("span",{style:RSTY[l]+";width:30px;height:30px;border-radius:6px;display:grid;place-items:center;font:800 17px var(--fh);flex:none"},b,l);const x=H("div",null,b);H("div",{style:"font:700 12.5px var(--fb);color:var(--navy)"},x,n);H("div",{class:"small",style:"font-size:11px"},x,d)});
+$("rasSeg").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{const m=b.dataset.m;RM=(m==="hoje"?RH:m==="prop"?RP:RD.map(()=>RR.map(()=>""))).map(r=>r.slice());setMode(m);draw()}));setMode("hoje");draw()})();
+function setMode(m,keep){$("rasSeg").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x.dataset.m===m));$("rasNote").textContent={hoje:"representação ilustrativa dos padrões relatados",prop:"proposta ilustrativa · a pactuar em workshop",free:"sua versão · clique para alternar R → A → S → C → I"}[m]}
+function draw(){let ok=0;document.querySelectorAll("#rasci td.cell").forEach(c=>{const v=RM[c.dataset.i][c.dataset.j];c.textContent=v===""?"·":v;c.style.cssText="height:62px;"+RSTY[v]});
+document.querySelectorAll("#rasci tr").forEach((tr,k)=>{if(!k)return;const i=k-1,row=RM[i],a=row.filter(x=>x==="A").length,r=row.filter(x=>x==="R").length,st=tr.querySelector(".st");let m,c;if(a===0){m="✕ sem A · ninguém responde";c="#BC0404"}else if(a>1){m=`✕ ${a} A · sobreposição`;c="#BC0404"}else if(r===0){m="! sem R · ninguém executa";c="#CE8E00"}else{m="✓ papel claro";c="#02624B";ok++}st.textContent=m;st.style.color=c});
+const s=$("rasRing");s.innerHTML="";const p=ok/6;S("circle",{cx:100,cy:100,r:80,fill:"none",stroke:"#EEF2F5","stroke-width":18},s);S("circle",{cx:100,cy:100,r:80,fill:"none",stroke:p===1?"#02624B":p>=.5?"#CE8E00":"#BC0404","stroke-width":18,"stroke-linecap":"round",pathLength:1,"stroke-dasharray":`${Math.max(p,.001)} 1`,transform:"rotate(-90 100 100)"},s);T(s,100,110,`${ok}/6`,{"text-anchor":"middle",fill:"#002B49",style:"font:700 44px var(--fh)"});T(s,100,134,"decisões claras",{"text-anchor":"middle",fill:"#6B7B8C",style:"font:600 12px var(--fb)"});
+$("rasMsg").textContent=ok===6?"Papéis claros em todas as decisões ✓":ok===0?"Nenhuma decisão com dono claro":`${6-ok} decisão(ões) ainda ambígua(s)`;if(ok===6&&!rasFired){rasFired=true;confetti()}if(ok<6)rasFired=false}
+
+/* ---------- SILOS → SINERGIA ---------- */
+(function(){const s=$("siloNet"),cx=415,cy=275,rx=300,ry=195,bw=196,bh=62;mk(s,"arS","#0085CA");
+const A=["Negócio & comercial","Pesquisa & desenvolvimento","Planejamento & execução","Supply & operações","Processos, dados & sistemas","Pessoas & capacitação"];
+const P=A.map((_,i)=>{const a=-Math.PI/2+i*2*Math.PI/6+Math.PI/6;return[cx+rx*Math.cos(a),cy+ry*Math.sin(a)]});
+const g0=S("g",{style:"transition:opacity .7s"},s),g1=S("g",{style:"transition:opacity .7s;opacity:0"},s);
+// HOJE
+T(g0,cx,cy-6,"sem espaço comum",{"text-anchor":"middle",fill:"#98A6B3",style:"font:700 15px var(--fb)"});T(g0,cx,cy+14,"de decisão",{"text-anchor":"middle",fill:"#98A6B3",style:"font:700 15px var(--fb)"});
+S("path",{d:`M${cx} ${cy+34} L${cx} ${cy+90}`,stroke:"#C5D2DE","stroke-width":2,"stroke-dasharray":"4 5"},g0);T(g0,cx,cy+108,"↑ escalonamento",{"text-anchor":"middle",fill:"#BC0404",style:"font:700 13px var(--fb)"});
+[[1,2],[2,3],[4,5]].forEach(([a,b])=>{const m=[(P[a][0]+P[b][0])/2,(P[a][1]+P[b][1])/2];S("path",{d:`M${P[a][0]} ${P[a][1]} Q${m[0]-(cx-m[0])*.2} ${m[1]-(cy-m[1])*.2} ${P[b][0]} ${P[b][1]}`,stroke:"#98A6B3","stroke-width":1.6,fill:"none","stroke-dasharray":"3 5"},g0);const q=[m[0]-(cx-m[0])*.1,m[1]-(cy-m[1])*.1];S("circle",{cx:q[0],cy:q[1],r:13,fill:"#FFF6E0",stroke:"#CE8E00"},g0);const fo=S("foreignObject",{x:q[0]-6,y:q[1]-11,width:12,height:24},g0);fo.innerHTML=`<div xmlns="http://www.w3.org/1999/xhtml">${person("#CE8E00",12,24)}</div>`;tip(fo,"Ponte pessoal","o fluxo depende de pessoas-chave")});
+const m1=[(P[0][0]+P[1][0])/2,(P[0][1]+P[1][1])/2],c1=[m1[0]-(cx-m1[0])*.1,m1[1]-(cy-m1[1])*.1];S("path",{d:`M${c1[0]-18} ${c1[1]-22} l14 8 l-8 10 l14 8 l-6 12`,stroke:"#BC0404","stroke-width":3,fill:"none"},g0);T(g0,c1[0]+30,c1[1]+8,"“duas TMG”",{"text-anchor":"start",fill:"#BC0404",style:"font:800 14px var(--fb)"});T(g0,-999,-999,"",{"text-anchor":"middle",fill:"#BC0404",style:"font:800 14px var(--fb)"});
+// FUTURO
+S("ellipse",{cx,cy,rx:rx,ry:ry,fill:"none",stroke:"#02624B","stroke-width":3,opacity:".5"},g1);
+P.forEach(p=>S("line",{x1:cx,y1:cy,x2:p[0],y2:p[1],stroke:"#0085CA","stroke-width":2.5,class:"flow"},g1));
+S("circle",{cx,cy,r:74,fill:"#002B49",class:"pulse"},g1);T(g1,cx,cy-4,"Fórum de",{"text-anchor":"middle",fill:"#fff",style:"font:700 17px var(--fb)"});T(g1,cx,cy+17,"integração",{"text-anchor":"middle",fill:"#fff",style:"font:700 17px var(--fb)"});T(g1,cx,cy+36,"quinzenal · log",{"text-anchor":"middle",fill:"#9DB7CE",style:"font:600 11px var(--fb)"});
+P.forEach((p,i)=>{const q=P[(i+1)%6],m=[(p[0]+q[0])/2,(p[1]+q[1])/2],o=[m[0]+(m[0]-cx)*.12,m[1]+(m[1]-cy)*.12];const g=S("g",null,g1);S("rect",{x:o[0]-62,y:o[1]-12,width:124,height:24,rx:12,fill:"#EAF5F0",stroke:"#02624B"},g);T(g,o[0],o[1]+4,"acordo de interface",{"text-anchor":"middle",fill:"#02624B",style:"font:700 11px var(--fb)"})});
+S("rect",{x:cx-190,y:6,width:380,height:30,rx:15,fill:"#FCBF00"},g1);T(g1,cx,26,"Metas compartilhadas por cadeia de valor",{"text-anchor":"middle",fill:"#002B49",style:"font:800 13px var(--fb)"});
+// ÁREAS
+const walls=[];P.forEach((p,i)=>{const w=S("rect",{x:p[0]-bw/2-10,y:p[1]-bh/2-10,width:bw+20,height:bh+20,rx:8,fill:"none",stroke:"#BC0404","stroke-width":3,"stroke-dasharray":"10 4",style:"transition:opacity .6s"},s);walls.push(w);
+S("rect",{x:p[0]-bw/2,y:p[1]-bh/2,width:bw,height:bh,rx:8,fill:"#fff",stroke:"#5E8AB4","stroke-width":1.8},s);S("rect",{x:p[0]-bw/2,y:p[1]-bh/2,width:6,height:bh,fill:"#5E8AB4"},s);
+const [l1,l2]=A[i].split(" & ");T(s,p[0]+3,p[1]-3,l1+(l2?" &":""),{"text-anchor":"middle",fill:"#002B49",style:"font:700 14px var(--fb)"});if(l2)T(s,p[0]+3,p[1]+15,l2,{"text-anchor":"middle",fill:"#002B49",style:"font:700 14px var(--fb)"})});
+T(s,8,535,"Áreas ilustrativas · o desenho real das interfaces é definido com as lideranças",{fill:"#98A6B3",style:"font:600 11px var(--fb)"});
+$("siloSeg").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{$("siloSeg").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));const f=b.dataset.v==="1";g0.style.opacity=f?0:1;g1.style.opacity=f?1:0;walls.forEach(w=>w.style.opacity=f?0:1)}));
+const B=[["Metas compartilhadas","KPI comum por cadeia de valor, não só por área"],["Donos de interface","cada interface crítica com um único A (RASCI)"],["Fórum de integração","quinzenal: dependências, conflitos e decisões"],["Acordos de interface","o que entrego, o que recebo, prazo e qualidade"],["Comunidades de prática","o conhecimento sai das pessoas-chave e vai para a rede"]];
+B.forEach(([t,d],i)=>{const c=H("div",{"data-a":"up",style:`--d:${i};display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-left:4px solid #5E8AB4;border-radius:8px;padding:8px 12px`},$("bridges"));H("div",{style:"width:30px;height:30px;border-radius:50%;background:#5E8AB4;color:#fff;display:grid;place-items:center;font:800 16px var(--fh)"},c,String(i+1));const x=H("div",null,c);H("div",{style:"font:700 14px var(--fb);color:var(--navy)"},x,t);H("div",{class:"small"},x,d)})})();
+
+/* ---------- GOVERNANÇA ---------- */
+(function(){const K=[["Governança & decisão",null,35,"fork"],["Escalonamento constante",[5,1],null,"fork"],["Decisão por influência",[4,1],null,"flag"],["Fóruns ineficazes",[4,1],null,"chat"]];
+K.forEach(([t,rc,v,ic],i)=>{const c=H("div",{class:"kt","data-a":"up",style:`--d:${i}`},$("govKpi"));H("div",{class:"ic",html:icon(ic),style:`background:${i?"#7B2F8C":"#BC0404"}`},c);const r=H("div",null,c);H("div",{class:"tt",style:"font-size:15px"},r,t);
+if(v!=null){const vr=H("div",{class:"vr"},r);H("div",{class:"v",style:"color:#BC0404;font-size:40px"},vr,pc(v));H("div",{class:"mt"},vr,"meta ≥62,5%");const lv=H("div",{class:"lv sm",style:"margin-top:4px"},r);lvBuild(lv,35,49,62.5,"#BC0404")}
+else{const vr=H("div",{style:"display:flex;align-items:center;gap:10px;margin-top:4px"},r);H("div",{class:"v",style:"color:#500260;font:800 36px var(--fh)"},vr,`${rc[0]}/7`);const pp=H("div",{style:"display:flex;gap:2px"},vr);for(let k=0;k<7;k++)H("div",{html:person(k<rc[0]?"#500260":k<rc[0]+rc[1]?"#C39BCB":"#D5DDE4",13,28)},pp);H("div",{class:"small",style:"font-size:10.5px"},r,`+${rc[1]} menção indireta`)}});
+const Q=[["Duas áreas disputam o mesmo especialista para entregas diferentes.","T","Fórum de integração decide com critério de prioridade — sem escalar ao comitê."],["Rever as prioridades estratégicas do portfólio do ano.","E","Comitê executivo: é uma decisão de direção."],["Ajustar a rotina interna de trabalho de uma equipe.","O","A própria área decide — não precisa subir de nível."],["Mudar um fluxo de processo que afeta três áreas.","T","O dono do processo (A) propõe e o fórum de integração valida."]];
+const LV={E:["Estratégico","#500260"],T:["Tático","#7B2F8C"],O:["Operacional","#A569B3"]};let score=0,done=0;
+Q.forEach(([q,a,why],i)=>{const r=H("div",{style:"border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:#FBF8FC"},$("quiz"));const top=H("div",{style:"display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center"},r);H("div",{style:"width:28px;height:28px;border-radius:50%;background:#500260;color:#fff;display:grid;place-items:center;font:800 15px var(--fh)"},top,String(i+1));H("div",{style:"font:600 14.5px var(--fb);color:var(--navy)"},top,q);
+const bs=H("div",{style:"display:flex;gap:6px"},top);const fb=H("div",{class:"small",style:"margin-top:6px;min-height:17px;font-size:12.5px"},r,"");let ans=false;
+["E","T","O"].forEach(k=>{const b=H("button",{style:"border:1.5px solid #C9B3D0;background:#fff;border-radius:99px;padding:6px 12px;font:700 12px var(--fb);color:#500260"},bs,LV[k][0]);b.addEventListener("click",()=>{if(ans)return;ans=true;done++;const ok=k===a;if(ok)score++;b.style.background=ok?"#02624B":"#BC0404";b.style.color="#fff";b.style.borderColor="transparent";if(!ok){const c=[...bs.children][["E","T","O"].indexOf(a)];c.style.background="#02624B";c.style.color="#fff"}
+fb.innerHTML=`<b style="color:${ok?"#02624B":"#BC0404"}">${ok?"✓ Isso!":"✕ Quase."}</b> ${LV[a][0]}: ${why}`;$("quizScore").textContent=`${score}/4`;if(done===4&&score===4)confetti()})})});
+[["E","Comitê executivo","mensal / trimestral","Direção, prioridades do portfólio e conflitos não resolvidos no tático."],["T","Fórum de integração","quinzenal","Prioridade entre áreas, dependências e mudanças de processo transversais."],["O","Área / dono do processo","contínuo","Execução, rotina e melhorias locais."]].forEach(([k,n,c,d],i)=>{const x=H("div",{"data-a":"left",style:`--d:${i};display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-left:6px solid ${LV[k][1]};border-radius:10px;padding:10px 14px;margin-left:${i*22}px`},$("alcadas"));const l=H("div",null,x);H("div",{style:`font:800 18px var(--fh);color:${LV[k][1]}`},l,LV[k][0]);H("div",{class:"small"},l,c);const rr=H("div",null,x);H("div",{style:"font:700 14px var(--fb);color:var(--navy)"},rr,n);H("div",{style:"font-size:13px;color:var(--ink2);line-height:1.35"},rr,d)})})();
+
+/* ---------- CRONOLOGIA ---------- */
+const PH=[["Diagnóstico","set/2026","Escuta & termômetro",["7 entrevistas","Termômetro 39%","Padrões mapeados"],"A","Entender como a cultura opera hoje, sem atribuição individual.","Temperatura de sinergia 39% (linha de base)","concluído","39%"],
+["Mobilizar","0–30 dias","Patrocínio",["Validar com a liderança","Narrativa única","Rede de agentes"],"A · D","Criar senso de urgência e patrocínio visível da liderança.","Liderança com a narrativa validada e agentes nomeados","próximo",""],
+["Desenhar","31–60 dias","Regras do jogo",["Contrato de liderança","Protocolo de divergência","Trilhas por papel"],"K","Definir os comportamentos esperados da liderança e das equipes.","Contrato de liderança com 5 compromissos desenhado","",""],
+["Pactuar","61–90 dias","Acordos",["Workshops de cultura","Assinatura do contrato","Cascata de comunicação"],"D · K","Transformar o desenho em compromisso de quem lidera e executa.","Contrato assinado por toda a liderança","",""],
+["Implantar","3–6 meses","Rituais",["Retro sem culpa","Reconhecimento","Comunidades de prática"],"Ab","Levar os novos comportamentos para a rotina.","Rituais culturais ativos em todas as áreas","",""],
+["Medir","6 meses","Marco de meio caminho",["Reaplicar termômetro","Pulso de liderança","Ajustar rituais"],"R","Medir a evolução com o mesmo instrumento.","Temperatura ≥51% (marco)","","51%"],
+["Sustentar","6–12 meses","Meta de 12 meses",["Ritos incorporados","Agentes multiplicadores","Refinar o contrato"],"R","Sustentar, reconhecer quem modela o novo e refinar.","Temperatura ≥62,5% (faixa Equilibrada)","","≥62,5%"]];
+(function(){const s=$("timeline"),y=128,X=i=>190+i*185;mk(s,"arT","#98A6B3");mk(s,"arD2","#B9A77A");
+S("line",{x1:70,y1:y,x2:1430,y2:y,stroke:"#98A6B3","stroke-width":2},s);
+S("circle",{cx:70,cy:y,r:17,fill:"#0B7A95"},s);S("circle",{cx:1430,cy:y,r:17,fill:"#C5D2DE"},s);
+T(s,34,y+2,"INÍCIO",{"text-anchor":"middle",fill:"#B3BFCA",style:"font:700 17px var(--fb);letter-spacing:.1em",transform:`rotate(-90 34 ${y})`});T(s,1468,y+2,"META 12M",{"text-anchor":"middle",fill:"#B3BFCA",style:"font:700 17px var(--fb);letter-spacing:.1em",transform:`rotate(-90 1468 ${y})`});
+[[6,3,26],[6,4,50]].forEach(([a,b,h])=>S("path",{d:`M${X(a)} ${y-66} C ${X(a)-40} ${h-12}, ${X(b)+60} ${h-12}, ${X(b)+8} ${y-62}`,stroke:"#98A6B3","stroke-width":1.8,fill:"none","marker-end":"url(#arT)"},s));
+T(s,(X(6)+X(3))/2+40,14,"ciclos de refinamento",{"text-anchor":"middle",fill:"#98A6B3",style:"font:italic 600 12px var(--fb)"});
+const G=[];PH.forEach((p,i)=>{const x=X(i),g=S("g",{style:"cursor:pointer"},s);T(g,x,y-46,p[0],{"text-anchor":"middle",fill:i===0?"#9A6600":"#CE8E00",style:"font:700 21px var(--fh)"});T(g,x,y-26,p[1],{"text-anchor":"middle",fill:"#6B7B8C",style:"font:600 12px var(--fb)"});
+if(i===0){S("circle",{cx:x,cy:y,r:19,fill:"none",stroke:"#0085CA","stroke-width":2,class:"pulse"},g)}
+const d=S("circle",{cx:x,cy:y,r:11,fill:i===0?"#0085CA":"#6E5A1E",stroke:"#fff","stroke-width":2},g);
+if(p[8]){S("rect",{x:x-34,y:y+18,width:68,height:22,rx:11,fill:i===0?"#E5F2FA":"#FFF3D6",stroke:i===0?"#0085CA":"#CE8E00"},g);T(g,x,y+33,p[8],{"text-anchor":"middle",fill:"#002B49",style:"font:800 12px var(--fb)"})}
+S("line",{x1:x,y1:y+(p[8]?44:20),x2:x,y2:y+76,stroke:"#B9A77A","stroke-width":1.8,"marker-end":"url(#arD2)"},g);
+T(g,x,y+104,p[2],{"text-anchor":"middle",fill:"#35516A",style:"font:700 17px var(--fh)"});p[3].forEach((b,k)=>T(g,x-76,y+134+k*21,"• "+b,{fill:"#02624B",style:"font:500 12.5px var(--fb)"}));
+if(i===0){S("rect",{x:x-52,y:y+204,width:104,height:22,rx:11,fill:"#0085CA"},g);T(g,x,y+219,"VOCÊ ESTÁ AQUI",{"text-anchor":"middle",fill:"#fff",style:"font:800 10.5px var(--fb);letter-spacing:.06em"})}
+g.addEventListener("click",()=>sel(i));G.push(d)});
+function sel(i){G.forEach((d,k)=>{d.setAttribute("r",k===i?15:11);d.setAttribute("stroke",k===i?"#FCBF00":"#fff");d.setAttribute("stroke-width",k===i?4:2)});const p=PH[i],b=$("tlDetail");b.innerHTML="";
+const a=H("div",{style:"background:linear-gradient(135deg,#9A6600,#CE8E00);color:#fff;border-radius:12px;padding:14px 18px"},b);H("div",{style:"font:700 11px var(--fb);letter-spacing:.14em;opacity:.85"},a,`FASE ${i} · ${p[1].toUpperCase()}`);H("div",{style:"font:700 30px var(--fh)"},a,p[0]);if(p[7])H("span",{class:"tagx",style:"background:rgba(255,255,255,.25);margin-top:6px"},a,p[7]);
+const o=H("div",{class:"card",style:"border-radius:12px"},b);H("div",{class:"eye"},o,"Objetivo");H("p",{style:"font-size:15px"},o,p[5]);
+const e=H("div",{class:"card",style:"border-radius:12px"},b);H("div",{class:"eye",style:"color:var(--green)"},e,"Indicador do marco");H("p",{style:"font:700 16px var(--fb);color:var(--navy)"},e,p[6]);
+const k=H("div",{class:"card nv",style:"border-radius:12px;text-align:center"},b);H("div",{class:"eye",style:"color:var(--yellow)"},k,"Etapa ADKAR");H("div",{style:"font:700 44px var(--fh);color:#fff"},k,p[4]);H("div",{class:"small",style:"color:#9DB7CE"},k,"Consciência · Desejo · Conhecimento · Habilidade · Reforço")}
+sel(0)})();
+
+(function(){const b=$("cultLv");H("div",{class:"ttl",style:"color:#02624B;font-size:15px",html:"Indicadores culturais<br><span style='font:500 11px var(--fb);color:var(--muted);text-transform:none;letter-spacing:0'>hoje → marco 6m → meta 12m</span>"},b);[FR[0],FR[1],FR[6],FR[4]].forEach(f=>{const c=H("div",{style:"background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 12px"},b);const t=H("div",{style:"display:flex;justify-content:space-between;align-items:baseline"},c);H("span",{style:"font:700 12.5px var(--fb);color:var(--navy)"},t,f.s);H("span",{html:`<b style="color:${zc(f.v)};font:800 18px var(--fh)">${pc(f.v)}</b> <span class="small">→ ${pc(f.n6)} → ≥62,5%</span>`},t);const lv=H("div",{class:"lv sm",style:"margin-top:16px"},c);lvBuild(lv,f.v,f.n6,62.5)})})();
+/* ---------- PLANO ORGANIZACIONAL (GANTT) ---------- */
+(function(){const s=$("gantt"),x0=300,x1=1490,W=(x1-x0)/12,XM=m=>x0+m*W;
+[[0,3,"Desenhar & pactuar · 0–90 dias","#E5F2FA"],[3,6,"Implantar · 3–6 meses","#FFF3D6"],[6,12,"Sustentar & expandir · 6–12 meses","#EAF5F0"]].forEach(([a,b,l,c])=>{S("rect",{x:XM(a)+1,y:0,width:XM(b)-XM(a)-2,height:20,rx:5,fill:c},s);T(s,(XM(a)+XM(b))/2,14,l,{"text-anchor":"middle",fill:"#002B49",style:"font:700 11.5px var(--fb)"})});
+for(let m=0;m<12;m++){T(s,XM(m)+W/2,38,"M"+(m+1),{"text-anchor":"middle",fill:"#6B7B8C",style:"font:700 11px var(--fb)"});S("line",{x1:XM(m),y1:44,x2:XM(m),y2:292,stroke:"#EEF2F5"},s)}
+[3,6,12].forEach(m=>S("line",{x1:XM(m),y1:24,x2:XM(m),y2:292,stroke:"#98A6B3","stroke-dasharray":"4 4"},s));
+const R=[["Papéis & RASCI","#CE8E00",[[1,2,"Desenhar RASCI das interfaces"],[3,3,"Pactuar"],[4,12,"Revisão contínua no fórum","d"]],"Um único A por decisão nas interfaces críticas"],
+["Governança & alçadas","#500260",[[1,2,"Mapa de alçadas + log"],[3,12,"Fórum de integração quinzenal","d"]],"Da escalada à alçada: quem decide o quê"],
+["Desconstrução de silos","#BC0404",[[2,2,"Donos interface"],[3,4,"Metas compartilhadas"],[5,6,"Acordos de interface"]],"Pontes formais no lugar de pontes pessoais"],
+["Matriz equilibrada","#0085CA",[[2,2,"Regras"],[3,6,"Piloto nas interfaces críticas"],[7,12,"Expansão às demais interfaces"]],"Gerente funcional × dono do processo"],
+["Sinergia & medição","#02624B",[],"Termômetro reaplicado com o mesmo instrumento"]];
+R.forEach(([n,c,bars,d],i)=>{const y=50+i*48;S("rect",{x:0,y,width:290,height:42,rx:8,fill:"#fff",stroke:"#D6DEE6"},s);S("rect",{x:0,y,width:6,height:42,fill:c},s);T(s,16,y+18,n,{fill:"#002B49",style:"font:700 14px var(--fb)"});T(s,16,y+34,d,{fill:"#6B7B8C",style:"font:500 10.5px var(--fb)"});
+bars.forEach(([a,b,l,t],k)=>{const g=S("g",{"data-a":"grow",style:`--d:${3+i+k*.5};transform-box:fill-box`},s);const x=XM(a-1)+3,w=XM(b)-XM(a-1)-6;const r=S("rect",{x,y:y+7,width:w,height:28,rx:6,fill:t?"#fff":c,stroke:c,"stroke-width":t?2:0,"stroke-dasharray":t?"6 4":"0"},g);T(g,x+w/2,y+25,l,{"text-anchor":"middle",fill:t?c:"#fff",style:"font:700 11.5px var(--fb)"});tip(g,l,`${n} · M${a}${b>a?"–M"+b:""}`)})});
+const y=50+4*48+21;S("line",{x1:x0,y1:y,x2:x1,y2:y,stroke:"#02624B","stroke-width":2,"stroke-dasharray":"2 5"},s);
+[[0,"base 39%"],[6,"marco ≥51%"],[12,"meta ≥62,5%"]].forEach(([m,l])=>{const x=m===12?XM(12)-8:m===0?XM(0)+8:XM(m);S("path",{d:`M${x} ${y-12} l12 12 l-12 12 l-12 -12z`,fill:"#02624B",stroke:"#fff","stroke-width":2},s);S("rect",{x:m===12?x-110:x+16,y:y-11,width:92,height:22,rx:11,fill:"#EAF5F0",stroke:"#02624B"},s);T(s,m===12?x-64:x+62,y+4,l,{"text-anchor":"middle",fill:"#02624B",style:"font:800 11px var(--fb)"})});
+const L=$("orgLv");[FR[2],FR[3],FR[4],FR[5]].forEach(f=>{const r=H("div",{style:"display:grid;grid-template-columns:170px 1fr 150px;gap:14px;align-items:center"},L);H("div",{style:"font:700 13.5px var(--fb);color:var(--navy)"},r,f.n);const lv=H("div",{class:"lv"},r);lvBuild(lv,f.v,f.n6,62.5);H("div",{style:"font:700 13px var(--fb);color:var(--ink2);text-align:right",html:`<b style="color:${zc(f.v)};font-size:18px">${pc(f.v)}</b> → ${pc(f.n6)} → <b style="color:#02624B">≥62,5%</b>`},r)});
+const Rw=[["Interfaces críticas com RASCI pactuada","não formalizada","50%","100%"],["Decisões transversais registradas em log","a medir","80%","100%"],["Temas resolvidos no fórum, sem escalar","a medir","60%","≥80%"],["Interfaces com meta compartilhada","a medir","50%","100%"],["Entrevistas relatando “papéis sobrepostos”","7 de 7","≤4 de 7","≤2 de 7"],["Entrevistas relatando “silos”","6 (+1) de 7","≤4 de 7","≤2 de 7"]];
+const t=$("score"),h=H("tr",null,t);["Indicador de gestão","Hoje","6 meses","12 meses"].forEach(x=>H("th",null,h,x));Rw.forEach((r,i)=>{const tr=H("tr",{"data-a":"up",style:`--d:${4+i*.5}`},t);H("td",{html:`<b>${r[0]}</b>`},tr);H("td",{style:"color:#BC0404;font-weight:700"},tr,r[1]);H("td",{style:"color:#9A6600;font-weight:700"},tr,r[2]);H("td",{style:"color:#02624B;font-weight:800;font-size:14px"},tr,r[3])})})();
+
+/* ---------- DECISÕES ---------- */
+(function(){const D=["Patrocinar o contrato de liderança (5 compromissos)","Aprovar a RASCI das interfaces críticas","Instituir o fórum de integração e o log de decisões","Nomear os donos de interface entre áreas","Adotar metas compartilhadas por cadeia de valor","Reaplicar o termômetro em 6 e 12 meses"];const on=new Set();let fired=false;
+D.forEach((t,i)=>{const b=H("button",{style:"display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:center;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:15px 16px;color:var(--navy);font:600 15.5px var(--fb)"},$("decisions"));const box=H("span",{style:"width:30px;height:30px;border:2.5px solid #02624B;border-radius:6px;display:grid;place-items:center;font-weight:800;color:#fff"},b,"");b.appendChild(document.createTextNode(t));
+b.addEventListener("click",()=>{on.has(i)?on.delete(i):on.add(i);const k=on.has(i);box.textContent=k?"✓":"";box.style.background=k?"#02624B":"transparent";b.style.background=k?"#F4FAF7":"#fff";b.style.borderColor=k?"#02624B":"";gauge()})});
+function gauge(){const s=$("ready");s.innerHTML="";const p=on.size/D.length;S("circle",{cx:110,cy:110,r:88,fill:"none",stroke:"rgba(255,255,255,.12)","stroke-width":18},s);S("circle",{cx:110,cy:110,r:88,fill:"none",stroke:p===1?"#2E9A6E":p>=.5?"#FCBF00":"#5CB8E6","stroke-width":18,"stroke-linecap":"round",pathLength:1,"stroke-dasharray":`${Math.max(p,.001)} 1`,transform:"rotate(-90 110 110)"},s);T(s,110,124,Math.round(p*100)+"%",{"text-anchor":"middle",fill:"#fff",style:"font:700 54px var(--fh)"});
+$("readyMsg").textContent=p===1?"Pronta para começar — a jornada rumo a ≥62,5% está patrocinada.":p>=.5?"Boa base: faltam decisões para garantir sustentação.":"Marque as decisões que a liderança assume hoje.";if(p===1&&!fired){fired=true;confetti()}if(p<1)fired=false}gauge()})();
+
+/* ---------- MATRIZ + BENCHMARKS ---------- */
+const MX=[["Funcional",100,"Gerente funcional decide tudo; não há papel formal de entrega transversal.","Sobem pela hierarquia da área.","Cada área responde pela sua etapa.","Depende de favores entre áreas.","Silos e lentidão em temas transversais."],
+["Matriz fraca",75,"Gerente funcional detém pessoas e orçamento; o líder da entrega só coordena.","Temas transversais sobem ou avançam por influência.","Responsabilidade pela entrega sem autoridade.","Depende de “pontes” pessoais.","Escalonamento, silos, dependência de pessoas-chave."],
+["Matriz equilibrada",50,"Autoridade compartilhada com regras claras: gerente cuida de capacidade e padrão; líder de comunidade cuida de prioridade e entrega.","Direitos de decisão definidos antes do conflito; fórum com critério.","RACI/DRI pactuado nas interfaces.","Prevista no desenho: metas comuns e squads.","Ambiguidade se as regras não forem respeitadas."],
+["Matriz forte",25,"Líder de produto/entrega decide prioridades e orçamento; áreas fornecem especialistas.","Owner decide dentro das alçadas.","Dono único do resultado.","Estrutural: times dedicados.","Duplicação de recursos, perda de padrão técnico."],
+["Projetizada",0,"Tudo organizado por projeto/produto.","Gerente do projeto decide.","Time dedicado.","Total, dentro do projeto.","Pouco compartilhamento entre projetos."]];
+(function(){const lab=$("mxLabels");MX.forEach(m=>H("span",null,lab,m[0]));const marks=$("mxMarks");
+[[1,"◆ sinais da TMG hoje","#CE8E00"],[2,"▲ proposta","#02624B"]].forEach(([p,t,c])=>H("span",{style:`position:absolute;left:${p*25}%;transform:translateX(-50%);font:700 12px var(--fb);color:${c};white-space:nowrap`},marks,t));
+const w=$("weakChecks");[["Liderança pouco consistente",7],["Decisões por influência ou escalada",5],["Silos entre áreas",6],["Sobreposição de papéis",7],["Falta de clareza de responsabilidades",6],["Baixa atuação transversal",6],["Dificuldade de responsabilização",6],["Necessidade constante de aprovação",4]].forEach(([t,n],i)=>{const r=H("div",{style:"display:grid;grid-template-columns:18px 1fr 110px;gap:8px;align-items:center;font-size:13px;color:var(--ink2)"},w);H("span",{style:"color:var(--green);font-weight:700"},r,"✓");H("span",null,r,t);const d=H("div",{style:"display:flex;gap:2px"},r);for(let k=0;k<7;k++)H("span",{style:`width:11px;height:11px;border-radius:50%;background:${k<n?"var(--navy)":"#E1E7ED"}`},d)});
+const inp=$("mx");inp.addEventListener("input",()=>mxDraw(+inp.value));mxDraw(1)})();
+function mxDraw(i){const m=MX[i],s=$("mxBar");s.innerHTML="";const h=320,fh=h*m[1]/100;
+if(h-fh>0)S("rect",{x:60,y:20,width:120,height:h-fh-(fh?2:0),fill:"#0085CA",rx:3},s);if(fh>0)S("rect",{x:60,y:20+h-fh,width:120,height:fh,fill:"#002B49",rx:3},s);
+T(s,120,366,"autoridade",{"text-anchor":"middle",fill:"#6B7B8C",style:"font:600 12px var(--fb)"});
+if(h-fh>36)T(s,120,20+(h-fh)/2+5,"entrega",{"text-anchor":"middle",fill:"#fff",style:"font:700 13px var(--fb)"});if(fh>36)T(s,120,20+h-fh/2+5,"área funcional",{"text-anchor":"middle",fill:"#fff",style:"font:700 13px var(--fb)"});
+const b=$("mxInfo");b.innerHTML="";const hd=H("div",{style:"display:flex;gap:10px;align-items:center"},b);H("h3",{style:"font:700 34px var(--fh);color:var(--navy)"},hd,m[0]);if(i===1)H("span",{class:"tagx",style:"background:var(--gold)"},hd,"TMG hoje");if(i===2)H("span",{class:"tagx",style:"background:var(--green)"},hd,"Proposta");
+[["Quem tem autoridade",m[2]],["Como se decide",m[3]],["Papéis",m[4]],["Atuação transversal",m[5]],["Risco típico",m[6]]].forEach(([k,v])=>{const r=H("div",{style:"display:grid;grid-template-columns:160px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line2)"},b);H("div",{style:"font:700 11px var(--fb);letter-spacing:.1em;text-transform:uppercase;color:"+(k==="Risco típico"?"var(--crit)":"var(--muted)")},r,k);H("div",{style:"font-size:16px;line-height:1.4;color:var(--ink2)"},r,v)})}
+
+const BM=[{n:"Bayer",s:"Agro · sementes e defensivos",y:"2024–2026",f:"Hierarquia de muitas camadas, silos e ciclos longos de planejamento, segundo a própria empresa.",d:"−50% de níveis hierárquicos; −2/3 dos cargos de gestão; €2 bi de economia organizacional planejada (2023–2026).",i:"Times multifuncionais em ciclos de 90 dias, decidindo perto do trabalho, encurtaram ciclos de desenvolvimento.",m:"Juntar pesquisa e negócio em times com dono do resultado e ciclos curtos — as “duas TMG” numa mesma entrega.",note:"Resultados divulgados pela própria empresa.",chart:"bayer"},
+{n:"Cargill",s:"Agro · trading e alimentos",y:"2015 · 2024",f:"Estrutura executiva em dois níveis; complexidade e necessidade de decidir mais rápido.",d:"2015: 2 níveis executivos → 1 time único. 2024: menos de 1/3 dos negócios bateu a meta de lucro; 5 negócios consolidados em 3.",i:"Simplificar estrutura é um movimento recorrente, disparado por velocidade de decisão e resultado.",m:"Medir velocidade de decisão e revisitar o desenho periodicamente — o modelo não é “implantar uma vez”.",note:"Fontes não divulgam resultados posteriores a 2024.",chart:"cargill"},
+{n:"Ford",s:"Automotivo",y:"2006–2009",f:"Empresa “dividida por disputas internas”; relatórios de status verdes enquanto perdia bilhões.",d:"Prejuízo de US$ 12,7 bi (2006) e US$ 14,6 bi (2008); lucro de US$ 2,7 bi em 2009, o primeiro em 4 anos.",i:"Um único fórum semanal, com dados comuns e segurança para mostrar o “vermelho”, trocou o corredor pela sala.",m:"Substituir conversas de corredor por um fórum de portfólio com dados comuns e log de decisões.",note:"A linha de crédito obtida em 2006 também foi decisiva.",chart:"ford"},
+{n:"Unilever",s:"Bens de consumo",y:"2022",f:"Estrutura matricial difusa, com accountability pouco clara pelo resultado.",d:"Saída da matriz para 5 Business Groups com dono do resultado; −15% dos cargos de alta gestão e −5% dos demais (~1.500 cargos).",i:"Accountability “cristalina” exige dono único por resultado — com plataforma comum de operações.",m:"Na matriz equilibrada, cada comunidade de entrega tem um dono do resultado; capacidades comuns ficam compartilhadas.",note:"Resultados posteriores não atribuíveis só à mudança.",chart:"unilever"}];
+(function(){const tb=$("benchTabs"),pn=$("benchPanes");BM.forEach((b,i)=>{const t=H("button",{class:i?"":"on"},tb);t.appendChild(document.createTextNode(b.n));H("small",null,t,`${b.s} · ${b.y}`);
+const p=H("div",{class:"pane"+(i?"":" on")},pn);const g=H("div",{style:"display:grid;grid-template-columns:1fr 540px;gap:20px"},p);const l=H("div",null,g);
+const f=H("div",{class:"fdii",style:"grid-template-columns:1fr 1fr"},l);[["f","Fato",b.f],["d","Dado",b.d],["i","Insight",b.i],["m","Implicação para a TMG",b.m]].forEach(([c,k,v],j)=>{const d=H("div",{class:c,style:`min-height:128px;font-size:14.5px;${j>=2?"border-top:1px solid var(--line)":""}`},f);H("span",{class:"k"},d,k);d.appendChild(document.createTextNode(v))});
+H("p",{class:"small",style:"margin-top:10px"},l,"Ressalva: "+b.note);const c=H("div",{class:"card"},g);const svg=S("svg",{viewBox:"0 0 520 400",width:500,height:385},c);chart(b.chart,svg);
+t.addEventListener("click",()=>{tb.querySelectorAll("button").forEach((x,k)=>x.classList.toggle("on",k===i));pn.querySelectorAll(".pane").forEach((x,k)=>x.classList.toggle("on",k===i))})})})();
+function hbar(svg,y,label,v,max,col,txt){T(svg,0,y+16,label,{fill:"#002B49",style:"font:600 13px var(--fb)"});const w=Math.max(3,250*Math.abs(v)/max);const r=S("rect",{x:180,y,width:w,height:24,fill:col,rx:3},svg);T(svg,188+w,y+17,txt,{fill:"#002B49",style:"font:700 14px var(--fb)"});tip(r,txt,label)}
+function chart(k,s){const h=(t,y)=>T(s,0,y,t,{fill:"#6B7B8C",style:"font:700 11px var(--fb);letter-spacing:.1em"});
+if(k==="bayer"){h("ESTRUTURA (índice, antes = 100)",18);hbar(s,34,"Níveis · antes",100,100,"#C5D2DE","100");hbar(s,64,"Níveis · depois",50,100,"#0085CA","50 (−50%)");hbar(s,104,"Cargos de gestão · antes",100,100,"#C5D2DE","100");hbar(s,134,"Cargos de gestão · depois",33,100,"#0085CA","33 (−2/3)");
+h("CICLOS DE DESENVOLVIMENTO (anos)",200);hbar(s,216,"Praga · Brasil · antes",7,7,"#C5D2DE","~7");hbar(s,246,"Praga · Brasil · depois",4.5,7,"#02624B","~4,5");hbar(s,286,"Tar spot · EUA · antes",5,7,"#C5D2DE","5");hbar(s,316,"Tar spot · EUA · depois",2,7,"#02624B","2");T(s,0,372,"€2 bi de economia organizacional planejada · 2023–2026",{fill:"#002B49",style:"font:700 15px var(--fb)"})}
+if(k==="cargill"){h("UNIDADES DE NEGÓCIO",18);[[5,"2023"],[3,"2024"]].forEach(([n,y],j)=>{T(s,0,60+j*60,y,{fill:"#002B49",style:"font:700 14px var(--fb)"});for(let i=0;i<n;i++)S("rect",{x:70+i*56,y:34+j*60,width:46,height:40,rx:4,fill:j?"#0085CA":"#C5D2DE"},s)});
+h("NÍVEIS DO TIME EXECUTIVO",176);[[2,"antes de 2015"],[1,"a partir de 2015"]].forEach(([n,y],j)=>{T(s,0,214+j*40,y,{fill:"#002B49",style:"font:600 13px var(--fb)"});for(let i=0;i<n;i++)S("rect",{x:150+i*60,y:196+j*40,width:52,height:26,rx:3,fill:j?"#0085CA":"#C5D2DE"},s)});
+h("NEGÓCIOS NA META DE LUCRO · FY2024",306);S("circle",{cx:60,cy:354,r:38,fill:"none",stroke:"#E8EDF2","stroke-width":16},s);S("circle",{cx:60,cy:354,r:38,fill:"none",stroke:"#BC0404","stroke-width":16,pathLength:1,"stroke-dasharray":"0.32 1",transform:"rotate(-90 60 354)"},s);T(s,120,360,"menos de 1/3",{fill:"#BC0404",style:"font:700 26px var(--fh)"})}
+if(k==="ford"){h("RESULTADO LÍQUIDO (US$ bi)",18);const base=210,sc=11;S("line",{x1:40,x2:500,y1:base,y2:base,stroke:"#98A6B3"},s);[["2006",-12.7],["2008",-14.6],["2009",2.7]].forEach(([y,v],j)=>{const x=80+j*150,hh=Math.abs(v)*sc;const r=S("rect",{x,y:v<0?base:base-hh,width:70,height:hh,fill:v<0?"#BC0404":"#02624B",rx:3},s);tip(r,`US$ ${String(v).replace(".",",")} bi`,y);T(s,x+35,v<0?base+hh+20:base-hh-8,(v>0?"+":"")+String(v).replace(".",","),{"text-anchor":"middle",fill:"#002B49",style:"font:700 16px var(--fb)"});T(s,x+35,v<0?base-8:base+20,y,{"text-anchor":"middle",fill:"#6B7B8C",style:"font:700 13px var(--fb)"})});
+T(s,0,392,"Business Plan Review semanal: todos os executivos, dados comuns, status por cores.",{fill:"#002B49",style:"font:600 13px var(--fb)"})}
+if(k==="unilever"){h("REDUÇÃO DE CARGOS DE GESTÃO",18);hbar(s,34,"Alta gestão",15,20,"#0085CA","−15%");hbar(s,70,"Demais níveis de gestão",5,20,"#5E8AB4","−5%");T(s,0,150,"~1.500",{fill:"#002B49",style:"font:700 56px var(--fh)"});T(s,150,150,"cargos no total",{fill:"#6B7B8C",style:"font:600 14px var(--fb)"});
+h("DE MATRIZ PARA DONOS DO RESULTADO",200);["Beauty & Wellbeing","Personal Care","Home Care","Nutrition","Ice Cream"].forEach((g,i)=>{S("rect",{x:i*102,y:216,width:94,height:70,rx:4,fill:"#002B49"},s);g.split(" ").slice(0,2).forEach((w,j)=>T(s,i*102+47,244+j*16,w,{"text-anchor":"middle",fill:"#fff",style:"font:600 11.5px var(--fb)"}))});S("rect",{x:0,y:296,width:500,height:34,rx:4,fill:"#E5F2FA"},s);T(s,250,318,"Plataforma comum: Unilever Business Operations",{"text-anchor":"middle",fill:"#002B49",style:"font:700 13px var(--fb)"})}}
+
+/* ---------- CHROME + NAVEGAÇÃO ---------- */
+const slides=[...document.querySelectorAll(".slide")],N=slides.length;let cur=0;
+slides.forEach((s,i)=>{if(s.dataset.band){const top=H("div",{class:"sr-top"});top.innerHTML=`<div class="sr-logo">${LOGO}<span class="t"><b>TMG</b><br>cultura &amp;<br>operação</span></div><div class="sr-pill">${s.dataset.t}</div>${(()=>{const p=(s.dataset.p||"").split(" · ");return p.length>1?`<div class="sr-date">PARTE ${p[0]}<span>${p[1]}</span></div>`:`<div class="sr-date">${(p[0]||"").toUpperCase()}<span>resumo</span></div>`})()}<div class="sr-right"><b>DIAGNÓSTICO | TMG</b><span>Base set/2026 · Gestão de Mudanças</span></div>`;s.prepend(top);
+const dec=H("div",{class:"sr-dec"},null,"▸▸▸▸▸▸▸▸▸▸▸▸");s.prepend(dec);const band=H("div",{class:"sr-band "+(s.dataset.c||"c-navy")});band.innerHTML=`<span>›</span><span>${s.dataset.band}</span>${s.dataset.bs?`<small>${s.dataset.bs}</small>`:""}`;top.after(band)}
+if(s.hasAttribute("data-nofoot"))return;const f=H("div",{class:"foot"},s);H("b",null,f,"TMG · CULTURA EM MOVIMENTO");if(s.dataset.src)H("span",{class:"s",title:s.dataset.src},f,s.dataset.src);H("span",{class:"n"},f,`${i+1} / ${N}`)});
+(function(){const A=[["1","Cultura","Termômetro, mapa cognitivo, código cultural, liderança e riscos","#02624B"],["2","Organização","Modelo de matriz, silos, papéis & RASCI e governança","#0085CA"],["3","Benchmarks","Bayer, Cargill, Ford e Unilever","#5E8AB4"],["4","Proposta","Plano cultural, plano organizacional com indicadores e resumo final","#CE8E00"]];
+A.forEach(([n,t,d,c])=>{const k=slides.findIndex(x=>x.dataset.p===`${n} · ${t}`);const b=H("button",{class:"clk",style:`display:grid;grid-template-columns:46px 1fr;gap:12px;align-items:center;text-align:left;background:#fff;border:1.5px solid var(--line);border-left:6px solid ${c};border-radius:10px;padding:10px 12px`},$("agenda"));H("div",{style:`font:800 34px var(--fh);color:${c}`},b,n);const x=H("div",null,b);H("div",{style:"font:700 17px var(--fh);color:var(--navy)"},x,`Parte ${n} · ${t}`);H("div",{class:"small"},x,d);b.addEventListener("click",()=>go(k))})})();
+slides.forEach((s,i)=>{const b=H("button",{title:s.dataset.t,"aria-label":s.dataset.t},$("dots"));b.addEventListener("click",()=>go(i))});
+function fit(){const vw=innerWidth,vh=innerHeight,pad=vw<720?8:16,bot=66,sc=Math.min((vw-pad*2)/1600,(vh-pad-bot)/900),st=$("stage");st.style.left=vw/2+"px";st.style.top=(pad+(vh-pad-bot)/2)+"px";st.style.transform=`translate(-50%,-50%) scale(${sc})`}
+addEventListener("resize",fit);
+function go(i,inst){i=Math.max(0,Math.min(N-1,i));const back=i<cur;slides[cur].classList.remove("active","entering","play","back");const n=slides[i];n.classList.remove("play","entering","back");void n.offsetWidth;n.classList.add("active","play");if(!inst){n.classList.add("entering");if(back)n.classList.add("back")}cur=i;
+$("cnt").textContent=`${i+1} / ${N}`;$("progress").style.width=((i+1)/N*100)+"%";$("bPrev").disabled=i===0;$("bNext").disabled=i===N-1;document.querySelectorAll("#dots button").forEach((b,k)=>b.classList.toggle("on",k===i));history.replaceState(null,"","#"+(i+1));
+n.querySelectorAll(".lv .fl[data-w]").forEach(f=>{f.style.transition="none";f.style.width="0";void f.offsetWidth;f.style.transition="";setTimeout(()=>f.style.width=f.dataset.w+"%",350)});
+n.querySelectorAll(".gbar").forEach(r=>{r.style.transition="none";r.setAttribute("width",0);void r.getBoundingClientRect();r.style.transition="";setTimeout(()=>r.setAttribute("width",r.dataset.w),350)});
+const nd=n.querySelector("#needle");if(nd){nd.style.transition="none";nd.style.transform="rotate(0deg)";void nd.getBoundingClientRect();nd.style.transition="";setTimeout(()=>nd.style.transform=`rotate(${TEMP[scen]/100*180}deg)`,400)}
+const ca=n.querySelector("#coverArc");if(ca){ca.style.transition="none";ca.setAttribute("stroke-dasharray",`0 ${2*Math.PI*225}`);void ca.getBoundingClientRect();ca.style.transition="";setTimeout(()=>ca.setAttribute("stroke-dasharray",ca.dataset.full),400)}}
+$("bNext").onclick=()=>go(cur+1);$("bPrev").onclick=()=>go(cur-1);
+addEventListener("keydown",e=>{if(e.target.tagName==="INPUT")return;if(["ArrowRight","PageDown"," "].includes(e.key)){e.preventDefault();go(cur+1)}else if(["ArrowLeft","PageUp"].includes(e.key)){e.preventDefault();go(cur-1)}else if(e.key==="Home")go(0);else if(e.key==="End")go(N-1);else if(e.key==="f"||e.key==="F"){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen?.()}});
+let tx=null;addEventListener("touchstart",e=>{tx=e.touches[0].clientX},{passive:true});addEventListener("touchend",e=>{if(tx==null||e.target.tagName==="INPUT")return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>60)dx<0?go(cur+1):go(cur-1);tx=null},{passive:true});
+const tp=$("tip");addEventListener("pointermove",e=>{const el=e.target.closest&&e.target.closest("[data-tv]");if(el){tp.querySelector("b").textContent=el.dataset.tv;tp.querySelector("span").textContent=el.dataset.tl;tp.classList.add("on");tp.style.left=Math.min(e.clientX+14,innerWidth-330)+"px";tp.style.top=(e.clientY+14)+"px"}else tp.classList.remove("on")});
+fit();const h0=parseInt(location.hash.slice(1),10);go(isNaN(h0)?0:h0-1,true);
+</script>
+</body>
+</html>
