@@ -1,7 +1,7 @@
 # DTS · Todos Sabem, Todos Usam, Somos Exemplo — 2:00 · GMO TECH
 
 Esta é a mesma versão de **2 min 00 s** que o time recebeu (*DTS - AI Flows - Cinematic 3D Animation*): o corte
-de 2:00 da v7, nas cores originais e com o contador 442 corrigido. A única mudança é o texto das skills de GMO,
+de 2:00 da v7 (`bb65650`), nas cores originais. A única mudança é o texto das skills de GMO,
 que agora usa a sigla **GMO TECH**, como no FLOWS (gravações de tela `Video_GMO_TECH` e `Video_GMO_TECH - CARD`).
 
 | Entrega | Arquivo |
@@ -31,7 +31,8 @@ Nada mais foi tocado: roteiro, câmera, legendas, trilha e tempos são os mesmos
   antes (mapa quadro a quadro reconstruído por `tools/mkmap.py`, resíduo médio 0,22 em miniaturas).
 - **Mesmo áudio:** a trilha foi copiada bit a bit do arquivo enviado (sem recodificar).
 - **Mesmo render:** a abertura do Fabio (0:00–0:09,5) é o próprio vídeo original. Todo o trecho 3D foi
-  re-renderizado pelo pipeline da v7 (`49161cd` + correção do 442), agora com os textos novos. O pipeline
+  re-renderizado pelo pipeline da v7 (`49161cd`), agora com os textos novos. O contador 442 mantém o rótulo
+  do vídeo enviado (*+1 skill de DTS na Biblioteca*). O pipeline
   reproduz a v7 original: diferença média de 0,05 nível de cor após a mesma codificação (ruído de compressão).
 - **Descrições das skills:** mantidas como no FLOWS. Por exemplo, *Change Impact Assessment* segue igual na
   gravação `Video_GMO_TECH - CARD`.
