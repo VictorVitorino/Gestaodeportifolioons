@@ -214,6 +214,12 @@ svg.i{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke
 .logo-box{height:74px;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:10px}
 .hb{display:inline-block;width:20px;height:20px;border-radius:50%;border:2px solid var(--navy);background:conic-gradient(var(--navy) calc(var(--p)*1%),#fff 0)}
 .tagk{display:inline-block;font:800 10px var(--fb);letter-spacing:.12em;text-transform:uppercase;border-radius:4px;padding:4px 7px}
+#stage{box-shadow:none}
+#controls,#dots{transition:opacity .5s}
+body.idle #controls,body.idle #dots{opacity:0;pointer-events:none}
+body.idle{cursor:none}
+#controls{bottom:10px;right:12px}#controls button,#controls .c{height:38px}
+#dots{bottom:22px}
 </style>
 </head>
 <body>
@@ -540,6 +546,42 @@ svg.i{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke
   </div>
 </section>
 
+<!-- PROPOSTA DE TRABALHO -->
+<section class="slide" data-p="4 · Reorganização" data-t="Proposta de trabalho" data-band="Relatório final · proposta de trabalho para a TMG" data-c="c-navy" data-bs="O que faremos, como e com que resultado" data-src="Proposta de trabalho baseada no diagnóstico de set/2026 (7 entrevistas, 46 evidências). Prazos, metas e entregáveis a confirmar com o patrocinador executivo da TMG.">
+  <div class="body">
+    <div class="stmt kin" style="font-size:26px">Em 12 meses, levar a TMG de <em>39%</em> para <em>≥62,5%</em> de sinergia — mudando como a empresa decide, integra e sustenta, sem criar uma nova área.</div>
+    <div style="display:grid;grid-template-columns:300px 1fr;gap:14px;margin-top:12px">
+      <div class="card nv" data-a="left" style="--d:2;border-radius:12px;padding:14px 18px">
+        <div class="eye" style="color:var(--yellow)">Objetivo do trabalho</div>
+        <p style="font-size:14px;line-height:1.5">Conduzir uma reorganização <b style="color:#fff">cultural e operacional</b>: liderança alinhada na execução, papéis claros, decisões com critério e áreas trabalhando em fluxo — sobre as linhas de reporte atuais.</p>
+        <div style="display:flex;gap:18px;margin-top:10px"><div><div style="font:800 30px var(--fh);color:#fff">39%</div><div class="small" style="color:#9DB7CE">hoje</div></div><div style="font:800 26px var(--fh);color:#FCBF00;align-self:center">→</div><div><div style="font:800 30px var(--fh);color:#FCBF00">≥62,5%</div><div class="small" style="color:#9DB7CE">12 meses</div></div></div>
+      </div>
+      <div>
+        <div class="ttl" style="color:var(--navy);font-size:15px">O que vamos fazer · 5 frentes</div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:6px">
+          <div class="card shine" data-a="up" style="--d:3;border-radius:10px;border-top:4px solid #0085CA;padding:10px 12px"><h4>1 · Liderança & cultura</h4><p style="font-size:12.5px">Contrato de liderança, protocolo de divergência e rituais que tiram a decisão do corredor.</p></div>
+          <div class="card shine" data-a="up" style="--d:4;border-radius:10px;border-top:4px solid #CE8E00;padding:10px 12px"><h4>2 · Papéis & RASCI</h4><p style="font-size:12.5px">RASCI pactuada nas interfaces críticas: um único responsável final (A) por decisão.</p></div>
+          <div class="card shine" data-a="up" style="--d:5;border-radius:10px;border-top:4px solid #500260;padding:10px 12px"><h4>3 · Governança & decisão</h4><p style="font-size:12.5px">Mapa de alçadas, fórum de integração quinzenal e log de decisões.</p></div>
+          <div class="card shine" data-a="up" style="--d:6;border-radius:10px;border-top:4px solid #BC0404;padding:10px 12px"><h4>4 · Silos → matriz equilibrada</h4><p style="font-size:12.5px">Donos de fluxo, metas compartilhadas e acordos de interface entre as áreas.</p></div>
+          <div class="card shine" data-a="up" style="--d:7;border-radius:10px;border-top:4px solid #02624B;padding:10px 12px"><h4>5 · Mudança & medição</h4><p style="font-size:12.5px">Gestão da mudança (ADKAR), comunicação em cascata e termômetro reaplicado.</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="ttl" style="color:var(--navy);font-size:15px;margin-top:12px">Como vamos fazer · 5 fases</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-top:6px" id="ptPhases"></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px">
+      <div class="card" data-a="up" style="--d:10;border-radius:10px;padding:10px 14px"><h4>Entregáveis</h4><ul style="margin-top:2px"><li style="font-size:12.5px">Contrato de liderança assinado</li><li style="font-size:12.5px">RASCI e mapa de alçadas</li><li style="font-size:12.5px">Desenho da matriz equilibrada</li><li style="font-size:12.5px">Plano de mudança e comunicação</li><li style="font-size:12.5px">Painel de indicadores 6 e 12 meses</li></ul></div>
+      <div class="card" data-a="up" style="--d:11;border-radius:10px;padding:10px 14px"><h4>Governança do trabalho</h4><ul style="margin-top:2px"><li style="font-size:12.5px"><b>Comitê executivo</b> mensal — decide e remove barreiras</li><li style="font-size:12.5px"><b>Fórum de integração</b> quinzenal</li><li style="font-size:12.5px"><b>Status report executivo</b> único</li></ul></div>
+      <div class="card" data-a="up" style="--d:12;border-radius:10px;padding:10px 14px"><h4>Como mediremos o sucesso</h4><ul style="margin-top:2px"><li style="font-size:12.5px">Temperatura de sinergia ≥62,5%</li><li style="font-size:12.5px">100% das interfaces críticas com RASCI</li><li style="font-size:12.5px">100% das decisões transversais no log</li><li style="font-size:12.5px">“Papéis sobrepostos” em ≤2 de 7 relatos</li></ul></div>
+      <div class="card soft" data-a="up" style="--d:13;border-radius:10px;padding:10px 14px"><h4>Premissas</h4><ul style="margin-top:2px"><li style="font-size:12.5px">Patrocínio visível da diretoria</li><li style="font-size:12.5px">Agenda protegida das lideranças</li><li style="font-size:12.5px">Acesso a organograma, alçadas e fluxo real de decisão</li></ul></div>
+    </div>
+    <div data-a="up" style="--d:14;display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:14px;align-items:end">
+      <div style="display:flex;align-items:flex-end;gap:16px"><div style="flex:1;border-top:1.5px solid #002B49;padding-top:6px"><div style="font:800 16px var(--fb);color:#002B49;letter-spacing:.02em">Alvarez &amp; Marsal</div><div class="small">Gestão de Mudanças · Organização · set/2026</div></div></div>
+      <div style="display:flex;align-items:flex-end;gap:16px"><div style="flex:1;border-top:1.5px solid #002B49;padding-top:6px"><div style="font:800 16px var(--fb);color:#002B49">TMG · Patrocinador executivo</div><div class="small">De acordo · data ____/____/______</div></div></div>
+    </div>
+  </div>
+</section>
+
 <div id="wipe"><i></i><i></i><i></i></div><div id="chap"></div>
 </div></div>
 <div id="controls"><button class="g" id="bPrev"><span style="transform:rotate(180deg);display:inline-block">➜</span><span class="lb">Voltar</span></button><span class="c" id="cnt">1 / 20</span><button class="p" id="bNext"><span class="lb">Avançar</span>➜</button></div>
@@ -553,7 +595,7 @@ function H(t,a,p,x){const e=document.createElement(t);if(a)for(const k in a){if(
 function T(p,x,y,s,a){const t=S("text",Object.assign({x,y},a||{}),p);t.textContent=s;return t}
 function tip(el,v,l){el.setAttribute("data-tv",v);el.setAttribute("data-tl",l||"")}
 function mk(svg,id,c){const d=S("defs",null,svg),m=S("marker",{id,viewBox:"0 0 10 10",refX:"9",refY:"5",markerWidth:"7",markerHeight:"7",orient:"auto-start-reverse"},d);S("path",{d:"M0 0L10 5L0 10z",fill:c},m)}
-function confetti(){const st=$("stage");const cols=["#0085CA","#CE8E00","#02624B","#FCBF00","#5E8AB4","#E23500"];for(let i=0;i<70;i++){const c=H("div",{class:"confetti",style:`left:${Math.random()*1600}px;background:${cols[i%6]};animation-delay:${Math.random()*.5}s`},st);setTimeout(()=>c.remove(),2600)}}
+function confetti(){return;const st=$("stage");const cols=["#0085CA","#CE8E00","#02624B","#FCBF00","#5E8AB4","#E23500"];for(let i=0;i<70;i++){const c=H("div",{class:"confetti",style:`left:${Math.random()*1600}px;background:${cols[i%6]};animation-delay:${Math.random()*.5}s`},st);setTimeout(()=>c.remove(),2600)}}
 const pc=v=>(v%1?v.toFixed(1).replace(".",","):String(v))+"%";
 const zc=v=>v<37.5?"#BC0404":v<62.5?"#CE8E00":v<87.5?"#5E8AB4":"#02624B";
 const zn=v=>v<37.5?"Crítica":v<62.5?"Frágil":v<87.5?"Equilibrada":"Forte";
@@ -963,6 +1005,8 @@ const im=H("div",{class:"card","data-a":"up",style:"--d:11;border-radius:12px;bo
 S("line",{x1:20,y1:Y(62.5),x2:580,y2:Y(62.5),stroke:"#02624B","stroke-dasharray":"4 4"},s);T(s,578,Y(62.5)-4,"faixa Equilibrada",{"text-anchor":"end",fill:"#02624B",style:"font:700 10.5px var(--fb)"});
 path(`M${X[0]} ${Y(39)} L${X[1]} ${Y(51)} L${X[2]} ${Y(62.5)}`,{stroke:"#002B49","stroke-width":4,fill:"none",class:"dr",pathLength:1,style:"--d:6","stroke-linecap":"round"},s);
 [[39,"hoje","39%"],[51,"6 meses","≥51%"],[62.5,"12 meses","≥62,5%"]].forEach(([v,l,t],i)=>{const g=S("g",{"data-a":"pop",style:`--d:${8+i*2}`},s);S("circle",{cx:X[i],cy:Y(v),r:8,fill:i===2?"#FCBF00":"#002B49",stroke:"#fff","stroke-width":3},g);T(g,X[i],Y(v)-14,t,{"text-anchor":"middle",fill:"#002B49",style:"font:800 14px var(--fb)"});T(g,X[i],Y(v)+24,l,{"text-anchor":"middle",fill:"#6B7B8C",style:"font:700 11px var(--fb)"})})})();
+(function(){const b=$("ptPhases");if(!b)return;const P=[["01","Mobilizar","0–30 dias","Validar o diagnóstico com a diretoria, narrativa única, rede de agentes","#5E8AB4"],["02","Desenhar","31–60 dias","Contrato de liderança, RASCI das interfaces, alçadas e fluxos de valor","#0085CA"],["03","Pactuar","61–90 dias","Workshops com as áreas, acordos de interface, cascata de comunicação","#CE8E00"],["04","Implantar","3–6 meses","Fórum de integração, log de decisões, piloto de dono de fluxo (ARCO)","#500260"],["05","Sustentar","6–12 meses","Termômetro reaplicado, expansão aos demais fluxos, ajustes finos","#02624B"]];
+P.forEach(([n,t,w,d,c],i)=>{const x=H("div",{"data-a":"right",style:`--d:${8+i*.6};position:relative;background:${c};color:#fff;padding:9px 30px 9px ${i?30:16}px;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 50%,calc(100% - 16px) 100%,0 100%${i?",16px 50%":""});margin-right:-10px`},b);const h=H("div",{style:"display:flex;align-items:baseline;gap:8px"},x);H("span",{style:"font:800 20px var(--fh);opacity:.6"},h,n);H("span",{style:"font:800 17px var(--fh)"},h,t);H("span",{style:"font:700 11px var(--fb);opacity:.85;margin-left:auto"},h,w);H("div",{style:"font:600 12px/1.35 var(--fb);margin-top:3px"},x,d)})})();
 /* ---------- SILOS → SINERGIA ---------- */
 (function(){const s=$("siloNet"),cx=415,cy=275,rx=300,ry=195,bw=196,bh=62;mk(s,"arS","#0085CA");
 const A=["Negócio & comercial","Pesquisa & desenvolvimento","Planejamento & execução","Supply & operações","Processos, dados & sistemas","Pessoas & capacitação"];
@@ -1086,10 +1130,11 @@ document.querySelectorAll(".kin").forEach(kin);
 A.forEach(([n,t,d,c],i)=>{const k=slides.findIndex(x=>x.dataset.p===`${n} · ${t}`),l=slides.map((x,j)=>x.dataset.p===`${n} · ${t}`?j:-1).filter(j=>j>=0);const b=H("button",{class:"clk","data-a":"up",style:`--d:${12+i};display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:center;text-align:left;background:#fff;border:1.5px solid var(--line);border-top:5px solid ${c};border-radius:12px;padding:10px 12px`},$("agenda"));H("div",{style:`font:800 36px var(--fh);color:${c}`},b,n);const x=H("div",null,b);H("div",{style:"font:800 16px var(--fh);color:var(--navy)"},x,`Parte ${n} · ${t} · telas ${l[0]+1}–${l[l.length-1]+1}`);H("div",{class:"small"},x,d);b.addEventListener("click",()=>go(k))})})();
 slides.forEach((s,i)=>{const b=H("button",{title:s.dataset.t,"aria-label":s.dataset.t},$("dots"));b.addEventListener("click",()=>go(i))});
 const CH={"1 · Cultura":["01","Cultura","Como a TMG pensa, decide e sustenta — o que as sete vozes revelam."],"2 · Organização":["02","Organização","Silos, matriz e papéis: como a estrutura real decide e entrega."],"3 · Benchmarks":["03","Benchmarks","Quem mexeu em quem decide — e o que aconteceu com os números."],"4 · Reorganização":["04","Reorganização","Caminhos, planos e indicadores para ir de 39% a ≥62,5%."]};
-function fit(){const vw=innerWidth,vh=innerHeight,pad=vw<720?8:16,bot=66,sc=Math.min((vw-pad*2)/1600,(vh-pad-bot)/900),st=$("stage");st.style.left=vw/2+"px";st.style.top=(pad+(vh-pad-bot)/2)+"px";st.style.transform=`translate(-50%,-50%) scale(${sc})`}
+function fit(){const vw=innerWidth,vh=innerHeight,sc=Math.min(vw/1600,vh/900),st=$("stage");st.style.left=vw/2+"px";st.style.top=vh/2+"px";st.style.transform=`translate(-50%,-50%) scale(${sc})`}
+let idleT=0;const wake=()=>{document.body.classList.remove("idle");clearTimeout(idleT);idleT=setTimeout(()=>document.body.classList.add("idle"),2500)};addEventListener("pointermove",wake);addEventListener("pointerdown",wake);wake();
 addEventListener("resize",fit);
 function counters(n){n.querySelectorAll("[data-count]").forEach(el=>{const to=+el.dataset.count,suf=el.dataset.suf||"";count(el,0,to,suf)})}
-function activate(i,inst,back){const n=slides[i];slides.forEach((s,k)=>{if(k!==i)s.classList.remove("active","entering","play","back")});n.classList.remove("play","entering","back");void n.offsetWidth;n.classList.add("active","play");if(!inst){n.classList.add("entering");if(back)n.classList.add("back")}cur=i;
+function activate(i,inst,back){const n=slides[i];slides.forEach((s,k)=>{if(k!==i)s.classList.remove("active","entering","play","back")});n.classList.remove("play","entering","back");void n.offsetWidth;n.classList.add("active","play");if(!inst){n.classList.add("entering");if(back)n.classList.add("back")}cur=i;document.body.style.background=n.classList.contains("dark")?"#001B30":"#F5F8FB";
 $("cnt").textContent=`${i+1} / ${N}`;$("progress").style.width=((i+1)/N*100)+"%";$("bPrev").disabled=i===0;$("bNext").disabled=i===N-1;document.querySelectorAll("#dots button").forEach((b,k)=>b.classList.toggle("on",k===i));history.replaceState(null,"","#"+(i+1));
 n.querySelectorAll(".lv .fl[data-w]").forEach(f=>{f.style.transition="none";f.style.width="0";void f.offsetWidth;f.style.transition="";setTimeout(()=>f.style.width=f.dataset.w+"%",350)});
 n.querySelectorAll(".gbar").forEach(r=>{r.style.transition="none";r.setAttribute("width",0);void r.getBoundingClientRect();r.style.transition="";setTimeout(()=>r.setAttribute("width",r.dataset.w),350)});

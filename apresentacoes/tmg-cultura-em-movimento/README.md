@@ -1,6 +1,6 @@
 # TMG · Cultura em Movimento (status report executivo)
 
-Apresentação em HTML de arquivo único, com 20 telas no formato *Status Report*: cabeçalho executivo, faixa de seção, metas-chave, barras de nivelamento, pictogramas, heatmap, matriz de bolhas e cronologia. Para navegar, use **Avançar**, as setas do teclado, o gesto de arrastar ou os pontos no rodapé; a tecla **F** abre em tela cheia.
+Apresentação em HTML de arquivo único, com 21 telas no formato *Status Report*: cabeçalho executivo, faixa de seção, metas-chave, barras de nivelamento, pictogramas, heatmap, matriz de bolhas e cronologia. Para navegar, use **Avançar**, as setas do teclado, o gesto de arrastar ou os pontos no rodapé; a tecla **F** abre em tela cheia.
 
 | Parte | Telas |
 |---|---|
@@ -8,7 +8,7 @@ Apresentação em HTML de arquivo único, com 20 telas no formato *Status Report
 | 1 · Cultura | Visão única (rede 7 vozes × 10 padrões) · Termômetro (régua térmica + cenários) · Nivelamento (escada com as alternativas reais dos instrumentos) · Heatmap sensorial (nível × etapa) · BPMN de onde a cultura quebra · Liderança · Código cultural · Radar de riscos |
 | 2 · Organização | Silos → rede · Matriz fraca × equilibrada × forte (organogramas e balança de autoridade) · A matriz equilibrada da TMG (funções × fluxos, hoje × proposta) · RASCI · Governança |
 | 3 · Benchmarks | Bayer, Cargill, Ford e Unilever, com logotipo, problema, movimento, número e lição |
-| 4 · Reorganização | Quatro caminhos (cobertura dos 10 padrões) · Plano cultural · Plano organizacional + indicadores · Resumo final |
+| 4 · Reorganização | Quatro caminhos (cobertura dos 10 padrões) · Plano cultural · Plano organizacional + indicadores · Resumo final · Proposta de trabalho (relatório final com assinatura) |
 
 **Movimento:** transição em faixas diagonais entre telas, capítulo animado na abertura de cada parte, tipografia cinética, traços desenhados, contadores e simulações. Tudo é desativado quando o sistema pede movimento reduzido.
 
