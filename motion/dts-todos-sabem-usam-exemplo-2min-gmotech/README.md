@@ -6,7 +6,8 @@ que agora usa a sigla **GMO TECH**, como no FLOWS (gravações de tela `Video_GM
 
 | Entrega | Arquivo |
 |---|---|
-| Filme 2:00 · GMO TECH (1920×1080, 24 fps) | `video/DTS_2min_GMO_TECH.mp4` |
+| Filme 2:00 · GMO TECH (1920×1080, 24 fps, qualidade máxima, ~90 MB) | `video/DTS_2min_GMO_TECH.mp4` |
+| Mesmo filme em 1920×1080 para envio (~29 MB) | `video/DTS_2min_GMO_TECH_1080p_envio.mp4` |
 | Mesmo filme em 1280×720 (formato do arquivo enviado) | `video/DTS_2min_GMO_TECH_720p.mp4` |
 | Antes/depois de cada trecho alterado | `video/antes_depois.jpg` |
 
@@ -48,7 +49,8 @@ Nada mais foi tocado: roteiro, câmera, legendas, trilha e tempos são os mesmos
 2. **Print da Biblioteca (tour):** `tools/edit_screen.py` apaga os títulos antigos e redesenha os novos em Inter 600.
    Tamanho, espaçamento e posição foram ajustados card a card a partir dos títulos originais (`tools/fit_lines.py`,
    correlação 0,83–0,94). O card *Mapa de Impactos* agora tem título de 1 linha, e o conteúdo sobe uma linha, como
-   no FLOWS. Resultado: `tex/screen_biblioteca.webp`.
+   no FLOWS. Resultado: `tex/screen_biblioteca.webp`. O anel laranja da nota desse card (0:28) subiu junto, os mesmos
+   22 px (`src/pace.js`, `tour.rings`), e envolve o **98** como nos outros cards.
 3. **Render:** `node bake.mjs`, depois `node render.mjs list 24 <w> 4 rend list.json` (modo novo: só os quadros
    da v7 que o corte de 2:00 usa, 2.652).
 4. **Montagem:** `tools/encode_v12.py` lê a v7 e os quadros novos na ordem do mapa. Codificação em 2 passes, com o

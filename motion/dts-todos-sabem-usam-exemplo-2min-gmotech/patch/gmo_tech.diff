@@ -24,6 +24,19 @@ index 9ef7236..314a9b0 100644
  const base = { name: '', where: '', whereFilled: false, whereHint: false, dd: 0, ddHi: 0, model: '', modelOk: false, reqPulse: 0, time: '', mode: 0, file: '', stepP: 0, press: 0, focus: '', caret: true, pfx: false };
  const S = [];
  S.push(['m_empty', { ...base }]);
+diff --git a/motion/dts-todos-sabem-usam-exemplo/src/pace.js b/motion/dts-todos-sabem-usam-exemplo/src/pace.js
+index fddc056..a4ba0f3 100644
+--- a/motion/dts-todos-sabem-usam-exemplo/src/pace.js
++++ b/motion/dts-todos-sabem-usam-exemplo/src/pace.js
+@@ -74,7 +74,7 @@ export const SCHED = {
+       [[538, 318, 621, 355], [4.45, 4.7, 6.75, 7.05]], [[290, 624, 1638, 692], [5.25, 5.5, 6.75, 7.05]],
+       [[441, 20, 497, 52], [7.1, 7.3, 7.6, 7.85]], [[318, 248, 748, 403], [8.15, 8.4, 9.0, 9.3]],
+       [[962, 398, 1036, 434], [10.15, 10.4, 12.75, 13.1]], [[1411, 414, 1486, 450], [10.33, 10.58, 12.75, 13.1]], [[518, 735, 593, 771], [10.51, 10.76, 12.75, 13.1]],
+-      [[964, 736, 1038, 772], [10.69, 10.94, 12.75, 13.1]], [[1416, 738, 1491, 774], [10.87, 11.12, 12.75, 13.1]]],
++      [[964, 714, 1038, 750], [10.69, 10.94, 12.75, 13.1]], [[1416, 738, 1491, 774], [10.87, 11.12, 12.75, 13.1]]],
+     "cur": [[2.2, [1320, 760]], [3.1, [990, 345]], [3.6, [990, 345]], [4.4, [582, 340]], [4.8, [582, 340]], [5.35, [700, 664]], [6.8, [700, 664]],
+       [7.3, [470, 40]], [7.6, [470, 40]], [8.55, [545, 345]], [9.1, [545, 345]], [9.75, [980, 760]]],
+     "curVis": [2.2, 2.55, 9.35, 9.7],
 diff --git a/motion/dts-todos-sabem-usam-exemplo/src/timeline.js b/motion/dts-todos-sabem-usam-exemplo/src/timeline.js
 index f75510c..dd5268b 100644
 --- a/motion/dts-todos-sabem-usam-exemplo/src/timeline.js
