@@ -19,8 +19,10 @@ que agora usa a sigla **GMO TECH**, como no FLOWS (gravações de tela `Video_GM
 | 0:36–0:40 | Cards 3D em destaque | idem | idem |
 | 0:49–0:51 | Nome digitado no formulário | `[DTS] - Change Management - Mapa de Impactos` | `[DTS] - GMO TECH - Mapa de Impactos` (digitado na mesma janela de tempo) |
 | 0:52–0:56 | Anatomia do nome | Service Line = *Change Management* | Service Line = **GMO TECH** |
+| 0:53–0:56 | Rótulos da anatomia | com *GMO TECH* (nome curto), *2 · Service Line* ficava por cima de *1 · Prefixo da Área* | *Service Line* desliza para a direita só o necessário; o conector continua em *GMO TECH* |
 | 0:56–1:02 | Formulário (nome no topo) | `[DTS] - Change Management - Mapa de Impactos` | `[DTS] - GMO TECH - Mapa de Impactos` |
 | 1:10–1:16 | Detalhes · Título | idem | idem |
+| 1:11–1:15 | Legenda do passo 6 | *Em Detalhes, classifique como Template.* | *Em Detalhes, escolha a classificação.* (mesmo tempo e mesmo sublinhado) |
 | 1:29–1:36 | Card NOVA publicado e 442 | idem | idem |
 | ao fundo | Cards pequenos da parede da Biblioteca (1:41–1:44, quase imperceptível) | títulos GMO antigos | títulos GMO TECH (coerentes com os cards em destaque) |
 

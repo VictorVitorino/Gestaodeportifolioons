@@ -25,7 +25,7 @@ index 9ef7236..314a9b0 100644
  const S = [];
  S.push(['m_empty', { ...base }]);
 diff --git a/motion/dts-todos-sabem-usam-exemplo/src/pace.js b/motion/dts-todos-sabem-usam-exemplo/src/pace.js
-index fddc056..a4ba0f3 100644
+index fddc056..72cc907 100644
 --- a/motion/dts-todos-sabem-usam-exemplo/src/pace.js
 +++ b/motion/dts-todos-sabem-usam-exemplo/src/pace.js
 @@ -74,7 +74,7 @@ export const SCHED = {
@@ -37,8 +37,17 @@ index fddc056..a4ba0f3 100644
      "cur": [[2.2, [1320, 760]], [3.1, [990, 345]], [3.6, [990, 345]], [4.4, [582, 340]], [4.8, [582, 340]], [5.35, [700, 664]], [6.8, [700, 664]],
        [7.3, [470, 40]], [7.6, [470, 40]], [8.55, [545, 345]], [9.1, [545, 345]], [9.75, [980, 760]]],
      "curVis": [2.2, 2.55, 9.35, 9.7],
+@@ -101,7 +101,7 @@ export const SCHED = {
+     "clk": [2.15, 4.4, 5.35, 8.25, 9.8, 11.2, 12.45, 18.0],
+     "scroll": [[7.2, 8.1], [11.45, 12.35]],
+     "focus": [[["tpl"], 1.5, 3.5], [["area"], 4.2, 5.55], [["area", "areaHint"], 5.55, 7.2], [["people", "pin"], 8.15, 11.5], [["desc"], 12.35, 16.85], [["share"], 17.3, 18.5]],
+-    "subs": [[0.3, 3.9, "Passo 6", "Em *Detalhes*, classifique como *Template*.", [0.8, 2.3]],
++    "subs": [[0.3, 3.9, "Passo 6", "Em *Detalhes*, escolha a *classificação*.", [0.8, 2.3]],
+       [3.9, 7.6, "Passo 6", "A *área responsável* recebe os *pontos*.", [4.35, 6.45]],
+       [7.6, 11.65, "Passo 6", "Inclua os *co-responsáveis* da skill.", [8.2]],
+       [11.65, 17.0, "Passo 6", "Na *Descrição*, detalhe o *entregável* e o *resultado final*.", [12.4, 16.0, 16.45]],
 diff --git a/motion/dts-todos-sabem-usam-exemplo/src/timeline.js b/motion/dts-todos-sabem-usam-exemplo/src/timeline.js
-index f75510c..dd5268b 100644
+index f75510c..8eacc09 100644
 --- a/motion/dts-todos-sabem-usam-exemplo/src/timeline.js
 +++ b/motion/dts-todos-sabem-usam-exemplo/src/timeline.js
 @@ -440,10 +440,10 @@ export function buildFilm(ctx) {
@@ -55,6 +64,25 @@ index f75510c..dd5268b 100644
      if (t > 37.5) img = 'm_where_0';
      if (t > 37.95) img = 'm_where_1'; if (t > 38.15) img = 'm_where_2'; if (t > 38.35) img = 'm_where_3';
      if (t > 38.7) img = 'm_where_dd'; if (t > 39.3) img = 'm_where_ddhi';
+@@ -844,12 +844,17 @@ export function buildFilm(ctx) {
+         const n = MR.name, r = MG.rectOf([project(mpt(n.x, n.y)), project(mpt(n.x + n.w, n.y)), project(mpt(n.x, n.y + n.h)), project(mpt(n.x + n.w, n.y + n.h))]);
+         spotHole.setAttribute('x', r.x0 - 16); spotHole.setAttribute('y', r.y0 - 16); spotHole.setAttribute('width', r.x1 - r.x0 + 32); spotHole.setAttribute('height', r.y1 - r.y0 + 32); spot.style.opacity = so.toFixed(3);
+       }
++      let prevR = -Infinity;
+       segLbl.forEach((el, k) => {
+         const a = E.outCubic(seg(u, T0[k], T0[k] + 0.4)), dim = u < SN.all && k < 2 && u > T0[k + 1];
+         const o = on ? a * out : 0;
+         el.style.filter = dim ? 'saturate(.35) brightness(.72)' : '';
+         const r = NS[k], top = project(mpt(r.x + r.w / 2, r.y + r.h + 4)), bot = project(mpt(r.x + r.w / 2, MR.name.y + MR.name.h + 6));
+-        show(el, o, top.x, bot.y + 30 + (1 - a) * 12, 0.5, 0, 1);
++        // GMO TECH: a label never covers the one before it (the short Service Line sat on Prefixo da Área);
++        // it slides right just enough, its connector stays on its part of the name
++        let x = top.x;
++        if (o > 0.003) { el.style.display = ''; const w = el.offsetWidth; x = Math.max(top.x, prevR + 18 + w / 2); prevR = x + w / 2; }
++        show(el, o, x, bot.y + 30 + (1 - a) * 12, 0.5, 0, 1);
+         segPath[k].setAttribute('d', `M${top.x},${top.y} V${bot.y + 30}`); segPath[k].style.opacity = o;
+       });
+       MG.vis(segLn, on);
 diff --git a/motion/dts-todos-sabem-usam-exemplo/src/ui.js b/motion/dts-todos-sabem-usam-exemplo/src/ui.js
 index 6d54d74..bd1eb7a 100644
 --- a/motion/dts-todos-sabem-usam-exemplo/src/ui.js
