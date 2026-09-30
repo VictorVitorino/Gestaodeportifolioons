@@ -21,10 +21,13 @@ que agora usa a sigla **GMO TECH**, como no FLOWS (gravações de tela `Video_GM
 | 0:56–1:02 | Formulário (nome no topo) | `[DTS] - Change Management - Mapa de Impactos` | `[DTS] - GMO TECH - Mapa de Impactos` |
 | 1:10–1:16 | Detalhes · Título | idem | idem |
 | 1:29–1:36 | Card NOVA publicado e 442 | idem | idem |
-| ao fundo | Cards pequenos da parede da Biblioteca (ex.: 1:41) | títulos GMO antigos | títulos GMO TECH (coerentes com os cards em destaque) |
+| ao fundo | Cards pequenos da parede da Biblioteca (1:41–1:44, quase imperceptível) | títulos GMO antigos | títulos GMO TECH (coerentes com os cards em destaque) |
 
-O mapa de diferenças (`tools/diffmap.py`, v7 original × render novo, quadro a quadro) confirma: a imagem só muda
-nesses trechos e só nos textos. Abertura, pilares, contador 441, ranking e cartela ficam iguais.
+**Conferência quadro a quadro com o vídeo enviado** (`tools/fullcheck.py`, os 2.880 quadros): a imagem só muda em
+0:26,5–0:31,3 · 0:36,3–0:40,2 · 0:49,3–1:02,1 · 1:11,3–1:16,9 · 1:30,0–1:35,7 (e em 27 px de um card pequeno da
+parede em 1:44,1). Em todo o resto (abertura, pilares, contador 441, rótulo do 442, ranking e cartela), a
+diferença é só ruído de compressão (média de 1–2 níveis de cor). O antes/depois de cada trecho está em
+`video/antes_depois.jpg`.
 
 Nada mais foi tocado: roteiro, câmera, legendas, trilha e tempos são os mesmos, quadro a quadro.
 - **Mesma minutagem:** o filme tem os mesmos 2.880 quadros. Cada quadro mostra o mesmo instante da v7 que mostrava
