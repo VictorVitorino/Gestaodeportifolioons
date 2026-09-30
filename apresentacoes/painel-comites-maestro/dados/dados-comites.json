@@ -1,0 +1,3306 @@
+{
+ "projeto": "Projeto Maestro — Operação Assistida",
+ "gerado_em": "2026-09-30",
+ "comites": [
+  {
+   "id": "gestor",
+   "nome": "Comitê Gestor",
+   "cadencia": "semanal",
+   "arquivo_fonte": "AM_Comite_Gestor_Op_Assistida_Master.pptx",
+   "total_slides": 95,
+   "edicoes": [
+    {
+     "id": "2026-07-22",
+     "rotulo": "22/07",
+     "data": "2026-07-22",
+     "slides": [
+      82,
+      95
+     ],
+     "slide_capa": 82,
+     "oculto_no_deck": true,
+     "slides_ignorados": []
+    },
+    {
+     "id": "2026-07-29",
+     "rotulo": "29/07",
+     "data": "2026-07-29",
+     "slides": [
+      76,
+      81
+     ],
+     "slide_capa": 76,
+     "oculto_no_deck": true,
+     "slides_ignorados": []
+    },
+    {
+     "id": "2026-08-05",
+     "rotulo": "05/08",
+     "data": "2026-08-05",
+     "slides": [
+      67,
+      75
+     ],
+     "slide_capa": 67,
+     "oculto_no_deck": true,
+     "slides_ignorados": []
+    },
+    {
+     "id": "2026-08-12",
+     "rotulo": "12/08",
+     "data": "2026-08-12",
+     "slides": [
+      59,
+      66
+     ],
+     "slide_capa": 59,
+     "oculto_no_deck": true,
+     "slides_ignorados": []
+    },
+    {
+     "id": "2026-08-19",
+     "rotulo": "19/08",
+     "data": "2026-08-19",
+     "slides": [
+      50,
+      58
+     ],
+     "slide_capa": 50,
+     "oculto_no_deck": true,
+     "slides_ignorados": []
+    },
+    {
+     "id": "2026-08-26",
+     "rotulo": "26/08",
+     "data": "2026-08-26",
+     "slides": [
+      43,
+      49
+     ],
+     "slide_capa": 43,
+     "oculto_no_deck": true,
+     "slides_ignorados": []
+    },
+    {
+     "id": "2026-09-02",
+     "rotulo": "02/09",
+     "data": "2026-09-02",
+     "slides": [
+      35,
+      42
+     ],
+     "slide_capa": 35,
+     "oculto_no_deck": true,
+     "slides_ignorados": []
+    },
+    {
+     "id": "2026-09-09",
+     "rotulo": "09/09",
+     "data": "2026-09-09",
+     "slides": [
+      29,
+      34
+     ],
+     "slide_capa": 29,
+     "oculto_no_deck": true,
+     "slides_ignorados": []
+    },
+    {
+     "id": "2026-09-16",
+     "rotulo": "16/09",
+     "data": "2026-09-16",
+     "slides": [
+      20,
+      28
+     ],
+     "slide_capa": 20,
+     "oculto_no_deck": true,
+     "slides_ignorados": []
+    },
+    {
+     "id": "2026-09-23",
+     "rotulo": "23/09",
+     "data": "2026-09-23",
+     "slides": [
+      11,
+      19
+     ],
+     "slide_capa": 11,
+     "oculto_no_deck": true,
+     "slides_ignorados": []
+    },
+    {
+     "id": "2026-09-30",
+     "rotulo": "30/09",
+     "data": "2026-09-30",
+     "slides": [
+      1,
+      10
+     ],
+     "slide_capa": 1,
+     "oculto_no_deck": false,
+     "slides_ignorados": []
+    }
+   ],
+   "atividades": [
+    {
+     "id": "gestor-a001",
+     "atividade": "Detalhamento do cronograma da operação assistida",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-07-22",
+       "status": "concluido",
+       "prazo": "17/07",
+       "prazo_iso": "2026-07-17",
+       "slide": 85,
+       "obs": "Cronograma disponibilizado na pasta compartilhada do Teams em 17/07"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a002",
+     "atividade": "Agendamento do Workshop para detalhamento do escopo, processos e integrações das Gerencias (com todos os gerentes, líderes das comunidades)",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-07-22",
+       "status": "em_andamento",
+       "prazo": "24/07",
+       "prazo_iso": "2026-07-24",
+       "slide": 85,
+       "obs": "Previsão para 04/08"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a003",
+     "atividade": "Reuniões com a FEN, FEL e FER para a realocação de processos, que não pertencem à FE",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-07-22",
+       "status": "em_andamento",
+       "prazo": "24/07",
+       "prazo_iso": "2026-07-24",
+       "slide": 85,
+       "obs": "Primeira reunião realizada: FEL 17/07 Reunião agendada: FER 22/07 e FEN 23/07"
+      },
+      {
+       "edicao": "2026-07-29",
+       "status": "concluido",
+       "prazo": "24/07",
+       "prazo_iso": "2026-07-24",
+       "slide": 79,
+       "obs": "Reuniões realizadas: FEL 17/07, FER 22/07 e FEN 23/07"
+      }
+     ],
+     "aliases": [
+      "Reunião com a FEN, FEL e FER para a realocação de processos, que não pertencem à FE"
+     ]
+    },
+    {
+     "id": "gestor-a004",
+     "atividade": "Mapeamento das demandas que estão sendo direcionadas para as comunidades e inventário das ferramentas de suporte utilizadas",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-07-22",
+       "status": "em_andamento",
+       "prazo": "24/07",
+       "prazo_iso": "2026-07-24",
+       "slide": 85,
+       "obs": "Data Request disponibilizado na pasta compartilhada do Teams em 17/07 com retorno até dia 24/07"
+      },
+      {
+       "edicao": "2026-07-29",
+       "status": "concluido",
+       "prazo": "24/07",
+       "prazo_iso": "2026-07-24",
+       "slide": 79,
+       "obs": "Data Request disponibilizado na pasta compartilhada do Teams em 17/07 com retorno até dia 24/07"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a005",
+     "atividade": "Consolidação das demandas direcionadas para as comunidades e definição de plano de ação preliminar para as iniciativas aplicáveis",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-07-22",
+       "status": "em_andamento",
+       "prazo": "29/07",
+       "prazo_iso": "2026-07-29",
+       "slide": 85,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a006",
+     "atividade": "Construção do material do Workshop para detalhamento do escopo, processos e integrações com os gerentes e líderes das comunidades de entrega e técnica",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-07-22",
+       "status": "em_andamento",
+       "prazo": "29/07",
+       "prazo_iso": "2026-07-29",
+       "slide": 85,
+       "obs": "Agendar prévia do material com Marcelo e FEG até dia 31/07"
+      },
+      {
+       "edicao": "2026-07-29",
+       "status": "em_andamento",
+       "prazo": "30/07",
+       "prazo_iso": "2026-07-30",
+       "slide": 79,
+       "obs": "Agendado prévia do material com Marcelo e FEG para 31/07"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a007",
+     "atividade": "Retorno dos comunicados para DPL e para todo ONS",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-07-22",
+       "status": "em_andamento",
+       "prazo": "22/07",
+       "prazo_iso": "2026-07-22",
+       "slide": 85,
+       "obs": "Primeiro boletim semanal para 22/07"
+      },
+      {
+       "edicao": "2026-07-29",
+       "status": "concluido",
+       "prazo": "22/07",
+       "prazo_iso": "2026-07-22",
+       "slide": 79,
+       "obs": "Primeiro boletim semanal enviado em 23/07"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a008",
+     "atividade": "Revisão do Plano de Comunicação",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-07-22",
+       "status": "nao_iniciado",
+       "prazo": "28/07",
+       "prazo_iso": "2026-07-28",
+       "slide": 85,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-07-29",
+       "status": "concluido",
+       "prazo": "28/07",
+       "prazo_iso": "2026-07-28",
+       "slide": 79,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a009",
+     "atividade": "Reestruturação da estratégia para Rede da Mudança",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-07-22",
+       "status": "em_andamento",
+       "prazo": "28/07",
+       "prazo_iso": "2026-07-28",
+       "slide": 85,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a010",
+     "atividade": "Validação da estratégia da Rede da Mudança",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-07-22",
+       "status": "nao_iniciado",
+       "prazo": "30/07",
+       "prazo_iso": "2026-07-30",
+       "slide": 85,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a011",
+     "atividade": "Agendamento do Workshop para detalhamento do escopo, processos e integrações das Gerencias",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-07-29",
+       "status": "concluido",
+       "prazo": "24/07",
+       "prazo_iso": "2026-07-24",
+       "slide": 79,
+       "obs": "Agendado para 04 e 05/08"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a012",
+     "atividade": "Realização do workshop para detalhamento do escopo, processos e integrações das Gerencias (com todos os gerentes, líderes das comunidades)",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-07-29",
+       "status": "em_andamento",
+       "prazo": "05/08",
+       "prazo_iso": "2026-08-05",
+       "slide": 79,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a013",
+     "atividade": "Consolidação e plano de ação preliminar para as demandas que estão sendo direcionadas para as comunidades",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-07-29",
+       "status": "em_andamento",
+       "prazo": "07/08",
+       "prazo_iso": "2026-08-07",
+       "slide": 79,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-08-05",
+       "status": "concluido",
+       "prazo": "30/07",
+       "prazo_iso": "2026-07-30",
+       "slide": 70,
+       "obs": "Alinhamento com a FEG sobre ações prioritárias"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a014",
+     "atividade": "Instanciamento do grupo de trabalho para definição das diretrizes de ferramentas de suporte à governança",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-07-29",
+       "status": "em_andamento",
+       "prazo": "07/08",
+       "prazo_iso": "2026-08-07",
+       "slide": 79,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-08-05",
+       "status": "em_andamento",
+       "prazo": "07/08",
+       "prazo_iso": "2026-08-07",
+       "slide": 70,
+       "obs": "Definição de representantes da FEG e DTA"
+      }
+     ],
+     "aliases": [
+      "Instanciamento do grupo de trabalho para definição das diretrizes de ferramentas de suporte a governança e documentação"
+     ]
+    },
+    {
+     "id": "gestor-a015",
+     "atividade": "Reestruturação da Rede de Influenciadores",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-07-29",
+       "status": "em_andamento",
+       "prazo": "29/07",
+       "prazo_iso": "2026-07-29",
+       "slide": 79,
+       "obs": "Alinhamento realizado com Vitor Duarte em 27/07"
+      },
+      {
+       "edicao": "2026-08-05",
+       "status": "concluido",
+       "prazo": "30/07",
+       "prazo_iso": "2026-07-30",
+       "slide": 70,
+       "obs": "Reunião de Alinhamento Marcelo, Vitor e Isabella 30/07"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a016",
+     "atividade": "Validação do Plano de Comunicação e Rede de Influenciadores",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-07-29",
+       "status": "em_andamento",
+       "prazo": "30/07",
+       "prazo_iso": "2026-07-30",
+       "slide": 79,
+       "obs": "Reunião agendada para 29/07"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a017",
+     "atividade": "Construção do material e realização do workshop para detalhamento do escopo, processos e integrações das Gerencias e Comunidades.",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-05",
+       "status": "concluido",
+       "prazo": "05/08",
+       "prazo_iso": "2026-08-05",
+       "slide": 70,
+       "obs": "Realizado nos dias 04 e 05/08"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a018",
+     "atividade": "Elaboração do plano de realocação dos processos herdados de outras áreas",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-05",
+       "status": "em_andamento",
+       "prazo": "14/08",
+       "prazo_iso": "2026-08-14",
+       "slide": 70,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-08-12",
+       "status": "em_andamento",
+       "prazo": "14/08",
+       "prazo_iso": "2026-08-14",
+       "slide": 62,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-08-19",
+       "status": "concluido",
+       "prazo": "14/08",
+       "prazo_iso": "2026-08-14",
+       "slide": 53,
+       "obs": "Disponibilizado no diretório do Teams"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a019",
+     "atividade": "Consolidação das adequações capturadas no workshop de detalhamento do escopo, processos e integrações das Gerencias e Comunidades.",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-05",
+       "status": "em_andamento",
+       "prazo": "14/08",
+       "prazo_iso": "2026-08-14",
+       "slide": 70,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a020",
+     "atividade": "Readequação do Plano de Comunicação",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-08-05",
+       "status": "concluido",
+       "prazo": "31/07",
+       "prazo_iso": "2026-07-31",
+       "slide": 70,
+       "obs": "Em processo de aprovação pela ONS"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a021",
+     "atividade": "Estruturação do cronograma e trilha de capacitação (Agenda, Conteúdo, Atividade de Fixação, Indicadores)",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-08-05",
+       "status": "em_andamento",
+       "prazo": "14/08",
+       "prazo_iso": "2026-08-14",
+       "slide": 70,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-08-12",
+       "status": "concluido",
+       "prazo": "12/08",
+       "prazo_iso": "2026-08-12",
+       "slide": 62,
+       "obs": "Validação interna e envio do calendário de treinamentos"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a022",
+     "atividade": "Setup e Ativação da Rede de Influenciadores",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-08-05",
+       "status": "nao_iniciado",
+       "prazo": "14/08",
+       "prazo_iso": "2026-08-14",
+       "slide": 70,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-08-12",
+       "status": "em_andamento",
+       "prazo": "19/08",
+       "prazo_iso": "2026-08-19",
+       "slide": 62,
+       "obs": "Aguardando validação das Gerências, prazo estipulado de retorno 12/08."
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a023",
+     "atividade": "Realização do workshop de detalhamento e apropriação do escopo, processos e integrações das Gerencias e Comunidades",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-12",
+       "status": "concluido",
+       "prazo": "04 e 05/08",
+       "prazo_iso": "2026-08-05",
+       "slide": 62,
+       "obs": "Realizado com os gerentes, líderes e pontos focais FE e DTA"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a024",
+     "atividade": "Consolidação das adequações capturadas no workshop",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-12",
+       "status": "concluido",
+       "prazo": "11/08",
+       "prazo_iso": "2026-08-11",
+       "slide": 62,
+       "obs": "Disponibilizado no diretório do Teams"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a025",
+     "atividade": "Reunião de alinhamento com a FEG para definição de atividades que serão executadas com suporte da A&M (ex. fóruns, detalhamento de processos e ferramentas)",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-12",
+       "status": "em_andamento",
+       "prazo": "12/08",
+       "prazo_iso": "2026-08-12",
+       "slide": 62,
+       "obs": "Plano de ação consolidado"
+      },
+      {
+       "edicao": "2026-08-19",
+       "status": "concluido",
+       "prazo": "12/08",
+       "prazo_iso": "2026-08-12",
+       "slide": 53,
+       "obs": "A&M irá participar das agendas semanais da FEG para alinhamento da implantação das atividades"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a026",
+     "atividade": "Reunião de entendimento das melhores práticas de Gestão de Projetos, Governança e ferramentas de suporte com a DTA - AGG",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-12",
+       "status": "em_andamento",
+       "prazo": "14/08",
+       "prazo_iso": "2026-08-14",
+       "slide": 62,
+       "obs": "Entendimento das melhores práticas e plano de ação para implantação"
+      },
+      {
+       "edicao": "2026-08-19",
+       "status": "concluido",
+       "prazo": "14/08",
+       "prazo_iso": "2026-08-14",
+       "slide": 53,
+       "obs": "Itens discutidos: Gestão de Projetos, Demandas, Indicadores, Contratos, Central de Serviços"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a027",
+     "atividade": "Elaboração do material de treinamento sobre o Modelo de Operação e Papeis e Responsabilidades",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-12",
+       "status": "em_andamento",
+       "prazo": "19/08",
+       "prazo_iso": "2026-08-19",
+       "slide": 62,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-08-19",
+       "status": "em_andamento",
+       "prazo": "24/08",
+       "prazo_iso": "2026-08-24",
+       "slide": 53,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-08-26",
+       "status": "em_andamento",
+       "prazo": "26/08",
+       "prazo_iso": "2026-08-26",
+       "slide": 46,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-09-02",
+       "status": "concluido",
+       "prazo": "26/08",
+       "prazo_iso": "2026-08-26",
+       "slide": 38,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a028",
+     "atividade": "Revisão e atualização do site do Maestro no Sou + considerando a etapa de Operação Assistida",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-08-12",
+       "status": "em_andamento",
+       "prazo": "14/08",
+       "prazo_iso": "2026-08-14",
+       "slide": 62,
+       "obs": "Reunião de Alinhamento com a CSI agendada para 14/08"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a029",
+     "atividade": "Monitoramento das respostas do formulário de feedback e preparação da análise consolidada (WS Modelo de Atuação Gerências)",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-08-12",
+       "status": "em_andamento",
+       "prazo": "17/08",
+       "prazo_iso": "2026-08-17",
+       "slide": 62,
+       "obs": "Prazo final de retorno 14/08"
+      },
+      {
+       "edicao": "2026-08-19",
+       "status": "concluido",
+       "prazo": "17/08",
+       "prazo_iso": "2026-08-17",
+       "slide": 53,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a030",
+     "atividade": "Disparo do convite para a primeira sessão de capacitação sobre Modelo de Operação e Papéis e Responsabilidades",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-19",
+       "status": "concluido",
+       "prazo": "18/08",
+       "prazo_iso": "2026-08-18",
+       "slide": 53,
+       "obs": "Em confirmação dos participantes DTA"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a031",
+     "atividade": "Webinar sobre o Modelo de Operação com as áreas clientes (Gerências Executivas e Gerencias)",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-19",
+       "status": "em_andamento",
+       "prazo": "27/08",
+       "prazo_iso": "2026-08-27",
+       "slide": 53,
+       "obs": "Em definição de agenda"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a032",
+     "atividade": "Análise do site do Maestro no Sou+ com foco na identificação de oportunidades de melhoria para a Operação Assistida.",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-08-19",
+       "status": "concluido",
+       "prazo": "14/08",
+       "prazo_iso": "2026-08-14",
+       "slide": 53,
+       "obs": "Construção dos sites das Gerências FE, visando continuidade operacional."
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a033",
+     "atividade": "Construção da atividade de fixação sobre Treinamento Modelo de Operação",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-08-19",
+       "status": "em_andamento",
+       "prazo": "24/08",
+       "prazo_iso": "2026-08-24",
+       "slide": 53,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a034",
+     "atividade": "Ativação da Rede de Influenciadores",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-08-19",
+       "status": "em_andamento",
+       "prazo": "26/08",
+       "prazo_iso": "2026-08-26",
+       "slide": 53,
+       "obs": "Avaliação sobre os benefícios de ativação parcial da rede (FE + DTA)"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a035",
+     "atividade": "Elaboração e validação da apresentação do webinar sobre o Modelo de Operação com as áreas clientes (Gerências Executivas e Gerencias)",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-26",
+       "status": "concluido",
+       "prazo": "25/08",
+       "prazo_iso": "2026-08-25",
+       "slide": 46,
+       "obs": "Alinhamento interno realizado em 20/08"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a036",
+     "atividade": "Webinar sobre o Modelo de Operação com as áreas clientes",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-26",
+       "status": "em_andamento",
+       "prazo": "27/08",
+       "prazo_iso": "2026-08-27",
+       "slide": 46,
+       "obs": "Sessões agendadas para 26 e 27/08"
+      },
+      {
+       "edicao": "2026-09-02",
+       "status": "concluido",
+       "prazo": "27/08",
+       "prazo_iso": "2026-08-27",
+       "slide": 38,
+       "obs": "Sessões realizadas em 26 e 27/08"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a037",
+     "atividade": "Primeira sessão de capacitação sobre Modelo de Operação e Papéis e Responsabilidades",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-26",
+       "status": "em_andamento",
+       "prazo": "27/08",
+       "prazo_iso": "2026-08-27",
+       "slide": 46,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-09-02",
+       "status": "concluido",
+       "prazo": "27/08",
+       "prazo_iso": "2026-08-27",
+       "slide": 38,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a038",
+     "atividade": "Consolidação do backlog inicial das Comunidades de Entrega",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-26",
+       "status": "em_andamento",
+       "prazo": "31/08",
+       "prazo_iso": "2026-08-31",
+       "slide": 46,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-09-02",
+       "status": "em_andamento",
+       "prazo": "04/09",
+       "prazo_iso": "2026-09-04",
+       "slide": 38,
+       "obs": "Realizado reuniões de alinhamento de conceitos e boas práticas"
+      },
+      {
+       "edicao": "2026-09-09",
+       "status": "em_atraso",
+       "prazo": "04/09 09/09",
+       "prazo_iso": "2026-09-04",
+       "slide": 32,
+       "obs": "Em consolidação: FEL e FEN"
+      },
+      {
+       "edicao": "2026-09-16",
+       "status": "concluido",
+       "prazo": "09/09",
+       "prazo_iso": "2026-09-09",
+       "slide": 23,
+       "obs": "Exceto EMT - Transitórios Eletromagnéticos"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a039",
+     "atividade": "Elaboração do material do Workshop FEG e Comunidades Técnicas",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-26",
+       "status": "em_andamento",
+       "prazo": "04/09",
+       "prazo_iso": "2026-09-04",
+       "slide": 46,
+       "obs": "Pré-requisito: Definição prévia dos participantes das comunidades técnicas (FE)"
+      },
+      {
+       "edicao": "2026-09-02",
+       "status": "em_andamento",
+       "prazo": "04/09",
+       "prazo_iso": "2026-09-04",
+       "slide": 38,
+       "obs": "Pré-requisito: Definição prévia dos participantes das comunidades técnicas (FE)"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a040",
+     "atividade": "Construção do material de treinamento de Metodologias de Gestão de Projetos",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-26",
+       "status": "em_andamento",
+       "prazo": "04/09",
+       "prazo_iso": "2026-09-04",
+       "slide": 46,
+       "obs": "Alinhado com as melhores práticas da DTA - AGG"
+      },
+      {
+       "edicao": "2026-09-02",
+       "status": "em_andamento",
+       "prazo": "04/09",
+       "prazo_iso": "2026-09-04",
+       "slide": 38,
+       "obs": "Alinhado com as melhores práticas da DTA - AGG"
+      },
+      {
+       "edicao": "2026-09-09",
+       "status": "concluido",
+       "prazo": "04/09",
+       "prazo_iso": "2026-09-04",
+       "slide": 32,
+       "obs": "Compartilhado no diretório do Teams"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a041",
+     "atividade": "Elaboração do conteúdo do site da FEG, visando estruturar os elementos que compõem a arquitetura da mandala e as frentes de atuação.",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-08-26",
+       "status": "concluido",
+       "prazo": "24/08",
+       "prazo_iso": "2026-08-24",
+       "slide": 46,
+       "obs": "Realizar validação com FEG"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a042",
+     "atividade": "Modelagem da estrutura de gamificação do primeiro treinamento com base no contexto da ONS.",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-08-26",
+       "status": "concluido",
+       "prazo": "24/08",
+       "prazo_iso": "2026-08-24",
+       "slide": 46,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a043",
+     "atividade": "Construção do informativo mensal para o ONS, contextualizando a etapa de Operação Assistida e recapitulando o projeto Maestro de forma geral",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-08-26",
+       "status": "em_andamento",
+       "prazo": "28/08",
+       "prazo_iso": "2026-08-28",
+       "slide": 46,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-09-02",
+       "status": "concluido",
+       "prazo": "01/09",
+       "prazo_iso": "2026-09-01",
+       "slide": 38,
+       "obs": "Em aprovação"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a044",
+     "atividade": "Diagnóstico da Liderança das Comunidades de Entrega e Técnica",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-08-26",
+       "status": "em_andamento",
+       "prazo": "02/09",
+       "prazo_iso": "2026-09-02",
+       "slide": 46,
+       "obs": "Consolidação dos insights e apresentação dos resultados."
+      },
+      {
+       "edicao": "2026-09-02",
+       "status": "em_andamento",
+       "prazo": "04/09",
+       "prazo_iso": "2026-09-04",
+       "slide": 38,
+       "obs": "Consolidação dos insights e apresentação dos resultados"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a045",
+     "atividade": "Construção de E-learning do treinamento de Modelo de Operação, com edição, configuração e adaptação para o formato de curso online",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-02",
+       "status": "concluido",
+       "prazo": "31/08",
+       "prazo_iso": "2026-08-31",
+       "slide": 38,
+       "obs": "Publicar ONS Educa+"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a046",
+     "atividade": "Monitoramento das respostas da atividade de fixação referente ao primeiro treinamento – Modelo de Operação",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-02",
+       "status": "em_andamento",
+       "prazo": "04/09",
+       "prazo_iso": "2026-09-04",
+       "slide": 38,
+       "obs": "Análise e apresentação dos indicadores"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a047",
+     "atividade": "Desenvolvimento de iniciativas digitais de engajamento para reforçar a apropriação dos conteúdos e mudanças propostas",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-02",
+       "status": "em_andamento",
+       "prazo": "07/09",
+       "prazo_iso": "2026-09-07",
+       "slide": 38,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a048",
+     "atividade": "Reunião de alinhamento sobre o Modelo de Operação: Atuação dos Representantes de Negócio nas Comunidade de Entrega Atuação nas Comunidades Técnicas de prospecção e novos métodos",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-09-09",
+       "status": "em_andamento",
+       "prazo": "10/09",
+       "prazo_iso": "2026-09-10",
+       "slide": 32,
+       "obs": "Reunião agendada: 10/09 - 14:00 hrs"
+      },
+      {
+       "edicao": "2026-09-16",
+       "status": "concluido",
+       "prazo": "10/09",
+       "prazo_iso": "2026-09-10",
+       "slide": 23,
+       "obs": "Representantes Comunidades Técnicas e Demandas de evolução das ferramentas - 16/09"
+      }
+     ],
+     "aliases": [
+      "Reunião de alinhamento sobre o Modelo de Operação: Atuação dos Representantes de Negócio nas Comunidade de Entrega Atuação nas Comunidades Técnicas de prospecção e validação de novos métodos"
+     ]
+    },
+    {
+     "id": "gestor-a049",
+     "atividade": "Realização do treinamento sobre Metodologias de Gestão de Projetos",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-09-09",
+       "status": "em_andamento",
+       "prazo": "11/09",
+       "prazo_iso": "2026-09-11",
+       "slide": 32,
+       "obs": "Agendado: 11/09 - 09:00 hrs"
+      },
+      {
+       "edicao": "2026-09-16",
+       "status": "concluido",
+       "prazo": "11/09",
+       "prazo_iso": "2026-09-11",
+       "slide": 23,
+       "obs": "Reforço de conceitos no plano de Monitoramento e Ajustes"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a050",
+     "atividade": "Realização do Workshop da FEG (fóruns, processos e rotinas operacionais)",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-09-09",
+       "status": "em_andamento",
+       "prazo": "16/09",
+       "prazo_iso": "2026-09-16",
+       "slide": 32,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-09-16",
+       "status": "em_andamento",
+       "prazo": "16/09",
+       "prazo_iso": "2026-09-16",
+       "slide": 23,
+       "obs": "1º Sessão realizada em 15/09 2º Sessão agendada para 16/09"
+      },
+      {
+       "edicao": "2026-09-23",
+       "status": "concluido",
+       "prazo": "16/09",
+       "prazo_iso": "2026-09-16",
+       "slide": 14,
+       "obs": "1º Sessão: Documentação dos Fóruns 2º Sessão: Processo de Recebimento de Demandas"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a051",
+     "atividade": "Publicação do treinamento Modelo Operação Matricial na plataforma de e-learning do ONS Educa+",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-09",
+       "status": "concluido",
+       "prazo": "04/09",
+       "prazo_iso": "2026-09-04",
+       "slide": 32,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a052",
+     "atividade": "Consolidação dos resultados do diagnóstico da Liderança das Comunidades de Entrega",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-09",
+       "status": "concluido",
+       "prazo": "08/09",
+       "prazo_iso": "2026-09-08",
+       "slide": 32,
+       "obs": "Apresentação agendada para 15/09"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a053",
+     "atividade": "Consolidação dos resultados da Atividade de Fixação referente ao Treinamento Modelo de Operação Matricial",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-09",
+       "status": "em_andamento",
+       "prazo": "10/09",
+       "prazo_iso": "2026-09-10",
+       "slide": 32,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-09-16",
+       "status": "concluido",
+       "prazo": "15/09",
+       "prazo_iso": "2026-09-15",
+       "slide": 23,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a054",
+     "atividade": "Comunicações Maestro (Boletim Mensal, Descanso de Tela, Comunicação Física Mural)",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-09",
+       "status": "em_andamento",
+       "prazo": "11/09",
+       "prazo_iso": "2026-09-11",
+       "slide": 32,
+       "obs": "Boletim em processo de disparo com CS"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a055",
+     "atividade": "Elaboração do conteúdo do site das gerencias da FE",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-09",
+       "status": "em_andamento",
+       "prazo": "14/09",
+       "prazo_iso": "2026-09-14",
+       "slide": 32,
+       "obs": "Validação interna FEG"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a056",
+     "atividade": "Realização do Workshop da FEG - Comunidades Técnicas",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-09-16",
+       "status": "em_andamento",
+       "prazo": "22/09",
+       "prazo_iso": "2026-09-22",
+       "slide": 23,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-09-23",
+       "status": "concluido",
+       "prazo": "22/09",
+       "prazo_iso": "2026-09-22",
+       "slide": 14,
+       "obs": "Classificação de demandas no padrão TRL e identificação de times envolvidos"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a057",
+     "atividade": "Treinamento de Arquitetura de Modelos Eletroenergéticos",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-09-16",
+       "status": "em_andamento",
+       "prazo": "24/09",
+       "prazo_iso": "2026-09-24",
+       "slide": 23,
+       "obs": "Sessões: 23 e 24/09"
+      },
+      {
+       "edicao": "2026-09-23",
+       "status": "em_andamento",
+       "prazo": "28/09",
+       "prazo_iso": "2026-09-28",
+       "slide": 14,
+       "obs": "Sessões: 23 e 28/09"
+      },
+      {
+       "edicao": "2026-09-30",
+       "status": "concluido",
+       "prazo": "28/09",
+       "prazo_iso": "2026-09-28",
+       "slide": 4,
+       "obs": "Sessões: 23 e 28/09"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a058",
+     "atividade": "Configuração do Azure Devops (ambiente de homologação)",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-09-16",
+       "status": "em_andamento",
+       "prazo": "25/09",
+       "prazo_iso": "2026-09-25",
+       "slide": 23,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-09-23",
+       "status": "em_andamento",
+       "prazo": "25/09",
+       "prazo_iso": "2026-09-25",
+       "slide": 14,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-09-30",
+       "status": "concluido",
+       "prazo": "25/09",
+       "prazo_iso": "2026-09-25",
+       "slide": 4,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a059",
+     "atividade": "Apresentação dos Resultados do Diagnótico dos Lideres de Comunidade de Entrega",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-16",
+       "status": "concluido",
+       "prazo": "14/09",
+       "prazo_iso": "2026-09-14",
+       "slide": 23,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a060",
+     "atividade": "Publicação do treinamento Gestão de Projetos Ágeis na plataforma de e-learning do ONS Educa+",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-16",
+       "status": "em_andamento",
+       "prazo": "17/09",
+       "prazo_iso": "2026-09-17",
+       "slide": 23,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-09-23",
+       "status": "concluido",
+       "prazo": "17/09",
+       "prazo_iso": "2026-09-17",
+       "slide": 14,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a061",
+     "atividade": "Elaboração de Guia de Bolso Interativo para Catequização das Gerências e Comunidades",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-16",
+       "status": "em_andamento",
+       "prazo": "18/09",
+       "prazo_iso": "2026-09-18",
+       "slide": 23,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a062",
+     "atividade": "Envio do convite do fórum de integração de Comunidades",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-09-23",
+       "status": "em_andamento",
+       "prazo": "25/09",
+       "prazo_iso": "2026-09-25",
+       "slide": 14,
+       "obs": "Primeiro fórum previsto até 16/10"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a063",
+     "atividade": "Workshop FEG - 3º Sessão com foco em Captação Orçamentária",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-09-23",
+       "status": "em_andamento",
+       "prazo": "29/09",
+       "prazo_iso": "2026-09-29",
+       "slide": 14,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a064",
+     "atividade": "Elaboração de Guia de Bolso Interativo para facilitar a aderência ao modelo de Operação (Gerências e Comunidades)",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-23",
+       "status": "concluido",
+       "prazo": "18/09",
+       "prazo_iso": "2026-09-18",
+       "slide": 14,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a065",
+     "atividade": "Comunicado para as áreas de negócio formalizando os indicados e responsabilidades que eles terão nas comunidades (Entrega e Técnica)",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-23",
+       "status": "em_andamento",
+       "prazo": "22/09",
+       "prazo_iso": "2026-09-22",
+       "slide": 14,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a066",
+     "atividade": "Construção de Toolkits para incorporar ao Guia de Bolso Interativo, disponibilizando soluções padronizadas e reutilizáveis (apresentações, produtos digitais e sistemas customizados)",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-23",
+       "status": "em_andamento",
+       "prazo": "25/09",
+       "prazo_iso": "2026-09-25",
+       "slide": 14,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-09-30",
+       "status": "concluido",
+       "prazo": "25/09",
+       "prazo_iso": "2026-09-25",
+       "slide": 4,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a067",
+     "atividade": "Workshop FEG - 4º Sessão com foco em Captação Orçamentária",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-09-30",
+       "status": "concluido",
+       "prazo": "29/09",
+       "prazo_iso": "2026-09-29",
+       "slide": 4,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a068",
+     "atividade": "Definição das demandas que serão conduzidas pelas Comunidades Técnicas",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-09-30",
+       "status": "em_andamento",
+       "prazo": "08/10",
+       "prazo_iso": "2026-10-08",
+       "slide": 4,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a069",
+     "atividade": "Validação do Azure Devops e tombamento para o ambiente de Produção",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-09-30",
+       "status": "em_andamento",
+       "prazo": "09/10",
+       "prazo_iso": "2026-10-09",
+       "slide": 4,
+       "obs": "Validação do ambiente de homologação até 02/10"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a070",
+     "atividade": "Kick off do ciclo da Captação Orçamentária (Gerentes e Líderes)",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-09-30",
+       "status": "em_andamento",
+       "prazo": "09/10",
+       "prazo_iso": "2026-10-09",
+       "slide": 4,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a071",
+     "atividade": "Construção e validação do comunicado para as áreas de negócio formalizando os Representantes de Negócio e responsabilidades (Comunidades de Entrega e Técnica)",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-30",
+       "status": "concluido",
+       "prazo": "29/09",
+       "prazo_iso": "2026-09-29",
+       "slide": 4,
+       "obs": "Envio para Gerencias Executivas, Gerências e Representantes de Negócio"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a072",
+     "atividade": "Publicação do treinamento Arquitetura de Modelos Eletroenergéticos na plataforma de e-learning do ONS Educa+",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-30",
+       "status": "em_andamento",
+       "prazo": "05/10",
+       "prazo_iso": "2026-10-05",
+       "slide": 4,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "gestor-a073",
+     "atividade": "Mapa de adoção aos comportamentos esperados perante ao Modelo de Operação",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-30",
+       "status": "em_andamento",
+       "prazo": "14/10",
+       "prazo_iso": "2026-10-14",
+       "slide": 4,
+       "obs": "Check points semanais"
+      }
+     ],
+     "aliases": []
+    }
+   ],
+   "pontos_atencao": [
+    {
+     "id": "gestor-p01",
+     "descricao": "Disponibilidade limitada de gestores e líderes de Comunidade (ex.: férias) podendo gerar impacto no cronograma e limitar a apropriação do modelo organizacional.",
+     "historico": [
+      {
+       "edicao": "2026-07-22",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FEG",
+       "prazo": "07/08",
+       "prazo_iso": "2026-08-07",
+       "plano_acao": "Planejamento do workshop considerando data que assegure a participação das lideranças críticas.",
+       "slide": 91
+      },
+      {
+       "edicao": "2026-07-29",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FEG",
+       "prazo": "07/08",
+       "prazo_iso": "2026-08-07",
+       "plano_acao": "Planejamento do workshop considerando data que assegure a participação das lideranças críticas.",
+       "slide": 80
+      },
+      {
+       "edicao": "2026-08-05",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FEG",
+       "prazo": "07/08",
+       "prazo_iso": "2026-08-07",
+       "plano_acao": "Planejamento do workshop considerando data que assegure a participação das lideranças críticas.",
+       "slide": 74
+      },
+      {
+       "edicao": "2026-08-12",
+       "status": "fechado",
+       "status_texto": "Fechado",
+       "responsavel": "A&M + FEG",
+       "prazo": "07/08",
+       "prazo_iso": "2026-08-07",
+       "plano_acao": "Planejamento do workshop considerando data que assegure a participação das lideranças críticas.",
+       "slide": 63
+      }
+     ]
+    },
+    {
+     "id": "gestor-p02",
+     "descricao": "Sobrecarga operacional durante a etapa de transição pode afetar a execução das atividades técnicas (ex.: atividades herdadas, demandas represadas e vagas ainda não preenchidas).",
+     "historico": [
+      {
+       "edicao": "2026-07-22",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FEG",
+       "prazo": "07/08",
+       "prazo_iso": "2026-08-07",
+       "plano_acao": "Mapeamento, consolidação e plano de realocação de processos e atividades em conjunto com a FEG. Mapeamento preliminar das demandas e plano de priorização e endereçamento.",
+       "slide": 91
+      },
+      {
+       "edicao": "2026-07-29",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FEG",
+       "prazo": "07/08",
+       "prazo_iso": "2026-08-07",
+       "plano_acao": "Mapeamento, consolidação e plano de realocação de processos e atividades em conjunto com a FEG. Mapeamento preliminar das demandas e plano de priorização e endereçamento.",
+       "slide": 80
+      },
+      {
+       "edicao": "2026-08-05",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FEG",
+       "prazo": "07/08",
+       "prazo_iso": "2026-08-07",
+       "plano_acao": "Mapeamento, consolidação e plano de realocação de processos e atividades em conjunto com a FEG. Mapeamento preliminar das demandas e plano de priorização e endereçamento. Formalização de recursos das áreas parceiras e estabelecimento de recorrências operacionais.",
+       "slide": 74
+      },
+      {
+       "edicao": "2026-08-12",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FEG",
+       "prazo": "14/08",
+       "prazo_iso": "2026-08-14",
+       "plano_acao": "Mapeamento, consolidação e plano de realocação de processos e atividades em conjunto com a FEG. Mapeamento preliminar das demandas e plano de priorização e endereçamento. Formalização de recursos das áreas parceiras e estabelecimento de recorrências operacionais.",
+       "slide": 63
+      },
+      {
+       "edicao": "2026-08-19",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FEG",
+       "prazo": "28/08",
+       "prazo_iso": "2026-08-28",
+       "plano_acao": "Mapeamento, consolidação e plano de realocação de processos e atividades em conjunto com a FEG. Mapeamento preliminar das demandas e plano de priorização e endereçamento. Formalização de recursos das áreas parceiras e estabelecimento de recorrências operacionais.",
+       "slide": 57
+      },
+      {
+       "edicao": "2026-08-26",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FEG",
+       "prazo": "11/09",
+       "prazo_iso": "2026-09-11",
+       "plano_acao": "Mapeamento, consolidação e plano de realocação de processos e atividades em conjunto com a FEG. Mapeamento preliminar das demandas e plano de priorização e endereçamento. Formalização de recursos das áreas parceiras e estabelecimento de recorrências operacionais.",
+       "slide": 48
+      },
+      {
+       "edicao": "2026-09-02",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FEG",
+       "prazo": "11/09",
+       "prazo_iso": "2026-09-11",
+       "plano_acao": "Mapeamento, consolidação e plano de realocação de processos e atividades em conjunto com a FEG. Mapeamento preliminar das demandas e plano de priorização e endereçamento. Formalização de recursos das áreas parceiras e estabelecimento de recorrências operacionais.",
+       "slide": 41
+      },
+      {
+       "edicao": "2026-09-09",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FEG",
+       "prazo": "11/09",
+       "prazo_iso": "2026-09-11",
+       "plano_acao": "Mapeamento, consolidação e plano de realocação de processos e atividades em conjunto com a FEG. Mapeamento preliminar das demandas e plano de priorização e endereçamento. Formalização de recursos das áreas parceiras e estabelecimento de recorrências operacionais.",
+       "slide": 33
+      },
+      {
+       "edicao": "2026-09-16",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FEG",
+       "prazo": "30/09",
+       "prazo_iso": "2026-09-30",
+       "plano_acao": "Mapeamento, consolidação e plano de realocação de processos e atividades em conjunto com a FEG. Mapeamento preliminar das demandas e plano de priorização e endereçamento. Formalização de recursos das áreas parceiras e estabelecimento de recorrências operacionais.",
+       "slide": 27
+      },
+      {
+       "edicao": "2026-09-23",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FEG",
+       "prazo": "30/09",
+       "prazo_iso": "2026-09-30",
+       "plano_acao": "Mapeamento, consolidação e plano de realocação de processos e atividades em conjunto com a FEG. Mapeamento preliminar das demandas e plano de priorização e endereçamento. Formalização de recursos das áreas parceiras e estabelecimento de recorrências operacionais.",
+       "slide": 18
+      },
+      {
+       "edicao": "2026-09-30",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FEG",
+       "prazo": "16/10",
+       "prazo_iso": "2026-10-16",
+       "plano_acao": "Mapeamento, consolidação e plano de realocação de processos e atividades em conjunto com a FEG. Mapeamento preliminar das demandas e plano de priorização e endereçamento. Formalização de recursos das áreas parceiras e estabelecimento de recorrências operacionais.",
+       "slide": 9
+      }
+     ]
+    },
+    {
+     "id": "gestor-p03",
+     "descricao": "Disponibilidade do time para participação das trilhas de Capacitação.",
+     "historico": [
+      {
+       "edicao": "2026-08-19",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FE",
+       "prazo": "30/09",
+       "prazo_iso": "2026-09-30",
+       "plano_acao": "Compartilhamento do cronograma da trilha de capacitação de forma antecipada. Gravação, edição e disponibilização dos treinamentos de forma online. Sensibilização da importância dos treinamentos pelos gestores responsáveis.",
+       "slide": 57
+      },
+      {
+       "edicao": "2026-08-26",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FE",
+       "prazo": "30/09",
+       "prazo_iso": "2026-09-30",
+       "plano_acao": "Compartilhamento do cronograma da trilha de capacitação de forma antecipada. Gravação, edição e disponibilização dos treinamentos de forma online. Sensibilização da importância dos treinamentos pelos gestores responsáveis.",
+       "slide": 48
+      },
+      {
+       "edicao": "2026-09-02",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FE",
+       "prazo": "30/09",
+       "prazo_iso": "2026-09-30",
+       "plano_acao": "Compartilhamento do cronograma da trilha de capacitação de forma antecipada. Gravação, edição e disponibilização dos treinamentos de forma online. Sensibilização da importância dos treinamentos pelos gestores responsáveis.",
+       "slide": 41
+      },
+      {
+       "edicao": "2026-09-09",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FE",
+       "prazo": "30/09",
+       "prazo_iso": "2026-09-30",
+       "plano_acao": "Compartilhamento do cronograma da trilha de capacitação de forma antecipada. Gravação, edição e disponibilização dos treinamentos de forma online. Sensibilização da importância dos treinamentos pelos gestores responsáveis.",
+       "slide": 33
+      },
+      {
+       "edicao": "2026-09-16",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FE",
+       "prazo": "30/09",
+       "prazo_iso": "2026-09-30",
+       "plano_acao": "Compartilhamento do cronograma da trilha de capacitação de forma antecipada. Gravação, edição e disponibilização dos treinamentos de forma online. Sensibilização da importância dos treinamentos pelos gestores responsáveis.",
+       "slide": 27
+      },
+      {
+       "edicao": "2026-09-23",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FE",
+       "prazo": "16/10",
+       "prazo_iso": "2026-10-16",
+       "plano_acao": "Compartilhamento do cronograma da trilha de capacitação de forma antecipada. Gravação, edição e disponibilização dos treinamentos de forma online. Sensibilização da importância dos treinamentos pelos gestores responsáveis.",
+       "slide": 18
+      },
+      {
+       "edicao": "2026-09-30",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FE",
+       "prazo": "16/10",
+       "prazo_iso": "2026-10-16",
+       "plano_acao": "Compartilhamento do cronograma da trilha de capacitação de forma antecipada. Gravação, edição e disponibilização dos treinamentos de forma online. Sensibilização da importância dos treinamentos pelos gestores responsáveis.",
+       "slide": 9
+      }
+     ]
+    },
+    {
+     "id": "gestor-p04",
+     "descricao": "Disponibilidade das áreas clientes atuando no modelo de operação da FE.",
+     "historico": [
+      {
+       "edicao": "2026-09-09",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FE",
+       "prazo": "30/09",
+       "prazo_iso": "2026-09-30",
+       "plano_acao": "Sensibilização das áreas clientes por meio de webinar sobre o Modelo. Revisitação do DQQ para acomodar a participação dos recursos (DPL - PL e PE / DOP - PR e PD).",
+       "slide": 33
+      },
+      {
+       "edicao": "2026-09-16",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FE",
+       "prazo": "30/09",
+       "prazo_iso": "2026-09-30",
+       "plano_acao": "Sensibilização das áreas clientes por meio de webinar sobre o Modelo. Revisitação do DQQ para acomodar a participação dos recursos (DPL - PL e PE / DOP - PR e PD).",
+       "slide": 27
+      },
+      {
+       "edicao": "2026-09-23",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FE",
+       "prazo": "16/10",
+       "prazo_iso": "2026-10-16",
+       "plano_acao": "Sensibilização das áreas clientes por meio de webinar sobre o Modelo. Revisitação do DQQ para acomodar a participação dos recursos na validação de novas funcionalidades (DPL - PL e PE / DOP - PR e PD).",
+       "slide": 18
+      },
+      {
+       "edicao": "2026-09-30",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FE",
+       "prazo": "16/10",
+       "prazo_iso": "2026-10-16",
+       "plano_acao": "Sensibilização das áreas clientes por meio de webinar sobre o Modelo. Revisitação do DQQ para acomodar a participação dos recursos na validação de novas funcionalidades (DPL - PL e PE / DOP - PR e PD).",
+       "slide": 9
+      }
+     ]
+    }
+   ],
+   "riscos_anexo": [
+    {
+     "n": "1",
+     "descricao": "Disponibilidade limitada de gestores e líderes de Comunidade (ex. férias) podendo gerar impacto no cronograma e limitar a apropriação do modelo organizacional.",
+     "impacto": "dentro_do_plano",
+     "responsavel": "A&M + FEG",
+     "prazo": "07/08",
+     "plano_acao": "Planejamento do workshop considerando data que assegure a participação das lideranças críticas.",
+     "slide": 93,
+     "edicao_base": "2026-07-22"
+    },
+    {
+     "n": "2",
+     "descricao": "Falta de clareza e distribuição incompleta dos papéis dentro das comunidades e gerências “engargalando” demandas por falta de responsáveis.",
+     "impacto": "dentro_do_plano",
+     "responsavel": "A&M + FEG",
+     "prazo": "07/08",
+     "plano_acao": "Workshop de construção conjunta das gerências e comunidades de entrega (clareza nas atribuições, processos, rotinas e etc.) Mapeamento preliminar das demandas atuais das comunidades de entrega e plano de ação para endereçamento",
+     "slide": 93,
+     "edicao_base": "2026-07-22"
+    },
+    {
+     "n": "3",
+     "descricao": "Sobrecarga operacional durante a etapa de transição pode afetar a execução das atividades técnicas (acúmulo de atribuições atuais e anteriores).",
+     "impacto": "dentro_do_plano",
+     "responsavel": "A&M + FEG",
+     "prazo": "05/08",
+     "plano_acao": "Mapeamento e consolidação do plano de realocação de processos em conjunto com a FEG",
+     "slide": 93,
+     "edicao_base": "2026-07-22"
+    }
+   ]
+  },
+  {
+   "id": "executivo",
+   "nome": "Comitê Executivo",
+   "cadencia": "quinzenal",
+   "arquivo_fonte": "AM_Comite_Executivo_Op_Assistida_Master.pptx",
+   "total_slides": 78,
+   "edicoes": [
+    {
+     "id": "2026-07-24",
+     "rotulo": "24/07",
+     "data": "2026-07-24",
+     "slides": [
+      61,
+      78
+     ],
+     "slide_capa": 61,
+     "oculto_no_deck": true,
+     "slides_ignorados": []
+    },
+    {
+     "id": "2026-08-10",
+     "rotulo": "10/08",
+     "data": "2026-08-10",
+     "slides": [
+      47,
+      60
+     ],
+     "slide_capa": 47,
+     "oculto_no_deck": true,
+     "slides_ignorados": []
+    },
+    {
+     "id": "2026-08-21",
+     "rotulo": "21/08",
+     "data": "2026-08-21",
+     "slides": [
+      34,
+      46
+     ],
+     "slide_capa": 34,
+     "oculto_no_deck": true,
+     "slides_ignorados": []
+    },
+    {
+     "id": "2026-09-04",
+     "rotulo": "04/09",
+     "data": "2026-09-04",
+     "slides": [
+      20,
+      33
+     ],
+     "slide_capa": 20,
+     "oculto_no_deck": true,
+     "slides_ignorados": []
+    },
+    {
+     "id": "2026-09-18",
+     "rotulo": "18/09",
+     "data": "2026-09-18",
+     "slides": [
+      12,
+      19
+     ],
+     "slide_capa": 12,
+     "oculto_no_deck": false,
+     "slides_ignorados": []
+    },
+    {
+     "id": "2026-10-02",
+     "rotulo": "02/10",
+     "data": "2026-10-02",
+     "slides": [
+      1,
+      11
+     ],
+     "slide_capa": 1,
+     "oculto_no_deck": false,
+     "slides_ignorados": [
+      6,
+      7
+     ]
+    }
+   ],
+   "atividades": [
+    {
+     "id": "executivo-a001",
+     "atividade": "Realização do kick off da etapa de Operação Assistida com a FE e DTA-TI",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-07-24",
+       "status": "concluido",
+       "prazo": "15/07",
+       "prazo_iso": "2026-07-15",
+       "slide": 66,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a002",
+     "atividade": "Detalhamento do cronograma da operação assistida",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-07-24",
+       "status": "concluido",
+       "prazo": "17/07",
+       "prazo_iso": "2026-07-17",
+       "slide": 66,
+       "obs": "Cronograma disponibilizado na pasta compartilhada do Teams em 17/07"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a003",
+     "atividade": "Agendamento do Workshop para detalhamento do escopo, processos e integrações das Gerencias (com todos os gerentes, líderes das comunidades)",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-07-24",
+       "status": "concluido",
+       "prazo": "24/07",
+       "prazo_iso": "2026-07-24",
+       "slide": 66,
+       "obs": "Agendado para 04 e 05/08"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a004",
+     "atividade": "Reuniões com a FEN, FEL e FER para a realocação de processos, que não pertencem à FE",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-07-24",
+       "status": "concluido",
+       "prazo": "24/07",
+       "prazo_iso": "2026-07-24",
+       "slide": 66,
+       "obs": "Reuniões realizadas: FEL 17/07, FER 22/07 e FEN 23/07"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a005",
+     "atividade": "Mapeamento das demandas que estão sendo direcionadas para as comunidades e inventário das ferramentas de suporte utilizadas",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-07-24",
+       "status": "em_andamento",
+       "prazo": "24/07",
+       "prazo_iso": "2026-07-24",
+       "slide": 66,
+       "obs": "Data Request disponibilizado na pasta compartilhada do Teams em 17/07 com retorno até dia 24/07"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a006",
+     "atividade": "Consolidação das demandas direcionadas para as comunidades e definição de plano de ação preliminar para as iniciativas aplicáveis",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-07-24",
+       "status": "em_andamento",
+       "prazo": "29/07",
+       "prazo_iso": "2026-07-29",
+       "slide": 66,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a007",
+     "atividade": "Construção do material do Workshop para detalhamento do escopo, processos e integrações com os gerentes e líderes das comunidades de entrega e técnica",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-07-24",
+       "status": "em_andamento",
+       "prazo": "29/07",
+       "prazo_iso": "2026-07-29",
+       "slide": 66,
+       "obs": "Agendar prévia do material com Marcelo e FEG até dia 31/07"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a008",
+     "atividade": "Retorno dos comunicados para DPL e para todo ONS",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-07-24",
+       "status": "concluido",
+       "prazo": "23/07",
+       "prazo_iso": "2026-07-23",
+       "slide": 66,
+       "obs": "Primeiro boletim semanal enviado em 23/07"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a009",
+     "atividade": "Revisão do plano de comunicação",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-07-24",
+       "status": "em_andamento",
+       "prazo": "28/07",
+       "prazo_iso": "2026-07-28",
+       "slide": 66,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a010",
+     "atividade": "Reestruturação da estratégia para Rede da Mudança",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-07-24",
+       "status": "em_andamento",
+       "prazo": "28/07",
+       "prazo_iso": "2026-07-28",
+       "slide": 66,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a011",
+     "atividade": "Validação da estratégia da Rede da Mudança",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-07-24",
+       "status": "nao_iniciado",
+       "prazo": "30/07",
+       "prazo_iso": "2026-07-30",
+       "slide": 66,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a012",
+     "atividade": "Mapeamento das demandas que estão sendo direcionadas para as comunidades",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-10",
+       "status": "concluido",
+       "prazo": "24/07",
+       "prazo_iso": "2026-07-24",
+       "slide": 50,
+       "obs": "Data Request disponibilizado via Teams em 17/07 com retorno até dia o 24/07"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a013",
+     "atividade": "Construção do material do workshop para detalhamento do escopo, processos e integrações das Gerências e Comunidades",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-10",
+       "status": "concluido",
+       "prazo": "31/07",
+       "prazo_iso": "2026-07-31",
+       "slide": 50,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a014",
+     "atividade": "Consolidação e plano de ação preliminar para as demandas que estão sendo direcionadas para as comunidades",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-10",
+       "status": "concluido",
+       "prazo": "31/07",
+       "prazo_iso": "2026-07-31",
+       "slide": 50,
+       "obs": "Alinhamento com a FEG sobre ações prioritárias"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a015",
+     "atividade": "Realização do workshop de detalhamento e apropriação do escopo, processos e integrações das Gerencias e Comunidades",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-10",
+       "status": "concluido",
+       "prazo": "04 e 05/08",
+       "prazo_iso": "2026-08-05",
+       "slide": 50,
+       "obs": "Realizado com os gerentes, líderes e pontos focais FE e DTA"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a016",
+     "atividade": "Instanciamento do grupo de trabalho para definição das diretrizes de ferramentas de suporte à governança e de desenvolvimento",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-10",
+       "status": "em_andamento",
+       "prazo": "10/08",
+       "prazo_iso": "2026-08-10",
+       "slide": 50,
+       "obs": "Definição dos representantes da FEG e DTA"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a017",
+     "atividade": "Elaboração do plano de realocação dos processos herdados de outras áreas",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-10",
+       "status": "em_andamento",
+       "prazo": "14/08",
+       "prazo_iso": "2026-08-14",
+       "slide": 50,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-08-21",
+       "status": "concluido",
+       "prazo": "14/08",
+       "prazo_iso": "2026-08-14",
+       "slide": 37,
+       "obs": "Disponibilizado no diretório do Teams"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a018",
+     "atividade": "Consolidação das adequações capturadas no workshop",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-10",
+       "status": "em_andamento",
+       "prazo": "14/08",
+       "prazo_iso": "2026-08-14",
+       "slide": 50,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a019",
+     "atividade": "Reestruturação da rede de influenciadores",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-08-10",
+       "status": "concluido",
+       "prazo": "30/07",
+       "prazo_iso": "2026-07-30",
+       "slide": 50,
+       "obs": "Alinhamento com as gerências sobre os indicados"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a020",
+     "atividade": "Proposta de readequação do Plano de Comunicação",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-08-10",
+       "status": "concluido",
+       "prazo": "31/07",
+       "prazo_iso": "2026-07-31",
+       "slide": 50,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a021",
+     "atividade": "Estruturação do cronograma e trilha de capacitação (Agenda, Conteúdo, Atividade de Fixação, Indicadores)",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-08-10",
+       "status": "em_andamento",
+       "prazo": "14/08",
+       "prazo_iso": "2026-08-14",
+       "slide": 50,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-08-21",
+       "status": "concluido",
+       "prazo": "12/08",
+       "prazo_iso": "2026-08-12",
+       "slide": 37,
+       "obs": "Disponibilizado no diretório do Teams"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a022",
+     "atividade": "Setup e ativação da rede de influenciadores",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-08-10",
+       "status": "em_andamento",
+       "prazo": "14/08",
+       "prazo_iso": "2026-08-14",
+       "slide": 50,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a023",
+     "atividade": "Consolidação das adequações capturadas no workshop de detalhamento e apropriação do escopo, processos e integrações das Gerencias e Comunidades",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-21",
+       "status": "concluido",
+       "prazo": "11/08",
+       "prazo_iso": "2026-08-11",
+       "slide": 37,
+       "obs": "Disponibilizado no diretório do Teams"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a024",
+     "atividade": "Alinhamento com a FEG para definição de atividades que serão executadas com suporte da A&M (ex. fóruns, detalhamento de processos e ferramentas)",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-21",
+       "status": "concluido",
+       "prazo": "12/08",
+       "prazo_iso": "2026-08-12",
+       "slide": 37,
+       "obs": "Participação da A&M nas agendas semanais da FEG para alinhamento da implantação"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a025",
+     "atividade": "Reunião de entendimento das melhores práticas de Gestão de Projetos, Governança e ferramentas de suporte com a DTA - AGG",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-21",
+       "status": "concluido",
+       "prazo": "14/08",
+       "prazo_iso": "2026-08-14",
+       "slide": 37,
+       "obs": "Itens discutidos: Gestão de Projetos, Demandas, Indicadores, Contratos, Central de Serviços"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a026",
+     "atividade": "Disparo do convite para a primeira sessão de capacitação sobre Modelo de Operação e Papéis e Responsabilidades",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-21",
+       "status": "concluido",
+       "prazo": "18/08",
+       "prazo_iso": "2026-08-18",
+       "slide": 37,
+       "obs": "Agendado para 27/08 Em confirmação dos participantes DTA"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a027",
+     "atividade": "Elaboração do material de treinamento sobre o Modelo de Operação / Papéis e Responsabilidades",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-21",
+       "status": "em_andamento",
+       "prazo": "24/08",
+       "prazo_iso": "2026-08-24",
+       "slide": 37,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-09-04",
+       "status": "concluido",
+       "prazo": "26/08",
+       "prazo_iso": "2026-08-26",
+       "slide": 23,
+       "obs": ""
+      }
+     ],
+     "aliases": [
+      "Elaboração do material de treinamento sobre o Modelo de Operação e Papeis e Responsabilidades"
+     ]
+    },
+    {
+     "id": "executivo-a028",
+     "atividade": "Webinar sobre o Modelo de Operação com as áreas clientes (Gerências Executivas e Gerencias)",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-08-21",
+       "status": "em_andamento",
+       "prazo": "27/08",
+       "prazo_iso": "2026-08-27",
+       "slide": 37,
+       "obs": "Agendado para 27/08"
+      },
+      {
+       "edicao": "2026-09-04",
+       "status": "concluido",
+       "prazo": "27/08",
+       "prazo_iso": "2026-08-27",
+       "slide": 23,
+       "obs": "Sessões realizadas em 26 e 27/08"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a029",
+     "atividade": "Análise do ecossistema de Comunicação, visando a continuidade operacional e melhoria das estatísticas de alcance",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-08-21",
+       "status": "concluido",
+       "prazo": "17/08",
+       "prazo_iso": "2026-08-17",
+       "slide": 37,
+       "obs": "Revisão do Sou+ Maestro e estruturação dos espaços das Gerências FE"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a030",
+     "atividade": "Coleta de feedbacks do WS de Modelo de atuação das Gerências e Comunidades",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-08-21",
+       "status": "concluido",
+       "prazo": "17/08",
+       "prazo_iso": "2026-08-17",
+       "slide": 37,
+       "obs": "Endereçamento dos principais pontos na construção dos treinamentos"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a031",
+     "atividade": "Assessment de prontidão para Líderes de Comunidade de Entrega e Técnica",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-08-21",
+       "status": "em_andamento",
+       "prazo": "02/09",
+       "prazo_iso": "2026-09-02",
+       "slide": 37,
+       "obs": "Acompanhamento e controle de participação"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a032",
+     "atividade": "Primeira sessão de capacitação sobre Modelo de Operação / Papéis e Responsabilidades (FE e representantes DTA)",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-09-04",
+       "status": "concluido",
+       "prazo": "27/08",
+       "prazo_iso": "2026-08-27",
+       "slide": 23,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a033",
+     "atividade": "Consolidação do backlog inicial das Comunidades de Entrega",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-09-04",
+       "status": "em_andamento",
+       "prazo": "04/09",
+       "prazo_iso": "2026-09-04",
+       "slide": 23,
+       "obs": "Realizado reuniões de alinhamento de conceitos e boas práticas"
+      },
+      {
+       "edicao": "2026-09-18",
+       "status": "concluido",
+       "prazo": "09/09",
+       "prazo_iso": "2026-09-09",
+       "slide": 15,
+       "obs": "Exceto EMT - Transitórios Eletromagnéticos"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a034",
+     "atividade": "Elaboração do material do Workshop FEG e Comunidades Técnicas",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-09-04",
+       "status": "em_andamento",
+       "prazo": "04/09",
+       "prazo_iso": "2026-09-04",
+       "slide": 23,
+       "obs": "Pré-requisito: Definição prévia dos participantes das comunidades técnicas (FE)"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a035",
+     "atividade": "Construção do material de treinamento de Metodologias de Gestão de Projetos",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-09-04",
+       "status": "em_andamento",
+       "prazo": "04/09",
+       "prazo_iso": "2026-09-04",
+       "slide": 23,
+       "obs": "Alinhado com as melhores práticas da DTA - AGG"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a036",
+     "atividade": "Reunião de alinhamento sobre o Modelo de Operação: Atuação dos Representantes de Negócio nas Comunidade de Entrega Atuação nas Comunidades Técnicas de prospecção e novos métodos",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-09-04",
+       "status": "em_andamento",
+       "prazo": "11/09",
+       "prazo_iso": "2026-09-11",
+       "slide": 23,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-09-18",
+       "status": "concluido",
+       "prazo": "10/09",
+       "prazo_iso": "2026-09-10",
+       "slide": 15,
+       "obs": "Representantes Comunidades Técnicas e Demandas de evolução das ferramentas"
+      }
+     ],
+     "aliases": [
+      "Reunião de alinhamento sobre o Modelo de Operação: Atuação dos Representantes de Negócio nas Comunidade de Entrega Atuação nas Comunidades Técnicas de prospecção e validação de novos métodos"
+     ]
+    },
+    {
+     "id": "executivo-a037",
+     "atividade": "Realização do treinamento sobre Metodologias de Gestão de Projetos",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-09-04",
+       "status": "em_andamento",
+       "prazo": "11/09",
+       "prazo_iso": "2026-09-11",
+       "slide": 23,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-09-18",
+       "status": "concluido",
+       "prazo": "11/09",
+       "prazo_iso": "2026-09-11",
+       "slide": 15,
+       "obs": "Reforço de conceitos no plano de Monitoramento e Ajustes"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a038",
+     "atividade": "Elaboração do conteúdo do site da FEG, visando estruturar os elementos que compõem a arquitetura da mandala e as frentes de atuação",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-04",
+       "status": "concluido",
+       "prazo": "24/08",
+       "prazo_iso": "2026-08-24",
+       "slide": 24,
+       "obs": "Revisão e publicação do conteúdo"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a039",
+     "atividade": "Modelagem da estrutura de gamificação do primeiro treinamento, com base no contexto do Maestro",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-04",
+       "status": "concluido",
+       "prazo": "24/08",
+       "prazo_iso": "2026-08-24",
+       "slide": 24,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a040",
+     "atividade": "Construção do e-learning do treinamento de Modelo de Operação, com edição, configuração e adaptação para formato de curso online",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-04",
+       "status": "concluido",
+       "prazo": "31/08",
+       "prazo_iso": "2026-08-31",
+       "slide": 24,
+       "obs": "Publicar no ONS Educa+"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a041",
+     "atividade": "Construção do informativo mensal para o ONS, contextualizando a etapa de Operação Assistida e recapitulando o Projeto Maestro",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-04",
+       "status": "concluido",
+       "prazo": "01/09",
+       "prazo_iso": "2026-09-01",
+       "slide": 24,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a042",
+     "atividade": "Diagnóstico das Lideranças das Comunidades de Entrega",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-04",
+       "status": "em_andamento",
+       "prazo": "04/09",
+       "prazo_iso": "2026-09-04",
+       "slide": 24,
+       "obs": "Consolidação dos insights e apresentação dos resultados"
+      },
+      {
+       "edicao": "2026-09-18",
+       "status": "concluido",
+       "prazo": "14/09",
+       "prazo_iso": "2026-09-14",
+       "slide": 16,
+       "obs": "Resultados apresentados e direcionadores consolidados"
+      },
+      {
+       "edicao": "2026-10-02",
+       "status": "concluido",
+       "prazo": "14/09",
+       "prazo_iso": "2026-09-14",
+       "slide": 5,
+       "obs": "Resultados apresentados e direcionadores consolidados"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a043",
+     "atividade": "Monitoramento das respostas da atividade de fixação referente ao primeiro treinamento - Modelo de Operação",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-04",
+       "status": "em_andamento",
+       "prazo": "08/09",
+       "prazo_iso": "2026-09-08",
+       "slide": 24,
+       "obs": "Análise e apresentação dos indicadores"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a044",
+     "atividade": "Desenvolvimento de iniciativas digitais de para reforçar a apropriação dos conteúdos dos treinamentos e trazer um modelo lúdico de engajamento",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-04",
+       "status": "em_andamento",
+       "prazo": "08/09",
+       "prazo_iso": "2026-09-08",
+       "slide": 24,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-09-18",
+       "status": "concluido",
+       "prazo": "08/09",
+       "prazo_iso": "2026-09-08",
+       "slide": 16,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-10-02",
+       "status": "concluido",
+       "prazo": "08/09",
+       "prazo_iso": "2026-09-08",
+       "slide": 5,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a045",
+     "atividade": "Realização do Workshop da FEG (fóruns, processos e rotinas operacionais)",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-09-18",
+       "status": "concluido",
+       "prazo": "16/09",
+       "prazo_iso": "2026-09-16",
+       "slide": 15,
+       "obs": "1º Sessão realizada em 15/09 2º Sessão agendada para 16/09"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a046",
+     "atividade": "Realização do Workshop da FEG - Comunidades Técnicas",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-09-18",
+       "status": "em_andamento",
+       "prazo": "22/09",
+       "prazo_iso": "2026-09-22",
+       "slide": 15,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a047",
+     "atividade": "Treinamento de Arquitetura de Modelos Eletroenergéticos",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-09-18",
+       "status": "em_andamento",
+       "prazo": "24/09",
+       "prazo_iso": "2026-09-24",
+       "slide": 15,
+       "obs": "Sessões: 23 e 24/09"
+      },
+      {
+       "edicao": "2026-10-02",
+       "status": "concluido",
+       "prazo": "28/09",
+       "prazo_iso": "2026-09-28",
+       "slide": 4,
+       "obs": "Sessões: 23 e 28/09"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a048",
+     "atividade": "Configuração do Azure Devops (ambiente de homologação)",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-09-18",
+       "status": "em_andamento",
+       "prazo": "25/09",
+       "prazo_iso": "2026-09-25",
+       "slide": 15,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-10-02",
+       "status": "concluido",
+       "prazo": "25/09",
+       "prazo_iso": "2026-09-25",
+       "slide": 4,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a049",
+     "atividade": "Workshop FEG - 3º Sessão com foco em Captação Orçamentária",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-09-18",
+       "status": "em_andamento",
+       "prazo": "29/09",
+       "prazo_iso": "2026-09-29",
+       "slide": 15,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a050",
+     "atividade": "Publicação do e-learning Treinamento: Modelo de Operação Matricial papeis e responsabilidades com interfaces dentro do ONS SOU+",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-18",
+       "status": "concluido",
+       "prazo": "04/09",
+       "prazo_iso": "2026-09-04",
+       "slide": 16,
+       "obs": "Em parceria com a GP"
+      },
+      {
+       "edicao": "2026-10-02",
+       "status": "concluido",
+       "prazo": "04/09",
+       "prazo_iso": "2026-09-04",
+       "slide": 5,
+       "obs": "Em parceria com a GP"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a051",
+     "atividade": "Consolidação dos resultados da Atividade de Fixação referente ao Treinamento Modelo de Operação Matricial",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-18",
+       "status": "concluido",
+       "prazo": "08/09",
+       "prazo_iso": "2026-09-08",
+       "slide": 16,
+       "obs": "Resultados apresentados e direcionadores consolidados"
+      },
+      {
+       "edicao": "2026-10-02",
+       "status": "concluido",
+       "prazo": "08/09",
+       "prazo_iso": "2026-09-08",
+       "slide": 5,
+       "obs": "Resultados apresentados e direcionadores consolidados"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a052",
+     "atividade": "Publicação da Recapitulação do Maestro no site(Sharepoint) ONS",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-18",
+       "status": "concluido",
+       "prazo": "16/09",
+       "prazo_iso": "2026-09-16",
+       "slide": 16,
+       "obs": "Em parceria com a CS"
+      },
+      {
+       "edicao": "2026-10-02",
+       "status": "concluido",
+       "prazo": "16/09",
+       "prazo_iso": "2026-09-16",
+       "slide": 5,
+       "obs": "Em parceria com a CS"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a053",
+     "atividade": "Guia de Bolso Interativo — Gerências e Comunidades",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-18",
+       "status": "em_andamento",
+       "prazo": "18/09",
+       "prazo_iso": "2026-09-18",
+       "slide": 16,
+       "obs": "Guia de Catequização Maestro"
+      },
+      {
+       "edicao": "2026-10-02",
+       "status": "em_andamento",
+       "prazo": "18/09",
+       "prazo_iso": "2026-09-18",
+       "slide": 5,
+       "obs": "Guia de Catequização Maestro"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a054",
+     "atividade": "Publicação do e-learning Treinamento: Metodologias Ágeis dentro do ONS SOU+",
+     "frente": "Gestão de Mudanças",
+     "historico": [
+      {
+       "edicao": "2026-09-18",
+       "status": "em_andamento",
+       "prazo": "21/09",
+       "prazo_iso": "2026-09-21",
+       "slide": 16,
+       "obs": ""
+      },
+      {
+       "edicao": "2026-10-02",
+       "status": "em_andamento",
+       "prazo": "21/09",
+       "prazo_iso": "2026-09-21",
+       "slide": 5,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a055",
+     "atividade": "Workshop FEG - 3º Sessão com foco nas Comunidades Técnicas",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-10-02",
+       "status": "concluido",
+       "prazo": "22/09",
+       "prazo_iso": "2026-09-22",
+       "slide": 4,
+       "obs": "Classificação de demandas no padrão TRL e identificação de times envolvidos"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a056",
+     "atividade": "Workshop FEG - 4º Sessão com foco em Captação Orçamentária",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-10-02",
+       "status": "concluido",
+       "prazo": "29/09",
+       "prazo_iso": "2026-09-29",
+       "slide": 4,
+       "obs": "1º Sessão: Documentação dos Fóruns 2º Sessão: Proc. Recebimento de Demandas 3º Sessão: Comunidades Técnicas"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a057",
+     "atividade": "Definição das demandas que serão conduzidas pelas Comunidades Técnicas",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-10-02",
+       "status": "em_andamento",
+       "prazo": "08/10",
+       "prazo_iso": "2026-10-08",
+       "slide": 4,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a058",
+     "atividade": "Validação do Azure Devops e tombamento para o ambiente de Produção",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-10-02",
+       "status": "em_andamento",
+       "prazo": "09/10",
+       "prazo_iso": "2026-10-09",
+       "slide": 4,
+       "obs": "Validação do ambiente de homologação até 02/10"
+      }
+     ],
+     "aliases": []
+    },
+    {
+     "id": "executivo-a059",
+     "atividade": "Kick off do ciclo da Captação Orçamentária (Gerentes e Líderes)",
+     "frente": "Estruturação das Gerências e Comunidades",
+     "historico": [
+      {
+       "edicao": "2026-10-02",
+       "status": "em_andamento",
+       "prazo": "09/10",
+       "prazo_iso": "2026-10-09",
+       "slide": 4,
+       "obs": ""
+      }
+     ],
+     "aliases": []
+    }
+   ],
+   "pontos_atencao": [
+    {
+     "id": "executivo-p01",
+     "descricao": "Disponibilidade limitada de gestores e líderes de Comunidade (ex.: férias) podendo gerar impacto no cronograma e limitar a apropriação do modelo organizacional.",
+     "historico": [
+      {
+       "edicao": "2026-07-24",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FEG",
+       "prazo": "07/08",
+       "prazo_iso": "2026-08-07",
+       "plano_acao": "Planejamento do workshop considerando data que assegure a participação das lideranças críticas.",
+       "slide": 77
+      },
+      {
+       "edicao": "2026-08-10",
+       "status": "fechado",
+       "status_texto": "Fechado",
+       "responsavel": "A&M + FEG",
+       "prazo": "07/08",
+       "prazo_iso": "2026-08-07",
+       "plano_acao": "Planejamento do workshop considerando data que assegure a participação das lideranças críticas.",
+       "slide": 59
+      }
+     ]
+    },
+    {
+     "id": "executivo-p02",
+     "descricao": "Sobrecarga operacional durante a etapa de transição pode afetar a execução das atividades técnicas (ex.: atividades herdadas, demandas represadas e vagas ainda não preenchidas).",
+     "historico": [
+      {
+       "edicao": "2026-07-24",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FEG",
+       "prazo": "07/08",
+       "prazo_iso": "2026-08-07",
+       "plano_acao": "Mapeamento, consolidação e plano de realocação de processos e atividades em conjunto com a FEG. Mapeamento preliminar das demandas e plano de priorização e endereçamento.",
+       "slide": 77
+      },
+      {
+       "edicao": "2026-08-10",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FEG",
+       "prazo": "14/08",
+       "prazo_iso": "2026-08-14",
+       "plano_acao": "Mapeamento, consolidação e plano de realocação de processos e atividades em conjunto com a FEG. Mapeamento preliminar das demandas e plano de priorização e endereçamento. Formalização de recursos das áreas parceiras e estabelecimento de recorrências operacionais.",
+       "slide": 59
+      },
+      {
+       "edicao": "2026-08-21",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FEG",
+       "prazo": "28/08",
+       "prazo_iso": "2026-08-28",
+       "plano_acao": "Mapeamento, consolidação e plano de realocação de processos e atividades em conjunto com a FEG. Mapeamento preliminar das demandas e plano de priorização e endereçamento. Formalização de recursos das áreas parceiras e estabelecimento de recorrências operacionais.",
+       "slide": 45
+      },
+      {
+       "edicao": "2026-09-04",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FEG",
+       "prazo": "11/09",
+       "prazo_iso": "2026-09-11",
+       "plano_acao": "Mapeamento, consolidação e plano de realocação de processos e atividades em conjunto com a FEG. Mapeamento preliminar das demandas e plano de priorização e endereçamento. Formalização de recursos das áreas parceiras e estabelecimento de recorrências operacionais.",
+       "slide": 27
+      },
+      {
+       "edicao": "2026-09-18",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FEG",
+       "prazo": "30/09",
+       "prazo_iso": "2026-09-30",
+       "plano_acao": "Mapeamento, consolidação e plano de realocação de processos e atividades em conjunto com a FEG. Mapeamento preliminar das demandas e plano de priorização e endereçamento. Formalização de recursos das áreas parceiras e estabelecimento de recorrências operacionais.",
+       "slide": 18
+      },
+      {
+       "edicao": "2026-10-02",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FEG",
+       "prazo": "16/10",
+       "prazo_iso": "2026-10-16",
+       "plano_acao": "Mapeamento, consolidação e plano de realocação de processos e atividades em conjunto com a FEG. Mapeamento preliminar das demandas e plano de priorização e endereçamento. Formalização de recursos das áreas parceiras e estabelecimento de recorrências operacionais.",
+       "slide": 10
+      }
+     ]
+    },
+    {
+     "id": "executivo-p03",
+     "descricao": "Disponibilidade do time para participação das trilhas de Capacitação.",
+     "historico": [
+      {
+       "edicao": "2026-08-21",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FE",
+       "prazo": "30/09",
+       "prazo_iso": "2026-09-30",
+       "plano_acao": "Compartilhamento do cronograma da trilha de capacitação de forma antecipada. Gravação, edição e disponibilização dos treinamentos de forma online. Sensibilização da importância dos treinamentos pelos gestores responsáveis.",
+       "slide": 45
+      },
+      {
+       "edicao": "2026-09-04",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FE",
+       "prazo": "30/09",
+       "prazo_iso": "2026-09-30",
+       "plano_acao": "Compartilhamento do cronograma da trilha de capacitação de forma antecipada. Gravação, edição e disponibilização dos treinamentos de forma online. Sensibilização da importância dos treinamentos pelos gestores responsáveis.",
+       "slide": 27
+      },
+      {
+       "edicao": "2026-09-18",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FE",
+       "prazo": "30/09",
+       "prazo_iso": "2026-09-30",
+       "plano_acao": "Compartilhamento do cronograma da trilha de capacitação de forma antecipada. Gravação, edição e disponibilização dos treinamentos de forma online. Sensibilização da importância dos treinamentos pelos gestores responsáveis.",
+       "slide": 18
+      },
+      {
+       "edicao": "2026-10-02",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FE",
+       "prazo": "16/10",
+       "prazo_iso": "2026-10-16",
+       "plano_acao": "Compartilhamento do cronograma da trilha de capacitação de forma antecipada. Gravação, edição e disponibilização dos treinamentos de forma online. Sensibilização da importância dos treinamentos pelos gestores responsáveis.",
+       "slide": 10
+      }
+     ]
+    },
+    {
+     "id": "executivo-p04",
+     "descricao": "Disponibilidade das áreas clientes atuando no modelo de operação da FE.",
+     "historico": [
+      {
+       "edicao": "2026-09-18",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FE",
+       "prazo": "30/09",
+       "prazo_iso": "2026-09-30",
+       "plano_acao": "Sensibilização das áreas clientes por meio de webinar sobre o Modelo. Revisitação do DQQ para acomodar a participação dos recursos (DPL - PL e PE / DOP - PR e PD).",
+       "slide": 18
+      },
+      {
+       "edicao": "2026-10-02",
+       "status": "em_acompanhamento",
+       "status_texto": "Em acompanhamento",
+       "responsavel": "A&M + FE",
+       "prazo": "16/10",
+       "prazo_iso": "2026-10-16",
+       "plano_acao": "Sensibilização das áreas clientes por meio de webinar sobre o Modelo. Revisitação do DQQ para acomodar a participação dos recursos na validação de novas funcionalidades (DPL - PL e PE / DOP - PR e PD).",
+       "slide": 10
+      }
+     ]
+    }
+   ],
+   "riscos_anexo": []
+  }
+ ]
+}

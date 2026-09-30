@@ -54,7 +54,10 @@ Vite é usado apenas como build/dev server para módulos ES e dependências; nã
 │   ├── migrations/0001...0019
 │   ├── seeds/
 │   └── README.md
+├── apresentacoes/
+│   └── painel-comites-maestro/   # painel executivo dos Comitês Gestor e Executivo
 ├── docs/
+│   └── fontes/comites-maestro/   # decks-fonte dos comitês + texto extraído
 ├── public/app-config.example.js
 ├── src/
 ├── tests/unit/
