@@ -1,0 +1,1151 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Afinação FEG</title>
+<meta name="description" content="Experiência de assessment de perfis da FEG — 10 compassos para descobrir onde cada pessoa brilha.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --graphite:#54575C; --graphite-2:#4A4D52; --graphite-3:#404347; --ink:#2C2E31;
+  --olive:#AEAB33; --lime:#D3CE22; --lime-soft:rgba(211,206,34,.14);
+  --paper:#F2F2F2; --white:#FFFFFF; --muted:#C3C5C8; --dim:#9A9DA2;
+  --line:rgba(255,255,255,.12); --line-2:rgba(255,255,255,.22);
+  --radius:14px; --shadow:0 18px 40px rgba(0,0,0,.22);
+  --display:'Outfit',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+  --body:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--graphite);color:var(--white);font-family:var(--body);font-size:15px;line-height:1.5;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 0 auto;width:38vw;pointer-events:none;z-index:0;
+  background:radial-gradient(120% 70% at 100% 0%,rgba(174,171,51,.55),rgba(174,171,51,0) 62%)}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+.app{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column}
+h1,h2,h3,h4{font-family:var(--display);margin:0;font-weight:400;letter-spacing:-.01em}
+.eyebrow{font-family:var(--display);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--lime);font-weight:500}
+.muted{color:var(--muted)}
+.hidden{display:none!important}
+
+/* ---------- header ---------- */
+.top{display:flex;align-items:center;gap:20px;padding:18px clamp(16px,3vw,40px);border-bottom:1px solid var(--line)}
+.top .logo-m{height:30px;width:auto;cursor:pointer}
+.top .logo-o{height:44px;width:auto;margin-left:auto}
+.top-mid{display:flex;flex-direction:column;min-width:0;padding-left:20px;border-left:1px solid var(--line)}
+.top-title{font-family:var(--display);font-size:18px;font-weight:300;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clock{display:flex;align-items:center;gap:8px;border:1px solid var(--line-2);border-radius:999px;padding:7px 14px;font-family:var(--display);font-size:15px;font-variant-numeric:tabular-nums;margin-left:auto}
+.clock small{color:var(--dim)}
+.clock .dot{width:8px;height:8px;border-radius:50%;background:var(--dim)}
+.clock.run .dot{background:var(--lime);box-shadow:0 0 0 4px rgba(211,206,34,.18)}
+.clock.over{border-color:#e9a23b;color:#ffd38a}
+.top .clock+.logo-o{margin-left:12px}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;gap:10px;border-radius:999px;padding:13px 24px;font-family:var(--display);font-weight:500;font-size:16px;transition:transform .15s,background .15s,border-color .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:var(--lime);color:var(--ink)}
+.btn-primary:hover{background:#e0db3a}
+.btn-ghost{border:1px solid var(--line-2)}
+.btn-ghost:hover{border-color:var(--lime)}
+.btn-text{color:var(--muted);text-decoration:underline;text-underline-offset:4px;font-size:14px}
+.btn-sm{padding:8px 14px;font-size:14px}
+.btn[disabled]{opacity:.4;pointer-events:none}
+
+/* ---------- cover ---------- */
+.cover{position:relative;flex:1;min-height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.cover-art{position:absolute;inset:0;width:100%;height:100%}
+.cover-art path{fill:none;stroke-width:4;stroke-linecap:square;stroke-dasharray:3200;stroke-dashoffset:3200;animation:draw 2.6s cubic-bezier(.6,.05,.2,1) forwards}
+.cover-art .w{stroke:#fff}.cover-art .y{stroke:var(--lime)}
+@keyframes draw{to{stroke-dashoffset:0}}
+.cover::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(to top,rgba(84,87,92,.97) 0%,rgba(84,87,92,.92) 48%,rgba(84,87,92,0) 72%)}
+.cover-logos,.cover-body{z-index:1}
+.cover-logos{position:relative;display:flex;justify-content:space-between;align-items:flex-start;padding:4vh 3.6vw}
+.cover-logos .logo-m{height:clamp(34px,4.4vw,72px)}
+.cover-logos .logo-o{height:clamp(52px,6vw,104px)}
+.cover-body{position:relative;margin-top:auto;display:grid;grid-template-columns:1.15fr .85fr;gap:4vw;padding:0 3.6vw 6vh;align-items:end}
+.cover h1{font-size:clamp(56px,9vw,148px);font-weight:200;line-height:.92;letter-spacing:-.03em}
+.cover h1 b{font-weight:500;color:var(--lime)}
+.cover .lead{font-size:clamp(16px,1.35vw,20px);max-width:640px;color:#E7E8E9;margin:22px 0 0;font-weight:300;font-family:var(--display)}
+.cover .meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;font-size:13px;color:#E7E8E9;background:rgba(64,67,71,.55);backdrop-filter:blur(4px)}
+.pill b{color:var(--lime);font-weight:600}
+.cast{background:rgba(64,67,71,.78);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:var(--shadow)}
+.cast h3{font-size:20px;font-weight:400;margin-bottom:4px}
+.cast p{margin:0 0 16px;color:var(--muted);font-size:14px}
+.cast-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.cast-row input{flex:1;background:rgba(0,0,0,.18);border:1px solid var(--line-2);border-radius:10px;padding:11px 14px;font-size:15px;outline:none}
+.cast-row input:focus{border-color:var(--lime)}
+.cast-row .x{color:var(--dim);font-size:20px;width:28px}
+.cast-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:18px}
+.cast-foot{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap}
+
+/* ---------- avatars ---------- */
+.av{--s:30px;width:var(--s);height:var(--s);border-radius:50%;display:inline-grid;place-items:center;font-family:var(--display);font-weight:600;font-size:calc(var(--s)*.42);flex:none;color:var(--ink)}
+.pc0{background:var(--lime)}
+.pc1{background:var(--paper)}
+.pc2{background:transparent;border:2px solid var(--lime);color:var(--white)}
+.pc3{background:var(--olive)}
+.pc4{background:transparent;border:2px dashed var(--paper);color:var(--white)}
+.av.sm{--s:22px}
+.av.xs{--s:18px;font-size:9px}
+
+/* ---------- layout ---------- */
+.stage{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:28px;padding:28px clamp(16px,3vw,40px) 18px;max-width:1500px;width:100%;margin:0 auto}
+.q-head{margin-bottom:22px}
+.q-head .eyebrow{display:flex;gap:10px;align-items:center}
+.q-head .eyebrow i{font-style:normal;color:var(--dim);letter-spacing:.08em}
+.q-head h2{font-size:clamp(28px,3vw,42px);font-weight:300;margin:6px 0 8px;line-height:1.1}
+.q-head p{margin:0;font-size:17px;color:#E4E5E6;max-width:880px;font-weight:300;font-family:var(--display)}
+.helper{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0 0;font-size:13px;color:var(--muted)}
+.helper .av{vertical-align:middle}
+
+.side{display:flex;flex-direction:column;gap:14px}
+.panel{background:var(--graphite-3);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.panel h4{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-weight:500;margin-bottom:12px;font-family:var(--display)}
+.who{display:flex;flex-direction:column;gap:6px}
+.who button{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;border:1px solid transparent;text-align:left;transition:background .15s}
+.who button:hover{background:rgba(255,255,255,.05)}
+.who button.on{border-color:var(--lime);background:var(--lime-soft)}
+.who .nm{flex:1;font-weight:500}
+.who .st{font-size:12px;color:var(--dim)}
+.who .st.ok{color:var(--lime)}
+.who kbd{font-family:var(--body);font-size:11px;color:var(--dim);border:1px solid var(--line-2);border-radius:5px;padding:0 5px}
+.reveal{width:100%;justify-content:center}
+.reveal.on{background:transparent;color:var(--lime);border:1px solid var(--lime)}
+.prov{background:linear-gradient(135deg,rgba(211,206,34,.16),rgba(211,206,34,.03));border-color:rgba(211,206,34,.35)}
+.prov p{margin:0;font-family:var(--display);font-size:17px;font-weight:300;line-height:1.4}
+.notes textarea{width:100%;min-height:110px;resize:vertical;background:rgba(0,0,0,.18);border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;font-size:14px;outline:none}
+.notes textarea:focus{border-color:var(--lime)}
+
+/* ---------- footer nav ---------- */
+.nav{display:flex;align-items:center;gap:18px;padding:14px clamp(16px,3vw,40px) 22px;border-top:1px solid var(--line)}
+.steps{flex:1;display:flex;align-items:center;justify-content:center;min-width:0}
+.steps button{position:relative;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;border:2px solid var(--line-2);font-family:var(--display);font-size:12px;color:var(--muted);background:var(--graphite);flex:none;transition:all .2s}
+.steps button.done{border-color:var(--lime);color:var(--lime)}
+.steps button.cur{background:var(--lime);border-color:var(--lime);color:var(--ink);transform:scale(1.12)}
+.steps button.fin{width:auto;padding:0 12px;border-radius:999px}
+.steps .ln{height:2px;flex:1;max-width:46px;min-width:6px;background:var(--line-2)}
+.steps .ln.done{background:var(--lime)}
+
+/* ---------- option patterns ---------- */
+.chips{display:inline-flex;gap:3px;flex-wrap:wrap}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--lime);border:1px solid rgba(211,206,34,.45);border-radius:999px;padding:2px 9px;font-weight:600;animation:pop .35s ease both}
+@keyframes pop{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* inbox */
+.inbox{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--graphite-3)}
+.mail{display:grid;grid-template-columns:40px minmax(0,1fr) auto auto;gap:14px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);transition:background .15s}
+.mail:last-child{border-bottom:0}
+.mail.is-love{background:rgba(211,206,34,.12);box-shadow:inset 3px 0 0 var(--lime)}
+.mail.is-skip{opacity:.55}
+.mail-av{width:36px;height:36px;border-radius:10px;background:var(--graphite);display:grid;place-items:center;font-family:var(--display);font-weight:600;color:var(--muted);font-size:13px;border:1px solid var(--line-2)}
+.mail-from{font-size:12px;color:var(--dim);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.mail-subj{font-size:15px;font-weight:500;color:#F4F4F4}
+.mail-who{display:flex;gap:10px;align-items:center}
+.mail-who .grp{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--dim)}
+.mail-act{display:flex;gap:6px}
+.ib{border:1px solid var(--line-2);border-radius:999px;padding:6px 12px;font-size:13px;color:var(--muted);white-space:nowrap;transition:all .15s}
+.ib:hover{border-color:var(--lime);color:var(--white)}
+.ib.love.on{background:var(--lime);color:var(--ink);border-color:var(--lime)}
+.ib.skip.on{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+
+/* cards (single) */
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.opt{position:relative;display:flex;flex-direction:column;gap:10px;text-align:left;background:var(--graphite-3);border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px 16px;min-height:150px;transition:all .18s}
+.opt:hover{border-color:var(--line-2);transform:translateY(-2px)}
+.opt.on{border-color:var(--lime);background:linear-gradient(160deg,rgba(211,206,34,.22),rgba(211,206,34,.05));box-shadow:0 0 0 1px var(--lime) inset}
+.opt .letter{font-family:var(--display);font-size:13px;color:var(--dim);letter-spacing:.12em}
+.opt.on .letter{color:var(--lime)}
+.opt .txt{font-family:var(--display);font-size:19px;font-weight:300;line-height:1.3}
+.opt .foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.opt .ico{color:var(--lime)}
+.opt .nname{font-family:var(--display);font-size:21px;font-weight:500}
+
+/* multi */
+.mchips{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.mchip{display:flex;align-items:center;gap:12px;text-align:left;background:var(--graphite-3);border:1px solid var(--line);border-radius:12px;padding:14px 16px;transition:all .15s}
+.mchip:hover{border-color:var(--line-2)}
+.mchip .box{width:22px;height:22px;border-radius:6px;border:2px solid var(--line-2);flex:none;display:grid;place-items:center;font-size:13px;color:var(--ink)}
+.mchip.on{border-color:var(--lime);background:rgba(211,206,34,.1)}
+.mchip.on .box{background:var(--lime);border-color:var(--lime)}
+.mchip .t{flex:1;font-size:15px}
+.mchip .r{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+
+/* pairs */
+.pairs{display:flex;flex-direction:column;gap:12px}
+.pair{display:grid;grid-template-columns:1fr 54px 1fr;align-items:stretch}
+.side-b{display:flex;align-items:center;gap:12px;justify-content:space-between;background:var(--graphite-3);border:1px solid var(--line);padding:18px 20px;font-family:var(--display);font-size:20px;font-weight:300;transition:all .15s;text-align:left}
+.pair .side-b:first-child{border-radius:var(--radius) 0 0 var(--radius)}
+.pair .side-b:last-child{border-radius:0 var(--radius) var(--radius) 0;flex-direction:row-reverse;text-align:right}
+.side-b:hover{border-color:var(--line-2)}
+.side-b.on{background:var(--lime);color:var(--ink);border-color:var(--lime);font-weight:400}
+.side-b.on .av.pc2{border-color:var(--ink);color:var(--ink)}
+.vs{display:grid;place-items:center;font-family:var(--display);font-size:13px;color:var(--dim);letter-spacing:.14em;text-transform:uppercase;background:var(--graphite-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+
+/* tokens */
+.tok-top{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.tok-left{font-family:var(--display);font-size:46px;font-weight:200;color:var(--lime);line-height:1}
+.tok-left small{font-size:15px;color:var(--muted);font-weight:300;display:block}
+.tok-bank{display:flex;gap:6px;flex-wrap:wrap}
+.coin{width:16px;height:16px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 3px rgba(211,206,34,.18)}
+.coin.used{background:transparent;box-shadow:inset 0 0 0 2px var(--line-2)}
+.toks{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.tok .ctrl{margin-top:auto}
+.tok{background:var(--graphite-3);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:10px}
+.tok.has{border-color:rgba(211,206,34,.5)}
+.tok .hd{display:flex;align-items:center;gap:10px;color:var(--lime)}
+.tok .hd b{font-family:var(--display);font-weight:500;font-size:17px;color:var(--white)}
+.tok .fr{font-size:12px;color:var(--muted);min-height:36px}
+.tok .ctrl{display:flex;align-items:center;justify-content:space-between}
+.tok .ctrl button{width:38px;height:38px;border-radius:50%;border:1px solid var(--line-2);font-size:20px;line-height:1}
+.tok .ctrl button:hover{border-color:var(--lime);color:var(--lime)}
+.tok .n{font-family:var(--display);font-size:34px;font-weight:300}
+.pips{display:grid;grid-template-columns:repeat(10,1fr);gap:3px}
+.pips i{height:6px;border-radius:3px;background:rgba(255,255,255,.1)}
+.pips i.f{background:var(--lime)}
+.tok .rv{display:flex;flex-wrap:wrap;gap:6px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px}
+.tok .rv span{display:inline-flex;align-items:center;gap:4px}
+
+/* scale */
+.scale{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--graphite-3)}
+.sc-row{display:grid;grid-template-columns:minmax(180px,1.1fr) repeat(4,minmax(0,1fr));align-items:stretch;border-bottom:1px solid var(--line)}
+.sc-row:last-child{border-bottom:0}
+.sc-row.hd{background:var(--graphite-2);font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.sc-row.hd div{padding:10px 8px;text-align:center}
+.sc-row.hd div:first-child{text-align:left;padding-left:16px}
+.sc-row.grp{grid-template-columns:1fr;background:rgba(0,0,0,.12);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--lime);padding:6px 16px;font-family:var(--display)}
+.sc-name{padding:10px 16px;display:flex;flex-direction:column;justify-content:center}
+.sc-name b{font-weight:500;font-size:14px}
+.sc-name small{color:var(--dim);font-size:12px;line-height:1.3}
+.sc-cell{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-left:1px solid var(--line);padding:8px 4px;transition:background .15s;min-height:56px}
+.sc-cell:hover{background:rgba(255,255,255,.04)}
+.sc-cell .rad{width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2)}
+.sc-cell.on{background:rgba(211,206,34,.12)}
+.sc-cell.on .rad{border-color:var(--lime);background:radial-gradient(circle,var(--lime) 45%,transparent 50%)}
+
+/* frente cards */
+.fcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.fcard{display:flex;flex-direction:column;gap:8px;text-align:left;background:var(--graphite-3);border:1px solid var(--line);border-radius:var(--radius);padding:16px;transition:all .15s}
+.fcard:hover{border-color:var(--line-2)}
+.fcard.on{border-color:var(--lime);background:rgba(211,206,34,.12)}
+.fcard .nk{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.fcard b{font-family:var(--display);font-weight:500;font-size:17px}
+.fcard small{color:var(--muted);font-size:12.5px;line-height:1.4}
+.fcard .ft{margin-top:auto;display:flex;justify-content:space-between;align-items:center;min-height:22px}
+.fcard .lvl{font-size:11px;color:var(--dim)}
+
+/* ---------- guide ---------- */
+.guide{padding:30px clamp(16px,3vw,40px) 40px;max-width:1300px;width:100%;margin:0 auto}
+.guide h2{font-size:clamp(30px,3.4vw,46px);font-weight:200;margin:8px 0 6px}
+.guide .sub{color:var(--muted);font-family:var(--display);font-weight:300;font-size:18px;max-width:820px;margin:0 0 28px}
+.timeline{display:grid;grid-template-columns:4fr 34fr 5fr 2fr;gap:4px;margin:10px 0 8px}
+.timeline div{background:var(--graphite-3);border-top:4px solid var(--lime);padding:12px;border-radius:0 0 10px 10px;min-width:0}
+.timeline div:nth-child(2){border-top-color:var(--olive)}
+.timeline div:nth-child(4){border-top-color:var(--paper)}
+.timeline b{display:block;font-family:var(--display);font-weight:500;font-size:15px}
+.timeline small{color:var(--muted);font-size:12px}
+.mins{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-bottom:30px}
+.mins div{font-size:11px;color:var(--dim);border-left:2px solid var(--line-2);padding:4px 6px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.g-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.rules{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:0;padding:0;list-style:none;counter-reset:r}
+.rules li{counter-increment:r;background:var(--graphite-3);border:1px solid var(--line);border-radius:12px;padding:14px 14px 14px 52px;position:relative;font-size:14px}
+.rules li::before{content:counter(r,decimal-leading-zero);position:absolute;left:14px;top:12px;font-family:var(--display);color:var(--lime);font-size:20px;font-weight:300}
+.rules li b{display:block;font-family:var(--display);font-weight:500;font-size:16px;margin-bottom:2px}
+.orch{display:flex;flex-direction:column;gap:10px}
+.orow{display:grid;grid-template-columns:44px 1.1fr 1.2fr 1fr;gap:14px;align-items:center;background:var(--graphite-3);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.orow .ic{color:var(--lime)}
+.orow b{font-family:var(--display);font-weight:500;font-size:17px;display:block}
+.orow small{color:var(--muted);font-size:12.5px;line-height:1.35;display:block}
+.orow .fr{display:flex;flex-wrap:wrap;gap:6px}
+.orow .fr span{font-size:12px;border:1px solid var(--line-2);border-radius:999px;padding:3px 10px}
+.orow .pool{font-size:12.5px;color:var(--lime)}
+.orow .pool small{color:var(--dim)}
+.sec-t{display:flex;align-items:baseline;gap:12px;margin:34px 0 14px}
+.sec-t h3{font-size:24px;font-weight:300}
+.sec-t span{color:var(--dim);font-size:13px}
+.qmap{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.qmap div{background:var(--graphite-3);border:1px solid var(--line);border-radius:12px;padding:12px}
+.qmap b{font-family:var(--display);color:var(--lime);font-weight:400;font-size:13px;letter-spacing:.1em}
+.qmap p{margin:4px 0 0;font-size:13.5px}
+.qmap small{color:var(--dim);font-size:12px}
+.quad-ex{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.quad-ex div{border-radius:12px;padding:14px;border:1px solid var(--line);background:var(--graphite-3)}
+.quad-ex div.hi{background:rgba(211,206,34,.14);border-color:rgba(211,206,34,.4)}
+.quad-ex b{font-family:var(--display);font-weight:500;font-size:16px;display:block}
+.quad-ex small{color:var(--muted);font-size:12.5px}
+
+/* ---------- results ---------- */
+.res{padding:26px clamp(16px,3vw,40px) 40px;max-width:1500px;width:100%;margin:0 auto}
+.res-hero{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:22px}
+.res-hero h2{font-size:clamp(32px,3.6vw,52px);font-weight:200;line-height:1.05;margin-top:6px}
+.res-hero h2 b{font-weight:500;color:var(--lime)}
+.res-actions{display:flex;gap:10px;flex-wrap:wrap}
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:24px;overflow-x:auto}
+.tabs button{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:2px solid transparent;color:var(--muted);font-family:var(--display);font-size:16px;white-space:nowrap}
+.tabs button.on{color:var(--white);border-bottom-color:var(--lime)}
+.cards3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:26px}
+.pcard{background:var(--graphite-3);border:1px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden}
+.pcard::after{content:"";position:absolute;right:-60px;top:-60px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(211,206,34,.22),transparent 70%)}
+.pcard .hd{display:flex;align-items:center;gap:12px}
+.pcard .hd b{font-family:var(--display);font-size:22px;font-weight:400}
+.inst{display:flex;align-items:center;gap:14px}
+.inst .ic{width:52px;height:52px;border-radius:14px;background:var(--lime);color:var(--ink);display:grid;place-items:center;flex:none}
+.inst .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.inst .v{font-family:var(--display);font-size:22px;font-weight:500;line-height:1.1}
+.inst .s{font-size:12.5px;color:var(--muted)}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kv>div{background:rgba(0,0,0,.14);border-radius:10px;padding:10px 12px}
+.kv>div>small{display:block;font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
+.kv>div>span{font-family:var(--display);font-size:16px}
+.align{font-size:13px;padding:10px 12px;border-radius:10px;border:1px dashed var(--line-2);color:#E4E5E6}
+.align b{color:var(--lime);font-weight:600}
+.gauge{height:8px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:6px}
+.gauge i{display:block;height:100%;background:linear-gradient(90deg,var(--olive),var(--lime))}
+
+.block{background:var(--graphite-3);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:20px}
+.block-h{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.block-h h3{font-size:22px;font-weight:300}
+.block-h p{margin:4px 0 0;color:var(--muted);font-size:13.5px;max-width:760px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);align-items:center}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.tbl-wrap{overflow-x:auto}
+table.heat{border-collapse:separate;border-spacing:4px;width:100%;min-width:620px}
+.heat th{font-weight:500;font-size:13px;text-align:left;padding:6px 8px;color:var(--muted)}
+.heat th.p{text-align:center}
+.heat th.p span{display:inline-flex;align-items:center;gap:8px;color:var(--white);font-family:var(--display);font-size:15px}
+.heat td.fn{padding:8px 10px;font-size:14px;white-space:nowrap}
+.heat td.fn small{display:block;color:var(--dim);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.heat td.grp{font-family:var(--display);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--lime);padding:12px 8px 2px}
+.cell{position:relative;border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:48px;border:1px solid var(--line)}
+.cell .pct{font-family:var(--display);font-size:17px;font-weight:500}
+.cell .dots{display:flex;gap:3px}
+.cell .dots i{width:7px;height:7px;border-radius:50%;border:1.5px solid currentColor;opacity:.75}
+.cell .dots i.f{background:currentColor;opacity:1}
+.cell .bd{position:absolute;top:-7px;right:8px;font-size:10px;font-weight:700;letter-spacing:.06em;border-radius:999px;padding:1px 7px;background:var(--ink);color:var(--lime);border:1px solid var(--lime)}
+.cell .bd.a{color:var(--paper);border-color:var(--paper)}
+.dist{width:100%;border-collapse:collapse;min-width:760px}
+.dist th{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);font-weight:500;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+.dist td{padding:10px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:middle}
+.dist td small{color:var(--dim);display:block;font-size:11.5px}
+.dist select{background:var(--graphite-2);border:1px solid var(--line-2);border-radius:8px;padding:7px 10px;min-width:150px}
+.dist .why{font-size:12.5px;color:var(--muted);max-width:340px}
+.flag{display:inline-block;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;border-radius:999px;padding:2px 8px;margin:2px 4px 2px 0}
+.flag.g{background:rgba(211,206,34,.18);color:var(--lime)}
+.flag.w{background:rgba(233,162,59,.18);color:#ffcf86}
+.flag.n{background:rgba(255,255,255,.1);color:var(--paper)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.load{display:flex;flex-direction:column;gap:12px}
+.load-row{display:grid;grid-template-columns:150px 1fr 70px;gap:12px;align-items:center;font-size:14px}
+.load-row .nm{display:flex;align-items:center;gap:8px}
+.load-bar{display:flex;height:22px;border-radius:6px;overflow:hidden;background:rgba(255,255,255,.06)}
+.load-bar i{display:block;height:100%}
+.load-bar .t{background:var(--lime)}
+.load-bar .a{background:repeating-linear-gradient(45deg,rgba(242,242,242,.55) 0 4px,rgba(242,242,242,.25) 4px 8px)}
+.ins{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.ins li{display:flex;gap:12px;align-items:flex-start;background:rgba(0,0,0,.12);border-radius:12px;padding:12px 14px;font-size:14px}
+.ins li .ic{flex:none;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--lime-soft);color:var(--lime)}
+.ins li b{font-weight:600}
+.pool-map{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.pool-map div{border:1px solid var(--line);border-radius:14px;padding:14px;background:rgba(0,0,0,.12);display:flex;flex-direction:column;gap:8px}
+.pool-map .r{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.pool-map b{font-family:var(--display);font-size:16px;font-weight:500}
+.pool-map .who2{display:flex;align-items:center;gap:8px;font-size:14px}
+.pp{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.svgbox{display:flex;justify-content:center}
+.svgbox svg{max-width:100%;height:auto}
+.bars5{display:flex;flex-direction:column;gap:10px}
+.bars5 .r{display:grid;grid-template-columns:24px 200px 1fr 44px;gap:10px;align-items:center;font-size:14px}
+.bars5 .r .ic{color:var(--lime)}
+.bars5 .bar{height:10px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden}
+.bars5 .bar i{display:block;height:100%;background:var(--lime)}
+.bars5 .v{text-align:right;font-family:var(--display);color:var(--muted)}
+.zones{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.zone{border-radius:14px;padding:14px;border:1px solid var(--line);background:rgba(0,0,0,.12)}
+.zone.hi{border-color:rgba(211,206,34,.45);background:rgba(211,206,34,.1)}
+.zone h5{margin:0 0 4px;font-family:var(--display);font-weight:500;font-size:16px}
+.zone p{margin:0 0 8px;font-size:12px;color:var(--dim)}
+.zone ul{margin:0;padding-left:18px;font-size:14px}
+.reading{font-family:var(--display);font-size:17px;font-weight:300;line-height:1.55}
+.reading p{margin:0 0 10px}
+.reading b{font-weight:500;color:var(--lime)}
+.empty{padding:60px 20px;text-align:center;color:var(--muted)}
+.notes-out{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.notes-out div{background:rgba(0,0,0,.12);border-radius:10px;padding:10px 12px;font-size:13.5px}
+.notes-out small{display:block;color:var(--lime);font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+
+/* ---------- responsive ---------- */
+@media (max-width:1080px){
+  .stage{grid-template-columns:1fr}
+  .side{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+  .g-grid,.two,.pp{grid-template-columns:1fr}
+  .toks{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+  .qmap{grid-template-columns:repeat(2,1fr)}
+  .cover-body{grid-template-columns:1fr}
+}
+@media (max-width:720px){
+  .top{gap:12px;flex-wrap:wrap}
+  .top-mid{display:none}
+  .top .logo-o{height:34px}
+  .mail{grid-template-columns:36px minmax(0,1fr)}
+  .mail-who,.mail-act{grid-column:2}
+  .pair{grid-template-columns:1fr}
+  .pair .side-b:first-child{border-radius:var(--radius) var(--radius) 0 0}
+  .pair .side-b:last-child{border-radius:0 0 var(--radius) var(--radius);flex-direction:row;text-align:left}
+  .vs{padding:4px;border:0;border-left:1px solid var(--line);border-right:1px solid var(--line)}
+  .sc-row{grid-template-columns:1fr repeat(4,44px)}
+  .sc-row.hd div{font-size:9px;padding:6px 2px}
+  .rules,.zones{grid-template-columns:1fr}
+  .orow{grid-template-columns:36px 1fr}
+  .orow .fr,.orow .pool{grid-column:2}
+  .timeline{grid-template-columns:1fr 1fr}
+  .mins{display:none}
+  .load-row{grid-template-columns:110px 1fr 60px}
+  .bars5 .r{grid-template-columns:20px 110px 1fr 40px}
+  .steps .ln{display:none}
+  .steps{gap:4px;flex-wrap:wrap}
+  .nav{flex-wrap:wrap}
+}
+@media print{
+  body{background:#fff;color:#222}
+  body::before,.top .clock,.nav,.res-actions,.tabs{display:none!important}
+  .block,.pcard,.panel{background:#fff;border-color:#ccc;break-inside:avoid}
+  .muted,.block-h p{color:#555}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+/* =========================================================================
+   AFINAÇÃO FEG — assessment de perfis por afinidade × domínio
+   Base conceitual: [A&M] Etapa 3 – Desenho do novo modelo organizacional
+   (atribuições da FEG e Pool de Recursos de Governança).
+   ========================================================================= */
+const LOGO_MAESTRO = "data:image/png;base64,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";
+const LOGO_ONS = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAH4AAABkCAYAAABAboR1AAAWjUlEQVR4nO2deZwdRbXHf2fAPMUkgCxBSEAkogRFtrAFEyKrgBDZwvLYHi6gGFTEDYkbEUVQDCIICHkskTUEBcKWBAKyhj0QICCSsArGSZgkDBPf9/1xqrk1PXfpvrfvzBDn9/nM5053VZ9zqk7X0lWnzpFWEADjgS/1tBzvFbT0tAAFYqCk3wE79bQg7wWsSIqXpH6SrgTW72lBejtWNMVL0tqSrulpIXo7VkTFS9Jw4MKeFqI3Y0VVvCQdA3y5p4XorViRFb9c0jhgnZ4WpDdi5Z4WoEAslTRD0r3h734ze7NnRepDH3oZrGiCwFBJq0t6vyQkLZH0hpm9VDSvnHKtbWb/6EkZGgWwiaS1JP2XpH9LapP0ppn9LS+thhQPbChpL0kjJW0paQNVHj6WSnpK0gPyLvlmM1vSCP8qcg2UtF3421rSVpLWlfRVMzu3APq7SPqh/MWOUa4+jzezOXXyGSHpAEmjJQ2T9L4KWdslzZV0j6RpZnZDPfyyCHQ0cC/QQf1oAyYDowqSaQfgXOCxKnItAz5TAK9DcpRzRB30xwJP1F+1vAmcBqzRaFkTgb4KzG9AoEqYAazZoGxnZOT1KrBeg7yaonhgSKiLorAQOL4cr0yfc8BIYI6kcyQNyVqQGnhH0q2SjpQ0phtn4OtIuh74YDfxywRge0mz5d16UVhd0tnADfjw9y5qKh6YIGm6pE0LEma+pPGSNjKz3c3sEjNbXBDtrNhKUq9Z2QM2k3STfLm5GdhL0u3xy15V8cBUST9Q49/7yyXdKWl/M9vAzH5WaZYPjMHH/u81yLMWDu4GHllxhaTVmsxjc0m15zfAzALGmGXApcDmNXjtAPwBn5TE+HnWUpF9jI/RDuyRlUfEq7AxHji5DrnzYjnwlSwFu75BRm3ARKpsjwKDgO8CT9eg9fWMyqhH8QD/BDbKwiPilUfxO9Sg9UadcudB7Z4N+FkDDJYCZwKDqtAfBVyJ9wZZsIwalRfontmA3E8AA2pWTolXIYoH9m5A5qw4NUuBRlLft3k73lWvW4X2gcBDdQr/PDVm4dTf4hNk3sMHDs1Bt5riT89BZzlwHrBF9PzqwPbAT4DXyjzzm6wFmpNDkAQ34kuJtWgPAI4F/lYHD4Bf1aDfqOIBTs5YT0Up/s856PyyhkwDgYui/H/IUhYBX8shBMA8YO9MxLvyOoP8Pcsy4KM1aDaKDjJM9oCDc9Cspvj7ctDJNA8BTgAuzZI3eSDrilw7cFpmwpX5HU1+5Z9fhV4Rigd4Hdighux5FF9xVg/MzkFn40bqO42WIMChyrYiN1fSjmb2/UYZm9nFkn6c87HDKGr9uTK602YvzybVMUUyThZwDq+Rb7mkc8xsmJk9WBRzM5sg6f4cj6wi6cCi+FfB1sDkbuDzao68JwL/C3ysCMYtwCqqvj7cKukgMyu72F8AfpAz/z5NkaIrDgFOajKPx3PkXUnSEZLmAg8AJ9UakqoC2KXKuPIU8PG6iWeX4akcY92iCjSKGuNjtAO7luFVyModsG2D8i2nzpegRW5AUQ63SNrBzJ7JQ7BOTMmRdyBQbsMobRRRBPpJmkxB3WsaZna/pMcaILGSpOGSTpf0PHA/8HVgtVoPtkgq94k02cz2MLPW5AbwYWBmA0JWw9058ze9F4qwpqSp5FjZS6GWldP4OummsZKkbSRNlLQAOIsqC2otcpOkGJea2WHxDWC4pAclNeto0rM581csUEa8nTP/MEnZv41zwMz+LOnKgsn2l3SCpGeosE7fIil+k683syPiDMAYSTMlrSfpjYIFTJCXbr2tL8Hx8i+VPNgX+GmDfCvhS5IeagLd/pJOA+4G1ooTWuRdhCQ9ZGZj4kTgv+VvY7JO3tEE4WRmb+V8ZKUy9zIbjprZHyWdkZOnJH0/NIRCEcq/i6S/Fk07YISkO4APJTda5Baab0raL84JHCzpAvkEJ8EqzZAqFigj2hvlGRah8lqjrizpYkmfbJR/GXlazWxHSWeqOQ1smKSrkosWSQvlJsDzk5v4GfOL5bbxMQY3QaB66C4siO+hkp7M+cxqkr5dEP8uMLNvS9pW0jS57XyR2BE381KLpElm9u7kAhgsfzPSSpektWnOWbRP58xfyOGM0MWOkfd4edCvdpZ3kfsz08weMbM95WcC/qBiXvTFkvY1s8clqcXMpqUyTJKf1qiEzxYgRBp5LUufKoqxmT0n6RC51W+vgpk9ambHmtkacoPJS+UrqXnxkqSdzeyWsqnAURlWi66vuyQVQFdbu2pYUIFG5pW7Cs9/K4cMeZD7QEWG+tofuAJYlIH/LODDtQj+PQOhdgpcxgWOy1mRkyrQaUjxgcZFNR/Oj8IVH8k7AN9/f6UM33coY6wKrAb8Ir5xYI7CXFeQ4GviJ1vy4PMVaDWs+EAnj3FEFjRN8ZHMa9D5yNU8YMcy+YaGfP+Ib16Zs0CZrF9rCDwtJ8+y3XygVZTiB5P/ZayGLgqowvujwHVUMVat8uxBeCs/vUL6npSG1LfihFtyFqgDOCGvgIHXKsDVdVTiiVVoFqL4QGsEsKQO+cohk+JxO76F4Zk55Dzfh5+726xK3bwTyfSvdGHrsbC9No+QuHn13Dr4vFiDbmGKD/QOp7HTwAlqKh64uMxzC4DtstZrBbrbUN6A9tl0xrzdfYI2/Ihy2fEM6I8fjZpG/ZV5aI1CFqr4QPOsOmWNUc3YckP8WHclvA2cSh07g8CE8Hw53JTOPBg/WdIIFuL287fjR37n4ActGsFtGQpauOID3bsblL2s4oHRlJ+Nl8MbeK9wHFB1HQW3s3+4Br2flHvwAIrp4opCpvPsNE/xg4AXG5C/i+KBH9N5zM2ChXgrLru4ho/xl+JWObUwvFJhf5hTqGZhCdknR01RfKC9JfBWnWUYkaK1O9mUk+AF4EQqdPf4d/kEfLjNgup2fsCvcgjXDCwD9s2hnKYpPtA/lPp6wi7zHuCnNZ5Zjg+V+5WTJdAYgJ+0zTs0j81S2B/QM93+QtzBUB7FNFXxgcdpdZSl0oT31DJ5X8HP01W08cPPy42nvlO26X2ZqoXdp04m9eIR6lgSphsUH/jkOe8G1a1sv4l30ddQ4zgaPoafDrTm5J/gafIeRsENLa+lua1/CQ2YNtF9ih8IPJmjXA0t2eLrK5Op/GmWBXOA+n0XATsBdzQgQDkswz9VNmywgjLPSRrhE3h9jOxja+Yl24j+qvgh1lqfZbXwDvDbRssbC7Ydrqx/NSDUM/hY1ZDrsUimblN84LcbvlNZDa8Cw3LSXQf3SNJIC18EnE+VIbNhl6b4gsJIuSepjeUm2GnrnUWS/i7pCflZuelmNrdR3ik59pCU/mZOytdJ2WZWiC078E1Jv45utcnPCMyQdKuZ1X1YAh+Pd5E0StJmkobKbfzThqYdcivlZ+SHM2YGk+2qKNyXreSfGnJ/q1rRPUjjq2Dtku40s2ZZycb81pD0gXC5zMz+2WyefehDH2oBWB84BvhIT8vShyYD+ALwe3zimnz6Nt0Cpx6sSBEqegPWknRcTwvRhx4A8LvUp1WvbPF9aALo7A62Vyp+RY5C1ZM4QFLucCHdiT7FNwHh2/oL8mNLTVkr6UMvBu4itlk+6PvQhz70oQ996EMfVkzgZ876JlE1EPb6y3sAB/YKq0834fZlp9PgUZ5mAjd9Bri2YLpH1UjfC/g1UeCA3g5Kh0MGxzc3pbqpz19oMChgM9BExS8Cjq6SPiHwPahIvs1ErPjEbfknJc2StEX43VceJ3aopKPk1h17S5oJrNojUvcMziOLHXqDwI9Tdf9QhZs0Q4VwFvix5lkhz6RuFq8qmtziwY1Bu5g+F9XigcMCnUcboZORV6nFh0JtLukFMysbm8zMlsp92rfLgwU0y7Vpb8Ny+db1lcDOqbSilmLnS1om6bmC6GWBtUjaLVxUdcxvZi9KukNeEblOuXQTmuG9ulXSSXL3ZlPofACyEH5mdpeZrWJmBxRBLyta5GO55ON4LSSWsUMkCfgIIUgOsDPuGLELgE3wGGufTN1fP3p+NPDpKG3j8EyXk534ubHd8EC8ZTeagGHh+U1S9z8c8dyO6jHtzMzOkvRTSQMl/SWWsQLfkbjbkS5OG4G1gc+l6wnYKD3G45Ptz5Ny0V5G/t3xYBNxnnWDDCOrCXpt6Pf/p1qBQt6zQ97x4fo13LY8jhY5h8hdNl2jVl4VpT0f7t0WfqeG+1PofGpnRvTMSDxgUIIkyME1IX0gHhItxg2E06bAzSmeZT1b4mP8m9H1L0L+14NSkjF+bEjfHvdikaAdN79Onh9HZ/cqLwOfBraO6wV/qdO+gW4hRIOmdIQrdtL0AsFvDl3dnjxH+HanNMav3yJpXpBt81qKl9vOS53djPeT9KKkL0q6TR51+jeB0ZnyUCLXyL8Upkg6kK4hP/pJGid3uC95rJbzwrPTJY0Gjgxpl8gDBp0n6Svq2uJ/KWlPSddJ2l/ur3aviHaCdSV9Q96V14SZfU/S+YH3NJV6ygSvqFQPR0paKunnQZHD5T5q2yQdKw/C9GgFu/tfS9pD0lT5vv518uH4rFS+Fklflzs+/oi8LiSfK9wg99h5gaSNJKVdl/9fcjYL3CNSRWfCwHC8FbYl+Si1+ORt7I/PgtvCdeLxYSLwczwaJcADIT1p8YNTvDYDvg2cQslJ0oSoddwX5U1CqyQtvjXI0D9cDwjXC8N10uLTk7V0eTu1+Oj+FanWODZKOwA/YTwedzkG3jskESXHlaGXbvGLcQ8iH4zytEV1mrT4rcL17uH6wnA9BDg+1N1ZIW1GSHt3Vr+ymf0VdzWyq6QrgP3TbsTxWfzl8ondGWYW+1btSOK/m1kb0K6Sm/NV5DPjbaL89yvlnz4OKQ6MlnSz3IjhOUnJCc8WhUMa6uzWM/5f8sMG75hZW6D9FrBcpUMICV5WHTCzg/ExtZO/PeByuVPkuUH2pBG1qOT1u2w8nRTeL2mpmcWhyd6WzzFitIbfd/3uBz09JC/rk5LeF5K6uHlPuskj5d33rpLmhLd2T2BfPLTnY5I+JumWMjHnPhje8CHAjyStKo9mIUl3KXwOSdpZ3g2ea2ZlnRQG7CTv+n9kZttL+kuU9riktySNAvbDbda/m3r+Dkn9cS8SA4HvyB3235HKV/fnmJntIz8mFWO0XEFby1+KuLe4M/wej09at6TkhyYtxyxJq0byj5O//PdWEif6f2v5MavLzWxbdT7eVR64d8TLKX8Uuo3y7jGTrn5xlHcxYaaMnypNR7BsJ6xvE7r6FM1RQYaO0OUlUadPC+lfS8mYnBdPuvqN6TzJIlxvHNKTrr5qPFwqdPVRen/gHkqTu0mB7rIgXyL3p0L6VSmZOvCGNTxcJ139JsBLqbyvJPJS6uqTmX0y1F2IO69qxT1qtFE6eHlnyJt09UO6vPX4DHB3SRvKu5GnJd1U7gwc8Jq8C9pO0kHyBZ7JZvZ8lGeApLGSPiHv6q5PXGfjq14DQsSImO5nJH1OPhmaLg8M8JiZzY7S95R3qX8O/F80s9tD+qqSDgtleF7Sn8xsUUjbXR5mZUocbKlM2Y6U9G8zu6xKntUlDTazJ8L1V+STqUfkrsY78cHdsY6Qe8q+yczuw50Z7SNfQEvG4oFB/qFB/iuS4RUPh7ZBuNeGf0HtIWmemd2Fe9M4TN69T5VP2l83sxsC/0GSrqhUpkzAW/zShoj0oUfQZ2X7H4o+xf+HotGzc99XvjAdfeglKPtJA9woaYmZ1b3liK89bxsuZ5tZnsjJvRK4U4JB6rxBg0r12GZmC/DFlV9IutnMzuxmMesH/hn1WgPPf4fOPlzagXrivPUq4KuJ1XBdyLdz8onV0zJXQuHHpIFRkibIP7VOl38SHiOPf/6UmV1UNM8ewBxJs1P3TNLD0f/vPTTS4oEzw9t+QnRvPeBr0fVA4F7g1oyy5I0N1xTgq2ngm0/V8u1SqcXjocO/E9YTknsXhF6xlmfqjfCd0In1l8LRDMcICc1kXV1m9rKkc6I8G8iXFwUMMrPXq9BbSSvW18cp8gWybaN7KyvbJHkLeSTt98t3M+tGMyo0acU/pELcmrDSNVbS3jWU3ttQ1n1aVuBx3UfL19IfrpG9K3OzayQdLT+J2xAKV7yZ3SjpbHnE54n4OvMppKxzzWxKxQB4731UejH6S/qWuu6PZ4aZTTKzR+p9vhPC2DUXt9Y4JT3G45YiU/HNjsfpakhRjuYYOtvpvxYmfkn6bcCV4f/VgD/hGzqPJ/MD3JqkA9/4uR3YLdxfD/hjkPdZfAcx5ns77hr8Ptw65bth3L0nlOGq0PoEfAgPqzIv5L0IX4MvV6ZkVl911yua1Z8f3Ts8yPNykG9kuL9HuAce2ePscP9qfEPpi6GMF4Ry3w78LKI7NsyXXgL+SmQRjFsFTQtlng18ORZyXGD6FnAXJbPi10L6piGtHbg1VDaJgLUA7BoEAvf/mhhxdADzIwUTFDILuDjcv5DSLt2juA3agCBDR6iEB8KzV4dnjg/XHbjZeCul3bJno0qeGPKfGJVtdiJHDcWXQ0eUL5ncnR+uTwjXC/AG9K8gz2b4Dl3iHXwecEl45lXchKoVb0DH4budUPpsPBzfiWvF3a8sBpKNqu1DvS3FlZ9E2RifCJm45kq2SrcM14niLw4PHBcV7G+hsqqHruxcaTMCnaPKKD7hcSpuiBE/1w7Mja6/GvJOxl/KT+F2fh14QL1E8b8L+Q8O18nWZFJ5D0Y0N8fP330c95XfWkPx80N5kr+ZdLYLTCv+9aDozwaZv5FKTyJc7hzRSGLfjYjuDQ33EsU/jSs+0d36Ud5k+/bAcL0m/oK0Af1XllvMLkrGDTN7mGDmEzA0/M6K7j0s3/LcUG4fF1fOCEmrm1k6Nvvd8olNOfOu38oNNU6WdDIeHmunCqt9iRP/Q8JfjDjuWmIXmFj7JLaFSZTFfkHe8fKl59j/7ttl+Ma42swqxsCLga/2JRa001PJm6o6Omq4SR0qXy1MdDc/Skvq6c6Q9ibwtPxrYkiLpAVyi4/krdlKPglJkOytx6a6W8r3lF+IpcC9Jc+QNJkoXBhuBHFwuCwXCXq+PEr1KLmJ18byAxwJ4s/OxKnQZaHgQ8NzQ1X6osgE3FbgFLmh5DD5p9Ib1R4Jv/1wQ4wuf+kHgj+chfKXaYRcIR+XtKPchqFT9tT1/9UownNya6PE/m5dSnaTyYv+mZD2IblNxBJJL+Yd42/Bx0mAc1QG+FiUuPNejE/qEouZ6VG+uKufjY//lwH3h7xHhLR5Ie/duB35qnjw4w68m70RH8cmhPxJVz8uXHdaPsUnkgCPheuFuNnzhZRMlpdVKFuygFMJibFHuqs/KVwvwKNRzA3lGhzSx4f0JwkTVbyrfzvFPz3GH0VpjJ8eyvIkfuRth1AvbaGOkjH+x5K0splNxE2Mxshb1omSPqXQ3ZnZk/gb9WV5S3xQ0k/M7PJylWNm5wKz5C18mHwh5x+S7jCzS6Ks58ktbCQ3Ujwm5F8gaVKU9wj5YsUHJA0KVivDgzxbBPrnyc2uJV9OPUdunyd57PTfS7onyNcK/F7eyiW35DlW7pXyRkkzVTIWTePxQCtG/OmWGD4uSPH8Fb76uJ+kdSQ9KrdfTIxMz5JbMn1Cpd5tkjr3vJIbWJ4rt4GUmU0CXpYPeWvJLW4uC0fe7gG2kds5biTv8qea2RRJ+n+zDN8diNVQ5QAAAABJRU5ErkJggg==";
+const KEY = 'afinacao-feg-v1';
+const SESSION_MIN = 45;
+
+const ICONS = {
+  guardia:'<path d="M12 3l7 3v6c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6z"/><path d="M9 12l2.2 2.2L15.5 10"/>',
+  compasso:'<path d="M3 20h18"/><path d="M6 20v-6"/><path d="M11 20V9"/><path d="M16 20v-9"/><path d="M5 9l5-4 4 3 6-5"/>',
+  produtora:'<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M16 15h2"/><path d="M7 3h10"/>',
+  spalla:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0"/><path d="M12 18v3"/><path d="M8 21h8"/>',
+  arranjadora:'<path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 00-3.9 10.6c.6.6.9 1.4.9 2.4h6c0-1 .3-1.8.9-2.4A6 6 0 0012 3z"/>',
+  heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/>',
+  eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  spark:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6"/>',
+  alert:'<path d="M12 3l9.5 17h-19z"/><path d="M12 10v4"/><path d="M12 17v.5"/>',
+  link:'<path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
+  grow:'<path d="M4 20h16"/><path d="M7 16l4-4 3 3 6-7"/><path d="M15 8h5v5"/>',
+  pause:'<circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/>',
+  mirror:'<path d="M12 3v18"/><path d="M8 7l-4 5 4 5"/><path d="M16 7l4 5-4 5"/>'
+};
+const icon = (n, s=22) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]||''}</svg>`;
+
+/* ---------- Modelo: 10 frentes da FEG agrupadas em 5 naipes ---------- */
+const FRENTES = [
+  {id:'GOV', nome:'Governança e conformidade', rot:'Governança', naipe:'guardia', desc:'Estruturar, manter e monitorar a governança da FE, com conformidade regulatória e aderência às diretrizes.'},
+  {id:'AUD', nome:'Auditorias', rot:'Auditorias', naipe:'guardia', desc:'Apoiar auditorias internas e externas com rastreabilidade, documentação e conformidade.'},
+  {id:'PORT', nome:'Estratégia e portfólio', rot:'Portfólio', naipe:'compasso', desc:'Planejar e gerir o portfólio de iniciativas e evoluções das ferramentas.'},
+  {id:'KPI', nome:'Desempenho, riscos e indicadores', rot:'Indicadores', naipe:'compasso', desc:'Monitorar e reportar resultados e riscos estratégicos; definir e acompanhar indicadores.'},
+  {id:'ORC', nome:'Orçamento', rot:'Orçamento', naipe:'produtora', desc:'Planejamento orçamentário, acompanhamento financeiro e controle de investimentos e despesas.'},
+  {id:'CONT', nome:'Contratos e fornecedores', rot:'Contratos', naipe:'produtora', desc:'Gerir contratos e fornecedores: escopo, prazos, SLAs e obrigações técnicas.'},
+  {id:'INST', nome:'Representação institucional', rot:'Representação', naipe:'spalla', desc:'Representar a gerência em fóruns, consolidar posicionamentos e desdobrar diretrizes às comunidades.'},
+  {id:'REG', nome:'Interface regulatória', rot:'Regulatório', naipe:'spalla', desc:'Atuar em fóruns como o CT PMO-PLD, executando e operacionalizando o backlog.'},
+  {id:'INOV', nome:'Inovação e eficiência', rot:'Inovação', naipe:'arranjadora', desc:'Identificar e estruturar inovação, modernização tecnológica e eficiência operacional.'},
+  {id:'MAT', nome:'Modelo matricial', rot:'Matricial', naipe:'arranjadora', desc:'Guardiã do modelo de operação matricial: adoção e evolução contínua.'}
+];
+const NAIPES = [
+  {id:'guardia', nome:'Guardiã da Partitura', frentes:['GOV','AUD'], pool:'Governança, Riscos e Conformidade',
+   essencia:'Garante que todos toquem a mesma partitura: regras claras, evidências e rastreabilidade.', energia:'Ordem · precisão · conformidade'},
+  {id:'compasso', nome:'Estrategista do Compasso', frentes:['PORT','KPI'], pool:'Gestão de Portfólio / PMO',
+   essencia:'Marca o ritmo: prioriza o portfólio, mede o andamento e antecipa riscos.', energia:'Visão · priorização · dados'},
+  {id:'produtora', nome:'Produtora da Temporada', frentes:['ORC','CONT'], pool:'Gestão de Contratos e Fornecedores',
+   essencia:'Faz o concerto acontecer: orçamento sob controle, contratos e fornecedores entregando.', energia:'Controle · negociação · entrega'},
+  {id:'spalla', nome:'Spalla', frentes:['INST','REG'], pool:'Interface institucional e regulatória',
+   essencia:'O primeiro violino: representa a orquestra, dá o tom nos fóruns e traduz diretrizes.', energia:'Voz · articulação · influência'},
+  {id:'arranjadora', nome:'Arranjadora', frentes:['INOV','MAT'], pool:'Estratégia e Inovação',
+   essencia:'Reescreve o arranjo: inovação, eficiência e o modelo matricial em evolução.', energia:'Criatividade · mudança · conexões'}
+];
+const F = Object.fromEntries(FRENTES.map(f=>[f.id,f]));
+const N = Object.fromEntries(NAIPES.map(n=>[n.id,n]));
+const NIVEIS = ['Ouvi falar','Entendo o conceito','Já faço','Posso ensinar'];
+const both = (n, w) => Object.fromEntries(N[n].frentes.map(f=>[f,w]));
+
+/* ---------- Os 10 compassos ---------- */
+const QS = [
+  {id:'q1', tipo:'inbox', ato:'Aquecimento', min:4, titulo:'A caixa de entrada de segunda-feira',
+   enunciado:'São 9h. Dez mensagens chegaram. Qual você abre primeiro, com prazer — e qual deixa para depois?',
+   provoca:'O que te puxou para essa mensagem? E o que faz a outra ir para o fim da fila — é o tema ou o jeito de trabalhar?',
+   itens:[
+     {f:'PORT', de:'Gerência Executiva FE', h:'08:12', txt:'Portfólio 2027: 14 iniciativas disputando a mesma capacidade. Precisamos priorizar.'},
+     {f:'AUD', de:'Auditoria Interna', h:'08:20', txt:'Pedido de evidências do processo de gestão de mudanças — prazo sexta.'},
+     {f:'INOV', de:'Comunidade Técnica', h:'08:31', txt:'Ideia: usar IA generativa para automatizar o relatório mensal das comunidades.'},
+     {f:'CONT', de:'Fornecedor', h:'08:37', txt:'Terceiro descumprimento de SLA no mês. Avaliar glosa e plano de ação.'},
+     {f:'INST', de:'Gabinete', h:'08:44', txt:'Convite: representar a gerência no fórum institucional de quinta-feira.'},
+     {f:'KPI', de:'Comitê Executivo', h:'08:49', txt:'O indicador de entregas caiu 18%. Quais são os riscos e qual o plano?'},
+     {f:'MAT', de:'Líder de Comunidade', h:'08:53', txt:'Minha comunidade não está aderindo ao modelo matricial. Como destravar?'},
+     {f:'ORC', de:'Controladoria', h:'08:55', txt:'Forecast do trimestre: desvios em investimento e despesa para justificar.'},
+     {f:'REG', de:'CT PMO-PLD', h:'08:58', txt:'Novos itens no backlog regulatório para operacionalizar.'},
+     {f:'GOV', de:'Diretoria', h:'09:00', txt:'Proposta de revisão de papéis, alçadas e ritos de governança da FE.'}
+   ]},
+  {id:'q2', tipo:'single', ato:'Identidade', min:3, titulo:'O seu superpoder',
+   enunciado:'Quando o time trava, normalmente te chamam para…',
+   provoca:'Conte um caso real e recente em que isso aconteceu. O que você fez — e como se sentiu depois?',
+   opcoes:[
+     {n:'compasso', txt:'…priorizar e mostrar, com números, onde estamos e o que vem a seguir.', w:both('compasso',2)},
+     {n:'arranjadora', txt:'…propor um jeito novo, mais simples ou automatizado de fazer.', w:both('arranjadora',2)},
+     {n:'guardia', txt:'…colocar ordem: processo, regra e evidência no lugar.', w:both('guardia',2)},
+     {n:'spalla', txt:'…conversar com quem decide e defender a posição do time.', w:both('spalla',2)},
+     {n:'produtora', txt:'…destravar com o fornecedor ou achar o recurso que falta.', w:both('produtora',2)}
+   ]},
+  {id:'q3', tipo:'pairs', ato:'Instinto', min:3, titulo:'Isto ou aquilo',
+   enunciado:'Cinco escolhas rápidas. Sem pensar muito — o primeiro impulso é o que vale.',
+   provoca:'Em qual par você hesitou? A hesitação costuma dizer mais do que a escolha.',
+   pares:[
+     [{txt:'Número que prova', w:{KPI:1,ORC:1}}, {txt:'Narrativa que convence', w:{INST:1,PORT:1}}],
+     [{txt:'Regra clara', w:{GOV:1,AUD:1}}, {txt:'Liberdade para testar', w:{INOV:1,MAT:1}}],
+     [{txt:'Palco: fórum e plateia', w:{INST:1,REG:1}}, {txt:'Bastidores: análise e evidência', w:{KPI:1,AUD:1}}],
+     [{txt:'Negociar com quem é de fora', w:{CONT:1,REG:1}}, {txt:'Organizar a casa por dentro', w:{MAT:1,GOV:1}}],
+     [{txt:'Visão de longo prazo', w:{PORT:1,INOV:1}}, {txt:'Controle do dia a dia', w:{CONT:1,ORC:1}}]
+   ]},
+  {id:'q4', tipo:'single', ato:'Pressão', min:3, titulo:'A crise das 48 horas',
+   enunciado:'Faltam 48h para o CT PMO-PLD. O backlog regulatório está atrasado, um fornecedor não entregou e a gerência executiva pediu um posicionamento técnico. Qual pedaço você pega sem pensar duas vezes?',
+   provoca:'E qual pedaço você torceria para não sobrar para você? Por quê?',
+   opcoes:[
+     {n:'spalla', txt:'Preparo o posicionamento técnico e me ofereço para apresentar no fórum.', w:both('spalla',2)},
+     {n:'produtora', txt:'Aciono o fornecedor, reviso SLA, penalidades e o impacto no orçamento.', w:both('produtora',2)},
+     {n:'compasso', txt:'Reprioritizo o backlog e monto o plano de recuperação com marcos claros.', w:both('compasso',2)},
+     {n:'arranjadora', txt:'Mobilizo as comunidades e proponho um atalho — automatizar o que der.', w:both('arranjadora',2)},
+     {n:'guardia', txt:'Separo o que é obrigação regulatória e garanto que tudo fique documentado.', w:both('guardia',2)}
+   ]},
+  {id:'q5', tipo:'multi', max:2, ato:'Sombra', min:3, titulo:'O que drena a sua energia',
+   enunciado:'Escolha até duas atividades que, sendo honesta, te deixam sem bateria no fim do dia.',
+   provoca:'Isso drena porque é chato, porque falta domínio ou porque falta autonomia? Cada resposta pede uma solução diferente.',
+   opcoes:[
+     {txt:'Correr atrás de evidências e documentação para auditoria', w:{AUD:-2,GOV:-1}},
+     {txt:'Conciliar números e justificar desvios de orçamento', w:{ORC:-2,KPI:-1}},
+     {txt:'Cobrar fornecedor e discutir cláusula de contrato', w:{CONT:-2,ORC:-1}},
+     {txt:'Defender posição em fórum com plateia exigente', w:{INST:-2,REG:-1}},
+     {txt:'Consolidar o status de dezenas de iniciativas', w:{PORT:-2,KPI:-1}},
+     {txt:'Mudanças constantes, sem roteiro definido', w:{INOV:-2,MAT:-1}},
+     {txt:'Ler normas e acompanhar exigências regulatórias', w:{REG:-2,GOV:-1}},
+     {txt:'Convencer áreas a mudarem o jeito de trabalhar', w:{MAT:-2,INST:-1}},
+     {txt:'Manter indicadores e matrizes de risco atualizados', w:{KPI:-2,PORT:-1}},
+     {txt:'Desenhar regras, papéis e fluxos de governança', w:{GOV:-2,AUD:-1}}
+   ]},
+  {id:'q6', tipo:'tokens', total:10, ato:'Escolha', min:4, titulo:'Suas 10 fichas de energia',
+   enunciado:'Se o seu mês tivesse só 10 fichas de energia, como você as distribuiria entre os cinco naipes da FEG?',
+   provoca:'Onde você colocou zero ficha? Isso é falta de interesse — ou falta de oportunidade até hoje?'},
+  {id:'q7', tipo:'single', ato:'Legado', min:3, titulo:'A entrega com a sua assinatura',
+   enunciado:'Daqui a 6 meses, qual entrega te daria mais orgulho de dizer “essa fui eu”?',
+   provoca:'Para quem você apresentaria esse legado? E quem você precisaria ao seu lado para chegar lá?',
+   opcoes:[
+     {n:'produtora', txt:'Contratos sob controle: SLAs monitorados e um orçamento previsível, sem surpresas.', w:both('produtora',2)},
+     {n:'compasso', txt:'Um painel vivo do portfólio, com indicadores e riscos que a liderança usa de verdade.', w:both('compasso',2)},
+     {n:'spalla', txt:'Uma agenda regulatória clara e a FEG reconhecida como voz técnica nos fóruns.', w:both('spalla',2)},
+     {n:'guardia', txt:'Uma trilha de governança à prova de auditoria — tudo rastreável em um clique.', w:both('guardia',2)},
+     {n:'arranjadora', txt:'O modelo matricial funcionando de verdade, com automações que liberam o time.', w:both('arranjadora',2)}
+   ]},
+  {id:'q8', tipo:'scale', ato:'Nivelamento', min:6, titulo:'O termômetro de domínio',
+   enunciado:'Agora é sobre o que você já sabe, não sobre o que gosta. Honestidade vale mais que nota alta.',
+   provoca:'Dê um exemplo concreto de onde você marcou “Posso ensinar”. E onde marcou “Ouvi falar” — isso te incomoda ou te deixa curiosa?'},
+  {id:'q9', tipo:'grow', max:2, ato:'Futuro', min:2, titulo:'Onde você quer crescer',
+   enunciado:'Em 12 meses, em quais frentes você gostaria de ser referência? Escolha até duas.',
+   provoca:'O que você precisaria para chegar lá — curso, mentoria, exposição, tempo? Quem aqui poderia te ajudar?'},
+  {id:'q10', tipo:'single', showNaipe:true, ato:'Autorretrato', min:3, titulo:'O seu instrumento na orquestra',
+   enunciado:'Na orquestra da FEG, qual é o seu instrumento? Escolha aquele em que você se reconhece.',
+   provoca:'Qual instrumento você definitivamente NÃO tocaria? E qual você acha que a colega ao lado toca?',
+   opcoes:NAIPES.map(n=>({n:n.id, txt:n.essencia, w:both(n.id,1.5)}))}
+];
+
+/* ---------- Estado ---------- */
+const fresh = () => ({players:[{id:'p1',name:''},{id:'p2',name:''},{id:'p3',name:''}], answers:{}, revealed:{}, notes:{},
+  screen:'cover', active:'p1', overrides:{}, clock:{start:null,acc:0}, tab:'team'});
+let S;
+try{ S = JSON.parse(localStorage.getItem(KEY)) || fresh(); }catch(e){ S = fresh(); }
+const save = () => { try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} };
+
+const esc = s => String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pIdx = pid => S.players.findIndex(p=>p.id===pid);
+const pName = pid => (S.players.find(p=>p.id===pid)||{}).name || '—';
+const initial = n => (n||'?').trim().charAt(0).toUpperCase();
+const av = (pid, cls='') => `<span class="av pc${pIdx(pid)%5} ${cls}" title="${esc(pName(pid))}">${esc(initial(pName(pid)))}</span>`;
+const val = (qid,pid) => (S.answers[qid]||{})[pid];
+const setVal = (qid,pid,v) => { (S.answers[qid] ||= {})[pid] = v; save(); };
+const isAnswered = (q,pid) => {
+  const v = val(q.id,pid); if(v==null) return false;
+  if(q.tipo==='inbox') return !!v.love;
+  if(q.tipo==='pairs') return v.filter(x=>x!=null).length===q.pares.length;
+  if(q.tipo==='tokens') return Object.values(v).reduce((a,b)=>a+b,0)===q.total;
+  if(q.tipo==='scale') return FRENTES.every(f=>v[f.id]!=null);
+  if(Array.isArray(v)) return v.length>0;
+  return true;
+};
+const countAnswered = q => S.players.filter(p=>isAnswered(q,p.id)).length;
+
+/* ---------- Pontuação ---------- */
+function contrib(q, v){
+  const out = {}; const add = (w,k=1) => { for(const f in w) out[f]=(out[f]||0)+w[f]*k; };
+  if(v==null) return out;
+  switch(q.tipo){
+    case 'inbox': if(v.love) add({[v.love]:3}); if(v.skip) add({[v.skip]:-1.5}); break;
+    case 'single': if(q.opcoes[v]) add(q.opcoes[v].w); break;
+    case 'multi': v.forEach(i=>q.opcoes[i] && add(q.opcoes[i].w)); break;
+    case 'pairs': v.forEach((s,i)=>{ if(s!=null) add(q.pares[i][s].w); }); break;
+    case 'tokens': for(const n in v) add(both(n,.4), v[n]); break;
+    case 'grow': v.forEach(f=>add({[f]:2})); break;
+  }
+  return out;
+}
+const QUAD = {
+  brilho:{nome:'Zona de brilho', acao:'Afinidade alta e domínio alto — pronta para ser titular.'},
+  cresc:{nome:'Zona de crescimento', acao:'Afinidade alta, domínio em construção — titular com mentoria ou apoio em desenvolvimento.'},
+  sust:{nome:'Zona de sustentação', acao:'Domina, mas não é onde brilha — ótimo apoio; cuidado com sobrecarga.'},
+  neutra:{nome:'Zona neutra', acao:'Baixa afinidade e domínio — evitar como titular agora.'}
+};
+const quadOf = (a, d) => { const hiA = a>=.55, hiD = d!=null && d>=2; return hiA&&hiD?'brilho':hiA?'cresc':hiD?'sust':'neutra'; };
+
+function compute(){
+  const players = S.players, out = {};
+  for(const p of players){
+    const raw = Object.fromEntries(FRENTES.map(f=>[f.id,0])); let any=false;
+    for(const q of QS){ const v = val(q.id,p.id); if(v==null||q.tipo==='scale') continue; any=true;
+      const c = contrib(q,v); for(const f in c) raw[f]+=c[f]; }
+    const vals = Object.values(raw), mn = Math.min(...vals), mx = Math.max(...vals);
+    const aff = Object.fromEntries(FRENTES.map(f=>[f.id, mx>mn ? Math.pow((raw[f.id]-mn)/(mx-mn), .7) : (any?.5:0)]));
+    const dv = val('q8',p.id) || {};
+    const dom = Object.fromEntries(FRENTES.map(f=>[f.id, dv[f.id]??null]));
+    const naipeRaw = Object.fromEntries(NAIPES.map(n=>[n.id, n.frentes.reduce((s,f)=>s+raw[f],0)]));
+    const ranking = NAIPES.map(n=>n.id).sort((a,b)=>naipeRaw[b]-naipeRaw[a]);
+    const pos = Object.fromEntries(NAIPES.map(n=>[n.id, Math.max(0,naipeRaw[n.id])]));
+    const posSum = Object.values(pos).reduce((a,b)=>a+b,0) || 1;
+    const mix = Object.fromEntries(NAIPES.map(n=>[n.id, pos[n.id]/posSum]));
+    const growth = val('q9',p.id) || [];
+    const drainSel = (val('q5',p.id)||[]).map(i=>QS[4].opcoes[i]);
+    const drains = drainSel.flatMap(o=>Object.keys(o.w).filter(f=>o.w[f]<=-2));
+    const selfIdx = val('q10',p.id); const self = selfIdx!=null ? QS[9].opcoes[selfIdx].n : null;
+    const domVals = Object.values(dom).filter(x=>x!=null);
+    const domAvg = domVals.length ? domVals.reduce((a,b)=>a+b,0)/domVals.length : null;
+    const quad = Object.fromEntries(FRENTES.map(f=>[f.id, quadOf(aff[f.id], dom[f.id])]));
+    const fit = Object.fromEntries(FRENTES.map(f=>[f.id, .6*aff[f.id] + .4*((dom[f.id]??0)/3)]));
+    out[p.id] = {raw, aff, dom, naipeRaw, ranking, mix, growth, drains, drainSel, self, domAvg, quad, fit, any,
+      top: FRENTES.map(f=>f.id).sort((a,b)=>aff[b]-aff[a])};
+  }
+  // Distribuição sugerida: titular por melhor encaixe com teto de carga; apoio prioriza quem quer crescer
+  const ids = players.map(p=>p.id), n = ids.length, cap = Math.ceil(FRENTES.length/Math.max(1,n));
+  const tit = {}, apo = {}, load = Object.fromEntries(ids.map(i=>[i,0])), aload = Object.fromEntries(ids.map(i=>[i,0]));
+  const pairs = []; ids.forEach(pid=>FRENTES.forEach(f=>pairs.push({pid,f:f.id,s:out[pid].fit[f.id] + (out[pid].growth.includes(f.id)?.05:0)})));
+  pairs.sort((a,b)=>b.s-a.s);
+  for(const x of pairs){ if(!tit[x.f] && load[x.pid]<cap){ tit[x.f]=x.pid; load[x.pid]++; } }
+  for(const f of FRENTES){ if(!tit[f.id] && ids.length){ tit[f.id]=ids[0]; } }
+  for(const f of FRENTES){
+    const cand = ids.filter(i=>i!==tit[f.id]).map(i=>({i, s: out[i].fit[f.id] + (out[i].growth.includes(f.id)?.25:0) - .06*aload[i]})).sort((a,b)=>b.s-a.s);
+    if(cand.length){ apo[f.id]=cand[0].i; aload[cand[0].i]++; }
+  }
+  const sug = {tit:{...tit}, apo:{...apo}};
+  for(const f in S.overrides){ const o=S.overrides[f]; if(o.tit && ids.includes(o.tit)) tit[f]=o.tit; if(o.apo!==undefined) apo[f]= ids.includes(o.apo)?o.apo:null; }
+  const L = Object.fromEntries(ids.map(i=>[i,{t:0,a:0}]));
+  for(const f of FRENTES){ if(tit[f.id]) L[tit[f.id]].t++; if(apo[f.id]) L[apo[f.id]].a++; }
+  return {P:out, tit, apo, sug, load:L, cap};
+}
+
+/* ---------- Relógio ---------- */
+const clockMs = () => S.clock.acc + (S.clock.start ? Date.now()-S.clock.start : 0);
+const fmt = ms => { const s=Math.floor(ms/1000); return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); };
+function toggleClock(){ if(S.clock.start){ S.clock.acc += Date.now()-S.clock.start; S.clock.start=null; } else S.clock.start=Date.now(); save(); paintClock(); }
+function paintClock(){ const el=document.querySelector('.clock'); if(!el) return; const ms=clockMs();
+  el.classList.toggle('run', !!S.clock.start); el.classList.toggle('over', ms>SESSION_MIN*60000);
+  el.querySelector('.t').textContent = fmt(ms); }
+setInterval(paintClock, 1000);
+
+/* ---------- Render ---------- */
+const app = document.getElementById('app');
+function render(){
+  const s = S.screen;
+  if(s==='cover') app.innerHTML = viewCover();
+  else if(s==='guide') app.innerHTML = header('Guia do facilitador') + viewGuide() + navBar(-1);
+  else if(s==='results') app.innerHTML = header('A partitura da equipe') + viewResults() + navBar(QS.length);
+  else { const i = +s.slice(1); app.innerHTML = header(`Compasso ${i+1} de ${QS.length} · ${QS[i].titulo}`) + viewQuestion(i) + navBar(i); }
+  paintClock();
+  window.scrollTo({top:0});
+}
+function go(screen){ S.screen = screen; save(); render(); }
+
+function header(title){
+  return `<header class="top">
+    <img class="logo-m" src="${LOGO_MAESTRO}" alt="maestro" data-a="go" data-to="cover">
+    <div class="top-mid"><span class="eyebrow">Afinação FEG</span><span class="top-title">${esc(title)}</span></div>
+    <button class="clock" data-a="clock" title="Iniciar / pausar o relógio da sessão"><span class="dot"></span><span class="t">00:00</span><small>/ ${SESSION_MIN}:00</small></button>
+    <img class="logo-o" src="${LOGO_ONS}" alt="ONS — Operador Nacional do Sistema Elétrico">
+  </header>`;
+}
+function navBar(i){
+  const prev = i<=0 ? (i===0?'guide':'cover') : i===QS.length ? 'q'+(QS.length-1) : 'q'+(i-1);
+  const next = i<0 ? 'q0' : i>=QS.length-1 ? 'results' : 'q'+(i+1);
+  let steps = '';
+  QS.forEach((q,k)=>{
+    const done = countAnswered(q)===S.players.length;
+    steps += (k?`<span class="ln ${done?'done':''}"></span>`:'') + `<button class="${k===i?'cur':''} ${done?'done':''}" data-a="go" data-to="q${k}" title="${esc(q.titulo)}">${k+1}</button>`;
+  });
+  steps += `<span class="ln"></span><button class="fin ${i===QS.length?'cur':''}" data-a="go" data-to="results">Partitura</button>`;
+  return `<nav class="nav">
+    <button class="btn btn-ghost btn-sm" data-a="go" data-to="${prev}">← Voltar</button>
+    <div class="steps">${steps}</div>
+    ${i<QS.length ? `<button class="btn btn-primary btn-sm" data-a="go" data-to="${next}">${i===QS.length-1?'Ver a partitura':'Próximo'} →</button>` : `<button class="btn btn-ghost btn-sm" data-a="go" data-to="guide">Guia</button>`}
+  </nav>`;
+}
+
+/* ---------- Capa ---------- */
+function circuit(){
+  const y='y', w='w';
+  const paths = [
+    [y,'M0 380H257V311H700'],[w,'M0 407H286V338H1267V0'],[y,'M0 435H316V366H1299V0'],[y,'M348 405H1340V0'],
+    [y,'M697 435H1528V0'],[w,'M0 460H173V586H1559V0'],[y,'M0 484H148V615H957V1080'],[y,'M0 511H47'],[y,'M145 646H924V1080']
+  ];
+  return `<svg class="cover-art" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs><radialGradient id="glow" cx="1" cy="0" r="1"><stop offset="0" stop-color="#AEAB33" stop-opacity=".9"/><stop offset=".55" stop-color="#AEAB33" stop-opacity="0"/></radialGradient></defs>
+    <rect x="1300" y="0" width="620" height="1080" fill="url(#glow)"/>
+    ${paths.map((p,k)=>`<path class="${p[0]}" d="${p[1]}" style="animation-delay:${k*.12}s"/>`).join('')}
+  </svg>`;
+}
+function viewCover(){
+  const rows = S.players.map((p,k)=>`<div class="cast-row">${`<span class="av pc${k%5}">${esc(p.name.trim()?initial(p.name):k+1)}</span>`}
+     <input data-a="name" data-pid="${p.id}" value="${esc(p.name)}" placeholder="Nome da participante ${k+1}" maxlength="28" aria-label="Nome da participante ${k+1}">
+     ${S.players.length>1?`<button class="x" data-a="rmp" data-pid="${p.id}" title="Remover">×</button>`:''}</div>`).join('');
+  const started = Object.keys(S.answers).length>0;
+  return `<section class="cover">${circuit()}
+    <div class="cover-logos"><img class="logo-m" src="${LOGO_MAESTRO}" alt="maestro"><img class="logo-o" src="${LOGO_ONS}" alt="ONS — Operador Nacional do Sistema Elétrico"></div>
+    <div class="cover-body">
+      <div>
+        <div class="eyebrow">FEG · Governança e Estratégia de Ferramentas Eletroenergéticas</div>
+        <h1>Afinação<br><b>FEG</b></h1>
+        <p class="lead">Antes de tocar junto, cada instrumento se afina. Dez compassos para descobrir onde cada uma brilha, onde quer crescer — e como a orquestra soa melhor.</p>
+        <div class="meta"><span class="pill"><b>10</b> compassos</span><span class="pill"><b>45</b> minutos</span><span class="pill"><b>5</b> naipes · <b>10</b> frentes</span><span class="pill">Nenhuma resposta errada</span></div>
+      </div>
+      <div class="cast">
+        <h3>Quem está na orquestra hoje?</h3>
+        <p>Os nomes aparecem nos avatares e na partitura final.</p>
+        ${rows}
+        ${S.players.length<5?`<button class="btn-text" data-a="addp">+ adicionar participante</button>`:''}
+        <div class="cast-actions">
+          <button class="btn btn-primary" data-a="start">${started?'Continuar a afinação':'Começar a afinação'} →</button>
+          <button class="btn btn-ghost" data-a="go" data-to="guide">Guia do facilitador</button>
+        </div>
+        <div class="cast-foot">
+          <button class="btn-text" data-a="demo">Ver com dados de exemplo</button>
+          ${started?`<button class="btn-text" data-a="reset">Zerar e começar de novo</button>`:''}
+        </div>
+      </div>
+    </div>
+  </section>`;
+}
+
+/* ---------- Guia ---------- */
+function viewGuide(){
+  let t=4; const mins = QS.map(q=>{ const a=t; t+=q.min; return `<div title="${esc(q.titulo)}">${a}′ · ${esc(q.ato)}</div>`; }).join('');
+  return `<section class="guide">
+    <div class="eyebrow">Roteiro de 45 minutos</div>
+    <h2>Isto não é uma avaliação. É uma <b style="font-weight:500;color:var(--lime)">afinação</b>.</h2>
+    <p class="sub">Hoje as três fazem quase tudo. A sessão revela, por afinidade e por domínio, onde cada uma brilha — para distribuir as 10 frentes da FEG de forma simples, com titular e apoio, e um plano de nivelamento.</p>
+    <div class="timeline">
+      <div><b>Abertura</b><small>0–4′ · contexto e regras</small></div>
+      <div><b>10 compassos</b><small>4–38′ · responder em segredo → revelar → conversar</small></div>
+      <div><b>Partitura</b><small>38–43′ · ler o mapa juntas</small></div>
+      <div><b>Combinados</b><small>43–45′</small></div>
+    </div>
+    <div class="mins">${mins}</div>
+    <div class="g-grid">
+      <div>
+        <div class="sec-t" style="margin-top:0"><h3>Regras do jogo</h3><span>leia em voz alta na abertura</span></div>
+        <ul class="rules">
+          <li><b>Sem resposta certa</b>Responda pelo que te dá energia, não pelo que acha que esperam.</li>
+          <li><b>Segredo, depois revelação</b>Cada uma responde sozinha; só então revelamos e conversamos.</li>
+          <li><b>Gostar ≠ saber</b>Afinidade e domínio são medidos separados. Os dois importam.</li>
+          <li><b>Discordar é ótimo</b>Diferenças são o que permite dividir bem os papéis.</li>
+        </ul>
+        <div class="sec-t"><h3>Como ler o resultado</h3><span>afinidade × domínio</span></div>
+        <div class="quad-ex">
+          <div class="hi"><b>Crescimento</b><small>Ama, ainda não domina → titular com mentoria</small></div>
+          <div class="hi"><b>Brilho</b><small>Ama e domina → titular</small></div>
+          <div><b>Neutra</b><small>Nem ama, nem domina → evitar agora</small></div>
+          <div><b>Sustentação</b><small>Domina, não ama → apoio, sem sobrecarga</small></div>
+        </div>
+      </div>
+      <div>
+        <div class="sec-t" style="margin-top:0"><h3>A orquestra da FEG</h3><span>5 naipes · 10 frentes · Pool A&amp;M</span></div>
+        <div class="orch">
+          ${NAIPES.map(n=>`<div class="orow"><span class="ic">${icon(n.id,30)}</span>
+            <div><b>${n.nome}</b><small>${n.energia}</small></div>
+            <div class="fr">${n.frentes.map(f=>`<span>${F[f].nome}</span>`).join('')}</div>
+            <div class="pool"><small>Papel no Pool A&amp;M</small>${n.pool}</div></div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="sec-t"><h3>Os 10 compassos</h3><span>cada pergunta mede algo diferente</span></div>
+    <div class="qmap">${QS.map((q,k)=>`<div><b>${String(k+1).padStart(2,'0')} · ${esc(q.ato.toUpperCase())}</b><p>${esc(q.titulo)}</p><small>~${q.min} min · ${({inbox:'escolha + rejeição',single:'escolha única',pairs:'5 dilemas',multi:'até 2',tokens:'10 fichas',scale:'autoavaliação',grow:'até 2'})[q.tipo]}</small></div>`).join('')}</div>
+    <div style="display:flex;gap:12px;margin-top:30px;flex-wrap:wrap">
+      <button class="btn btn-primary" data-a="start">Começar o compasso 1 →</button>
+      <button class="btn btn-ghost" data-a="go" data-to="cover">Voltar para a capa</button>
+    </div>
+  </section>`;
+}
+
+/* ---------- Pergunta ---------- */
+function whoChose(q, test){ return S.players.filter(p=>{ const v=val(q.id,p.id); return v!=null && test(v); }).map(p=>av(p.id,'xs')).join(''); }
+function viewQuestion(i){
+  const q = QS[i], pid = S.active, v = val(q.id,pid), rv = !!S.revealed[q.id];
+  let body = '';
+  if(q.tipo==='inbox'){
+    body = `<div class="inbox">${q.itens.map(it=>{
+      const love = v&&v.love===it.f, skip = v&&v.skip===it.f;
+      const lw = rv ? whoChose(q,x=>x.love===it.f) : '', sw = rv ? whoChose(q,x=>x.skip===it.f) : '';
+      return `<div class="mail ${love?'is-love':''} ${skip?'is-skip':''}">
+        <div class="mail-av">${esc(it.de.split(' ').map(w=>w[0]).slice(0,2).join(''))}</div>
+        <div><div class="mail-from">${esc(it.de)} · ${it.h} ${rv?`<span class="tag">${F[it.f].rot}</span>`:''}</div><div class="mail-subj">${esc(it.txt)}</div></div>
+        <div class="mail-who">${lw?`<span class="grp">${icon('heart',13)}${lw}</span>`:''}${sw?`<span class="grp">${icon('pause',13)}${sw}</span>`:''}</div>
+        <div class="mail-act"><button class="ib love ${love?'on':''}" data-a="inbox" data-k="love" data-f="${it.f}">♥ Primeiro</button><button class="ib skip ${skip?'on':''}" data-a="inbox" data-k="skip" data-f="${it.f}">Depois</button></div>
+      </div>`;}).join('')}</div>`;
+  }
+  else if(q.tipo==='single'){
+    body = `<div class="opts">${q.opcoes.map((o,k)=>{
+      const on = v===k, who = rv ? whoChose(q,x=>x===k) : '';
+      const nn = N[o.n];
+      return `<button class="opt ${on?'on':''}" data-a="single" data-k="${k}">
+        ${q.showNaipe ? `<span class="ico">${icon(o.n,34)}</span><span class="nname">${nn.nome}</span><span class="txt" style="font-size:16px">${esc(o.txt)}</span>`
+          : `<span class="letter">${'ABCDE'[k]}</span><span class="txt">${esc(o.txt)}</span>`}
+        <span class="foot">${rv && !q.showNaipe ? `<span class="tag">${icon(o.n,13)} ${nn.nome}</span>` : (q.showNaipe?`<small class="muted">${nn.energia}</small>`:'<span></span>')}<span class="chips">${who}</span></span>
+      </button>`;}).join('')}</div>`;
+  }
+  else if(q.tipo==='multi'){
+    const sel = v||[];
+    body = `<div class="helper">Selecionadas: <b style="color:var(--lime)">${sel.length}/${q.max}</b></div><div class="mchips" style="margin-top:12px">${q.opcoes.map((o,k)=>{
+      const on = sel.includes(k), who = rv ? whoChose(q,x=>x.includes(k)) : '';
+      const fr = Object.keys(o.w).filter(f=>o.w[f]<=-2).map(f=>F[f].rot);
+      return `<button class="mchip ${on?'on':''}" data-a="multi" data-k="${k}"><span class="box">${on?'✓':''}</span><span class="t">${esc(o.txt)}</span>
+        <span class="r">${rv?`<span class="tag">${fr.join(', ')}</span>`:''}<span class="chips">${who}</span></span></button>`;}).join('')}</div>`;
+  }
+  else if(q.tipo==='pairs'){
+    const sel = v||[];
+    body = `<div class="pairs">${q.pares.map((pr,k)=>`<div class="pair">${[0,1].map(s=>{
+      const on = sel[k]===s, who = rv ? whoChose(q,x=>x[k]===s) : '';
+      return `<button class="side-b ${on?'on':''}" data-a="pair" data-k="${k}" data-s="${s}"><span>${esc(pr[s].txt)}</span><span class="chips">${who}</span></button>` + (s===0?'<span class="vs">ou</span>':'');
+    }).join('')}</div>`).join('')}</div>`;
+  }
+  else if(q.tipo==='tokens'){
+    const t = v||{}, used = Object.values(t).reduce((a,b)=>a+b,0), left = q.total-used;
+    body = `<div class="tok-top"><div class="tok-left">${left}<small>ficha${left===1?'':'s'} restante${left===1?'':'s'}</small></div>
+      <div class="tok-bank">${Array.from({length:q.total},(_,k)=>`<span class="coin ${k<used?'used':''}"></span>`).join('')}</div></div>
+      <div class="toks">${NAIPES.map(n=>{ const c=t[n.id]||0;
+        const rvs = rv ? S.players.map(p=>{ const pv=val(q.id,p.id); return pv?`<span>${av(p.id,'xs')} ${pv[n.id]||0}</span>`:''; }).join('') : '';
+        return `<div class="tok ${c?'has':''}"><div class="hd">${icon(n.id,22)}<b>${n.nome}</b></div>
+          <div class="fr">${n.frentes.map(f=>F[f].nome).join(' · ')}</div>
+          <div class="ctrl"><button data-a="tok" data-n="${n.id}" data-d="-1" aria-label="Remover ficha">−</button><span class="n">${c}</span><button data-a="tok" data-n="${n.id}" data-d="1" aria-label="Adicionar ficha">+</button></div>
+          <div class="pips">${Array.from({length:q.total},(_,k)=>`<i class="${k<c?'f':''}"></i>`).join('')}</div>
+          ${rv?`<div class="rv">${rvs}</div>`:''}</div>`; }).join('')}</div>`;
+  }
+  else if(q.tipo==='scale'){
+    const sv = v||{};
+    body = `<div class="scale"><div class="sc-row hd"><div>Frente</div>${NIVEIS.map(l=>`<div>${l}</div>`).join('')}</div>
+      ${NAIPES.map(n=>`<div class="sc-row grp">${n.nome}</div>` + n.frentes.map(fid=>{ const f=F[fid];
+        return `<div class="sc-row"><div class="sc-name"><b>${f.nome}</b><small>${esc(f.desc)}</small></div>${NIVEIS.map((l,k)=>{
+          const who = rv ? whoChose(q,x=>x[fid]===k) : '';
+          return `<button class="sc-cell ${sv[fid]===k?'on':''}" data-a="scale" data-f="${fid}" data-k="${k}" aria-label="${esc(f.nome)}: ${l}"><span class="rad"></span><span class="chips">${who}</span></button>`; }).join('')}</div>`; }).join('')).join('')}</div>`;
+  }
+  else if(q.tipo==='grow'){
+    const sel = v||[], dom = val('q8',pid)||{};
+    body = `<div class="helper">Selecionadas: <b style="color:var(--lime)">${sel.length}/${q.max}</b> · o nível marcado no termômetro aparece em cada cartão.</div>
+      <div class="fcards" style="margin-top:12px">${FRENTES.map(f=>{ const on=sel.includes(f.id), who = rv ? whoChose(q,x=>x.includes(f.id)) : '';
+        return `<button class="fcard ${on?'on':''}" data-a="grow" data-f="${f.id}"><span class="nk">${N[f.naipe].nome}</span><b>${f.nome}</b><small>${esc(f.desc)}</small>
+          <span class="ft"><span class="lvl">${dom[f.id]!=null?'Hoje: '+NIVEIS[dom[f.id]]:''}</span><span class="chips">${who}</span></span></button>`; }).join('')}</div>`;
+  }
+  const done = countAnswered(q);
+  const side = `<aside class="side">
+    <div class="panel"><h4>Quem está respondendo</h4><div class="who">${S.players.map((p,k)=>{ const ok=isAnswered(q,p.id);
+      return `<button class="${p.id===pid?'on':''}" data-a="active" data-pid="${p.id}">${av(p.id)}<span class="nm">${esc(p.name)}</span><span class="st ${ok?'ok':''}">${ok?'✓ respondeu':'pendente'}</span><kbd>${k+1}</kbd></button>`; }).join('')}</div></div>
+    <div class="panel"><button class="btn ${rv?'reveal on':'btn-primary reveal'}" data-a="reveal">${icon('eye',18)} ${rv?'Ocultar respostas':'Revelar respostas'}</button>
+      <div class="helper" style="justify-content:center">${done} de ${S.players.length} responderam${rv?'':' · cada uma vê só a própria escolha'}</div></div>
+    <div class="panel prov"><h4>Para conversar · depois de revelar</h4><p>${esc(q.provoca)}</p></div>
+    <div class="panel notes"><h4>Anotações · ${esc(pName(pid))}</h4><textarea data-a="note" placeholder="Falas marcantes, exemplos, sinais de energia…">${esc(((S.notes[q.id]||{})[pid])||'')}</textarea></div>
+  </aside>`;
+  return `<main class="stage"><section>
+    <div class="q-head"><div class="eyebrow">Compasso ${String(i+1).padStart(2,'0')} <i>· ${esc(q.ato)} · ~${q.min} min</i></div>
+      <h2>${esc(q.titulo)}</h2><p>${esc(q.enunciado)}</p>
+      <div class="helper">Respondendo agora: ${av(pid,'sm')} <b>${esc(pName(pid))}</b> · troque a pessoa no painel ao lado ou com as teclas 1–${S.players.length}</div></div>
+    ${body}</section>${side}</main>`;
+}
+
+/* ---------- Gráficos SVG ---------- */
+const ORDER = NAIPES.flatMap(n=>n.frentes);
+function radar(r, size=360){
+  const pad=96, W=size+pad*2, c=W/2, R=size/2, n=ORDER.length;
+  const pt = (k, v) => { const a = -Math.PI/2 + k*2*Math.PI/n; return [c+Math.cos(a)*R*v, c+Math.sin(a)*R*v]; };
+  const poly = vals => vals.map((v,k)=>pt(k,v).map(x=>x.toFixed(1)).join(',')).join(' ');
+  let g = '';
+  [.25,.5,.75,1].forEach(l=> g += `<polygon points="${poly(ORDER.map(()=>l))}" fill="none" stroke="rgba(255,255,255,${l===1?.25:.1})"/>`);
+  ORDER.forEach((f,k)=>{ const [x,y]=pt(k,1), [lx,ly]=pt(k,1.17); const cos=Math.cos(-Math.PI/2+k*2*Math.PI/n);
+    g += `<line x1="${c}" y1="${c}" x2="${x}" y2="${y}" stroke="rgba(255,255,255,.1)"/>`;
+    g += `<text x="${lx}" y="${ly}" fill="#C3C5C8" font-size="12" font-family="Inter,sans-serif" text-anchor="${Math.abs(cos)<.2?'middle':cos>0?'start':'end'}" dominant-baseline="middle">${F[f].rot}</text>`; });
+  const dvals = ORDER.map(f=>(r.dom[f]??0)/3), avals = ORDER.map(f=>r.aff[f]);
+  g += `<polygon points="${poly(dvals)}" fill="rgba(242,242,242,.08)" stroke="#F2F2F2" stroke-width="1.6" stroke-dasharray="5 4"/>`;
+  g += `<polygon points="${poly(avals)}" fill="rgba(211,206,34,.28)" stroke="#D3CE22" stroke-width="2.2"/>`;
+  avals.forEach((v,k)=>{ const [x,y]=pt(k,v); g += `<circle cx="${x}" cy="${y}" r="3.5" fill="#D3CE22"/>`; });
+  return `<svg viewBox="0 0 ${W} ${W}" width="${W}" role="img" aria-label="Radar de afinidade e domínio">${g}</svg>`;
+}
+function quadrant(r){
+  const W=480, H=360, L=56, T=16, Rr=24, B=46, pw=W-L-Rr, ph=H-T-B;
+  const x = d => L + ((d+.5)/4)*pw, y = a => T + 14 + (1-a)*(ph-28);
+  let g = `<rect x="${L}" y="${T}" width="${pw}" height="${ph}" fill="rgba(0,0,0,.12)" rx="8"/>`;
+  g += `<rect x="${x(1.5)}" y="${T}" width="${L+pw-x(1.5)}" height="${y(.55)-T}" fill="rgba(211,206,34,.14)"/>`;
+  g += `<line x1="${x(1.5)}" y1="${T}" x2="${x(1.5)}" y2="${T+ph}" stroke="rgba(255,255,255,.25)" stroke-dasharray="4 4"/>`;
+  g += `<line x1="${L}" y1="${y(.55)}" x2="${L+pw}" y2="${y(.55)}" stroke="rgba(255,255,255,.25)" stroke-dasharray="4 4"/>`;
+  const lab = (tx,ty,t,anc) => `<text x="${tx}" y="${ty}" fill="rgba(255,255,255,.4)" font-size="10.5" font-family="Outfit,sans-serif" letter-spacing="1.5" text-anchor="${anc}">${t}</text>`;
+  g += lab(L+8,y(.55)-8,'CRESCIMENTO','start') + lab(L+pw-8,y(.55)-8,'BRILHO','end') + lab(L+8,T+ph-8,'NEUTRA','start') + lab(L+pw-8,T+ph-8,'SUSTENTAÇÃO','end');
+  NIVEIS.forEach((l,k)=> g += `<text x="${x(k)}" y="${T+ph+18}" fill="#9A9DA2" font-size="10.5" font-family="Inter,sans-serif" text-anchor="middle">${l}</text>`);
+  g += `<text x="${L+pw/2}" y="${H-6}" fill="#C3C5C8" font-size="11" font-family="Inter,sans-serif" text-anchor="middle">Domínio →</text>`;
+  g += `<text x="16" y="${T+ph/2}" fill="#C3C5C8" font-size="11" font-family="Inter,sans-serif" text-anchor="middle" transform="rotate(-90 16 ${T+ph/2})">Afinidade →</text>`;
+  const pts = ORDER.map((f,k)=>({f,k,d:r.dom[f],a:r.aff[f]})).filter(p=>p.d!=null);
+  const groups = {};
+  pts.forEach(p=>{ p.side = p.k%2 ? 1 : -1; p.px = x(p.d) + p.side*10; p.py = y(p.a); (groups[p.d+'_'+p.side] ||= []).push(p); });
+  Object.values(groups).forEach(gr=>{ gr.sort((a,b)=>a.py-b.py); let last=-1e9;
+    gr.forEach(p=>{ p.ly = Math.max(p.py, last+13); last = p.ly; });
+    const over = last - (T+ph-4); if(over>0) gr.forEach(p=>p.ly-=over); });
+  pts.forEach(p=>{ const hot = r.quad[p.f]==='brilho'||r.quad[p.f]==='cresc', tx = p.px + p.side*12;
+    if(Math.abs(p.ly-p.py)>2) g += `<line x1="${p.px}" y1="${p.py}" x2="${tx-p.side*2}" y2="${p.ly}" stroke="rgba(255,255,255,.3)"/>`;
+    g += `<circle cx="${p.px}" cy="${p.py}" r="5.5" fill="${hot?'#D3CE22':'#F2F2F2'}" stroke="#404347" stroke-width="2"/>`;
+    g += `<text x="${tx}" y="${p.ly+4}" fill="#fff" font-size="11.5" font-family="Inter,sans-serif" text-anchor="${p.side>0?'start':'end'}">${F[p.f].rot}</text>`; });
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" role="img" aria-label="Matriz afinidade por domínio">${g}</svg>`;
+}
+
+/* ---------- Resultados ---------- */
+const dots = d => `<span class="dots">${[0,1,2].map(k=>`<i class="${d!=null&&d>k?'f':''}"></i>`).join('')}</span>`;
+function viewResults(){
+  const C = compute(), anyAns = S.players.some(p=>C.P[p.id].any);
+  const tabs = `<div class="tabs"><button class="${S.tab==='team'?'on':''}" data-a="tab" data-t="team">${icon('spark',16)} Partitura da equipe</button>
+    ${S.players.map(p=>`<button class="${S.tab===p.id?'on':''}" data-a="tab" data-t="${p.id}">${av(p.id,'sm')} ${esc(p.name)}</button>`).join('')}</div>`;
+  const hero = `<div class="res-hero"><div><div class="eyebrow">Resultado da afinação</div><h2>Cada instrumento no <b>seu lugar</b>.</h2></div>
+    <div class="res-actions"><button class="btn btn-ghost btn-sm" data-a="print">Imprimir / PDF</button><button class="btn btn-ghost btn-sm" data-a="csv">Exportar CSV</button><button class="btn btn-ghost btn-sm" data-a="json">Exportar JSON</button></div></div>`;
+  if(!anyAns) return `<section class="res">${hero}<div class="block empty">Ainda não há respostas. Volte aos compassos — ou carregue os dados de exemplo na capa para ver como fica.</div></section>`;
+  const tab = S.tab==='team' || !C.P[S.tab] ? viewTeam(C) : viewPerson(C, S.tab);
+  return `<section class="res">${hero}${tabs}${tab}</section>`;
+}
+function instBlock(nid, label, sub){
+  const n = N[nid]; return `<div class="inst"><span class="ic">${icon(nid,28)}</span><div><div class="k">${label}</div><div class="v">${n.nome}</div>${sub?`<div class="s">${sub}</div>`:''}</div></div>`;
+}
+function viewTeam(C){
+  const ids = S.players.map(p=>p.id);
+  const cards = S.players.map(p=>{ const r=C.P[p.id], top=r.ranking[0];
+    const alignTxt = r.self ? (r.self===top ? `Autorretrato <b>confirma</b> as respostas.` : `Se vê como <b>${N[r.self].nome}</b>; as respostas apontam <b>${N[top].nome}</b>.`) : 'Autorretrato ainda não respondido.';
+    return `<div class="pcard"><div class="hd">${av(p.id)}<b>${esc(p.name)}</b></div>
+      ${instBlock(top,'Instrumento revelado',N[top].pool)}
+      <div class="kv"><div><small>Top frentes</small><span>${r.top.slice(0,2).map(f=>F[f].rot).join(' · ')}</span></div>
+        <div><small>Nivelamento</small><span>${r.domAvg!=null?NIVEIS[Math.round(r.domAvg)]:'—'}</span><div class="gauge"><i style="width:${r.domAvg!=null?r.domAvg/3*100:0}%"></i></div></div></div>
+      <div class="align">${icon('mirror',14)} ${alignTxt}</div></div>`; }).join('');
+
+  const heatRows = NAIPES.map(n=>`<tr><td class="grp" colspan="${ids.length+1}">${n.nome} · ${n.pool}</td></tr>` + n.frentes.map(fid=>{
+    return `<tr><td class="fn">${F[fid].nome}</td>${ids.map(pid=>{ const r=C.P[pid], a=r.aff[fid], d=r.dom[fid];
+      const isT = C.tit[fid]===pid, isA = C.apo[fid]===pid;
+      const bg = `rgba(211,206,34,${(.08+a*.78).toFixed(2)})`, dark = a>.55;
+      return `<td><div class="cell" style="background:${bg};color:${dark?'#2C2E31':'#fff'}" title="${esc(pName(pid))} · ${F[fid].nome}: afinidade ${Math.round(a*100)}% · domínio ${d!=null?NIVEIS[d]:'—'}">
+        <span class="pct">${Math.round(a*100)}</span>${dots(d)}${isT?'<span class="bd">TITULAR</span>':isA?'<span class="bd a">APOIO</span>':''}</div></td>`; }).join('')}</tr>`; }).join('')).join('');
+
+  const opt = (sel, allowNone) => (allowNone?`<option value="">— sem apoio —</option>`:'') + S.players.map(p=>`<option value="${p.id}" ${sel===p.id?'selected':''}>${esc(p.name)}</option>`).join('');
+  const distRows = FRENTES.map(f=>{ const t=C.tit[f.id], a=C.apo[f.id], rt=C.P[t], ra=a?C.P[a]:null;
+    const flags = [];
+    if(rt) flags.push(`<span class="flag ${rt.quad[f.id]==='brilho'?'g':rt.quad[f.id]==='cresc'?'g':rt.quad[f.id]==='sust'?'n':'w'}">${QUAD[rt.quad[f.id]].nome}</span>`);
+    if(ra && ra.growth.includes(f.id)) flags.push(`<span class="flag g">apoio quer crescer aqui</span>`);
+    if(rt && rt.drains.includes(f.id)) flags.push(`<span class="flag w">drena energia da titular</span>`);
+    const maxD = Math.max(...ids.map(i=>C.P[i].dom[f.id]??-1));
+    if(maxD<2) flags.push(`<span class="flag w">gap de domínio</span>`);
+    const changed = C.sug.tit[f.id]!==t || (C.sug.apo[f.id]||null)!==(a||null);
+    return `<tr><td><b>${f.nome}</b><small>${N[f.naipe].nome}</small></td>
+      <td><select data-a="ov" data-f="${f.id}" data-k="tit">${opt(t)}</select></td>
+      <td><select data-a="ov" data-f="${f.id}" data-k="apo">${opt(a, true)}</select></td>
+      <td class="why">${flags.join('')}${changed?' <span class="flag n">ajuste manual</span>':''}</td></tr>`; }).join('');
+
+  const maxT = Math.max(...ids.map(i=>C.load[i].t + C.load[i].a), 1);
+  const loads = S.players.map(p=>{ const L=C.load[p.id];
+    return `<div class="load-row"><span class="nm">${av(p.id,'sm')} ${esc(p.name)}</span>
+      <span class="load-bar"><i class="t" style="width:${L.t/maxT*100}%"></i><i class="a" style="width:${L.a/maxT*100}%"></i></span>
+      <span class="muted" style="font-size:13px">${L.t}T · ${L.a}A</span></div>`; }).join('');
+
+  // Insights
+  const ins = [];
+  FRENTES.forEach(f=>{ const maxD = Math.max(...ids.map(i=>C.P[i].dom[f.id]??-1));
+    if(maxD<2) ins.push(['alert',`<b>${f.nome}</b>: ninguém marcou “Já faço” ou acima. Gap de nivelamento — trilha de capacitação ou apoio externo.`]); });
+  FRENTES.forEach(f=>{ const maxA = Math.max(...ids.map(i=>C.P[i].aff[f.id]));
+    if(maxA<.4) ins.push(['alert',`<b>${f.nome}</b>: afinidade baixa em todo o time. Considere rodízio trimestral ou automação para reduzir o esforço.`]); });
+  FRENTES.forEach(f=>{ ids.forEach(learner=>{ if(!C.P[learner].growth.includes(f.id)) return;
+      const mentors = ids.filter(m=>m!==learner && (C.P[m].dom[f.id]??0)>=2).sort((a,b)=>(C.P[b].dom[f.id]??0)-(C.P[a].dom[f.id]??0));
+      if(mentors.length && (C.P[learner].dom[f.id]??0) < (C.P[mentors[0]].dom[f.id]??0))
+        ins.push(['link',`<b>Par de mentoria em ${f.rot}</b>: ${esc(pName(mentors[0]))} (${NIVEIS[C.P[mentors[0]].dom[f.id]]}) → ${esc(pName(learner))}, que quer crescer nessa frente.`]); }); });
+  ids.forEach(i=>{ const r=C.P[i]; if(r.self && r.self!==r.ranking[0]) ins.push(['mirror',`<b>${esc(pName(i))}</b> se vê como ${N[r.self].nome}, mas as escolhas apontam ${N[r.ranking[0]].nome}. Ótima pergunta para a devolutiva.`]); });
+  const counts = {}; ids.forEach(i=>{ const t=C.P[i].ranking[0]; counts[t]=(counts[t]||0)+1; });
+  Object.entries(counts).forEach(([n,c])=>{ if(c>1) ins.push(['user',`${c} pessoas têm <b>${N[n].nome}</b> como instrumento principal — combine quem lidera e quem é segunda voz para evitar disputa ou sobreposição.`]); });
+  const missing = NAIPES.filter(n=>!ids.some(i=>C.P[i].ranking.slice(0,2).includes(n.id)));
+  missing.forEach(n=>ins.push(['alert',`Ninguém tem <b>${n.nome}</b> entre os dois naipes principais. Atenção à cobertura de ${n.frentes.map(f=>F[f].rot).join(' e ')}.`]));
+  ids.forEach(i=>{ if(C.load[i].t > C.cap) ins.push(['alert',`<b>${esc(pName(i))}</b> está com ${C.load[i].t} titularidades — acima do equilíbrio (${C.cap}).`]); });
+
+  const poolMap = NAIPES.map(n=>{ const owners = n.frentes.map(f=>C.tit[f]); const lead = owners[0]===owners[1] ? owners[0] : null;
+    return `<div><span class="r">${n.nome}</span><b>${n.pool}</b>
+      ${lead?`<span class="who2">${av(lead,'sm')} ${esc(pName(lead))} <span class="muted" style="font-size:12px">lidera o naipe</span></span>`
+        : n.frentes.map(f=>`<span class="who2">${av(C.tit[f],'sm')} ${esc(pName(C.tit[f]))} <span class="muted" style="font-size:12px">· ${F[f].rot}</span></span>`).join('')}</div>`; }).join('');
+
+  return `<div class="cards3">${cards}</div>
+    <div class="block"><div class="block-h"><div><h3>Mapa de calor · afinidade × domínio</h3><p>O número é a afinidade relativa (0–100) de cada pessoa por frente; os pontos mostram o domínio declarado (○○○ ouvi falar → ●●● posso ensinar). Selos indicam a distribuição atual.</p></div>
+      <div class="legend"><span><i style="background:rgba(211,206,34,.15)"></i>baixa</span><span><i style="background:rgba(211,206,34,.85)"></i>alta afinidade</span></div></div>
+      <div class="tbl-wrap"><table class="heat"><thead><tr><th></th>${S.players.map(p=>`<th class="p"><span>${av(p.id,'sm')} ${esc(p.name)}</span></th>`).join('')}</tr></thead><tbody>${heatRows}</tbody></table></div></div>
+    <div class="block"><div class="block-h"><div><h3>Proposta de distribuição · titular e apoio</h3><p>Sugestão automática: titular pelo melhor encaixe (60% afinidade + 40% domínio) com carga equilibrada; apoio prioriza quem quer crescer na frente. Ajuste à vontade — fica salvo.</p></div>
+      <button class="btn btn-ghost btn-sm" data-a="ovreset">Restaurar sugestão</button></div>
+      <div class="tbl-wrap"><table class="dist"><thead><tr><th>Frente</th><th>Titular</th><th>Apoio</th><th>Leitura</th></tr></thead><tbody>${distRows}</tbody></table></div></div>
+    <div class="two">
+      <div class="block"><div class="block-h"><div><h3>Carga por pessoa</h3><p>Titularidades (sólido) e apoios (hachurado).</p></div></div><div class="load">${loads}</div>
+        <div class="block-h" style="margin-top:22px"><div><h3>Ponte com o Pool de Governança</h3><p>Como a distribuição se traduz nos papéis do desenho A&amp;M.</p></div></div><div class="pool-map">${poolMap}</div></div>
+      <div class="block"><div class="block-h"><div><h3>Sinais para o gestor</h3><p>Gaps, pares de mentoria e pontos para a conversa.</p></div></div>
+        <ul class="ins">${ins.length?ins.slice(0,10).map(([ic,t])=>`<li><span class="ic">${icon(ic,16)}</span><span>${t}</span></li>`).join(''):'<li><span class="ic">'+icon('spark',16)+'</span><span>Nenhum alerta: boa cobertura e domínio distribuído.</span></li>'}</ul></div>
+    </div>`;
+}
+function viewPerson(C, pid){
+  const r = C.P[pid], top = r.ranking[0], sec = r.ranking[1];
+  const z = k => FRENTES.filter(f=>r.quad[f.id]===k).sort((a,b)=>r.aff[b.id]-r.aff[a.id]);
+  const zone = (k, hi) => `<div class="zone ${hi?'hi':''}"><h5>${QUAD[k].nome}</h5><p>${QUAD[k].acao}</p><ul>${z(k).map(f=>`<li>${f.nome}</li>`).join('')||'<li class="muted">—</li>'}</ul></div>`;
+  const mine = FRENTES.filter(f=>C.tit[f.id]===pid), sup = FRENTES.filter(f=>C.apo[f.id]===pid);
+  const br = z('brilho'), cr = z('cresc');
+  const read = [];
+  read.push(`<p>${esc(pName(pid))} toca como <b>${N[top].nome}</b>${sec?`, com segunda voz de <b>${N[sec].nome}</b>`:''}. ${N[top].essencia}</p>`);
+  if(br.length) read.push(`<p>Está pronta para ser titular em <b>${br.slice(0,3).map(f=>f.rot).join(', ')}</b> — gosta e domina.</p>`);
+  if(cr.length) read.push(`<p>Tem energia, mas ainda constrói domínio em <b>${cr.slice(0,3).map(f=>f.rot).join(', ')}</b>: boa aposta com mentoria.</p>`);
+  if(r.growth.length) read.push(`<p>Quer ser referência em <b>${r.growth.map(f=>F[f].rot).join(' e ')}</b> nos próximos 12 meses.</p>`);
+  if(r.drainSel.length) read.push(`<p>Atenção: <b>${r.drainSel.map(o=>o.txt.toLowerCase()).join('</b> e <b>')}</b> drena energia — evitar como titular onde isso domina.</p>`);
+  if(r.self) read.push(r.self===top ? `<p>O autorretrato (<b>${N[r.self].nome}</b>) confirma as escolhas: autoconhecimento alto.</p>`
+    : `<p>Se vê como <b>${N[r.self].nome}</b>, mas as escolhas apontam <b>${N[top].nome}</b>. Pergunta para a devolutiva: “o que te faz se ver assim?”</p>`);
+  const notes = QS.map(q=>{ const t=((S.notes[q.id]||{})[pid]||'').trim(); return t?`<div><small>${esc(q.titulo)}</small>${esc(t)}</div>`:''; }).join('');
+  return `<div class="pp">
+      <div class="block"><div class="block-h"><div>${instBlock(top,'Instrumento revelado','Papel no Pool A&amp;M: '+N[top].pool)}</div>
+          ${r.self?`<div>${instBlock(r.self,'Autorretrato','')}</div>`:''}</div>
+        <div class="reading">${read.join('')}</div>
+        <div class="block-h" style="margin-top:16px"><div><h3>Mix de naipes</h3><p>Distribuição da energia positiva nas respostas.</p></div></div>
+        <div class="bars5">${NAIPES.map(n=>`<div class="r"><span class="ic">${icon(n.id,18)}</span><span>${n.nome}</span><span class="bar"><i style="width:${(r.mix[n.id]*100).toFixed(0)}%"></i></span><span class="v">${(r.mix[n.id]*100).toFixed(0)}%</span></div>`).join('')}</div>
+      </div>
+      <div class="block"><div class="block-h"><div><h3>Radar · afinidade × domínio</h3><p>Área amarela = afinidade. Linha tracejada = domínio declarado.</p></div></div><div class="svgbox">${radar(r)}</div></div>
+    </div>
+    <div class="pp">
+      <div class="block"><div class="block-h"><div><h3>Matriz afinidade × domínio</h3><p>Onde cada frente cai para ${esc(pName(pid))}.</p></div></div><div class="svgbox">${quadrant(r)}</div></div>
+      <div class="block"><div class="block-h"><div><h3>Zonas de atuação</h3><p>Base para a conversa de devolutiva.</p></div></div>
+        <div class="zones">${zone('brilho',1)}${zone('cresc',1)}${zone('sust')}${zone('neutra')}</div>
+        <div class="block-h" style="margin-top:18px"><div><h3>Na distribuição atual</h3></div></div>
+        <div class="kv"><div><small>Titular</small><span>${mine.map(f=>f.rot).join(' · ')||'—'}</span></div><div><small>Apoio</small><span>${sup.map(f=>f.rot).join(' · ')||'—'}</span></div></div>
+      </div>
+    </div>
+    ${notes?`<div class="block"><div class="block-h"><div><h3>Anotações do facilitador</h3></div></div><div class="notes-out">${notes}</div></div>`:''}`;
+}
+
+/* ---------- Exportação ---------- */
+function download(name, text, type){ const b=new Blob([text],{type}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},300); }
+function exportCSV(){
+  const C = compute(); const rows=[['Participante','Naipe','Frente','Afinidade (0-100)','Domínio','Zona','Papel sugerido','Quer crescer','Drena energia','Instrumento revelado','Autorretrato']];
+  S.players.forEach(p=>{ const r=C.P[p.id]; FRENTES.forEach(f=>rows.push([p.name,N[f.naipe].nome,f.nome,Math.round(r.aff[f.id]*100),r.dom[f.id]!=null?NIVEIS[r.dom[f.id]]:'',QUAD[r.quad[f.id]].nome,
+    C.tit[f.id]===p.id?'Titular':C.apo[f.id]===p.id?'Apoio':'',r.growth.includes(f.id)?'Sim':'',r.drains.includes(f.id)?'Sim':'',N[r.ranking[0]].nome,r.self?N[r.self].nome:''])); });
+  download('afinacao-feg.csv', '﻿'+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(';')).join('\n'), 'text/csv;charset=utf-8');
+}
+function exportJSON(){ const C=compute(); download('afinacao-feg.json', JSON.stringify({gerado:new Date().toISOString(), estado:S, resultado:{distribuicao:{titular:C.tit,apoio:C.apo}, perfis:C.P}},null,2), 'application/json'); }
+
+/* ---------- Dados de exemplo ---------- */
+function demo(){
+  const profiles = [
+    {name:'Ana', pref:{spalla:1, compasso:.75, arranjadora:.45, guardia:.2, produtora:.1}, dom:{INST:3,REG:2,PORT:2,KPI:2,INOV:1,MAT:1,GOV:1,AUD:0,ORC:1,CONT:0}},
+    {name:'Bia', pref:{guardia:1, produtora:.8, compasso:.4, spalla:.15, arranjadora:.1}, dom:{GOV:3,AUD:3,ORC:2,CONT:2,PORT:1,KPI:2,INST:0,REG:1,INOV:0,MAT:1}},
+    {name:'Carla', pref:{arranjadora:1, compasso:.7, spalla:.35, produtora:.3, guardia:.15}, dom:{INOV:2,MAT:1,PORT:2,KPI:1,INST:1,REG:0,GOV:1,AUD:1,ORC:1,CONT:1}}
+  ];
+  S = fresh(); S.players = profiles.map((p,k)=>({id:'p'+(k+1), name:p.name}));
+  let seed = 7; const rnd = () => (seed = (seed*9301+49297)%233280)/233280;
+  profiles.forEach((pr,k)=>{ const pid='p'+(k+1);
+    const fp = Object.fromEntries(FRENTES.map(f=>[f.id, pr.pref[f.naipe] + (rnd()-.5)*.3]));
+    const score = w => Object.entries(w).reduce((s,[f,x])=>s+x*fp[f],0);
+    const ids = FRENTES.map(f=>f.id).sort((a,b)=>fp[b]-fp[a]);
+    setVal('q1',pid,{love:ids[0], skip:ids[9]});
+    [1,3,6,9].forEach(qi=>{ const q=QS[qi]; const best=q.opcoes.map((o,i)=>[i,score(o.w)+(rnd()-.5)*.2]).sort((a,b)=>b[1]-a[1])[0][0]; setVal(q.id,pid,best); });
+    setVal('q3',pid,QS[2].pares.map(pp=>score(pp[0].w)>=score(pp[1].w)?0:1));
+    setVal('q5',pid,QS[4].opcoes.map((o,i)=>[i,score(o.w)]).sort((a,b)=>b[1]-a[1]).slice(0,2).map(x=>x[0]));
+    const tot = Object.values(pr.pref).reduce((a,b)=>a+b*b,0); const tk={}; let left=10;
+    NAIPES.map(n=>n.id).sort((a,b)=>pr.pref[b]-pr.pref[a]).forEach((n,j,arr)=>{ const c = j===arr.length-1?left:Math.min(left,Math.round(10*pr.pref[n]**2/tot)); if(c>0) tk[n]=c; left-=c; });
+    setVal('q6',pid,tk);
+    setVal('q8',pid,{...pr.dom});
+    setVal('q9',pid,FRENTES.map(f=>f.id).sort((a,b)=>(fp[b]-pr.dom[b]*.25)-(fp[a]-pr.dom[a]*.25)).slice(0,2));
+  });
+  S.screen='results'; S.tab='team'; save(); render();
+}
+
+/* ---------- Eventos ---------- */
+document.addEventListener('click', e=>{
+  const el = e.target.closest('[data-a]'); if(!el) return; const a = el.dataset.a;
+  const qi = S.screen.startsWith('q') ? +S.screen.slice(1) : -1, q = QS[qi], pid = S.active;
+  switch(a){
+    case 'go': go(el.dataset.to); break;
+    case 'clock': toggleClock(); break;
+    case 'addp': { const n = S.players.length+1; let id='p'+n; while(S.players.some(p=>p.id===id)) id+='x'; S.players.push({id,name:''}); save(); render(); break; }
+    case 'rmp': S.players = S.players.filter(p=>p.id!==el.dataset.pid); save(); render(); break;
+    case 'start': {
+      S.players.forEach((p,k)=>{ if(!p.name.trim()) p.name = 'Participante '+(k+1); });
+      if(!S.players.some(p=>p.id===S.active)) S.active = S.players[0].id;
+      if(!S.clock.start && S.clock.acc===0) S.clock.start = Date.now();
+      const firstOpen = QS.findIndex(qq=>countAnswered(qq)<S.players.length);
+      go('q'+(firstOpen<0?0:firstOpen)); break; }
+    case 'demo': demo(); break;
+    case 'reset': if(confirm('Apagar todas as respostas e anotações desta sessão?')){ S = fresh(); save(); render(); } break;
+    case 'active': S.active = el.dataset.pid; save(); render(); break;
+    case 'reveal': S.revealed[q.id] = !S.revealed[q.id]; save(); render(); break;
+    case 'inbox': { const v = {...(val(q.id,pid)||{})}, k=el.dataset.k, o=k==='love'?'skip':'love', f=el.dataset.f;
+      v[k] = v[k]===f ? null : f; if(v[o]===f) v[o]=null; setVal(q.id,pid,v); render(); break; }
+    case 'single': { const k=+el.dataset.k; setVal(q.id,pid, val(q.id,pid)===k?null:k); render(); break; }
+    case 'multi': { const k=+el.dataset.k; let v=[...(val(q.id,pid)||[])];
+      v = v.includes(k) ? v.filter(x=>x!==k) : (v.length<q.max ? [...v,k] : [...v.slice(1),k]); setVal(q.id,pid,v); render(); break; }
+    case 'grow': { const f=el.dataset.f; let v=[...(val(q.id,pid)||[])];
+      v = v.includes(f) ? v.filter(x=>x!==f) : (v.length<q.max ? [...v,f] : [...v.slice(1),f]); setVal(q.id,pid,v); render(); break; }
+    case 'pair': { const v=[...(val(q.id,pid)||Array(q.pares.length).fill(null))]; const k=+el.dataset.k, s=+el.dataset.s; v[k] = v[k]===s?null:s; setVal(q.id,pid,v); render(); break; }
+    case 'tok': { const v={...(val(q.id,pid)||{})}, n=el.dataset.n, d=+el.dataset.d, used=Object.values(v).reduce((x,y)=>x+y,0);
+      if(d>0 && used>=q.total) break; v[n]=Math.max(0,(v[n]||0)+d); if(!v[n]) delete v[n]; setVal(q.id,pid,v); render(); break; }
+    case 'scale': { const v={...(val(q.id,pid)||{})}, f=el.dataset.f, k=+el.dataset.k; v[f] = v[f]===k?null:k; if(v[f]==null) delete v[f]; setVal(q.id,pid,v); render(); break; }
+    case 'tab': S.tab = el.dataset.t; save(); render(); break;
+    case 'ovreset': S.overrides = {}; save(); render(); break;
+    case 'print': window.print(); break;
+    case 'csv': exportCSV(); break;
+    case 'json': exportJSON(); break;
+  }
+});
+document.addEventListener('input', e=>{
+  const el = e.target;
+  if(el.dataset.a==='name'){ const p=S.players.find(x=>x.id===el.dataset.pid); if(p){ p.name=el.value; save();
+    const avEl = el.parentElement.querySelector('.av'); if(avEl) avEl.textContent = el.value.trim() ? initial(el.value) : (S.players.indexOf(p)+1); } }
+  if(el.dataset.a==='note'){ const q=QS[+S.screen.slice(1)]; (S.notes[q.id] ||= {})[S.active] = el.value; save(); }
+});
+document.addEventListener('change', e=>{
+  const el = e.target; if(el.dataset.a!=='ov') return;
+  const C = compute(), f = el.dataset.f, k = el.dataset.k, o = S.overrides[f] ||= {tit:C.tit[f], apo:C.apo[f]||null};
+  o[k] = el.value || null;
+  if(o.tit && o.tit===o.apo) o.apo = null;
+  save(); render();
+});
+document.addEventListener('keydown', e=>{
+  if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) return;
+  const s = S.screen;
+  if(s.startsWith('q')){ const i=+s.slice(1);
+    if(e.key==='ArrowRight') go(i===QS.length-1?'results':'q'+(i+1));
+    else if(e.key==='ArrowLeft') go(i===0?'guide':'q'+(i-1));
+    else if(/^[1-5]$/.test(e.key) && S.players[+e.key-1]){ S.active=S.players[+e.key-1].id; save(); render(); }
+    else if(e.key.toLowerCase()==='r'){ S.revealed[QS[i].id]=!S.revealed[QS[i].id]; save(); render(); }
+  }
+});
+if(!S.players.some(p=>p.id===S.active)) S.active = S.players[0].id;
+render();
+</script>
+</body>
+</html>
