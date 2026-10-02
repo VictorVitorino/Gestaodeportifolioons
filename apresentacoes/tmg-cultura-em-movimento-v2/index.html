@@ -390,6 +390,34 @@ html,body{background:radial-gradient(1400px 900px at 50% 40%,#EEF1F5 0%,#DCE2E9 
 #idxP .xi b{font:800 11px var(--fb);color:#98A6B3}
 #idxP .xi:hover{background:#F4F7FA}
 #idxP .xi.cur{background:#FEF1E2}#idxP .xi.cur b{color:#F78C16}
+.gmo{display:flex;align-items:center;gap:8px;border-radius:8px;padding:6px 10px}
+.gmo b{font:800 11px var(--fb);letter-spacing:.08em;padding:3px 8px;border-radius:99px;white-space:nowrap}
+.gmo span{font:700 11.5px/1.25 var(--fb)}
+.gmo.on{background:#FEF1E2;border:1.5px solid #F78C16}.gmo.on b{background:#F78C16;color:#0E1C39}.gmo.on span{color:#8A4A05}
+.gmo.off{background:#F4F5F7;border:1.5px dashed #B3BFCA}.gmo.off b{background:#fff;color:#6B7B8C;border:1px solid #B3BFCA}.gmo.off span{color:#6B7B8C}
+.gmo.big{padding:8px 12px;margin-left:18px}.gmo.big b{font-size:13px}
+.bmc{transition:transform .25s cubic-bezier(.2,.7,.2,1),box-shadow .25s}.bmc:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(14,28,57,.2)}
+#bmM{position:absolute;inset:0;z-index:96;display:none;align-items:center;justify-content:center;background:rgba(14,28,57,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#bmM.on{display:flex;animation:aF .3s both}
+#bmM .bx{width:1460px;height:800px;background:#fff;border-radius:16px;box-shadow:0 40px 100px rgba(0,0,0,.5);padding:20px 26px 14px;display:flex;flex-direction:column;animation:aZ .35s cubic-bezier(.2,.7,.2,1) both}
+#bmM .hd{display:flex;align-items:center;gap:18px;padding-bottom:12px;border-bottom:1px solid var(--line2)}
+#bmM .lg{width:150px;height:64px;display:flex;align-items:center;justify-content:center}#bmM .lg svg,#bmM .lg img{max-width:150px;max-height:64px}
+#bmM .nb{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:#fff;color:#002B49;font:800 17px var(--fb);cursor:pointer}
+#bmM .gr{display:grid;grid-template-columns:400px 1fr 440px;gap:18px;margin-top:14px;flex:1;min-height:0}
+#bmM .ey{font:800 11.5px var(--fb);letter-spacing:.14em;text-transform:uppercase;color:#002B49;margin-bottom:6px}
+#bmM .bk{border-radius:10px;padding:12px 14px}
+#bmM ul{margin:0;padding-left:18px;display:grid;gap:5px}#bmM li{font:600 13px/1.4 var(--fb);color:#002B49}
+#bmM .tl{position:relative;display:grid;gap:12px;padding-left:22px}
+#bmM .tl::before{content:"";position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:#DFE8F0}
+#bmM .ti{position:relative;display:grid;gap:1px}
+#bmM .ti::before{content:"";position:absolute;left:-21px;top:4px;width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid #5E8AB4}
+#bmM .ti:last-child::before{border-color:#F78C16}
+#bmM .ti b{font:800 11px var(--fb);color:#5E8AB4;letter-spacing:.04em}
+#bmM .ti span{font:600 13.5px/1.38 var(--fb);color:#002B49}
+#bmM .src{font:500 11.5px/1.4 var(--fb);color:#6B7B8C;border-top:1px solid var(--line2);padding-top:8px;margin-top:10px}
+#bmM [data-a]{opacity:1!important;animation:none!important;transform:none!important}
+#bmM .bx{height:auto;max-height:820px}#bmM .gr{flex:none}
+#bmRead{margin-top:12px;display:grid;grid-template-columns:200px 1fr 1fr;gap:12px;align-items:stretch}
 </style>
 </head>
 <body>
@@ -691,9 +719,9 @@ html,body{background:radial-gradient(1400px 900px at 50% 40%,#EEF1F5 0%,#DCE2E9 
 </section>
 
 <!--@BENCH-->
-<section class="slide" data-p="3 · Benchmarks" data-t="Benchmarks" data-band="Benchmarks · quem já enfrentou o mesmo desafio" data-c="c-steel" data-bs="2 casos do agronegócio · 2 de outras indústrias" data-src="Fontes: Bayer (bayer.com, 2026; CNBC 23/10/2025) · Cargill (Reuters 17/11/2015 e 08/08/2024) · Ford (The Oakland Press 28/01/2010; Acertitude) · Unilever (press release 25/01/2022). Resultados não atribuíveis só à reorganização. Logotipos: marcas de seus titulares.">
+<section class="slide" data-p="3 · Benchmarks" data-t="Benchmarks" data-band="Benchmarks · quem já enfrentou o mesmo desafio" data-c="c-steel" data-bs="2 com GMO · 2 sem GMO divulgada · clique para ampliar" data-src="Fontes: Bayer (bayer.com, 2026; CNBC 23/10/2025) · Cargill (Reuters 17/11/2015 e 08/08/2024) · Ford (The Oakland Press 28/01/2010; Acertitude) · Unilever (press release 25/01/2022; 19/03/2024). Selo GMO = evidência pública de programa de gestão da mudança; “sem GMO” = não encontramos essa evidência. Resultados não atribuíveis só à reorganização. Logotipos: marcas de seus titulares.">
   <div class="body">
-    <div style="display:flex;align-items:center;gap:12px"><div class="stmt kin" style="font-size:24px">Quatro empresas que mexeram em <em>quem decide</em> e o que os números mostram.</div><span class="small" style="margin-left:auto"><b style="color:#33556D">▲▼ verde</b> = melhora · <b style="color:#BC0404">▲▼ vermelho</b> = piora</span></div>
+    <div style="display:flex;align-items:center;gap:12px"><div class="stmt kin" style="font-size:24px">Quatro empresas que mexeram em <em>quem decide</em>: duas com gestão da mudança estruturada, duas só com estrutura.</div><span class="small" style="margin-left:auto;display:flex;gap:8px;align-items:center;white-space:nowrap"><span class="gmo on" style="padding:3px 6px"><b>✓ GMO</b></span>com gestão da mudança · <span class="gmo off" style="padding:3px 6px"><b>SEM GMO</b></span>não divulgada · clique no card para ampliar</span></div>
     <div id="bmCards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:10px"></div>
   </div>
 </section>
@@ -1249,18 +1277,80 @@ bm.style.transform=`rotate(${v?0:-13}deg)`;scL.textContent=v?"EQUILÍBRIO COM RE
 $("mtSeg").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{$("mtSeg").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));mode(+b.dataset.v)}));mode(1)})();
 
 /* ---------- BENCHMARKS ---------- */
-(function(){const B=[{k:"bayer",n:"Bayer",tag:"Agronegócio",tc:"#33556D",per:"2024–2026",prob:"Hierarquia de muitas camadas, silos e ciclos longos de planejamento, segundo a própria empresa.",mov:"Dynamic Shared Ownership: times multifuncionais em ciclos de 90 dias, decidindo perto do trabalho.",res:["▼","€2 bi","de economia organizacional planejada (2023–26)","#33556D"],les:"Juntar pesquisa e negócio no mesmo fluxo, com dono e ciclos curtos, as “duas TMG” numa só entrega.",note:"dados declarados pela empresa",tmg:"Na TMG: silos e agenda local em 6 (+1) de 7 entrevistas · índice 20%."},
-{k:"cargill",n:"Cargill",tag:"Agronegócio",tc:"#33556D",per:"2015 · 2024",prob:"Menos de 1/3 dos negócios bateu a meta de lucro no ano fiscal de 2024.",mov:"2015: dois níveis executivos viram um time único. 2024: 5 negócios consolidados em 3.",res:["▼","5 → 3","negócios, para decidir mais rápido","#34628C"],les:"Simplificar quem decide, e revisitar o desenho periodicamente, não “implantar uma vez”.",note:"resultados pós-2024 não divulgados",tmg:"Na TMG: escalonamento constante em 5 (+1) de 7 · governança 35%."},
-{k:"ford",n:"Ford",tag:"Outra indústria",tc:"#34628C",per:"2006–2009",prob:"Empresa “dividida por disputas internas”; status verde nos relatórios enquanto perdia bilhões.",mov:"One Ford + Business Plan Review semanal: todos os executivos, dados comuns e o “vermelho” sem punição.",res:["▲","+US$ 2,7 bi","em 2009, primeiro lucro em 4 anos","#33556D"],les:"Trocar o corredor pela sala: um fórum com dados comuns e segurança para mostrar o problema.",note:"crédito obtido em 2006 também foi decisivo",tmg:"Na TMG: liderança desalinhada em 7 de 7, concorda na sala, diverge no corredor."},
-{k:"unilever",n:"Unilever",tag:"Outra indústria",tc:"#34628C",per:"2022",prob:"Estrutura matricial difusa, com accountability pouco clara pelo resultado.",mov:"Saída da matriz para 5 Business Groups, cada um “totalmente responsável e accountable” pelo resultado.",res:["▼","~1.500","cargos de gestão (−15% alta gestão · −5% demais)","#34628C"],les:"Dono claro do resultado, na TMG, via dono do fluxo, sem mexer na hierarquia.",note:"efeitos posteriores têm múltiplas causas",tmg:"Na TMG: papéis sobrepostos em 7 de 7 · accountability difusa em 6 (+1) de 7."}];
-const box=$("bmCards");B.forEach((b,i)=>{const c=H("div",{class:"card shine","data-a":"up",style:`--d:${2+i*1.5};border-radius:14px;padding:10px 14px;display:flex;flex-direction:column;gap:7px;height:618px`},box);
-const lg=H("div",{class:"logo-box",style:"border:1px solid var(--line2);height:62px;padding:6px"},c);H("div",{style:`height:${b.k==="cargill"?44:50}px;width:${b.k==="ford"?150:b.k==="cargill"?150:80}px;display:flex;align-items:center;justify-content:center`,html:LOGOS[b.k]},lg);
-const t=H("div",{style:"display:flex;align-items:center;gap:6px"},c);H("span",{class:"tagk",style:`background:${b.tc};color:#fff`},t,b.tag);H("span",{class:"small",style:"font-weight:700"},t,b.per);
-const pr=H("div",{style:"background:#FDF1EF;border-left:5px solid #BC0404;border-radius:8px;padding:9px 12px"},c);H("div",{style:"font:800 11px var(--fb);letter-spacing:.12em;color:#BC0404"},pr,"① O PROBLEMA");H("div",{style:"font:700 14px/1.35 var(--fb);color:#002B49;margin-top:2px"},pr,b.prob);
-const sv=S("svg",{viewBox:"0 0 330 150",width:290,height:118,style:"align-self:center"},c);chartB(b.k,sv);
-const mv=H("div",null,c);H("div",{style:"font:800 11px var(--fb);letter-spacing:.12em;color:#5E8AB4"},mv,"② O QUE FIZERAM");H("div",{style:"font:600 11.5px/1.35 var(--fb);color:#002B49"},mv,b.mov);
-H("div",{style:"font:800 11px var(--fb);letter-spacing:.12em;color:#5E8AB4;border-top:1px solid var(--line2);padding-top:6px"},c,"③ O QUE ACONTECEU");const rs=H("div",{style:"display:flex;align-items:center;gap:10px"},c);H("div",{class:b.res[0]==="▲"?"bob":"bobd",style:`font:800 25px var(--fh);color:${b.res[3]}`},rs,b.res[0]);const rr=H("div",null,rs);H("div",{style:`font:800 23px/1 var(--fh);color:${b.res[3]}`},rr,b.res[1]);H("div",{class:"small",style:"font-weight:600"},rr,b.res[2]);
-const ls=H("div",{style:"margin-top:auto;background:#FEF1E2;border-left:5px solid #F78C16;border-radius:8px;padding:9px 12px"},c);H("div",{style:"font:800 11px var(--fb);letter-spacing:.12em;color:#B35F00"},ls,"④ LIÇÃO PARA A TMG");H("div",{style:"font:800 14px/1.35 var(--fb);color:#002B49;margin-top:2px"},ls,b.les);H("div",{style:"font:600 11px/1.35 var(--fb);color:#8A4A05;margin-top:5px;padding-top:5px;border-top:1px dashed rgba(179,95,0,.35)"},ls,b.tmg);H("div",{class:"small",style:"font-size:10.5px"},c,"Ressalva: "+b.note)})})();
+const BM=[
+{k:"bayer",n:"Bayer",tag:"Agronegócio",per:"2024–2026",gmo:true,
+ prob:"Hierarquia de até 13 camadas, silos e ciclos longos de planejamento, segundo a própria empresa.",
+ res:["▼","€2 bi","de economia organizacional planejada até o fim de 2026"],
+ les:"Juntar pesquisa e negócio no mesmo fluxo, com dono e ciclos curtos: as “duas TMG” numa só entrega.",
+ tmg:"Na TMG: silos e agenda local em 6 de 7 entrevistas · índice 20%.",
+ tl:[["jun/2023","Bill Anderson assume como CEO"],["jan/2024","Lançamento do Dynamic Shared Ownership (DSO)"],["1º tri/2024","~1.500 desligamentos, cerca de 2/3 em cargos de gestão"],["1º tri/2025","Mais ~2.000 desligamentos e menos camadas de gestão"],["meados/2025","100+ times “front-runner”; modelo em metade do negócio global"],["fim/2026","Meta de €2 bi de economia organizacional"]],
+ mov:["Times autônomos em ciclos de 90 dias, decidindo perto do cliente","Camadas de gestão reduzidas de até 13 para cerca de 6–7"],
+ gm:["250+ praticantes de DSO dedicados em tempo integral","1.000+ “champions” dentro dos times","Implantação por ondas, começando por times “front-runner”"],
+ aft:["Mais de 12.000 posições reduzidas em cerca de dois anos","Adesão dividida, segundo a própria Bayer: ~1/3 engajado, ~1/3 hesitante, ~1/3 aguardando","Resultado financeiro ainda misto: ação na mínima de 20 anos em nov/2024"],
+ src:"bayer.com (Dynamic Shared Ownership) · Corporate Rebels, out/2025 · Fierce Pharma · BioSpace · Forbes, 07/01/2025 · CNBC, 23/10/2025"},
+{k:"cargill",n:"Cargill",tag:"Agronegócio",per:"2015 · 2024",gmo:false,
+ prob:"Menos de 1/3 dos negócios bateu a meta de lucro no ano fiscal de 2024.",
+ res:["▼","5 → 3","negócios, para decidir mais rápido"],
+ les:"Simplificar quem decide e revisitar o desenho periodicamente, não “implantar uma vez”.",
+ tmg:"Na TMG: escalonamento constante em 5 de 7 entrevistas · governança 35%.",
+ tl:[["nov/2015","Dois níveis executivos (~30 pessoas) viram um único time de 10"],["2015","~100 unidades de negócio reagrupadas em 5 grandes negócios"],["FY2024","Menos de 1/3 dos negócios na meta; receita de US$ 160 bi (−~10%)"],["set/2024","5 negócios consolidados em 3: Food, Ag & Trading e Specialized Portfolio"],["dez/2024","Corte de ~5% da força de trabalho (~8.000 pessoas), sobretudo cargos corporativos"],["FY2025","Receita de US$ 154 bi, a menor desde 2021"]],
+ mov:["Menos camadas e gestores com responsabilidade ampliada","Menos duplicidade entre negócios"],
+ gm:["Mudança comunicada por memorando do CEO","Não encontramos programa público de gestão da mudança (rede de agentes, rituais, medição de adoção)"],
+ aft:["Segunda grande reestruturação de estrutura em menos de 10 anos","Até US$ 1 bi em encargos previstos com a reestruturação, segundo a imprensa"],
+ src:"Food Dive, nov/2015 · Reuters, 17/11/2015 e 08/08/2024 · Star Tribune, dez/2024 · Supply Chain Dive · TT News (FY2025)"},
+{k:"ford",n:"Ford",tag:"Outra indústria",per:"2006–2009",gmo:true,
+ prob:"Empresa “dividida por disputas internas”: status verde nos relatórios enquanto perdia bilhões.",
+ res:["▲","+US$ 2,7 bi","em 2009, primeiro lucro anual em 4 anos"],
+ les:"Trocar o corredor pela sala: um fórum com dados comuns e segurança para mostrar o problema.",
+ tmg:"Na TMG: liderança desalinhada em 7 de 7, concorda na sala e diverge no corredor.",
+ tl:[["set/2006","Alan Mulally assume como CEO"],["2006","Prejuízo de US$ 12,7 bi, recorde até então"],["2006","Plano One Ford e Business Plan Review semanal"],["2008","Prejuízo de US$ 14,6 bi na crise"],["2009","Lucro de US$ 2,7 bi, sem resgate do governo"],["2014","Mulally deixa o cargo; Mark Fields assume"]],
+ mov:["One Ford: um plano, um time, uma meta","Reestruturação de marcas e financiamento do plano (crédito obtido em 2006)"],
+ gm:["Comportamentos esperados explícitos para a liderança (“Working Together”)","Reunião semanal com todos os líderes globais e dados comuns","Status verde, amarelo e vermelho: o primeiro “vermelho” mostrado foi aplaudido pelo CEO"],
+ aft:["De US$ 14,6 bi de prejuízo (2008) a US$ 2,7 bi de lucro (2009)","A única das três montadoras de Detroit que não recorreu a resgate do governo em 2009"],
+ src:"NBC News / Fox News (resultados 2006 e 2008) · The Oakland Press, 28/01/2010 · Acertitude · B. Hoffman, American Icon (2012)"},
+{k:"unilever",n:"Unilever",tag:"Outra indústria",per:"2022 · 2024",gmo:false,
+ prob:"Estrutura matricial difusa, com accountability pouco clara pelo resultado.",
+ res:["▼","~1.500","cargos de gestão (−15% alta gestão · −5% demais)"],
+ les:"Dono claro do resultado: na TMG, via dono do fluxo, sem mexer na hierarquia.",
+ tmg:"Na TMG: papéis sobrepostos em 7 de 7 · accountability difusa em 6 de 7.",
+ tl:[["25/jan/2022","Anúncio da Compass Organisation: saída da matriz para 5 Business Groups"],["jul/2022","Novo modelo em vigor; ~1.500 cargos de gestão reduzidos"],["set/2022","CEO Alan Jope anuncia aposentadoria para 2023"],["jul/2023","Hein Schumacher assume como CEO"],["mar/2024","Novo plano: separação da divisão de sorvetes e ~7.500 cortes"],["fim/2025","Separação de sorvetes prevista para conclusão"]],
+ mov:["5 Business Groups, cada um “totalmente responsável e accountable” pelo resultado","Centro corporativo enxuto e operações compartilhadas"],
+ gm:["Mudança comunicada como redesenho de estrutura e accountability","Não encontramos programa público de gestão da mudança associado à Compass"],
+ aft:["Dois anos depois, novo redesenho: ~7.500 cortes e separação de sorvetes","Troca de CEO no meio do caminho"],
+ src:"Unilever, press release 25/01/2022 · SEC 6-K (2022) · Food Dive (2023) · Grocery Gazette e UPI, 19/03/2024"}];
+(function(){const box=$("bmCards");if(!box)return;const stage=$("stage");
+BM.forEach((b,i)=>{const c=H("div",{class:"card shine bmc","data-a":"up",style:`--d:${2+i*1.2};border-radius:14px;padding:12px 16px;display:flex;flex-direction:column;gap:9px;height:470px;cursor:pointer;position:relative`},box);
+const lg=H("div",{class:"logo-box",style:"border:1px solid var(--line2);height:70px;padding:6px"},c);H("div",{style:`height:${b.k==="cargill"?46:54}px;width:${b.k==="ford"||b.k==="cargill"?150:80}px;display:flex;align-items:center;justify-content:center`,html:LOGOS[b.k]},lg);
+const sl=H("div",{class:"gmo "+(b.gmo?"on":"off")},c);sl.innerHTML=b.gmo?"<b>✓ GMO</b><span>gestão da mudança estruturada</span>":"<b>SEM GMO</b><span>não divulgada · só mudança de estrutura</span>";
+const t=H("div",{style:"display:flex;align-items:center;gap:6px"},c);H("span",{class:"tagk",style:`background:${b.tag==="Agronegócio"?"#33556D":"#5E8AB4"};color:#fff`},t,b.tag);H("span",{class:"small",style:"font-weight:700"},t,b.per);
+const pr=H("div",{style:"background:#FDF1EF;border-left:5px solid #BC0404;border-radius:8px;padding:9px 12px"},c);H("div",{style:"font:800 10.5px var(--fb);letter-spacing:.12em;color:#BC0404"},pr,"O PROBLEMA");H("div",{style:"font:700 14px/1.35 var(--fb);color:#002B49;margin-top:2px"},pr,b.prob);
+const rs=H("div",{style:"display:flex;align-items:center;gap:10px;padding:4px 0"},c);H("div",{style:"font:800 24px var(--fh);color:#33556D"},rs,b.res[0]);const rr=H("div",null,rs);H("div",{style:"font:800 26px/1 var(--fh);color:#002B49"},rr,b.res[1]);H("div",{class:"small",style:"font-weight:600;margin-top:2px"},rr,b.res[2]);
+const ls=H("div",{style:"background:#FEF1E2;border-left:5px solid #F78C16;border-radius:8px;padding:9px 12px"},c);H("div",{style:"font:800 10.5px var(--fb);letter-spacing:.12em;color:#B35F00"},ls,"LIÇÃO PARA A TMG");H("div",{style:"font:800 14px/1.35 var(--fb);color:#002B49;margin-top:2px"},ls,b.les);
+H("div",{style:"margin-top:auto;font:800 13px var(--fb);color:#B35F00"},c,"Ver caso completo ⤢");c.addEventListener("click",()=>openBM(i))});
+const rd=H("div",{id:"bmRead","data-a":"up",style:"--d:8"},box.parentNode);H("div",{class:"card nv",style:"border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;justify-content:center",html:'<div class="eye" style="color:#F78C16;margin:0">Leitura A&amp;M</div><div style="font:800 16px/1.2 var(--fh);color:#fff;margin-top:3px">O que o selo GMO separa</div>'},rd);
+[["on","✓ Com GMO · Bayer e Ford","A mudança de estrutura veio junto com rede de agentes, rituais semanais e comportamentos esperados. A gestão da mudança fez parte do desenho, não do pós."],["off","Sem GMO divulgada · Cargill e Unilever","A estrutura foi redesenhada de novo em poucos anos: Cargill em 2015 e 2024; Unilever em 2022 e 2024. Mudar a caixa não bastou para mudar como se decide."]].forEach(([k,t,d])=>{const c=H("div",{class:"gmo "+k,style:"flex-direction:column;align-items:flex-start;gap:4px;padding:10px 14px;border-radius:12px"},rd);H("b",null,c,t);H("span",{style:"font:600 13px/1.4 var(--fb)"},c,d)});
+/* tela ampliada */
+const M=H("div",{id:"bmM"},stage);let bi=0;
+function openBM(i){bi=(i+BM.length)%BM.length;const b=BM[bi];M.innerHTML="";M.classList.add("on");
+const bx=H("div",{class:"bx"},M);const hd=H("div",{class:"hd"},bx);H("div",{class:"lg",html:LOGOS[b.k]},hd);const ht=H("div",null,hd);H("div",{style:"font:800 30px/1 var(--fh);color:#002B49"},ht,b.n);H("div",{class:"small",style:"font-weight:700;margin-top:4px"},ht,`${b.tag} · ${b.per}`);
+const sl=H("div",{class:"gmo big "+(b.gmo?"on":"off")},hd);sl.innerHTML=b.gmo?"<b>✓ GMO</b><span>gestão da mudança estruturada</span>":"<b>SEM GMO</b><span>não encontramos programa público</span>";
+const nv=H("div",{style:"margin-left:auto;display:flex;gap:6px;align-items:center"},hd);[["‹",-1],["›",1]].forEach(([t,d])=>{const x=H("button",{class:"nb"},nv,t);x.addEventListener("click",()=>openBM(bi+d))});const cl=H("button",{class:"nb",style:"font-size:20px"},nv,"×");cl.addEventListener("click",closeBM);
+const g=H("div",{class:"gr"},bx);
+const c1=H("div",null,g);H("div",{class:"ey"},c1,"Linha do tempo");const tl=H("div",{class:"tl"},c1);b.tl.forEach(([d,t])=>{const r=H("div",{class:"ti"},tl);H("b",null,r,d);H("span",null,r,t)});
+const c2=H("div",{style:"display:grid;gap:10px;align-content:start"},g);
+const p=H("div",{class:"bk",style:"background:#FDF1EF;border-left:5px solid #BC0404"},c2);H("div",{class:"ey",style:"color:#BC0404"},p,"① O problema");H("div",{style:"font:700 15px/1.4 var(--fb);color:#002B49"},p,b.prob);
+const m=H("div",{class:"bk",style:"background:#F4F7FA;border-left:5px solid #5E8AB4"},c2);H("div",{class:"ey",style:"color:#5E8AB4"},m,"② O que fizeram");const mu=H("ul",null,m);b.mov.forEach(x=>H("li",null,mu,x));
+const gm=H("div",{class:"bk",style:b.gmo?"background:#FEF1E2;border-left:5px solid #F78C16":"background:#F4F5F7;border-left:5px solid #98A6B3"},c2);H("div",{class:"ey",style:`color:${b.gmo?"#B35F00":"#6B7B8C"}`},gm,b.gmo?"✓ Como conduziram a mudança (GMO)":"Gestão da mudança");const gu=H("ul",null,gm);b.gm.forEach(x=>H("li",null,gu,x));
+const c3=H("div",{style:"display:grid;gap:10px;align-content:start"},g);
+const ch=H("div",{class:"bk",style:"background:#fff;border:1px solid var(--line2)"},c3);H("div",{class:"ey",style:"color:#5E8AB4"},ch,"③ O que aconteceu");const sv=S("svg",{viewBox:"0 0 330 150",width:400,height:170},ch);chartB(b.k,sv);
+const af=H("ul",{style:"margin-top:4px"},ch);b.aft.forEach(x=>H("li",null,af,x));
+const ls=H("div",{class:"bk",style:"background:#FEF1E2;border-left:5px solid #F78C16"},c3);H("div",{class:"ey",style:"color:#B35F00"},ls,"④ Lição para a TMG");H("div",{style:"font:800 16px/1.35 var(--fb);color:#002B49"},ls,b.les);H("div",{style:"font:600 12.5px/1.35 var(--fb);color:#8A4A05;margin-top:6px"},ls,b.tmg);
+H("div",{class:"src"},bx,"Fontes: "+b.src+". Resultados não atribuíveis só à reorganização. “Sem GMO” = não encontramos evidência pública de programa estruturado, o que não prova que não houve.")}
+function closeBM(){M.classList.remove("on")}
+addEventListener("keydown",e=>{if(!M.classList.contains("on"))return;e.stopImmediatePropagation();e.preventDefault();if(e.key==="Escape")closeBM();if(e.key==="ArrowRight")openBM(bi+1);if(e.key==="ArrowLeft")openBM(bi-1)},true);
+M.addEventListener("click",e=>{if(e.target===M)closeBM()});
+window.__closeBM=closeBM})();
+
 function chartB(k,s){const lab=(x,y,t,a)=>T(s,x,y,t,Object.assign({fill:"#35516A",style:"font:700 11px var(--fb)"},a||{}));
 const arrow=(x,y,up,c)=>{const g=S("g",{class:up?"bob":"bobd"},s);path(up?`M${x} ${y} l7 -10 l7 10 h-4 v8 h-6 v-8z`:`M${x} ${y} l7 10 l7 -10 h-4 v-8 h-6 v8z`,{fill:c},g)};
 if(k==="bayer"){[["Níveis hierárquicos",100,50,"−50%"],["Cargos de gestão",100,33,"−2/3"],["Ciclo de pesquisa (anos)",7,4.5,"7 → ~4,5"]].forEach(([l,a,b,t],i)=>{const y=26+i*46,sc=v=>i===2?30+200*v/7:30+200*v/100;lab(30,y-8,l);S("line",{x1:sc(0),y1:y+6,x2:sc(i===2?7:100),y2:y+6,stroke:"#E8EDF2","stroke-width":6,"stroke-linecap":"round"},s);S("line",{x1:sc(b),y1:y+6,x2:sc(a),y2:y+6,stroke:"#BFD0E1","stroke-width":6,"stroke-linecap":"round"},s);S("circle",{cx:sc(a),cy:y+6,r:6,fill:"#98A6B3"},s);S("circle",{cx:sc(b),cy:y+6,r:7,fill:"#33556D"},s);arrow(244,y-2,false,"#33556D");lab(264,y+10,t,{fill:"#33556D","text-anchor":"start",style:"font:800 11px var(--fb)"})})}
@@ -1691,6 +1781,7 @@ let last=null,items=[];slides.forEach((s,i)=>{const p=s.dataset.p||"Contexto";if
 let open=false;const set=v=>{open=v;ix.classList.toggle("on",v);c.classList.toggle("on",v);if(v){items.forEach((b,k)=>b.classList.toggle("cur",k===cur));const a=items[cur];if(a)a.scrollIntoView({block:"center"})}};
 c.addEventListener("click",e=>{e.stopPropagation();set(!open)});c.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();set(!open)}});xb.addEventListener("click",()=>set(false));
 ix.addEventListener("click",e=>e.stopPropagation());addEventListener("click",()=>{if(open)set(false)});addEventListener("keydown",e=>{if(e.key==="g"||e.key==="G")set(!open);if(e.key==="Escape")set(false)})})();
+if(window.__closeBM){const _a9=activate;activate=function(i,inst,back){window.__closeBM();_a9(i,inst,back)}}
 
 </script>
 </body>
