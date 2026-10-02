@@ -360,6 +360,23 @@ html,body{background:radial-gradient(1400px 900px at 50% 40%,#EEF1F5 0%,#DCE2E9 
 #infoP .id{font:500 14px/1.5 var(--fb);color:#35516A;margin-top:6px}
 #tmgLogo{height:44px;width:auto;display:block}
 .tmgslot{display:inline-flex;align-items:center;padding-left:14px;margin-left:4px;border-left:1px solid rgba(255,255,255,.25)}
+#lensList .ln-n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#002B49;color:#fff;font:800 11px var(--fb);margin-right:8px;vertical-align:middle}
+#lensList button.sel .ln-n{background:#F78C16}
+#lensList .g6{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(135deg,rgba(0,43,73,.28) 0 3px,transparent 3px 6px);transition:background .45s,box-shadow .45s}
+#lensList.m6 .g6{background:#002B49;box-shadow:inset 0 0 0 1.5px #F78C16}
+#lensList [data-a=grow]{transition:opacity .45s}
+#lensList.m6 [data-a=grow]{opacity:.3}
+#lensList small{display:block;font:800 10.5px var(--fb);color:#B35F00;margin-top:-2px}
+#lensLeg .lg-cur,#lensLeg .lg-g6{display:inline-block;width:18px;height:10px;border-radius:2px;margin:0 8px 0 4px;vertical-align:middle;background:linear-gradient(90deg,#BC0404 50%,#F78C16 50%)}
+#lensLeg .lg-g6{background:#002B49;box-shadow:inset 0 0 0 1.5px #F78C16}
+#lensLeg .lg-dot{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid #002B49;background:#fff;margin:0 11px 0 6px;vertical-align:middle}
+#stairs g[data-tv]{cursor:help}#stairs g[data-tv] circle{transition:r .2s,fill .2s}#stairs g[data-tv]:hover circle{r:9;fill:#FEF1E2}
+#lensList.m6 [data-a=grow]{opacity:1;filter:grayscale(1) opacity(.35)}
+#lensList.m6 .g6{background:#002B49;box-shadow:inset 0 0 0 2px #F78C16,0 0 8px rgba(247,140,22,.55);z-index:2}
+#lensList button>div:first-child{font-size:14.5px!important;line-height:1.25}
+#stairs .fl6{transition:opacity .4s}#stairs.m6 .fl6{opacity:0}
+#lensList.m6 [data-a=grow]{filter:none;background:#BFD0E1!important;transition:background .45s}
+#stairs.m6 .fl6{visibility:hidden}
 </style>
 </head>
 <body>
@@ -448,16 +465,23 @@ html,body{background:radial-gradient(1400px 900px at 50% 40%,#EEF1F5 0%,#DCE2E9 
 <!--@NIVEL-->
 <section class="slide" data-p="1 · Cultura" data-t="Nivelamento" data-band="Nivelamento · a escada de maturidade da TMG" data-c="c-blue" data-bs="Degraus = alternativas dos próprios instrumentos da entrevista" data-src="Degraus: as 4 alternativas de cada situação dos instrumentos aplicados (da mais tensionada à mais estruturada), alinhadas às faixas do termômetro. Pontos = leituras (anônimas) de cada instrumento. Meta: proposta.">
   <div class="body">
-    <div style="display:grid;grid-template-columns:420px 1fr;gap:18px">
-      <div>
-        <div style="display:flex;align-items:center;gap:10px"><div class="ttl" style="color:var(--navy)">7 lentes · em que degrau estamos</div></div>
-        <div class="small" style="margin:2px 0 8px">clique numa lente para subir a escada</div>
+    <div style="display:grid;grid-template-columns:460px 1fr;gap:18px">
+      <div class="card" id="lensCard" style="border-radius:14px;padding:14px 16px 12px;border-top:5px solid #002B49;background:linear-gradient(180deg,#F4F7FA,#fff 120px)">
+        <div class="eye" style="color:#B35F00;margin:0">As 7 lentes da leitura</div>
+        <div style="font:800 21px/1.15 var(--fh);color:#002B49;margin-top:2px">Em que degrau a TMG está</div>
+        <div class="small" style="margin:3px 0 10px">cada lente é uma situação real perguntada nas entrevistas · clique para subir a escada</div>
         <div id="lensList" style="display:grid;gap:7px"></div>
-        <div class="small" style="margin-top:8px">▮ degrau atual (média) · <b style="color:#F78C16">▼</b> meta 6 meses · Comunicação fica fora da escada: só 1 leitura.</div>
+        <div id="lensLeg" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line2);display:grid;gap:6px;font:600 12.5px/1.3 var(--fb);color:#35516A">
+          <div><span class="lg-cur"></span>Degrau atual — média das leituras da lente</div>
+          <div><b style="color:#F78C16;display:inline-block;width:26px;text-align:center">▼</b>Meta de 6 meses</div>
+          <div><span class="lg-g6"></span>Ganho previsto em 6 meses (vê-se em <b>META 6 MESES</b>)</div>
+          <div><span class="lg-dot"></span>Leitura de um instrumento na escada — passe o mouse</div>
+          <div style="color:#6B7B8C"><span style="display:inline-block;width:26px;text-align:center">—</span>Comunicação fica fora da escada: só 1 leitura</div>
+        </div>
       </div>
       <div>
-        <div style="display:flex;align-items:flex-start;gap:14px"><div style="flex:1"><div class="eye" id="lensEye" style="margin-bottom:2px">Lente</div><div id="lensQ" style="font:600 15px/1.35 var(--fb);color:var(--navy)"></div></div><div class="seg" id="stairSeg"><button class="on" data-s="0">HOJE</button><button data-s="1">META 6 MESES</button></div></div>
-        <svg viewBox="0 0 1050 500" width="1050" height="500" id="stairs" style="margin-top:6px"></svg>
+        <div style="display:flex;align-items:flex-start;gap:14px"><div style="flex:1"><div class="eye" id="lensEye" style="margin-bottom:2px;font-size:12.5px;color:#B35F00">Lente</div><div id="lensQ" style="font:700 21px/1.3 var(--fh);color:#002B49;border-left:5px solid #F78C16;background:#FEF7EF;border-radius:0 10px 10px 0;padding:8px 14px;margin-top:4px"></div></div><div class="seg" id="stairSeg"><button class="on" data-s="0">HOJE</button><button data-s="1">META 6 MESES</button></div></div>
+        <svg viewBox="0 0 1050 500" width="1010" height="470" id="stairs" style="margin-top:4px"></svg>
         <div id="lensNext" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px"></div>
       </div>
     </div>
@@ -987,7 +1011,7 @@ const LENS=[
 LENS.forEach(l=>{l.n6=Math.round(l.v+(62.5-l.v)/2)});
 let lensI=0,stairS=0;
 const SW=240,SX=36,BASE=492,TOPS=[378,276,174,72],DX=18,DY=12;
-(function(){const box=$("lensList");LENS.forEach((l,i)=>{const b=H("button",{class:"clk","data-a":"left",style:`--d:${i*.6};display:grid;grid-template-columns:1fr 150px 58px;gap:10px;align-items:center;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:9px 12px`},box);
+(function(){const box=$("lensList");LENS.forEach((l,i)=>{const b=H("button",{class:"clk","data-a":"left",style:`--d:${i*.6};display:grid;grid-template-columns:1fr 128px 64px;gap:10px;align-items:center;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:9px 12px`},box);
 H("div",{style:"font:700 14px var(--fb);color:var(--navy)"},b,l.n);const bar=H("div",{style:"position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:3px;height:14px"},b);
 const p=stepPos(l.v);for(let k=0;k<4;k++){const seg=H("div",{style:`position:relative;background:${LV4[k][2]};border-radius:3px;overflow:hidden`},bar);const f=clamp(p-k,0,1);if(f>0)H("div",{"data-a":"grow",style:`--d:${4+i*.6+k*.3};position:absolute;left:0;top:0;bottom:0;width:${f*100}%;background:${LV4[k][1]}`},seg)}
 H("div",{style:`position:absolute;left:${stepPos(l.n6)/4*100}%;top:-6px;`+"transform:translateX(-50%);color:#F78C16;font-size:12px;line-height:1"},bar,"▼");
@@ -1005,8 +1029,8 @@ T(g,x0+14,top+26,`${k+1} · ${b[0].toUpperCase()}`,{fill:b[1],style:"font:800 13
 T(g,x0+SW-14,top+26,["índice < 37,5","37,5 – 62,5","62,5 – 87,5","≥ 87,5"][k],{"text-anchor":"end",fill:"#6B7B8C",style:"font:600 10.5px var(--fb)"});
 fo(g,x0+12,top+36,SW-24,BASE-top-40,l.L[k],`font:${k===cur?700:500} 12.5px/1.38 var(--fb);color:#002B49`);
 });
-const seen={};l.r.forEach((r,i)=>{const x=Math.round(sx(r)/8)*8,y=sy(r);seen[x]=(seen[x]||0)+1;const g=S("g",{"data-a":"pop",style:`--d:${5+i*.5}`},s);S("circle",{cx:x,cy:y-4-(seen[x]-1)*13,r:6,fill:"#fff",stroke:"#002B49","stroke-width":2},g);tip(g,`Leitura ${pc(r)}`,"um instrumento · sem identificação")});
-const fx=sx(l.n6),fy=sy(l.n6),fl=S("g",{"data-a":"down",style:"--d:8"},s);S("line",{x1:fx,y1:fy-4,x2:fx,y2:fy-70,stroke:"#002B49","stroke-width":2.5},fl);path(`M${fx} ${fy-70} h58 l-10 10 l10 10 h-58z`,{fill:"#F78C16"},fl);T(fl,fx+5,fy-56,"META 6M",{fill:"#002B49",style:"font:800 10.5px var(--fb)"});
+const seen={};l.r.forEach((r,i)=>{const x=Math.round(sx(r)/8)*8,y=sy(r);seen[x]=(seen[x]||0)+1;const g=S("g",{"data-a":"pop",style:`--d:${5+i*.5}`},s);S("circle",{cx:x,cy:y-4-(seen[x]-1)*13,r:6,fill:"#fff",stroke:"#002B49","stroke-width":2},g);tip(g,`Leitura de um instrumento · ${pc(r)}`,`degrau ${bandOf(r)+1} · ${LV4[bandOf(r)][0]} — anônima`)});
+const fx=sx(l.n6),fy=sy(l.n6),fl=S("g",{"data-a":"down",class:"fl6",style:"--d:8"},s);S("line",{x1:fx,y1:fy-4,x2:fx,y2:fy-70,stroke:"#002B49","stroke-width":2.5},fl);path(`M${fx} ${fy-70} h58 l-10 10 l10 10 h-58z`,{fill:"#F78C16"},fl);T(fl,fx+5,fy-56,"META 6M",{fill:"#002B49",style:"font:800 10.5px var(--fb)"});
 const av=S("g",{id:"stAv",style:"transition:transform 1.2s cubic-bezier(.34,1.3,.64,1)"},s);const ag=S("g",{class:"bob"},av);S("circle",{cx:0,cy:-44,r:22,fill:"#5E8AB4",stroke:"#fff","stroke-width":3},ag);T(ag,0,-39,"TMG",{"text-anchor":"middle",fill:"#fff",style:"font:800 12px var(--fb)"});path("M0 -18 l-7 -8 h14z",{fill:"#5E8AB4"},ag);
 const lab=T(av,0,-74,"",{"text-anchor":"middle",fill:"#002B49",style:"font:800 13px var(--fb)",id:"stAvL"});
 moveAvatar(true);const nx=$("lensNext");nx.innerHTML="";const nk=Math.min(3,cur+1);
@@ -1355,6 +1379,16 @@ const tb=H("div",{class:"card","data-a":"up",style:"--d:9;border-radius:12px;pad
 p.kpi.forEach((r,i)=>{const rw=H("div",{style:`display:grid;grid-template-columns:1.8fr .8fr 1fr 1fr;border-top:1px solid var(--line2);background:${i%2?"#F8FAFC":"#fff"}`},tb);r.forEach((x,j)=>H("div",{style:`padding:7px 12px;font:${j===0?700:j===1?800:600} 12.5px/1.3 var(--fb);color:${j===1?"#BC0404":j===3?"#B35F00":"#002B49"}`},rw,x))});
 const rs=H("div",{style:"display:grid;gap:8px"},bt);[["Quem participa",p.who,"#5E8AB4"],["Risco a monitorar",p.risk,"#BC0404"]].forEach(([t,d,c],i)=>{const k=H("div",{"data-a":"left",style:`--d:${10+i*.6};background:#fff;border:1px solid var(--line);border-left:4px solid ${c};border-radius:10px;padding:7px 12px`},rs);H("div",{style:`font:800 10px var(--fb);letter-spacing:.12em;color:${c}`},k,t.toUpperCase());H("div",{style:"font:600 12px/1.35 var(--fb);color:#002B49;margin-top:2px"},k,d)});
 ENTER[sec.dataset.t]=()=>{const b=sec.querySelector(".p8bar");b.style.transition="none";b.style.width="0";void b.offsetWidth;b.style.transition="";setTimeout(()=>b.style.width="100%",500)}})})();
+
+/* ---------- NIVELAMENTO · ênfase nas lentes e na visão de 6 meses ---------- */
+(function(){const box=$("lensList");if(!box||typeof LENS==="undefined")return;
+LENS.forEach((l,i)=>{const b=l._b;if(!b)return;const nm=b.firstChild;nm.innerHTML=`<span class="ln-n">${i+1}</span>${nm.textContent}`;
+const bar=b.children[1];bar.style.height="18px";const p=stepPos(l.v),p6=stepPos(l.n6);[...bar.children].forEach((seg,k)=>{const f0=clamp(p-k,0,1),f1=clamp(p6-k,0,1);if(f1>f0)H("div",{class:"g6",style:`left:${f0*100}%;width:${(f1-f0)*100}%`},seg)});
+const pv=b.children[2];l._pv=pv;l._pc=pv.style.color});
+const upd=()=>{const m6=$("stairSeg").querySelector("button.on").dataset.s==="1";box.classList.toggle("m6",m6);$("stairs").classList.toggle("m6",m6);LENS.forEach(l=>{if(!l._pv)return;l._pv.innerHTML=m6?`${l.n6}%<small>+${l.n6-l.v} pts</small>`:`${l.v}%`;l._pv.style.color=m6?"#002B49":l._pc})};
+$("stairSeg").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>setTimeout(upd,0)));
+const s=$("stairs"),_d=drawStairs;drawStairs=function(){_d();const g=S("g",{class:"st-leg"},s);S("circle",{cx:46,cy:24,r:6,fill:"#fff",stroke:"#002B49","stroke-width":2},g);T(g,58,28,"= leitura de um instrumento (anônima) · passe o mouse",{fill:"#35516A",style:"font:700 12px var(--fb)"})};
+drawStairs();ENTER["Nivelamento"]=()=>{const b=$("stairSeg").querySelector('button[data-s="0"]');if(b&&!b.classList.contains("on"))b.click();upd()};upd()})();
 /* ---------- SILOS → SINERGIA ---------- */
 (function(){const s=$("siloNet"),cx=415,cy=275,rx=300,ry=195,bw=196,bh=62;mk(s,"arS","#5E8AB4");
 const A=["Negócio & comercial","Pesquisa & desenvolvimento","Planejamento & execução","Supply & operações","Processos, dados & sistemas","Pessoas & capacitação"];
