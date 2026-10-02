@@ -519,14 +519,19 @@ html,body{background:radial-gradient(1400px 900px at 50% 40%,#EEF1F5 0%,#DCE2E9 
 <section class="slide" data-p="1 · Cultura" data-t="Liderança" data-band="Liderança · do alinhamento à realização" data-c="c-blue" data-bs="A alavanca que move as demais frentes" data-src="Alinhamento estratégico 79% e Liderança 47%: índices harmonizados. “Liderança desalinhada”: 7 de 7 entrevistas. Compromissos do contrato de liderança: proposta.">
   <div class="body">
     <div style="display:grid;grid-template-columns:520px 1fr;gap:20px">
-      <div class="grid" style="align-content:start">
-        <div class="card" style="border-radius:12px">
-          <div class="ttl" style="color:var(--navy)">Gap de realização</div>
-          <svg viewBox="0 0 470 250" width="470" height="250" id="gapChart"></svg>
-          <div style="font-size:14px;color:var(--ink2);line-height:1.45">A liderança concorda sobre <b>o quê</b> — mas não executa <b>junto</b>. Fontes divergem muito entre si (amplitude de 100 pts), sinal de experiências diferentes com a liderança.</div>
+      <div style="display:grid;gap:12px;align-content:start">
+        <div class="card" data-a="up" style="--d:1;border-radius:12px;border-left:6px solid #F78C16;padding:14px 18px">
+          <div class="eye" style="color:#B35F00;margin:0">O que esta tela mostra</div>
+          <div style="font:800 24px/1.22 var(--fh);color:#002B49;margin-top:4px">A liderança concorda sobre <span style="color:#1F3263;background:#DFE8F0;padding:0 6px;border-radius:4px">o quê</span> — mas não executa <span style="color:#8F0303;background:#FDF1EF;padding:0 6px;border-radius:4px">junto</span>.</div>
+          <p style="font:500 14px/1.5 var(--fb);color:#35516A;margin-top:8px">Medimos duas coisas na mesma régua de 0 a 100: o <b style="color:#002B49">alinhamento estratégico</b> — se as lideranças concordam sobre para onde a TMG vai — e a <b style="color:#002B49">liderança na execução</b> — se agem juntas para chegar lá. A distância entre as duas é a maior do diagnóstico.</p>
         </div>
-        <div class="card nv" style="border-radius:12px"><div class="eye" style="color:var(--yellow)">7 de 7 entrevistas</div><p style="font:600 22px/1.3 var(--fh);color:#fff">“O alinhamento até acontece; a realização falha.”</p>
-          <div style="margin-top:10px"><div class="small" style="color:#9DB7CE;margin-bottom:16px">Liderança · hoje 47% → meta 6 meses 55%</div><div class="lv" data-lv="47" data-t6="55" data-c="#9DBBD9"></div></div></div>
+        <div class="card" data-a="up" style="--d:3;border-radius:12px;padding:12px 18px 8px">
+          <div class="ttl" style="color:var(--navy)">Gap de realização</div>
+          <svg viewBox="0 0 470 186" width="470" height="186" id="gapChart"></svg>
+        </div>
+        <div class="card nv" data-a="up" style="--d:5;border-radius:12px;padding:14px 18px"><div class="eye" style="color:var(--yellow);margin:0">7 de 7 entrevistas</div><p style="font:600 21px/1.3 var(--fh);color:#fff;margin-top:4px">“O alinhamento até acontece; a realização falha.”</p>
+          <div class="small" style="color:#9DB7CE;margin-top:10px">Nivelamento da liderança na régua 0–100</div>
+          <svg viewBox="0 0 470 74" width="470" height="74" id="ldLv" style="margin-top:2px"></svg></div>
       </div>
       <div>
         <div style="display:flex;align-items:center;gap:12px"><div class="ttl" style="color:var(--blue)">Contrato de liderança</div><span class="hint">assine cada compromisso</span><div style="margin-left:auto;display:flex;align-items:center;gap:10px"><span class="small">força do pacto</span><div style="width:220px"><div class="lv" id="pactBar"><div class="fl" style="width:0;background:linear-gradient(90deg,#5E8AB4,#33556D)"></div></div></div><b id="pactN" style="font:800 22px var(--fh);color:var(--navy)">0/5</b></div></div>
@@ -1123,10 +1128,14 @@ sel(0)})();
 
 /* ---------- LIDERANÇA ---------- */
 (function(){const s=$("gapChart"),X=v=>10+v*4.5;
-[[0,"Alinhamento estratégico · o QUÊ",79,"#33556D"],[1,"Liderança · o COMO, juntos",47,"#F78C16"]].forEach(([i,l,v,c])=>{const y=30+i*95;T(s,10,y,l,{fill:"#002B49",style:"font:700 14px var(--fb)"});S("rect",{x:10,y:y+10,width:450,height:44,rx:8,fill:"#EEF2F5"},s);const r=S("rect",{x:10,y:y+10,width:0,height:44,rx:8,fill:c,style:"transition:width 1.2s cubic-bezier(.2,.7,.2,1)"},s);r.classList.add("gbar");r.dataset.w=X(v)-10;T(s,X(v)-10,y+40,pc(v),{"text-anchor":"end",fill:"#fff",style:"font:800 24px var(--fh)"})});
-S("rect",{x:X(47),y:115,width:X(79)-X(47),height:44,rx:6,fill:"none",stroke:"#BC0404","stroke-width":2.5,"stroke-dasharray":"6 5"},s);S("rect",{x:(X(47)+X(79))/2-50,y:125,width:100,height:24,rx:5,fill:"#fff"},s);T(s,(X(47)+X(79))/2,143,"gap 32 pts",{"text-anchor":"middle",fill:"#BC0404",style:"font:800 17px var(--fb)"});
-S("line",{x1:X(55),y1:14,x2:X(55),y2:180,stroke:"#002B49","stroke-width":2,"stroke-dasharray":"3 4"},s);T(s,X(55),200,"meta 6m 55%",{"text-anchor":"middle",fill:"#002B49",style:"font:700 12px var(--fb)"});
-T(s,10,236,"Maior diferença entre duas dimensões do diagnóstico.",{fill:"#6B7B8C",style:"font:600 12px var(--fb)"});
+[[0,"Alinhamento estratégico","concordam sobre o QUÊ",79,"#33556D"],[1,"Liderança na execução","agem JUNTOS no COMO",47,"#F78C16"]].forEach(([i,l,l2,v,c])=>{const y=18+i*80;T(s,10,y,l,{fill:"#002B49",style:"font:800 14px var(--fb)"});T(s,460,y,l2,{"text-anchor":"end",fill:"#6B7B8C",style:"font:700 12.5px var(--fb)"});S("rect",{x:10,y:y+8,width:450,height:40,rx:8,fill:"#EEF2F5"},s);const r=S("rect",{x:10,y:y+8,width:0,height:40,rx:8,fill:c,style:"transition:width 1.2s cubic-bezier(.2,.7,.2,1)"},s);r.classList.add("gbar");r.dataset.w=X(v)-10;T(s,X(v)-12,y+36,pc(v),{"text-anchor":"end",fill:"#fff",style:"font:800 23px var(--fh)"})});
+S("rect",{x:X(47),y:106,width:X(79)-X(47),height:40,rx:6,fill:"none",stroke:"#BC0404","stroke-width":2.5,"stroke-dasharray":"6 5"},s);S("rect",{x:(X(47)+X(79))/2-52,y:114,width:104,height:24,rx:5,fill:"#fff"},s);T(s,(X(47)+X(79))/2,132,"gap 32 pts",{"text-anchor":"middle",fill:"#BC0404",style:"font:800 17px var(--fb)"});
+S("line",{x1:X(55),y1:150,x2:X(55),y2:162,stroke:"#002B49","stroke-width":2},s);T(s,X(55),178,"meta 6 meses: 55%",{"text-anchor":"middle",fill:"#002B49",style:"font:800 12px var(--fb)"});
+const L=$("ldLv"),Z=v=>10+v*4.5;[[0,37.5,"#BC0404","Crítica"],[37.5,62.5,"#F78C16","Frágil"],[62.5,87.5,"#5E8AB4","Equilibrada"],[87.5,100,"#33556D","Forte"]].forEach(([a,b,c,n])=>{S("rect",{x:Z(a),y:30,width:Z(b)-Z(a)-2,height:14,rx:3,fill:c,opacity:.28},L);T(L,(Z(a)+Z(b))/2,62,n,{"text-anchor":"middle",fill:"#9DB7CE",style:"font:700 10.5px var(--fb)"})});
+const fl=S("rect",{x:Z(0),y:30,width:0,height:14,rx:3,fill:"#F78C16",class:"gbar"},L);fl.dataset.w=Z(47)-Z(0);
+S("rect",{x:Z(47),y:30,width:Z(55)-Z(47),height:14,fill:"none",stroke:"#FCD1A2","stroke-width":1.5,"stroke-dasharray":"3 2"},L);
+S("line",{x1:Z(47),y1:24,x2:Z(47),y2:48,stroke:"#fff","stroke-width":2.5},L);T(L,Z(47)-4,18,"hoje 47%",{"text-anchor":"end",fill:"#fff",style:"font:800 13px var(--fb)"});
+S("line",{x1:Z(55),y1:24,x2:Z(55),y2:48,stroke:"#F78C16","stroke-width":2.5},L);T(L,Z(55)+4,18,"meta 6m 55%",{fill:"#F78C16",style:"font:800 13px var(--fb)"});
 const P=[["Uma só voz","Discurso duplo: concorda na sala, diverge no corredor","Divergir na sala e sustentar a decisão fora dela","corredor 5 (+1)/7"],["Decidir por critério","Decisão pela influência de quem pesa mais","Critérios explícitos e decisão registrada em log","influência 4 (+1)/7"],["Dono do resultado","A falha é sempre da outra área","Um único dono (A) por resultado transversal","accountability 6 (+1)/7"],["Patrocínio até a adoção","A atenção migra depois do lançamento","Sponsor acompanha a adoção em 30/60/90 dias","não sustentada 7/7"],["Metas compartilhadas","Cada área protege a própria agenda","Metas comuns entre áreas da mesma cadeia","silos 6 (+1)/7"]];
 const on=new Set();let fired=false;const bar=$("pactBar").querySelector(".fl");
 P.forEach(([t,de,para,d],i)=>{const r=H("div",{class:"clk","data-a":"up",style:`--d:${i};display:grid;grid-template-columns:56px 190px 1fr 1fr 118px;gap:12px;align-items:center;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;min-height:98px`},$("pact"));
