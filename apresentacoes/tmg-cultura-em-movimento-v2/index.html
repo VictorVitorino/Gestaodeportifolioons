@@ -344,6 +344,22 @@ html,body{background:radial-gradient(1400px 900px at 50% 40%,#EEF1F5 0%,#DCE2E9 
 #vuNet foreignObject b{color:#F78C16;font-weight:800}
 #vuNet foreignObject i{color:#FCD1A2;font-style:italic}
 #vuStrip>div{padding-top:10px!important;padding-bottom:10px!important}
+/* ===== V8 ===== */
+#dust{display:none!important}
+.ic8 svg{width:24px;height:24px;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.atk{transition:transform .25s cubic-bezier(.2,.7,.2,1),box-shadow .25s}
+.atk:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(14,28,57,.2)}
+#controls #bInfo{background:#fff;color:#002B49;gap:8px;font:700 13px var(--fb)}
+#controls #bInfo.on{background:#F78C16;color:#0E1C39}
+#infoP{position:fixed;right:22px;bottom:62px;z-index:61;width:440px;max-width:calc(100vw - 44px);background:#fff;border-radius:12px;border-left:5px solid #F78C16;box-shadow:0 22px 50px rgba(14,28,57,.32);padding:14px 18px 16px;opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .25s,transform .25s}
+#infoP.on{opacity:1;transform:none;pointer-events:auto}
+#infoP .ih{display:flex;align-items:center;justify-content:space-between}
+#infoP .ie{font:800 10.5px var(--fb);letter-spacing:.14em;text-transform:uppercase;color:#B35F00}
+#infoP .ix{border:0;background:transparent;font:700 22px/1 var(--fb);color:#98A6B3;cursor:pointer}
+#infoP .it{font:800 18px/1.2 var(--fh);color:#002B49;margin-top:4px}
+#infoP .id{font:500 14px/1.5 var(--fb);color:#35516A;margin-top:6px}
+#tmgLogo{height:44px;width:auto;display:block}
+.tmgslot{display:inline-flex;align-items:center;padding-left:14px;margin-left:4px;border-left:1px solid rgba(255,255,255,.25)}
 </style>
 </head>
 <body>
@@ -355,7 +371,7 @@ html,body{background:radial-gradient(1400px 900px at 50% 40%,#EEF1F5 0%,#DCE2E9 
   <canvas id="dust" width="1600" height="900" style="position:absolute;inset:0;width:1600px;height:900px"></canvas>
   <svg viewBox="0 0 760 760" style="position:absolute;right:30px;top:70px;width:740px;height:740px" id="coverSvg" aria-hidden="true"></svg>
   <div style="position:absolute;left:84px;top:70px;right:820px">
-    <div data-a="fade" style="display:flex;gap:12px;align-items:center"><span id="coverLogo"></span><span class="tagx" style="background:rgba(255,255,255,.14)">Leitura analítica sobre Cultura e Organização</span></div>
+    <div data-a="fade" style="display:flex;gap:12px;align-items:center"><span id="coverLogo"></span><span class="tmgslot" id="tmgSlot"><img id="tmgLogo" src="tmg-logo.png" alt="TMG" onerror="if(!this.dataset.t){this.dataset.t=1;this.src='tmg-logo.svg'}else{this.parentNode.style.display='none'}"></span><span class="tagx" style="background:rgba(255,255,255,.14)">Leitura analítica sobre Cultura e Organização</span></div>
     <div class="eye" data-a="fade" style="--d:2;color:var(--yellow);margin-top:90px">Reorganização cultural e operacional</div>
     <h1 class="kin" style="font:700 96px/.94 var(--fh);color:#fff;margin-top:12px">Cultura TMG <span style="color:#9DBBD9">em movimento</span></h1>
     <p data-a="blur" style="--d:6;font-size:21px;line-height:1.45;color:#C8DBEB;margin-top:22px;max-width:700px">Uma leitura cirúrgica de gestão de mudanças: dimensionamos <b style="color:#fff">comportamentos</b> e <b style="color:#fff">barreiras</b> para mostrar onde a mudança trava, por que trava — e o que faz ela se sustentar.</p>
@@ -607,6 +623,32 @@ html,body{background:radial-gradient(1400px 900px at 50% 40%,#EEF1F5 0%,#DCE2E9 
   </div>
 </section>
 
+<!--@BENCHCAPA-->
+<section class="slide" data-p="3 · Benchmarks" data-t="Benchmarks · contexto" data-band="Benchmarks · por que olhar para fora" data-c="c-steel" data-bs="Os sintomas da TMG não são exclusivos da TMG" data-src="Sintomas TMG: recorrência nas 7 entrevistas e índices harmonizados do diagnóstico (set/2026). Casos: fontes públicas citadas na próxima tela. Benchmark é referência, não receita: contextos, escalas e causas diferem." data-desc="Abre a parte de benchmarks. Antes de mostrar o que outras empresas fizeram, conecta cada caso a um sintoma que já apareceu no diagnóstico da TMG — silos, decisão por influência, discurso duplo da liderança e accountability difusa. A pergunta que guia a leitura: o que aconteceu quando outras empresas enfrentaram o mesmo problema?">
+  <div class="body">
+    <div class="stmt kin" style="font-size:28px">Silos, decisão por influência e liderança que <em>concorda na sala e diverge no corredor</em> não são um problema só da TMG.</div>
+    <div data-a="fade" style="--d:3;font:500 15px/1.5 var(--fb);color:#35516A;margin-top:6px;max-width:1300px">Empresas maiores, em agronegócio e em outras indústrias, enfrentaram os mesmos sintomas. Os próximos casos mostram <b style="color:#002B49">o problema que viveram</b>, <b style="color:#002B49">o que fizeram</b>, <b style="color:#002B49">o que aconteceu</b> — e <b style="color:#B35F00">a lição que serve para a TMG</b>.</div>
+    <div style="display:grid;grid-template-columns:1fr 330px;gap:18px;margin-top:14px">
+      <div class="card" style="border-radius:14px;padding:14px 18px">
+        <div style="display:grid;grid-template-columns:470px 1fr 300px;gap:0;align-items:end;padding-bottom:6px;border-bottom:1px solid var(--line2)">
+          <div class="eye" style="color:#BC0404;margin:0">O sintoma na TMG · diagnóstico</div><div></div><div class="eye" style="color:#34628C;margin:0">Quem já enfrentou</div>
+        </div>
+        <svg viewBox="0 0 1130 470" width="1130" height="470" id="bcMap" style="display:block;margin-top:4px"></svg>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="card nv" data-a="left" style="--d:6;border-radius:14px;padding:16px 18px">
+          <div class="eye" style="color:#F78C16">Como ler cada caso</div>
+          <ol id="bcRead" style="margin:6px 0 0 0;padding:0;list-style:none;display:grid;gap:9px"></ol>
+        </div>
+        <div class="ins" data-a="up" style="--d:9;padding:14px 18px">
+          <h3>RESSALVA</h3>
+          <p style="font-size:13.5px;line-height:1.5;margin-top:4px">Benchmark é <b>referência, não receita</b>. Escala, setor e momento são diferentes, e os resultados publicados não são atribuíveis só à reorganização. O que se aproveita é o <b>mecanismo</b> — não o organograma.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!--@BENCH-->
 <section class="slide" data-p="3 · Benchmarks" data-t="Benchmarks" data-band="Benchmarks · quem já enfrentou o mesmo desafio" data-c="c-steel" data-bs="2 casos do agronegócio · 2 de outras indústrias" data-src="Fontes: Bayer (bayer.com, 2026; CNBC 23/10/2025) · Cargill (Reuters 17/11/2015 e 08/08/2024) · Ford (The Oakland Press 28/01/2010; Acertitude) · Unilever (press release 25/01/2022). Resultados não atribuíveis só à reorganização. Logotipos: marcas de seus titulares.">
   <div class="body">
@@ -646,6 +688,34 @@ html,body{background:radial-gradient(1400px 900px at 50% 40%,#EEF1F5 0%,#DCE2E9 
     </div>
   </div>
 </section>
+
+<!--@ATAQUE-->
+<section class="slide" data-p="4 · Reorganização" data-t="Onde atacar em 8 semanas" data-band="Primeiras 8 semanas · onde atacar primeiro" data-c="c-navy" data-bs="Onda 1 do plano de 6 meses · clique em cada frente" data-src="Critério de Onda 1 (o mesmo do diagnóstico): índice abaixo de 37,5 (faixa Crítica) ou tema presente nas 7 de 7 entrevistas. Comunicação fica fora: 1 só leitura. Frente ARCO: instrumento ARCO (Mudança & Adoção 40%) e entrevista com a PMO do projeto. Planos: proposta, a calibrar com o patrocinador." data-desc="Recorta o plano de 6 meses nas primeiras 8 semanas (a Onda 1). O critério de escolha é o mesmo do diagnóstico: atacar primeiro o que está na faixa Crítica ou aparece nas 7 de 7 entrevistas. Isso gera três frentes — Liderança executiva (o maior problema), Papéis & decisão e Silos & interfaces — e uma quarta, o Projeto ARCO, onde a mudança já está acontecendo no dia a dia. Cada card abre o seu plano de 8 semanas.">
+  <div class="body">
+    <div class="stmt kin" style="font-size:26px">Em 8 semanas, atacar onde a leitura é <em>mais baixa e mais recorrente</em> — começando pela liderança executiva.</div>
+    <div style="display:grid;grid-template-columns:520px 1fr;gap:16px;margin-top:10px">
+      <div class="card" style="border-radius:14px;padding:12px 16px">
+        <div style="display:flex;align-items:baseline;gap:10px"><div class="ttl" style="color:var(--navy)">Por que estas frentes</div><span class="small">índice 0–100 · recorrência nas 7 entrevistas</span></div>
+        <svg viewBox="0 0 488 420" width="488" height="420" id="atkChart" style="display:block;margin-top:4px"></svg>
+        <div class="small" style="font-size:11.5px;line-height:1.4"><b style="color:#002B49">Onda 1</b> = índice na faixa Crítica (&lt;37,5, linha tracejada) <b>ou</b> tema em 7 de 7 entrevistas — o mesmo critério do termômetro.</div>
+      </div>
+      <div id="atkCards" style="display:grid;grid-template-columns:1fr 1fr;gap:12px"></div>
+    </div>
+    <div id="atkMethod" style="display:grid;grid-template-columns:200px repeat(3,1fr);gap:10px;margin-top:12px;align-items:stretch"></div>
+  </div>
+</section>
+
+<!--@PLANO1-->
+<section class="slide" data-p="4 · Reorganização" data-t="8 semanas · Liderança executiva" data-band="Plano de 8 semanas · Frente 1 · Liderança executiva" data-c="c-navy" data-bs="O maior problema · a alavanca das demais frentes" data-src="Evidências: Liderança 47% × Alinhamento estratégico 79% (índices harmonizados); “liderança desalinhada” e “mudança não sustentada” em 7 de 7 entrevistas; Sustentação da mudança 25%; instrumento ARCO: Change Leadership 40%. Atividades, marcos e indicadores: proposta, a calibrar com o patrocinador." data-desc="Plano da frente que o diagnóstico aponta como o maior problema: a liderança concorda sobre o quê (79%), mas não executa junto (47%), e a mudança perde força depois do lançamento (25%). Em 8 semanas, o comitê executivo sai da devolutiva para um contrato de liderança assinado, um ritual executivo com dados comuns e o primeiro pulso de comportamento — seguindo ADKAR e os primeiros passos de Kotter." data-plan="0"><div class="body"><div class="planwrap"></div></div></section>
+
+<!--@PLANO2-->
+<section class="slide" data-p="4 · Reorganização" data-t="8 semanas · Papéis & decisão" data-band="Plano de 8 semanas · Frente 2 · Papéis & decisão" data-c="c-navy" data-bs="Um dono por decisão · da escalada à alçada" data-src="Evidências: Papéis & responsabilidades 40%; Governança & decisão 35%; “papéis sobrepostos” 7 de 7; “accountability difusa” 6 (+1) de 7; “escalonamento constante” 5 (+1) de 7; RACI anterior aplicada e descartada. Atividades e marcos: proposta, a calibrar com as lideranças." data-desc="Plano para tirar as decisões transversais da influência e do escalonamento. A RACI anterior foi aplicada como documento e descartada; aqui ela nasce em workshop, vale primeiro para as interfaces críticas e é revisada em fórum. Em 8 semanas: inventário das decisões, RASCI pactuada nas interfaces piloto, mapa de alçadas, log de decisões ativo e o fórum de integração rodando." data-plan="1"><div class="body"><div class="planwrap"></div></div></section>
+
+<!--@PLANO3-->
+<section class="slide" data-p="4 · Reorganização" data-t="8 semanas · Silos & interfaces" data-band="Plano de 8 semanas · Frente 3 · Silos & interfaces" data-c="c-navy" data-bs="De pontes pessoais a pontes formais" data-src="Evidências: Silos / visão de empresa 20% (menor índice do diagnóstico); “silos e agenda local” 6 (+1) de 7; “dependência de pessoas-chave” 2 (+1) de 7; Colaboração 54%; instrumento ARCO: “cada área controla bem sua parte, mas o fluxo completo perde eficiência nas interfaces”. Atividades e marcos: proposta." data-desc="Plano para o menor índice do diagnóstico (silos, 20%). As pessoas se ajudam (colaboração 54%), mas o fluxo depende de pontes pessoais. Em 8 semanas, um fluxo piloto ponta a ponta ganha dono, metas compartilhadas e acordos de interface — e o fórum de integração passa a resolver o que hoje sobe por escalonamento." data-plan="2"><div class="body"><div class="planwrap"></div></div></section>
+
+<!--@PLANO4-->
+<section class="slide" data-p="4 · Reorganização" data-t="8 semanas · Projeto ARCO" data-band="Plano de 8 semanas · Frente 4 · Projeto ARCO · adoção" data-c="c-navy" data-bs="Apoiar a PMO a fazer o sistema virar rotina" data-src="Evidências: instrumento ARCO (Mudança & Adoção 40%; Change Leadership 40%; Processos & Operação 50%; “depois do lançamento, a atenção das lideranças migra”) e entrevista com a PMO do projeto (alta de chamados nas últimas 2 semanas; papel de key user em disputa; Protheus sem pessoa dedicada; sustentação Salesforce enxuta e em freeze; janela comercial de 60 dias). Sem identificação de pessoas. Plano: proposta." data-desc="Plano de gestão da mudança para o Projeto ARCO, em apoio à PMO: estabilizar (triagem de chamados e status único), definir quem é key user e quem atende Protheus, posicionar a liderança de cima para baixo, treinar por papel sem parar a janela comercial e medir adoção com indicadores de GMO — velocidade de adoção, utilização e proficiência." data-plan="3"><div class="body"><div class="planwrap"></div></div></section>
 
 <!-- 12 INSIGHTS E DECISÕES -->
 <section class="slide" data-p="4 · Reorganização" data-t="Resumo final" data-band="Proposta 3 · resumo final — insights e decisões" data-c="c-green" data-bs="O que a liderança assume hoje" data-src="Decisões e prontidão: proposta para deliberação da liderança.">
@@ -762,13 +832,20 @@ const M=["ADKAR · Prosci","Termômetro de Sinergia","Organization Design","7 le
 M.forEach(t=>H("span",{class:"pill",style:"background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);padding:9px 14px;font-size:13px"},$("coverFronts"),t));
 const F=[["Cultura e Comportamento","flag"],["Papéis e Responsabilidades","clip"],["Silos Organizacionais","wall"],["Fronteiras entre áreas","link"],["Liderança e Governança","fork"]];
 const s=$("coverSvg"),cx=400,cy=380,r=225,L=2*Math.PI*r;
-S("circle",{cx,cy,r:330,fill:"none",stroke:"rgba(255,255,255,.08)","stroke-dasharray":"2 10"},s);
-S("circle",{cx,cy,r,fill:"none",stroke:"rgba(255,255,255,.09)","stroke-width":38},s);
-S("circle",{cx,cy,r,fill:"none",stroke:"#F78C16","stroke-width":38,"stroke-dasharray":`${L*.12} ${L}`,"stroke-dashoffset":`${-L*.39}`,transform:`rotate(-90 ${cx} ${cy})`,opacity:".35"},s);
-const cur=S("circle",{cx,cy,r,fill:"none",stroke:"#9DBBD9","stroke-width":38,"stroke-linecap":"butt","stroke-dasharray":`0 ${L}`,transform:`rotate(-90 ${cx} ${cy})`,style:"transition:stroke-dasharray 1.8s cubic-bezier(.2,.7,.2,1)"},s);cur.id="coverArc";cur.dataset.full=`${L*.39} ${L}`;
-const a=2*Math.PI*.51-Math.PI/2;S("line",{x1:cx+(r-30)*Math.cos(a),y1:cy+(r-30)*Math.sin(a),x2:cx+(r+30)*Math.cos(a),y2:cy+(r+30)*Math.sin(a),stroke:"#F78C16","stroke-width":4},s);T(s,cx,cy+128,"meta 6 meses ≥51%",{"text-anchor":"middle",fill:"#F78C16",style:"font:800 14px var(--fb);letter-spacing:.04em"});
+const NS=s.namespaceURI,df=S("defs",null,s),lg=S("linearGradient",{id:"cvG",x1:0,y1:0,x2:1,y2:1},df);S("stop",{offset:0,"stop-color":"#BFD0E1"},lg);S("stop",{offset:1,"stop-color":"#5E8AB4"},lg);
+const pt=(v,rr)=>{const a=2*Math.PI*v/100-Math.PI/2;return[cx+rr*Math.cos(a),cy+rr*Math.sin(a)]};
+const arcD=(a,b,rr)=>{const[x0,y0]=pt(a,rr),[x1,y1]=pt(b,rr);return`M${x0} ${y0} A${rr} ${rr} 0 ${b-a>50?1:0} 1 ${x1} ${y1}`};
+for(let k=0;k<100;k+=2.5){const mj=k%25===0,[x0,y0]=pt(k,r+22),[x1,y1]=pt(k,r+(mj?36:29));S("line",{x1:x0,y1:y0,x2:x1,y2:y1,stroke:mj?"rgba(255,255,255,.45)":"rgba(255,255,255,.16)","stroke-width":mj?2:1.2},s)}
+S("circle",{cx,cy,r,fill:"none",stroke:"rgba(255,255,255,.07)","stroke-width":26},s);
+const tgt=path(arcD(39,51,r),{fill:"none",stroke:"#F78C16","stroke-width":26,opacity:0,style:"transition:opacity .8s"},s);
+const cur=S("circle",{cx,cy,r,fill:"none",stroke:"url(#cvG)","stroke-width":26,"stroke-dasharray":`0 ${L}`,transform:`rotate(-90 ${cx} ${cy})`},s);
+const head=S("circle",{cx:pt(0,r)[0],cy:pt(0,r)[1],r:9,fill:"#fff",style:"filter:drop-shadow(0 0 8px rgba(191,208,225,.9))"},s);
+const[mx0,my0]=pt(51,r-22),[mx1,my1]=pt(51,r+22);const mk51=S("line",{x1:mx0,y1:my0,x2:mx1,y2:my1,stroke:"#F78C16","stroke-width":4,"stroke-linecap":"round",opacity:0,style:"transition:opacity .6s"},s);
+const ml=T(s,cx,cy+128,"meta 6 meses ≥51%",{"text-anchor":"middle",fill:"#F78C16",opacity:0,style:"font:800 14px var(--fb);letter-spacing:.04em;transition:opacity .6s"});
+let raf=0;window.__capa=()=>{cancelAnimationFrame(raf);const pc_=$("coverPct");tgt.setAttribute("opacity",0);mk51.setAttribute("opacity",0);ml.setAttribute("opacity",0);const t0=performance.now(),D=2200,dl=600;
+const st=t=>{const k=Math.max(0,Math.min(1,(t-t0-dl)/D)),e=1-Math.pow(1-k,3),v=39*e;cur.setAttribute("stroke-dasharray",`${L*v/100} ${L}`);const[hx,hy]=pt(v,r);head.setAttribute("cx",hx);head.setAttribute("cy",hy);if(pc_)pc_.textContent=Math.round(v)+"%";if(k<1)raf=requestAnimationFrame(st);else{tgt.setAttribute("opacity",.45);mk51.setAttribute("opacity",1);ml.setAttribute("opacity",1)}};raf=requestAnimationFrame(st)};
 T(s,cx,cy-40,"TEMPERATURA DE SINERGIA",{"text-anchor":"middle",fill:"#9DB7CE",style:"font:700 13px var(--fb);letter-spacing:.14em"});
-T(s,cx,cy+34,"39%",{"text-anchor":"middle",fill:"#fff",style:"font:700 96px var(--fh)"});
+T(s,cx,cy+34,"39%",{"text-anchor":"middle",fill:"#fff",id:"coverPct",style:"font:700 96px var(--fh)"});
 T(s,cx,cy+72,"menções quantitativas e qualitativas",{"text-anchor":"middle",fill:"#F78C16",style:"font:700 16px var(--fb)"});
 F.forEach(([t,ic],i)=>{const an=-Math.PI/2+i*2*Math.PI/5-.35,x=cx+305*Math.cos(an),y=cy+305*Math.sin(an);const g=S("g",{class:"pulse",style:`animation-delay:${i*.4}s`},s);S("circle",{cx:x,cy:y,r:30,fill:"#5E8AB4",stroke:"#9DBBD9","stroke-width":2},g);
 const fo=S("foreignObject",{x:x-15,y:y-15,width:30,height:30},g);fo.innerHTML=`<div xmlns="http://www.w3.org/1999/xhtml" style="width:30px;height:30px">${icon(ic)}</div>`;
@@ -1119,18 +1196,18 @@ bm.style.transform=`rotate(${v?0:-13}deg)`;scL.textContent=v?"EQUILÍBRIO COM RE
 $("mtSeg").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{$("mtSeg").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));mode(+b.dataset.v)}));mode(1)})();
 
 /* ---------- BENCHMARKS ---------- */
-(function(){const B=[{k:"bayer",n:"Bayer",tag:"Agronegócio",tc:"#33556D",per:"2024–2026",prob:"Hierarquia de muitas camadas, silos e ciclos longos de planejamento — segundo a própria empresa.",mov:"Dynamic Shared Ownership: times multifuncionais em ciclos de 90 dias, decidindo perto do trabalho.",res:["▼","€2 bi","de economia organizacional planejada (2023–26)","#33556D"],les:"Juntar pesquisa e negócio no mesmo fluxo, com dono e ciclos curtos — as “duas TMG” numa só entrega.",note:"dados declarados pela empresa"},
-{k:"cargill",n:"Cargill",tag:"Agronegócio",tc:"#33556D",per:"2015 · 2024",prob:"Menos de 1/3 dos negócios bateu a meta de lucro no ano fiscal de 2024.",mov:"2015: dois níveis executivos viram um time único. 2024: 5 negócios consolidados em 3.",res:["▼","5 → 3","negócios, para decidir mais rápido","#34628C"],les:"Simplificar quem decide — e revisitar o desenho periodicamente, não “implantar uma vez”.",note:"resultados pós-2024 não divulgados"},
-{k:"ford",n:"Ford",tag:"Outra indústria",tc:"#34628C",per:"2006–2009",prob:"Empresa “dividida por disputas internas”; status verde nos relatórios enquanto perdia bilhões.",mov:"One Ford + Business Plan Review semanal: todos os executivos, dados comuns e o “vermelho” sem punição.",res:["▲","+US$ 2,7 bi","em 2009 — primeiro lucro em 4 anos","#33556D"],les:"Trocar o corredor pela sala: um fórum com dados comuns e segurança para mostrar o problema.",note:"crédito obtido em 2006 também foi decisivo"},
-{k:"unilever",n:"Unilever",tag:"Outra indústria",tc:"#34628C",per:"2022",prob:"Estrutura matricial difusa, com accountability pouco clara pelo resultado.",mov:"Saída da matriz para 5 Business Groups, cada um “totalmente responsável e accountable” pelo resultado.",res:["▼","~1.500","cargos de gestão (−15% alta gestão · −5% demais)","#34628C"],les:"Dono claro do resultado — na TMG, via dono do fluxo, sem mexer na hierarquia.",note:"efeitos posteriores têm múltiplas causas"}];
-const box=$("bmCards");B.forEach((b,i)=>{const c=H("div",{class:"card shine","data-a":"up",style:`--d:${2+i*1.5};border-radius:14px;padding:12px 16px;display:flex;flex-direction:column;gap:8px;height:640px`},box);
-const lg=H("div",{class:"logo-box",style:"border:1px solid var(--line2);height:80px;padding:8px"},c);H("div",{style:`height:${b.k==="bayer"?64:b.k==="unilever"?64:b.k==="ford"?64:52}px;width:${b.k==="ford"?150:b.k==="cargill"?150:80}px;display:flex;align-items:center;justify-content:center`,html:LOGOS[b.k]},lg);
+(function(){const B=[{k:"bayer",n:"Bayer",tag:"Agronegócio",tc:"#33556D",per:"2024–2026",prob:"Hierarquia de muitas camadas, silos e ciclos longos de planejamento — segundo a própria empresa.",mov:"Dynamic Shared Ownership: times multifuncionais em ciclos de 90 dias, decidindo perto do trabalho.",res:["▼","€2 bi","de economia organizacional planejada (2023–26)","#33556D"],les:"Juntar pesquisa e negócio no mesmo fluxo, com dono e ciclos curtos — as “duas TMG” numa só entrega.",note:"dados declarados pela empresa",tmg:"Na TMG: silos e agenda local em 6 (+1) de 7 entrevistas · índice 20%."},
+{k:"cargill",n:"Cargill",tag:"Agronegócio",tc:"#33556D",per:"2015 · 2024",prob:"Menos de 1/3 dos negócios bateu a meta de lucro no ano fiscal de 2024.",mov:"2015: dois níveis executivos viram um time único. 2024: 5 negócios consolidados em 3.",res:["▼","5 → 3","negócios, para decidir mais rápido","#34628C"],les:"Simplificar quem decide — e revisitar o desenho periodicamente, não “implantar uma vez”.",note:"resultados pós-2024 não divulgados",tmg:"Na TMG: escalonamento constante em 5 (+1) de 7 · governança 35%."},
+{k:"ford",n:"Ford",tag:"Outra indústria",tc:"#34628C",per:"2006–2009",prob:"Empresa “dividida por disputas internas”; status verde nos relatórios enquanto perdia bilhões.",mov:"One Ford + Business Plan Review semanal: todos os executivos, dados comuns e o “vermelho” sem punição.",res:["▲","+US$ 2,7 bi","em 2009 — primeiro lucro em 4 anos","#33556D"],les:"Trocar o corredor pela sala: um fórum com dados comuns e segurança para mostrar o problema.",note:"crédito obtido em 2006 também foi decisivo",tmg:"Na TMG: liderança desalinhada em 7 de 7 — concorda na sala, diverge no corredor."},
+{k:"unilever",n:"Unilever",tag:"Outra indústria",tc:"#34628C",per:"2022",prob:"Estrutura matricial difusa, com accountability pouco clara pelo resultado.",mov:"Saída da matriz para 5 Business Groups, cada um “totalmente responsável e accountable” pelo resultado.",res:["▼","~1.500","cargos de gestão (−15% alta gestão · −5% demais)","#34628C"],les:"Dono claro do resultado — na TMG, via dono do fluxo, sem mexer na hierarquia.",note:"efeitos posteriores têm múltiplas causas",tmg:"Na TMG: papéis sobrepostos em 7 de 7 · accountability difusa em 6 (+1) de 7."}];
+const box=$("bmCards");B.forEach((b,i)=>{const c=H("div",{class:"card shine","data-a":"up",style:`--d:${2+i*1.5};border-radius:14px;padding:10px 14px;display:flex;flex-direction:column;gap:7px;height:618px`},box);
+const lg=H("div",{class:"logo-box",style:"border:1px solid var(--line2);height:62px;padding:6px"},c);H("div",{style:`height:${b.k==="cargill"?44:50}px;width:${b.k==="ford"?150:b.k==="cargill"?150:80}px;display:flex;align-items:center;justify-content:center`,html:LOGOS[b.k]},lg);
 const t=H("div",{style:"display:flex;align-items:center;gap:6px"},c);H("span",{class:"tagk",style:`background:${b.tc};color:#fff`},t,b.tag);H("span",{class:"small",style:"font-weight:700"},t,b.per);
-const pr=H("div",{style:"background:#FDF1EF;border-radius:8px;padding:7px 10px"},c);H("div",{style:"font:800 10px var(--fb);letter-spacing:.12em;color:#BC0404"},pr,"O PROBLEMA");H("div",{style:"font:600 12.5px/1.35 var(--fb);color:#002B49"},pr,b.prob);
-const sv=S("svg",{viewBox:"0 0 330 150",width:330,height:150},c);chartB(b.k,sv);
-const mv=H("div",null,c);H("div",{style:"font:800 10px var(--fb);letter-spacing:.12em;color:#5E8AB4"},mv,"O MOVIMENTO");H("div",{style:"font:600 12.5px/1.35 var(--fb);color:#002B49"},mv,b.mov);
-const rs=H("div",{style:"display:flex;align-items:center;gap:10px;border-top:1px solid var(--line2);padding-top:6px"},c);H("div",{class:b.res[0]==="▲"?"bob":"bobd",style:`font:800 26px var(--fh);color:${b.res[3]}`},rs,b.res[0]);const rr=H("div",null,rs);H("div",{style:`font:800 24px/1 var(--fh);color:${b.res[3]}`},rr,b.res[1]);H("div",{class:"small",style:"font-weight:600"},rr,b.res[2]);
-const ls=H("div",{style:"margin-top:auto;background:#FEF1E2;border-left:4px solid #F78C16;border-radius:8px;padding:8px 10px"},c);H("div",{style:"font:800 10px var(--fb);letter-spacing:.12em;color:#B35F00"},ls,"LIÇÃO PARA A TMG");H("div",{style:"font:700 12.5px/1.35 var(--fb);color:#002B49"},ls,b.les);H("div",{class:"small",style:"font-size:10.5px"},c,"Ressalva: "+b.note)})})();
+const pr=H("div",{style:"background:#FDF1EF;border-left:5px solid #BC0404;border-radius:8px;padding:9px 12px"},c);H("div",{style:"font:800 11px var(--fb);letter-spacing:.12em;color:#BC0404"},pr,"① O PROBLEMA");H("div",{style:"font:700 15px/1.35 var(--fb);color:#002B49;margin-top:2px"},pr,b.prob);
+const sv=S("svg",{viewBox:"0 0 330 150",width:290,height:118,style:"align-self:center"},c);chartB(b.k,sv);
+const mv=H("div",null,c);H("div",{style:"font:800 11px var(--fb);letter-spacing:.12em;color:#5E8AB4"},mv,"② O QUE FIZERAM");H("div",{style:"font:600 12.5px/1.35 var(--fb);color:#002B49"},mv,b.mov);
+H("div",{style:"font:800 11px var(--fb);letter-spacing:.12em;color:#5E8AB4;border-top:1px solid var(--line2);padding-top:6px"},c,"③ O QUE ACONTECEU");const rs=H("div",{style:"display:flex;align-items:center;gap:10px"},c);H("div",{class:b.res[0]==="▲"?"bob":"bobd",style:`font:800 26px var(--fh);color:${b.res[3]}`},rs,b.res[0]);const rr=H("div",null,rs);H("div",{style:`font:800 24px/1 var(--fh);color:${b.res[3]}`},rr,b.res[1]);H("div",{class:"small",style:"font-weight:600"},rr,b.res[2]);
+const ls=H("div",{style:"margin-top:auto;background:#FEF1E2;border-left:5px solid #F78C16;border-radius:8px;padding:9px 12px"},c);H("div",{style:"font:800 11px var(--fb);letter-spacing:.12em;color:#B35F00"},ls,"④ LIÇÃO PARA A TMG");H("div",{style:"font:800 15px/1.35 var(--fb);color:#002B49;margin-top:2px"},ls,b.les);H("div",{style:"font:600 12px/1.35 var(--fb);color:#8A4A05;margin-top:5px;padding-top:5px;border-top:1px dashed rgba(179,95,0,.35)"},ls,b.tmg);H("div",{class:"small",style:"font-size:10.5px"},c,"Ressalva: "+b.note)})})();
 function chartB(k,s){const lab=(x,y,t,a)=>T(s,x,y,t,Object.assign({fill:"#35516A",style:"font:700 11px var(--fb)"},a||{}));
 const arrow=(x,y,up,c)=>{const g=S("g",{class:up?"bob":"bobd"},s);path(up?`M${x} ${y} l7 -10 l7 10 h-4 v8 h-6 v-8z`:`M${x} ${y} l7 10 l7 -10 h-4 v-8 h-6 v8z`,{fill:c},g)};
 if(k==="bayer"){[["Níveis hierárquicos",100,50,"−50%"],["Cargos de gestão",100,33,"−2/3"],["Ciclo de pesquisa (anos)",7,4.5,"7 → ~4,5"]].forEach(([l,a,b,t],i)=>{const y=26+i*46,sc=v=>i===2?30+200*v/7:30+200*v/100;lab(30,y-8,l);S("line",{x1:sc(0),y1:y+6,x2:sc(i===2?7:100),y2:y+6,stroke:"#E8EDF2","stroke-width":6,"stroke-linecap":"round"},s);S("line",{x1:sc(b),y1:y+6,x2:sc(a),y2:y+6,stroke:"#BFD0E1","stroke-width":6,"stroke-linecap":"round"},s);S("circle",{cx:sc(a),cy:y+6,r:6,fill:"#98A6B3"},s);S("circle",{cx:sc(b),cy:y+6,r:7,fill:"#33556D"},s);arrow(244,y-2,false,"#33556D");lab(264,y+10,t,{fill:"#33556D","text-anchor":"start",style:"font:800 11px var(--fb)"})})}
@@ -1166,6 +1243,118 @@ path(`M${X[0]} ${Y(39)} L${X[1]} ${Y(51)}`,{stroke:"#002B49","stroke-width":4,fi
 [[39,"hoje","39%"],[51,"meta 6 meses","≥51%"]].forEach(([v,l,t],i)=>{const g=S("g",{"data-a":"pop",style:`--d:${8+i*2}`},s);S("circle",{cx:X[i],cy:Y(v),r:8,fill:i===1?"#F78C16":"#002B49",stroke:"#fff","stroke-width":3},g);T(g,X[i],Y(v)-14,t,{"text-anchor":"middle",fill:"#002B49",style:"font:800 14px var(--fb)"});T(g,X[i],Y(v)+24,l,{"text-anchor":"middle",fill:"#6B7B8C",style:"font:700 11px var(--fb)"})})})();
 (function(){const b=$("ptPhases");if(!b)return;const P=[["01","Mobilizar","mês 1","Validar o diagnóstico com a diretoria, narrativa única, rede de agentes","#5E8AB4"],["02","Desenhar","mês 2","Contrato de liderança, RASCI das interfaces, alçadas e fluxos de valor","#5E8AB4"],["03","Pactuar","mês 3","Workshops com as áreas, acordos de interface, cascata de comunicação","#F78C16"],["04","Implantar","meses 4–5","Fórum de integração, log de decisões, piloto de dono de fluxo (ARCO)","#1F3263"],["05","Medir","mês 6","Termômetro reaplicado, resultados e decisão do próximo ciclo","#33556D"]];
 P.forEach(([n,t,w,d,c],i)=>{const x=H("div",{"data-a":"right",style:`--d:${8+i*.6};position:relative;background:${c};color:#fff;padding:9px 30px 9px ${i?30:16}px;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 50%,calc(100% - 16px) 100%,0 100%${i?",16px 50%":""});margin-right:-10px`},b);const h=H("div",{style:"display:flex;align-items:baseline;gap:8px"},x);H("span",{style:"font:800 20px var(--fh);opacity:.6"},h,n);H("span",{style:"font:800 17px var(--fh)"},h,t);H("span",{style:"font:700 11px var(--fb);opacity:.85;margin-left:auto"},h,w);H("div",{style:"font:600 12px/1.35 var(--fb);margin-top:3px"},x,d)})})();
+
+/* ---------- BENCHMARKS · CONTEXTO ---------- */
+(function(){const s=$("bcMap");if(!s)return;
+const R=[["Silos e agenda local","6 (+1) de 7 entrevistas","Silos / visão de empresa 20%","“Existem duas TMG.”","bayer","Bayer","Silos e muitas camadas"],
+["Decisão por influência e escalonamento","5 (+1) de 7 · escalonamento","Governança & decisão 35%","A prioridade fica com a área mais influente.","cargill","Cargill","Quem decide, simplificado"],
+["Concorda na sala, diverge no corredor","7 de 7 · liderança desalinhada","Liderança 47% × alinhamento 79%","“O alinhamento até acontece; a realização falha.”","ford","Ford","Disputas internas e status “verde”"],
+["Papéis sobrepostos, ninguém responde","7 de 7 · papéis sobrepostos","Papéis & responsabilidades 40%","“Ninguém se responsabiliza.”","unilever","Unilever","Matriz difusa, accountability pouco clara"]];
+R.forEach(([sy,rec,idx,q,k,co,cp],i)=>{const y=12+i*116,g=S("g",{"data-a":"left",style:`--d:${3+i*1.2}`},s);
+S("rect",{x:0,y,width:470,height:100,rx:12,fill:"#FDF1EF",stroke:"#F2C9C3"},g);S("rect",{x:0,y,width:6,height:100,rx:3,fill:"#BC0404"},g);
+T(g,20,y+28,sy,{fill:"#002B49",style:"font:800 17px var(--fb)"});T(g,20,y+50,rec+"  ·  "+idx,{fill:"#BC0404",style:"font:700 12.5px var(--fb)"});T(g,20,y+76,q,{fill:"#35516A",style:"font:italic 600 13px var(--fb)"});
+const p=path(`M478 ${y+50} C 560 ${y+50}, 600 ${y+50}, 676 ${y+50}`,{stroke:"#F78C16","stroke-width":2.5,fill:"none","stroke-dasharray":"6 6",class:"dr",pathLength:1,style:`--d:${5+i*1.2}`},s);
+const m=S("g",{"data-a":"pop",style:`--d:${6+i*1.2}`},s);S("circle",{cx:577,cy:y+50,r:15,fill:"#fff",stroke:"#F78C16","stroke-width":2},m);T(m,577,y+56,"≈",{"text-anchor":"middle",fill:"#F78C16",style:"font:800 16px var(--fb)"});
+const h=S("g",{"data-a":"right",style:`--d:${7+i*1.2}`},s);S("rect",{x:684,y,width:446,height:100,rx:12,fill:"#fff",stroke:"#D8E2EC"},h);
+const lf=fo(h,700,y+18,120,64,"",""),lb=lf.firstChild||lf;lb.innerHTML=`<div style="width:120px;height:64px;display:flex;align-items:center;justify-content:center">${LOGOS[k]}</div>`;lb.querySelectorAll("svg,img").forEach(e=>{e.style.maxWidth="110px";e.style.maxHeight="58px"});
+T(h,842,y+40,co,{fill:"#002B49",style:"font:800 18px var(--fh)"});T(h,842,y+64,cp,{fill:"#35516A",style:"font:600 13px var(--fb)"});T(h,842,y+84,["agronegócio","agronegócio","outra indústria","outra indústria"][i],{fill:"#5E8AB4",style:"font:800 10.5px var(--fb);letter-spacing:.12em;text-transform:uppercase"})});
+[["1","O problema","o que travava — nas palavras da própria empresa ou da imprensa"],["2","O que fizeram","o movimento sobre quem decide"],["3","O que aconteceu","o número que se moveu (com ressalva)"],["4","A lição para a TMG","o mecanismo que serve aqui — sem copiar o organograma"]].forEach(([n,t,d],i)=>{const li=H("li",{style:"display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start"},$("bcRead"));H("span",{style:`width:28px;height:28px;border-radius:50%;background:${i===3?"#F78C16":"rgba(255,255,255,.14)"};color:#fff;display:grid;place-items:center;font:800 13px var(--fb)`},li,n);const b=H("div",null,li);H("div",{style:`font:800 15px var(--fb);color:${i===3?"#F78C16":"#fff"}`},b,t);H("div",{style:"font:500 12.5px/1.35 var(--fb);color:#C8DBEB"},b,d)})})();
+
+/* ---------- 8 SEMANAS · DADOS ---------- */
+const P8=[
+{n:"Liderança executiva",sh:"Liderança",c:"#122143",ac:"#F78C16",ic:"flag",exec:true,fr:"Liderança · Sustentação da mudança",
+ tiles:[["47%","Liderança · o como, juntos","× 79% de alinhamento: gap de 32 pts"],["7 de 7","liderança desalinhada","presente em todas as entrevistas"],["25%","sustentação da mudança","“mudança não sustentada”: 7 de 7"],["40%","Change Leadership · ARCO","atenção migra após o lançamento"]],
+ q:"“O alinhamento até acontece; a realização falha.”",qs:"7 de 7 entrevistas",
+ goal:"Comitê executivo falando com uma só voz — e sustentando a mudança depois do lançamento.",
+ sp:[["Consciência e patrocínio","A","Kotter 1–2 · urgência e coalizão",["Devolutiva do diagnóstico ao comitê executivo: os 10 padrões e o gap 79% × 47%","Conversas 1:1 de patrocínio com cada executivo: expectativas e resistências","Formar a coalizão: patrocinador, executivos e PMO de mudança"],"Mapa de patrocínio e de resistências"],
+ ["Contrato de liderança","D","Kotter 3 · visão e estratégia",["Workshop dos 5 compromissos: uma só voz, decidir por critério, dono do resultado, patrocínio até a adoção, metas compartilhadas","Protocolo de divergência: divergir na sala, sustentar fora dela","Assinatura pelo comitê"],"Contrato de liderança assinado"],
+ ["Ritual e cascata","K·A","Kotter 4–5 · comunicar e remover barreiras",["Ritual executivo com dados comuns e o “vermelho” sem punição","Mensagem única em cascata aos gerentes: o que muda e por quê","Apoio de coaching de gestão onde o gap for maior"],"Pauta e cadência do ritual executivo"],
+ ["Primeiro pulso","R","Kotter 6 · vitórias de curto prazo",["Pulso dos 5 compromissos, na visão dos gerentes","Check de patrocínio 30/60 no Projeto ARCO","Retrospectiva do comitê e ajuste do contrato"],"1º pulso e vitórias curtas comunicadas"]],
+ kpi:[["Executivos com o contrato assinado","—","100% do comitê","mantido"],["Compromissos cumpridos (pulso)","a medir","1ª leitura","evolução no mês 3 e 6"],["Índice de Liderança","47%","pulso no mês 3","55%"],["Sustentação da mudança","25%","check 30/60 ARCO","44%"]],
+ who:"Patrocinador executivo · comitê executivo · RH / PMO de mudança",risk:"Patrocínio forte no lançamento e atenção que migra depois (7 de 7). Mitigação: compromisso 4 do contrato + check 30/60."},
+{n:"Papéis & decisão",sh:"Papéis & decisão",c:"#B35F00",ac:"#F78C16",ic:"clip",fr:"Papéis · Governança",
+ tiles:[["40%","Papéis & responsabilidades","“papéis sobrepostos”: 7 de 7"],["35%","Governança & decisão","faixa Crítica"],["6 (+1)","de 7 · accountability difusa","“ninguém se responsabiliza”"],["5 (+1)","de 7 · escalonamento","decisão sobe em vez de ser tomada"]],
+ q:"“Ninguém se responsabiliza.”",qs:"padrão em 7 de 7 entrevistas",
+ goal:"Um único dono (A) por decisão transversal — e decisões que deixam de subir por escalonamento.",
+ sp:[["Inventário","A","Kotter 1 · urgência",["Inventário das decisões transversais e das interfaces críticas","Onde há vários A — ou nenhum A","Fóruns existentes, redundâncias e o que hoje escala"],"Decisões e interfaces críticas priorizadas"],
+ ["RASCI em workshop","D·K","Kotter 3 · visão",["Workshop RASCI com as áreas das interfaces piloto — pacto, não documento","Mapa de alçadas: estratégico, tático e operacional","Regra de ouro: um único A e ao menos um R"],"RASCI e alçadas em versão pactuável"],
+ ["Pacto e log","A","Kotter 5 · remover barreiras",["Pactuar e assinar a RASCI com as lideranças envolvidas","Lançar o log de decisões: o quê, quem, critério, data","1º fórum de integração com pauta por critério"],"RASCI piloto assinada + log ativo"],
+ ["Revisão no fórum","R","Kotter 6 · vitórias curtas",["Revisar a RASCI no fórum: o que funcionou, o que travou","Medir decisões registradas × escalonadas","Plano de expansão às demais interfaces (meses 3–6)"],"RASCI revisada e plano de expansão"]],
+ kpi:[["Interfaces críticas com RASCI pactuada","não formalizada","interfaces piloto","50%"],["Decisões transversais no log","a medir","log ativo","80%"],["Temas resolvidos no fórum sem escalar","a medir","1ª leitura","60%"],["Relatos “papéis sobrepostos”","7 de 7","—","≤4 de 7"]],
+ who:"Gerentes das interfaces piloto · donos de processo · key users",risk:"Repetir a RACI de gaveta (já aplicada e descartada). Mitigação: nasce em workshop, é revisada no fórum e se apoia no compromisso “dono do resultado”."},
+{n:"Silos & interfaces",sh:"Silos & interfaces",c:"#BC0404",ac:"#F78C16",ic:"wall",fr:"Silos · Sinergia",
+ tiles:[["20%","Silos / visão de empresa","menor índice do diagnóstico"],["6 (+1)","de 7 · silos e agenda local","a prioridade fica com a área mais influente"],["54%","Colaboração transversal","as pessoas se ajudam"],["2 (+1)","de 7 · pessoas-chave","o fluxo depende de pontes pessoais"]],
+ q:"“Existem duas TMG.”",qs:"relato recorrente sobre silos",
+ goal:"Um fluxo piloto ponta a ponta com dono, metas compartilhadas e acordos de interface.",
+ sp:[["Mapa do fluxo","A","Kotter 1 · urgência",["Mapear o fluxo piloto ponta a ponta (fluxo de sistemas / ARCO) e seus handoffs","Identificar as pontes informais que hoje sustentam o fluxo","Escolher as interfaces com mais retrabalho e escalonamento"],"Mapa do fluxo e das interfaces críticas"],
+ ["Dono e metas","D","Kotter 2–3 · coalizão e visão",["Nomear o dono do fluxo piloto, sobre as linhas de reporte atuais","Definir metas compartilhadas da cadeia, não só por área","Redigir acordos de interface: entrego, recebo, prazo e qualidade"],"Acordos de interface e metas compartilhadas"],
+ ["Fluxo em operação","K·A","Kotter 4–5 · comunicar e remover barreiras",["Operar o fluxo piloto com os acordos","Fórum quinzenal trata os bloqueios entre áreas","Comunidade de prática: o conhecimento sai das pessoas-chave"],"Fluxo piloto rodando"],
+ ["Vitória curta","R","Kotter 6 · vitórias curtas",["Mostrar handoffs resolvidos sem escalonamento","Lições aprendidas do piloto","Desenho da expansão aos três fluxos (meses 3–6)"],"Caso piloto e plano de expansão"]],
+ kpi:[["Interfaces com meta compartilhada","a medir","interfaces piloto","50%"],["Temas do fluxo resolvidos no fórum","a medir","1ª leitura","60%"],["Índice Silos / visão de empresa","20%","pulso no mês 3","41%"],["Relatos “silos”","6 (+1) de 7","—","≤4 de 7"]],
+ who:"Dono do fluxo piloto · gerentes funcionais do fluxo · key users",risk:"A prioridade voltar para a área mais influente. Mitigação: metas compartilhadas + fórum com critério + compromisso “metas compartilhadas”."},
+{n:"Projeto ARCO · adoção",sh:"Projeto ARCO",c:"#33556D",ac:"#F78C16",ic:"refresh",fr:"Implantação · adoção do sistema",
+ tiles:[["40%","Mudança & Adoção · ARCO","menor dimensão do instrumento"],["▲","chamados em alta","nas últimas 2 semanas (PMO)"],["60 dias","janela comercial","venda da nova safra"],["Protheus","sem pessoa dedicada","coordenação atende 23 projetos"]],
+ q:"“Você entraria num avião que não foi testado?”",qs:"entrevista com a PMO do projeto",
+ goal:"Ajudar a PMO a fazer o ARCO virar rotina: sistema estável, papéis claros e pessoas usando no dia a dia.",
+ sp:[["Estabilizar","A","Kotter 1 · urgência",["Triagem semanal dos chamados por tipo: bug × melhoria × dúvida × processo","Status report único (bugs, melhorias, adoção) ao patrocinador","Decisão do patrocinador: quem atende Protheus"],"Painel de chamados por tipo + status único"],
+ ["Posicionar","D","Kotter 2 e 4 · coalizão e comunicação",["Posicionamento top-down: patrocinador e diretores com a mesma mensagem","Papel de key user: o que é, o que decide, o que não decide — com agenda protegida","Rito de demandas: quem aprova melhoria e com que critério"],"Papel de key user e rito de demandas"],
+ ["Capacitar","K·A","Kotter 5 · remover barreiras",["Mapear gaps de capacitação por papel (hoje não mapeados), com a verba de treinamento","Treinos curtos por papel, encaixados na janela comercial","Guias rápidos a partir das dúvidas mais frequentes + multiplicadores"],"Trilhas por papel e guias rápidos"],
+ ["Reforçar","R","Kotter 6–7 · vitórias e consolidação",["Check de adoção 30/60: uso, proficiência e chamados por tipo","Reconhecer áreas e key users que adotaram","Plano de sustentação pós-janela e retomada priorizada das atualizações do Salesforce"],"Relatório de adoção 30/60 e plano de sustentação"]],
+ kpi:[["Velocidade de adoção · usuários-alvo operando no sistema","a medir","linha de base na S2, semanal","a pactuar com a PMO"],["Utilização · transações no sistema × fora dele","a medir","1ª leitura","a pactuar com a PMO"],["Proficiência · chamados de dúvida por usuário","em alta","tendência de queda","a pactuar com a PMO"],["Mudança & Adoção (instrumento ARCO)","40%","—","reaplicar no mês 6"]],
+ who:"Patrocinador do ARCO · PMO do projeto · key users · coordenação Protheus · squad de sustentação Salesforce",risk:"Operação e projeto ao mesmo tempo, na janela de 60 dias. Mitigação: nada que pare a venda — treinos curtos, no fluxo, e decisões de prioridade no rito de demandas."}];
+
+/* ---------- 8 SEMANAS · ONDE ATACAR ---------- */
+(function(){const s=$("atkChart");if(!s)return;
+const go8=k=>{const i=slides.findIndex(x=>x.dataset.plan===String(k));if(i>=0)go(i)};
+const RW=[["Silos / visão de empresa",20,6,1,"3"],["Sustentação da mudança",25,7,0,"1"],["Governança & decisão",35,5,1,"2"],["Papéis & responsabilidades",40,7,0,"2"],["Liderança",47,7,0,"1"],["Cultura & conflito",47,4,1,""],["Sinergia · colaboração",54,2,1,""]];
+const X0=196,XW=112,bx=v=>X0+XW*v/100;
+T(s,0,14,"FRENTE",{fill:"#6B7B8C",style:"font:800 10px var(--fb);letter-spacing:.12em"});T(s,X0,14,"ÍNDICE",{fill:"#6B7B8C",style:"font:800 10px var(--fb);letter-spacing:.12em"});T(s,358,14,"RECORRÊNCIA (DE 7)",{fill:"#6B7B8C",style:"font:800 10px var(--fb);letter-spacing:.12em"});
+S("line",{x1:bx(37.5),y1:22,x2:bx(37.5),y2:330,stroke:"#BC0404","stroke-dasharray":"3 4",opacity:.6},s);
+RW.forEach(([n,v,r,ind,f],i)=>{const y=30+i*44,on=!!f,g=S("g",{"data-a":"left",style:`--d:${3+i*.5}`},s);
+if(on)S("rect",{x:-4,y:y-4,width:492,height:38,rx:8,fill:"#FEF1E2"},g);
+T(g,4,y+19,n,{fill:on?"#002B49":"#98A6B3",style:`font:${on?800:600} 12.5px var(--fb)`});
+S("rect",{x:X0,y:y+8,width:XW,height:14,rx:7,fill:"#EEF2F6"},g);const b=S("rect",{x:X0,y:y+8,width:0,height:14,rx:7,fill:zc(v),class:"gbar","data-w":XW*v/100},g);b.dataset.w=XW*v/100;
+T(g,X0+XW+8,y+20,v+"%",{fill:on?zc(v):"#98A6B3",style:"font:800 13px var(--fb)"});
+for(let k=0;k<7;k++){const full=k<r,half=!full&&k<r+ind;S("circle",{cx:368+k*13,cy:y+15,r:5,fill:full?(on?"#002B49":"#98A6B3"):half?"#fff":"#E3E9EF",stroke:half?(on?"#002B49":"#98A6B3"):"none","stroke-width":1.6,"stroke-dasharray":half?"2 2":"none"},g)}
+if(on){const t=S("g",{style:"cursor:pointer"},g);S("rect",{x:462,y:y+4,width:24,height:22,rx:5,fill:"#122143"},t);T(t,474,y+20,f,{"text-anchor":"middle",fill:"#fff",style:"font:800 12px var(--fb)"});t.addEventListener("click",()=>go8(+f-1));tip(t,`Frente ${f}`,"abre o plano de 8 semanas")}});
+const ya=30+7*44+10;S("line",{x1:0,y1:ya-6,x2:488,y2:ya-6,stroke:"#D8E2EC"},s);const g=S("g",{"data-a":"left",style:"--d:7"},s);S("rect",{x:-4,y:ya,width:492,height:38,rx:8,fill:"#EAF0F6"},g);
+T(g,4,ya+16,"Projeto ARCO",{fill:"#002B49",style:"font:800 12.5px var(--fb)"});T(g,4,ya+31,"Mudança & Adoção · instrumento",{fill:"#6B7B8C",style:"font:600 10px var(--fb)"});
+S("rect",{x:X0,y:ya+12,width:XW,height:14,rx:7,fill:"#EEF2F6"},g);S("rect",{x:X0,y:ya+12,width:XW*.4,height:14,rx:7,fill:"#F78C16"},g);T(g,X0+XW+8,ya+24,"40%",{fill:"#B35F00",style:"font:800 13px var(--fb)"});T(g,362,ya+24,"em implantação",{fill:"#33556D",style:"font:700 11px var(--fb)"});
+const t4=S("g",{style:"cursor:pointer"},g);S("rect",{x:462,y:ya+8,width:24,height:22,rx:5,fill:"#122143"},t4);T(t4,474,ya+24,"4",{"text-anchor":"middle",fill:"#fff",style:"font:800 12px var(--fb)"});t4.addEventListener("click",()=>go8(3));
+S("circle",{cx:12,cy:408,r:5,fill:"#002B49"},s);T(s,22,412,"explícita",{fill:"#6B7B8C",style:"font:600 10.5px var(--fb)"});S("circle",{cx:82,cy:408,r:5,fill:"#fff",stroke:"#002B49","stroke-dasharray":"2 2","stroke-width":1.6},s);T(s,92,412,"indireta (+1)",{fill:"#6B7B8C",style:"font:600 10.5px var(--fb)"});S("rect",{x:178,y:402,width:16,height:12,rx:3,fill:"#FEF1E2"},s);T(s,200,412,"Onda 1 · atacar nas 8 semanas",{fill:"#6B7B8C",style:"font:600 10.5px var(--fb)"});
+const box=$("atkCards");P8.forEach((p,i)=>{const ex=p.exec,c=H("button",{class:"card shine atk","data-a":"up",style:`--d:${4+i*1.2};text-align:left;cursor:pointer;border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:7px;position:relative;overflow:hidden;font-family:var(--fb);${ex?"padding-top:34px;background:linear-gradient(150deg,#0E1C39,#1F3263);color:#fff;border:2px solid #F78C16;box-shadow:0 16px 36px rgba(14,28,57,.28)":`background:#fff;border:1px solid var(--line);border-top:5px solid ${p.c}`}`},box);
+if(ex)H("div",{style:"position:absolute;top:0;right:0;background:#F78C16;color:#0E1C39;font:800 10.5px var(--fb);letter-spacing:.1em;padding:6px 12px;border-radius:0 0 0 10px"},c,"▲ MAIOR PROBLEMA · CARD EXECUTIVO");
+const h=H("div",{style:"display:flex;align-items:center;gap:10px"},c);H("div",{style:`width:40px;height:40px;border-radius:10px;background:${ex?"#F78C16":p.c};display:grid;place-items:center;flex:none`,class:"ic8",html:icon(p.ic)},h);const ht=H("div",null,h);H("div",{style:`font:800 11px var(--fb);letter-spacing:.12em;color:${ex?"#FCD1A2":"#6B7B8C"}`},ht,`FRENTE ${i+1} · ${p.fr.toUpperCase()}`);H("div",{style:`font:800 21px/1.1 var(--fh);color:${ex?"#fff":"#002B49"}`},ht,p.n);
+const nr=H("div",{style:"display:grid;grid-template-columns:repeat(3,1fr);gap:8px"},c);p.tiles.slice(0,3).forEach(([v,l])=>{const d=H("div",{style:`border-radius:8px;padding:6px 8px;background:${ex?"rgba(255,255,255,.08)":"#F4F7FA"}`},nr);H("div",{style:`font:800 20px/1 var(--fh);color:${ex?"#F78C16":(v.includes("%")?zc(parseFloat(v)):"#002B49")}`},d,v);H("div",{style:`font:600 10.5px/1.25 var(--fb);color:${ex?"#C8DBEB":"#6B7B8C"};margin-top:2px`},d,l)});
+H("div",{style:`font:600 13px/1.4 var(--fb);color:${ex?"#E6EEF6":"#35516A"}`},c,ex?"A liderança é a alavanca: concorda sobre o quê (79%), mas não executa junto (47%). Sem ela, as outras três frentes não se sustentam.":p.goal);
+H("div",{style:`margin-top:auto;font:800 13px var(--fb);color:${ex?"#F78C16":"#B35F00"}`},c,"Ver plano de 8 semanas →");c.addEventListener("click",()=>go8(i))});
+const M=$("atkMethod");H("div",{class:"card nv",style:"border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;justify-content:center"},M,"").innerHTML='<div class="eye" style="color:#F78C16;margin:0">Metodologia</div><div style="font:800 17px/1.2 var(--fh);color:#fff;margin-top:4px">8 semanas = Onda 1 do plano de 6 meses</div>';
+[["ADKAR · Prosci","Cada sprint de 2 semanas mira uma etapa: Consciência → Desejo → Conhecimento e Habilidade → Reforço."],["Kotter · 8 passos","As 8 semanas cobrem os passos 1–6: urgência, coalizão, visão, comunicação, remoção de barreiras e vitórias curtas. Os passos 7–8 ficam para os meses 3–6."],["Indicadores de GMO","Adoção, utilização e proficiência (Prosci) + pulso no mês 3 e termômetro no mês 6 — na mesma régua de 0 a 100."]].forEach(([t,d],i)=>{const k=H("div",{"data-a":"up",style:`--d:${9+i*.6};background:#fff;border:1px solid var(--line);border-left:4px solid ${i===1?"#5E8AB4":"#F78C16"};border-radius:10px;padding:9px 12px`},M);H("div",{style:"font:800 14px var(--fb);color:#002B49"},k,t);H("div",{style:"font:500 12px/1.4 var(--fb);color:#35516A;margin-top:2px"},k,d)})})();
+
+/* ---------- 8 SEMANAS · PLANOS ---------- */
+(function(){const AD={A:"Consciência",D:"Desejo","D·K":"Desejo · Conhecimento",K:"Conhecimento","K·A":"Conhecimento · Habilidade",R:"Reforço"};
+document.querySelectorAll("section[data-plan]").forEach(sec=>{const p=P8[+sec.dataset.plan],w=sec.querySelector(".planwrap"),ex=p.exec;
+const top=H("div",{style:"display:grid;grid-template-columns:1fr 430px;gap:14px"},w);
+const L=H("div",null,top);const hd=H("div",{style:"display:flex;align-items:center;gap:12px"},L);
+H("div",{style:`width:46px;height:46px;border-radius:12px;background:${ex?"#F78C16":p.c};display:grid;place-items:center;flex:none`,class:"ic8",html:icon(p.ic)},hd);
+const ht=H("div",null,hd);H("div",{class:"eye",style:"margin:0;color:#6B7B8C"},ht,`Frente ${+sec.dataset.plan+1} de 4 · por que atacar agora`);H("div",{class:"kin",style:"font:800 26px/1.1 var(--fh);color:#002B49"},ht,p.goal);
+if(ex)H("span",{style:"margin-left:auto;background:#F78C16;color:#0E1C39;font:800 11px var(--fb);letter-spacing:.1em;padding:7px 12px;border-radius:99px;white-space:nowrap"},hd,"▲ MAIOR PROBLEMA");
+const tl=H("div",{style:"display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px"},L);p.tiles.forEach(([v,l,d],i)=>{const t=H("div",{"data-a":"up",style:`--d:${2+i*.5};background:#F4F7FA;border-radius:10px;padding:8px 12px;border-left:4px solid ${v.includes("%")?zc(parseFloat(v)):p.c}`},tl);H("div",{style:`font:800 24px/1 var(--fh);color:${v.includes("%")?zc(parseFloat(v)):"#002B49"}`},t,v);H("div",{style:"font:800 11.5px var(--fb);color:#002B49;margin-top:3px"},t,l);H("div",{style:"font:500 11px/1.3 var(--fb);color:#6B7B8C"},t,d)});
+const R=H("div",{class:"card nv","data-a":"left",style:"--d:3;border-radius:12px;padding:14px 18px;display:flex;flex-direction:column;justify-content:center"},top);H("div",{class:"eye",style:"color:#F78C16;margin:0"},R,"A voz do diagnóstico");H("div",{style:"font:italic 700 19px/1.3 var(--fh);color:#fff;margin-top:6px"},R,p.q);H("div",{style:"font:600 12px var(--fb);color:#9DB7CE;margin-top:6px"},R,p.qs);
+const bk=H("button",{class:"pill",style:"margin-top:10px;align-self:flex-start;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.08);color:#fff;padding:7px 12px;font:700 12px var(--fb);cursor:pointer"},R,"← as 4 frentes");bk.addEventListener("click",()=>{const i=slides.findIndex(x=>x.dataset.t==="Onde atacar em 8 semanas");if(i>=0)go(i)});
+/* régua de 8 semanas */
+const rl=H("div",{style:"margin-top:12px;display:grid;grid-template-columns:repeat(8,1fr);gap:0;position:relative"},w);for(let k=1;k<=8;k++){const c=H("div",{style:`text-align:center;font:800 11px var(--fb);color:#6B7B8C;padding:4px 0;border-left:${k===1?"0":"1px dashed #D8E2EC"}`},rl,"SEM "+k)}
+const prog=H("div",{style:"position:relative;height:6px;border-radius:99px;background:#E8EDF2;margin-top:2px;overflow:hidden"},w);H("i",{class:"p8bar",style:`position:absolute;left:0;top:0;bottom:0;width:0;border-radius:99px;background:linear-gradient(90deg,${p.c},#F78C16);transition:width 2.4s cubic-bezier(.2,.7,.2,1)`},prog);
+const sg=H("div",{style:"display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px"},w);
+p.sp.forEach(([t,a,kt,acts,ent],i)=>{const c=H("div",{class:"card","data-a":"up",style:`--d:${4+i*1.1};border-radius:12px;padding:10px 14px;display:flex;flex-direction:column;gap:6px;border-top:4px solid ${i===3?"#F78C16":p.c}`},sg);
+const hh=H("div",{style:"display:flex;align-items:center;gap:8px"},c);H("div",{style:`min-width:34px;height:34px;padding:0 6px;border-radius:9px;background:${i===3?"#F78C16":p.c};color:#fff;display:grid;place-items:center;font:800 ${a.length>1?13:17}px var(--fh)`,title:"ADKAR"},hh,a);const hx=H("div",null,hh);H("div",{style:"font:800 10.5px var(--fb);letter-spacing:.1em;color:#6B7B8C"},hx,`SEMANAS ${i*2+1}–${i*2+2} · ADKAR ${AD[a].toUpperCase()}`);H("div",{style:"font:800 16px/1.15 var(--fh);color:#002B49"},hx,t);
+H("div",{style:"font:700 11px var(--fb);color:#5E8AB4"},c,kt);const ul=H("ul",{style:"margin:0;padding-left:16px;display:grid;gap:4px"},c);acts.forEach(x=>H("li",{style:"font:500 13.5px/1.4 var(--fb);color:#35516A"},ul,x));
+const e=H("div",{style:"margin-top:auto;background:#FEF1E2;border-radius:8px;padding:6px 9px"},c);H("div",{style:"font:800 9.5px var(--fb);letter-spacing:.12em;color:#B35F00"},e,"ENTREGÁVEL");H("div",{style:"font:700 12px/1.3 var(--fb);color:#002B49"},e,ent)});
+const bt=H("div",{style:"display:grid;grid-template-columns:1fr 400px;gap:12px;margin-top:10px"},w);
+const tb=H("div",{class:"card","data-a":"up",style:"--d:9;border-radius:12px;padding:0;overflow:hidden"},bt);const hr=H("div",{style:"display:grid;grid-template-columns:1.8fr .8fr 1fr 1fr;background:#002B49;color:#fff;font:800 10px var(--fb);letter-spacing:.12em"},tb);["INDICADOR DE GMO","HOJE","MARCO SEMANA 8","META 6 MESES"].forEach(x=>H("div",{style:"padding:6px 12px"},hr,x));
+p.kpi.forEach((r,i)=>{const rw=H("div",{style:`display:grid;grid-template-columns:1.8fr .8fr 1fr 1fr;border-top:1px solid var(--line2);background:${i%2?"#F8FAFC":"#fff"}`},tb);r.forEach((x,j)=>H("div",{style:`padding:7px 12px;font:${j===0?700:j===1?800:600} 12.5px/1.3 var(--fb);color:${j===1?"#BC0404":j===3?"#B35F00":"#002B49"}`},rw,x))});
+const rs=H("div",{style:"display:grid;gap:8px"},bt);[["Quem participa",p.who,"#5E8AB4"],["Risco a monitorar",p.risk,"#BC0404"]].forEach(([t,d,c],i)=>{const k=H("div",{"data-a":"left",style:`--d:${10+i*.6};background:#fff;border:1px solid var(--line);border-left:4px solid ${c};border-radius:10px;padding:7px 12px`},rs);H("div",{style:`font:800 10px var(--fb);letter-spacing:.12em;color:${c}`},k,t.toUpperCase());H("div",{style:"font:600 12px/1.35 var(--fb);color:#002B49;margin-top:2px"},k,d)});
+ENTER[sec.dataset.t]=()=>{const b=sec.querySelector(".p8bar");b.style.transition="none";b.style.width="0";void b.offsetWidth;b.style.transition="";setTimeout(()=>b.style.width="100%",500)}})})();
 /* ---------- SILOS → SINERGIA ---------- */
 (function(){const s=$("siloNet"),cx=415,cy=275,rx=300,ry=195,bw=196,bh=62;mk(s,"arS","#5E8AB4");
 const A=["Negócio & comercial","Pesquisa & desenvolvimento","Planejamento & execução","Supply & operações","Processos, dados & sistemas","Pessoas & capacitação"];
@@ -1286,10 +1475,10 @@ slides.forEach((s,i)=>{if(s.dataset.band){const top=H("div",{class:"sr-top"});co
 s.prepend(H("div",{class:"sr-dec"},null,"▸▸▸▸▸▸▸▸▸▸▸▸"));const band=H("div",{class:"sr-band "+(s.dataset.c||"c-navy")});band.innerHTML=`<span>›</span><span class="bt">${s.dataset.band}</span>${s.dataset.bs?`<small>${s.dataset.bs}</small>`:""}`;top.after(band);kin(band.querySelector(".bt"))}
 if(s.hasAttribute("data-nofoot"))return;const f=H("div",{class:"foot"},s);H("b",null,f,"TMG · CULTURA EM MOVIMENTO");if(s.dataset.src)H("span",{class:"s",title:s.dataset.src},f,s.dataset.src);H("span",{class:"n"},f,`${i+1} / ${N}`)});
 document.querySelectorAll(".kin").forEach(kin);
-(function(){const A=[["1","Cultura","Visão única, termômetro, nivelamento, heatmap, BPMN, liderança e riscos","#33556D"],["2","Organização","Silos, matriz fraca × equilibrada × forte, a matriz da TMG, RASCI e governança","#5E8AB4"],["3","Benchmarks","Bayer, Cargill, Ford e Unilever — o que os números mostram","#5E8AB4"],["4","Reorganização","Quatro caminhos, plano cultural, plano organizacional e resumo final","#F78C16"]];
+(function(){const A=[["1","Cultura","Visão única, termômetro, nivelamento, heatmap, BPMN, liderança e riscos","#33556D"],["2","Organização","Silos, matriz fraca × equilibrada × forte, a matriz da TMG, RASCI e governança","#5E8AB4"],["3","Benchmarks","Contexto + Bayer, Cargill, Ford e Unilever: o problema, o que fizeram e a lição para a TMG","#5E8AB4"],["4","Reorganização","Quatro caminhos, planos de 6 meses, onde atacar em 8 semanas (4 frentes) e resumo final","#F78C16"]];
 A.forEach(([n,t,d,c],i)=>{const k=slides.findIndex(x=>x.dataset.p===`${n} · ${t}`),l=slides.map((x,j)=>x.dataset.p===`${n} · ${t}`?j:-1).filter(j=>j>=0);const b=H("button",{class:"clk","data-a":"up",style:`--d:${12+i};display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:center;text-align:left;background:#fff;border:1.5px solid var(--line);border-top:5px solid ${c};border-radius:12px;padding:10px 12px`},$("agenda"));H("div",{style:`font:800 36px var(--fh);color:${c}`},b,n);const x=H("div",null,b);H("div",{style:"font:800 16px var(--fh);color:var(--navy)"},x,`Parte ${n} · ${t} · telas ${l[0]+1}–${l[l.length-1]+1}`);H("div",{class:"small"},x,d);b.addEventListener("click",()=>go(k))})})();
 slides.forEach((s,i)=>{const b=H("button",{title:s.dataset.t,"aria-label":s.dataset.t},$("dots"));b.addEventListener("click",()=>go(i))});
-const CH={"1 · Cultura":["01","Cultura","Como a TMG pensa, decide e sustenta — o que as sete vozes revelam."],"2 · Organização":["02","Organização","Silos, matriz e papéis: como a estrutura real decide e entrega."],"3 · Benchmarks":["03","Benchmarks","Quem mexeu em quem decide — e o que aconteceu com os números."],"4 · Reorganização":["04","Reorganização","Caminhos, planos e indicadores para ir de 39% a ≥51% em 6 meses."]};
+const CH={"1 · Cultura":["01","Cultura","Como a TMG pensa, decide e sustenta — o que as sete vozes revelam."],"2 · Organização":["02","Organização","Silos, matriz e papéis: como a estrutura real decide e entrega."],"3 · Benchmarks":["03","Benchmarks","Os mesmos sintomas, em outras empresas — o problema, o que fizeram e a lição para a TMG."],"4 · Reorganização":["04","Reorganização","Caminhos, planos e indicadores para ir de 39% a ≥51% em 6 meses."]};
 function fit(){const vw=innerWidth,vh=innerHeight,sm=vw<760,pad=sm?8:22,bar=sm?54:64,sc=Math.min((vw-pad*2)/1600,(vh-pad-bar)/900),st=$("stage");st.style.left=vw/2+"px";st.style.top=(pad+(vh-pad-bar)/2)+"px";st.style.transform=`translate(-50%,-50%) scale(${sc})`}
 addEventListener("resize",fit);
 function counters(n){n.querySelectorAll("[data-count]").forEach(el=>{const to=+el.dataset.count,suf=el.dataset.suf||"";count(el,0,to,suf)})}
@@ -1299,7 +1488,7 @@ n.querySelectorAll(".lv .fl[data-w]").forEach(f=>{f.style.transition="none";f.st
 n.querySelectorAll(".gbar").forEach(r=>{r.style.transition="none";r.setAttribute("width",0);void r.getBoundingClientRect();r.style.transition="";setTimeout(()=>r.setAttribute("width",r.dataset.w),350)});
 const nd=n.querySelector("#needle");if(nd){nd.style.transition="none";nd.style.transform="rotate(0deg)";void nd.getBoundingClientRect();nd.style.transition="";setTimeout(()=>nd.style.transform=`rotate(${TEMP[scen]/100*180}deg)`,400)}
 const ca=n.querySelector("#coverArc");if(ca){ca.style.transition="none";ca.setAttribute("stroke-dasharray",`0 ${2*Math.PI*225}`);void ca.getBoundingClientRect();ca.style.transition="";setTimeout(()=>ca.setAttribute("stroke-dasharray",ca.dataset.full),1500)}
-if(i===0)Dust.start();else Dust.stop();counters(n);const fn=ENTER[n.dataset.t];if(fn)fn()}
+Dust.stop();counters(n);const fn=ENTER[n.dataset.t];if(fn)fn()}
 function chapter(meta,done){const c=$("chap");c.innerHTML=`<div class="n">${meta[0]}</div><div class="ey">PARTE ${meta[0]}</div><h1>${meta[1]}</h1><p>${meta[2]}</p><div class="ln"></div><div class="sk">clique para pular ›</div>`;kin(c.querySelector("h1"));c.classList.add("on","play");
 const ln=c.querySelector(".ln"),h=c.querySelector("h1"),p=c.querySelector("p"),nn=c.querySelector(".n");ln.animate([{width:"0px"},{width:"520px"}],{duration:900,delay:300,easing:"cubic-bezier(.2,.7,.2,1)",fill:"forwards"});p.animate([{opacity:0,transform:"translateY(14px)"},{opacity:1,transform:"none"}],{duration:700,delay:500,fill:"backwards"});nn.animate([{opacity:0,transform:"translateX(80px)"},{opacity:1,transform:"none"}],{duration:1300,easing:"cubic-bezier(.2,.7,.2,1)"});
 let ended=false;const end=()=>{if(ended)return;ended=true;c.animate([{opacity:1},{opacity:0}],{duration:450}).onfinish=()=>{c.classList.remove("on","play");c.innerHTML=""};done()};c.onclick=end;setTimeout(end,2100)}
@@ -1343,7 +1532,7 @@ document.querySelectorAll(".kt .ic svg *").forEach(p=>p.setAttribute("pathLength
 /* 33 · card stack nos 4 atos */
 [...document.querySelectorAll("#acts > div")].forEach((w,i)=>{w.dataset.a="stack";w.style.setProperty("--sx",((1.5-i)*381)+"px");w.style.setProperty("--r",((i-1.5)*4)+"deg");w.style.setProperty("--d",String(3+i*1.1))});
 /* 29 · blob orgânico atrás da capa + 40 · hero shader (aurora) */
-(function(){const sv=$("coverSvg");const blob=S("path",{class:"blob",d:"M400 50 C560 50 730 210 730 380 C730 550 560 710 400 710 C240 710 70 550 70 380 C70 210 240 50 400 50 Z",fill:"rgba(94,138,180,.10)",stroke:"rgba(157,187,217,.22)","stroke-width":1});sv.insertBefore(blob,sv.firstChild);
+(function(){const sv=$("coverSvg");const blob=S("path",{class:"blob",d:"M400 50 C560 50 730 210 730 380 C730 550 560 710 400 710 C240 710 70 550 70 380 C70 210 240 50 400 50 Z",fill:"rgba(94,138,180,.10)",stroke:"rgba(157,187,217,.22)","stroke-width":1});
 const au=document.createElement("canvas");au.width=400;au.height=225;au.style.cssText="position:absolute;inset:0;width:1600px;height:900px;filter:blur(34px);opacity:.8;pointer-events:none";slides[0].insertBefore(au,$("dust"));const ax=au.getContext("2d");let run=false;
 const blobs=[[.22,.34,130,"94,138,180",.42],[.68,.62,160,"31,50,99",.7],[.56,.22,90,"247,140,22",.13],[.86,.84,120,"157,187,217",.26],[.4,.8,110,"18,33,67",.5]];
 function fr(t){if(!run)return;ax.clearRect(0,0,400,225);blobs.forEach(([bx,by,r,c,a],i)=>{const x=bx*400+Math.sin(t/4200+i)*44,y=by*225+Math.cos(t/5200+i*1.3)*26;const g=ax.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,`rgba(${c},${a})`);g.addColorStop(1,`rgba(${c},0)`);ax.fillStyle=g;ax.fillRect(0,0,400,225)});requestAnimationFrame(fr)}
@@ -1398,6 +1587,39 @@ const sil=slides.findIndex(s=>s.dataset.t==="Silos e sinergia");if(i===sil&&FX.s
 const _act=activate;activate=function(i,inst,back){_act(i,inst,back);FX.onSlide(i)};FX.onSlide(cur);
 $("controls").insertAdjacentHTML("afterbegin",'<span class="c" style="font-weight:500;opacity:.8;height:40px">⤢ amplia gráficos</span>');
 })();
+
+/* ===== V8 · capa em progress motion + botão "Sobre este slide" ===== */
+if(window.__capa){ENTER["Capa"]=window.__capa;if(cur===0)window.__capa()}
+(function(){const D={
+"Capa":"Abertura da leitura analítica: a temperatura de sinergia da TMG hoje (39%) e a meta proposta para 6 meses (≥51%). O anel mostra o caminho percorrido até hoje e o trecho que falta até a meta; ao redor, as cinco frentes analisadas.",
+"Resumo executivo":"A história em quatro atos: como a leitura foi feita (7 lideranças, 5 instrumentos, 77 respostas, 46 relatos), o que a cultura mostra (44%), o que a organização mostra (37%) e o que propomos para 6 meses. O botão de analogias traduz cada ato para a linguagem do campo.",
+"Visão única":"Mostra que sete pessoas, de áreas e instrumentos diferentes, chegaram à mesma leitura: 10 padrões se repetem em pelo menos 4 das 7 entrevistas. É a base de confiança para o restante do diagnóstico.",
+"Termômetro cultural":"Reúne as 6 leituras estruturadas numa só régua de 0 a 100. A TMG está em 39%, no limiar da faixa Crítica; a meta de 6 meses é ≥51%. Os cards de cima mostram as frentes da organização e a meta de cada uma.",
+"Nivelamento":"Escada de maturidade por lente: em que degrau a TMG está hoje e onde a meta de 6 meses a coloca. Os degraus são as próprias alternativas dos instrumentos aplicados nas entrevistas.",
+"Heatmap térmico":"Mapa de calor que posiciona cada evidência das entrevistas por nível hierárquico e etapa do fluxo de trabalho: mostra onde a dor se concentra de verdade.",
+"Onde a cultura quebra":"Compara o caminho formal de um tema transversal com o caminho que acontece de fato, marcando os pontos de quebra relatados nas entrevistas.",
+"Liderança":"A liderança concorda sobre o quê (79%), mas não executa junto (47%) — gap de 32 pontos, presente em 7 de 7 entrevistas. Propõe um contrato de liderança com 5 compromissos observáveis.",
+"Código cultural":"Seis comportamentos que descrevem como a cultura opera hoje — e para onde precisa virar. Vire as cartas para ver o comportamento futuro e o ritual que o sustenta.",
+"Riscos":"Radar do custo de não agir: cada risco posicionado pela recorrência nas entrevistas e pelo impacto, com a tendência caso nada mude.",
+"Silos e sinergia":"Da ilha à sinergia: hoje o fluxo entre áreas depende de pontes pessoais (silos 20%). A proposta troca essas pontes por cinco pontes formais.",
+"Matriz: comparação":"Compara matriz fraca, equilibrada e forte pelo critério que importa: quem decide. Os relatos mostram sinais de matriz fraca — leitura interpretativa, a validar com organograma e alçadas.",
+"Matriz equilibrada TMG":"Desenho proposto de matriz equilibrada para a TMG: funções × fluxos de valor, sobre as linhas de reporte atuais e sem criar uma nova área.",
+"Papéis e responsabilidades":"Matriz RASCI ilustrativa dos padrões relatados: decisões com vários donos ou com nenhum. Regra de ouro: um único A e pelo menos um R por decisão.",
+"Governança e decisão":"Quem decide o quê: governança em 35%, com escalonamento, decisão por influência e fóruns ineficazes. Propõe um mapa de alçadas e um log de decisões.",
+"Benchmarks":"Quatro casos — dois do agronegócio e dois de outras indústrias. Cada card mostra o problema que a empresa viveu, o que fez, o que aconteceu e a lição que serve para a TMG.",
+"Análise de caminhos":"Quatro caminhos de reorganização comparados pela cobertura dos 10 padrões e por cinco critérios. O caminho C — matriz equilibrada + gestão da mudança — é o recomendado.",
+"Proposta · cultura":"Plano de trabalho da reorganização cultural em 6 meses, com marcos, entregáveis e ciclos de refinamento. Clique em cada marco para ver objetivo, indicador e etapa ADKAR.",
+"Proposta · organização":"Plano de trabalho operacional de 6 meses (papéis, governança, silos e donos de fluxo) e os indicadores de maturidade, de hoje à meta de 6 meses.",
+"Resumo final":"Os principais insights e as decisões que a liderança pode assumir hoje. A prontidão sobe a cada decisão marcada.",
+"Proposta de trabalho":"A proposta consolidada: em 6 meses, levar a TMG de 39% a ≥51% de sinergia, com 5 frentes, 5 fases, entregáveis, governança e indicadores de sucesso."};
+const bt=H("button",{class:"g",id:"bInfo",title:"Sobre este slide","aria-expanded":"false"});bt.innerHTML='<span style="display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;border:2px solid currentColor;font:800 12px/1 var(--fb)">i</span><span>Sobre este slide</span>';
+$("controls").insertBefore(bt,$("bPrev"));
+const pn=H("div",{id:"infoP"},document.body);pn.innerHTML='<div class="ih"><span class="ie">Sobre este slide</span><button class="ix" aria-label="Fechar">×</button></div><div class="it"></div><div class="id"></div>';
+let open=false;const fill=i=>{const s=slides[i];pn.querySelector(".it").textContent=s.dataset.t;pn.querySelector(".id").textContent=s.dataset.desc||D[s.dataset.t]||"Tela da leitura analítica sobre cultura e organização da TMG."};
+const set=v=>{open=v;pn.classList.toggle("on",v);bt.classList.toggle("on",v);bt.setAttribute("aria-expanded",v);if(v)fill(cur)};
+bt.addEventListener("click",()=>set(!open));pn.querySelector(".ix").addEventListener("click",()=>set(false));
+addEventListener("keydown",e=>{if(e.key==="i"||e.key==="I")set(!open);if(e.key==="Escape")set(false)});
+const _a8=activate;activate=function(i,inst,back){_a8(i,inst,back);if(open)fill(i)}})();
 
 </script>
 </body>
