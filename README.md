@@ -66,6 +66,22 @@ Vite é usado apenas como build/dev server para módulos ES e dependências; nã
 └── .gitignore
 ```
 
+## Gestão de Portfólio FEG — sistema (labs/gestao-portfolio-feg)
+
+Sistema de cadastro, entrada e priorização de projetos para a própria equipe da FEG fazer a gestão do portfólio. Arquivo único e offline: abra `public/gestao-portfolio-feg.html` no Chrome ou Edge. Os dados ficam no `localStorage` do navegador; use **Dados e configurações → Backup** para guardar cópia.
+
+| Nível | Para quê | Telas |
+|---|---|---|
+| 1 · Cadastro e entrada | Registrar tudo e decidir o que entra | Painel, Novo projeto, Acervo, Funil de entrada (checklist entra / não entra / falta informação) |
+| 2 · Priorização | Ordenar com perguntas (0–3) e pesos em % | Avaliar projetos, Ranking, Matriz valor × esforço, Critérios e pesos |
+| 3 · Capacidade e planejamento | Ver o que cabe e quando | Carteira e capacidade (FTE, reserva, orçamento, decisão do comitê, pauta), Roadmap |
+
+- Pesos, perguntas, checklist e reserva de capacidade são **sugestões a validar pela FEG** (editáveis na tela de Critérios e pesos e em Carteira).
+- Planilha: exporta CSV compatível com Excel e importa com prévia de erros (modelo de planilha em Dados e configurações).
+- Desenvolvimento: `labs/gestao-portfolio-feg/index.html` (arquivos separados) → `node labs/gestao-portfolio-feg/build.mjs` gera o arquivo único.
+- QA de regressão: `bash labs/gestao-portfolio-feg/qa/qa.sh` (build, `npm test`, `npm run check`, apps existentes, todas as rotas em desktop/celular e fluxos de cada passo). Testes do modelo: `tests/unit/gestao-portfolio-feg.test.js`.
+- Plano e requisitos: `labs/gestao-portfolio-feg/PLANO.md`.
+
 ## Portfólio FEG — trilha didática (labs/portfolio-feg)
 
 App de aprendizagem de gestão de portfólio para as analistas da FEG, em 3 níveis progressivos. É um **arquivo HTML único e offline**, em pt-BR, com a paleta Maestro/ONS. Ele não usa o Supabase nem os dados do Portfólio FE.
