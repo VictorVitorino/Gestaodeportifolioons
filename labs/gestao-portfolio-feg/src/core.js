@@ -77,7 +77,7 @@
 
   /* ------------------------------------------------------------------- telas */
   const TELAS = [];
-  GP.tela = t => { const i = TELAS.findIndex(x => x.id === t.id); if(i >= 0) TELAS[i] = t; else TELAS.push(t); };
+  GP.tela = t => { const i = TELAS.findIndex(x => x.id === t.id); if(i >= 0) TELAS[i] = t; else TELAS.push(t); TELAS.sort((a, b) => (a.ordem || 50) - (b.ordem || 50)); };
   GP.telas = () => TELAS;
   GP.NIVEIS = [
     { n:1, nome:'Cadastro e entrada', curto:'Cadastro',
