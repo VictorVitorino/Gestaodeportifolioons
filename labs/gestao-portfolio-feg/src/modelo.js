@@ -38,7 +38,7 @@
       seNao:'É atividade de rotina/chamado: tratar no fluxo operacional (Azure DevOps, Jira ou atendimento).' },
     { id:'E2', tipo:'barreira', pergunta:'Está no escopo da FE (ferramentas eletroenergéticas e sua governança)?',
       seNao:'Fora do escopo da FE: encaminhar à área responsável.' },
-    { id:'E3', tipo:'barreira', pergunta:'Não repete um projeto que já está no acervo?',
+    { id:'E3', tipo:'barreira', pergunta:'É uma demanda nova, que não duplica um projeto do acervo?',
       seNao:'Duplicado: juntar ao projeto que já existe.' },
     { id:'E4', tipo:'informacao', pergunta:'O objetivo e o benefício esperado estão descritos?',
       seNao:'Descrever objetivo e benefício esperado.', sugerir: p => !!(p.descricao && p.beneficio) },
@@ -136,7 +136,7 @@
     const efetiva = +cap.fte * (1 - (+cap.reservaPct || 0) / 100);
     const execucao = lista.filter(p => p.etapa === 'execucao');
     const comprometido = cap.descontarExecucao ? execucao.reduce((a, p) => a + (p.esforcoFte || 0), 0) : 0;
-    const livre = efetiva - comprometido, orc = +cap.orcamento || 0;
+    const excesso = Math.max(0, comprometido - efetiva), livre = Math.max(0, efetiva - comprometido), orc = +cap.orcamento || 0;
     const rk = ranking(lista.filter(p => p.etapa === 'aprovado'), {}, crit);
     // fixados entram primeiro, na ordem do ranking
     const ordem = [...rk.filter(x => forcar[x.p.id] === 'in'), ...rk.filter(x => forcar[x.p.id] !== 'in')];
@@ -151,7 +151,7 @@
       return Object.assign({}, x, { status, falta, acumFte: fte, acumCusto: custo });
     });
     const dentro = itens.filter(i => ['cabe', 'fixado', 'fixado_estoura'].includes(i.status));
-    return { efetiva, comprometido, livre, orcamento: orc, usadoFte: fte, usadoCusto: custo, sobraFte: livre - fte, sobraOrc: orc - custo,
+    return { efetiva, comprometido, excesso, livre, orcamento: orc, usadoFte: fte, usadoCusto: custo, sobraFte: livre - fte, sobraOrc: orc - custo,
       itens, dentro, cabem: dentro.length, candidatos: rk.length, semNota: lista.filter(p => p.etapa === 'aprovado' && !pontuar(p, crit).completo) };
   }
   const STATUS_CARTEIRA = {
@@ -169,13 +169,52 @@
   function estadoInicial(){
     return { v: VERSAO, projetos: [], seq: 0, criterios: JSON.parse(JSON.stringify(CRITERIOS_PADRAO)), capacidade: Object.assign({}, CAPACIDADE_PADRAO), forcar: {}, ui: { nivel: 1, menuMini: false } };
   }
+  /* Higienização: tudo o que vem do armazenamento ou de um backup passa por aqui (tipos, ids seguros, catálogos). */
+  const idSeguro = v => String(v ?? '').replace(/[^\w-]/g, '').slice(0, 60);
+  const txt = (v, max = 2000) => typeof v === 'string' ? v.slice(0, max) : v == null ? '' : String(v).slice(0, max);
+  const numOuNull = v => v === '' || v == null || isNaN(v) ? null : Math.max(0, +v);
+  const dataOuVazio = v => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : '';
+  function limparProjeto(p){
+    if(!p || typeof p !== 'object' || !p.id || typeof p.titulo !== 'string') return null;
+    const o = {};
+    ['titulo', 'descricao', 'beneficio', 'area', 'ferramenta', 'demandante', 'patrocinador', 'responsavel', 'link', 'observacoes', 'codigo', 'tipo', 'origem'].forEach(k => o[k] = txt(p[k], k === 'titulo' ? 140 : 2000));
+    o.id = idSeguro(p.id); o.codigo = idSeguro(p.codigo) || o.id;
+    o.gerencia = CAT.gerencias.some(g => g.id === p.gerencia) ? p.gerencia : '';
+    o.etapa = ETAPAS.some(e => e.id === p.etapa) ? p.etapa : 'entrada';
+    o.obrigatorio = !!p.obrigatorio; o.exemplo = !!p.exemplo;
+    ['esforcoFte', 'duracaoMeses', 'custo'].forEach(k => o[k] = numOuNull(p[k]));
+    ['inicioPrevisto', 'fimPrevisto', 'dataEntrada'].forEach(k => o[k] = dataOuVazio(p[k]));
+    if(o.link && !/^https?:\/\//i.test(o.link)) o.link = '';
+    ['criadoEm', 'atualizadoEm'].forEach(k => { if(p[k]) o[k] = txt(p[k], 40); });
+    o.historico = Array.isArray(p.historico) ? p.historico.filter(h => h && typeof h === 'object').map(h => ({ data: txt(h.data, 40), acao: txt(h.acao, 60), detalhe: txt(h.detalhe, 1000) })) : [];
+    if(p.entrada && typeof p.entrada === 'object' && RESULTADO_ENTRADA[p.entrada.resultado]){
+      const r = {}; Object.entries(p.entrada.respostas || {}).forEach(([k, v]) => { if(ENTRADA.some(q => q.id === k) && (v === 'sim' || v === 'nao')) r[k] = v; });
+      o.entrada = { respostas: r, resultado: p.entrada.resultado, motivos: Array.isArray(p.entrada.motivos) ? p.entrada.motivos.map(m => txt(m, 300)) : [], obs: txt(p.entrada.obs, 300), data: txt(p.entrada.data, 40) };
+    }
+    if(p.avaliacao && typeof p.avaliacao === 'object'){
+      const r = {}; Object.entries(p.avaliacao.respostas || {}).forEach(([k, v]) => { if(/^[\w-]{1,20}$/.test(k) && v !== '' && v != null && !isNaN(v)) r[k] = Math.max(0, Math.min(3, Math.round(+v))); });
+      o.avaliacao = { respostas: r, obs: txt(p.avaliacao.obs, 300), data: txt(p.avaliacao.data, 40) };
+    }
+    return o;
+  }
+  function limparCriterios(cs){
+    if(!Array.isArray(cs) || !cs.length) return JSON.parse(JSON.stringify(CRITERIOS_PADRAO));
+    const ok = cs.filter(c => c && typeof c === 'object' && /^[\w-]{1,20}$/.test(c.id) && (c.eixo === 'valor' || c.eixo === 'esforco') && Array.isArray(c.niveis) && c.niveis.length === 4)
+      .map(c => ({ id: c.id, eixo: c.eixo, peso: Math.max(0, Math.min(100, Math.round(+c.peso || 0))), nome: txt(c.nome, 80), pergunta: txt(c.pergunta, 200), niveis: c.niveis.map(n => txt(n, 120)) }));
+    return ok.some(c => c.eixo === 'valor') && ok.some(c => c.eixo === 'esforco') ? ok : JSON.parse(JSON.stringify(CRITERIOS_PADRAO));
+  }
   function migrar(S){
-    S.ui = Object.assign({ nivel: 1, menuMini: false }, S.ui || {});
-    if(!Array.isArray(S.criterios) || !S.criterios.length) S.criterios = JSON.parse(JSON.stringify(CRITERIOS_PADRAO));
-    S.capacidade = Object.assign({}, CAPACIDADE_PADRAO, S.capacidade || {});
-    S.forcar = S.forcar || {};
-    S.projetos = S.projetos || [];
-    S.seq = S.seq || 0;
+    S = S && typeof S === 'object' ? S : estadoInicial();
+    const ui = S.ui && typeof S.ui === 'object' ? S.ui : {};
+    S.ui = Object.assign({}, ui, { nivel: Math.max(1, Math.min(3, Math.round(+ui.nivel) || 1)), menuMini: !!ui.menuMini });
+    S.criterios = limparCriterios(S.criterios);
+    const c = S.capacidade && typeof S.capacidade === 'object' ? S.capacidade : {};
+    S.capacidade = { periodo: txt(c.periodo ?? CAPACIDADE_PADRAO.periodo, 20), fte: numOuNull(c.fte) ?? CAPACIDADE_PADRAO.fte, reservaPct: Math.min(60, numOuNull(c.reservaPct) ?? CAPACIDADE_PADRAO.reservaPct),
+      orcamento: numOuNull(c.orcamento) ?? CAPACIDADE_PADRAO.orcamento, descontarExecucao: c.descontarExecucao === undefined ? CAPACIDADE_PADRAO.descontarExecucao : !!c.descontarExecucao };
+    const vistos = new Set();
+    S.projetos = (Array.isArray(S.projetos) ? S.projetos : []).map(limparProjeto).filter(p => p && !vistos.has(p.id) && vistos.add(p.id));
+    const f = {}; Object.entries(S.forcar && typeof S.forcar === 'object' ? S.forcar : {}).forEach(([k, v]) => { if(vistos.has(k) && (v === 'in' || v === 'out')) f[k] = v; }); S.forcar = f;
+    S.seq = Math.max(Math.round(+S.seq) || 0, ...S.projetos.map(p => +(String(p.codigo).match(/(\d+)$/) || [0, 0])[1] || 0));
     S.v = VERSAO;
     return S;
   }
@@ -194,7 +233,9 @@
     const e = {};
     OBRIGATORIOS.forEach(k => { if(!String(p[k] ?? '').trim()) e[k] = 'Campo obrigatório.'; });
     if(p.titulo && p.titulo.trim().length < 5) e.titulo = 'Use pelo menos 5 caracteres.';
-    if(p.link){ try { new URL(p.link); } catch(x) { e.link = 'Informe um endereço completo (https://…).'; } }
+    if(p.titulo && p.titulo.trim().length > 140) e.titulo = 'Use no máximo 140 caracteres.';
+    if(p.link){ let ok = false; try { ok = /^https?:$/.test(new URL(p.link).protocol); } catch(x) {} if(!ok) e.link = 'Informe um endereço completo começando com https:// (ou http://).'; }
+    ['inicioPrevisto', 'fimPrevisto'].forEach(k => { if(p[k] && (!/^\d{4}-\d{2}-\d{2}$/.test(p[k]) || p[k] < '2000-01-01' || p[k] > '2100-12-31')) e[k] = 'Informe uma data entre 2000 e 2100.'; });
     ['esforcoFte', 'duracaoMeses', 'custo'].forEach(k => { if(p[k] !== '' && p[k] != null && (isNaN(p[k]) || +p[k] < 0)) e[k] = 'Informe um número maior ou igual a zero.'; });
     if(p.inicioPrevisto && p.fimPrevisto && p.fimPrevisto < p.inicioPrevisto) e.fimPrevisto = 'O fim não pode ser antes do início.';
     const dup = S().projetos.find(x => x.id !== p.id && x.titulo && p.titulo && x.titulo.trim().toLowerCase() === p.titulo.trim().toLowerCase());

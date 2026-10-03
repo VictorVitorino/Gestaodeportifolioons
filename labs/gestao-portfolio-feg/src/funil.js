@@ -58,7 +58,7 @@
     const dias = d => d ? Math.max(0, Math.round((Date.now() - new Date(d + 'T00:00:00').getTime()) / 864e5)) : null;
     const corpoFila = fila.length ? `<div class="stack" style="gap:10px">${fila.map(p => { const d = dias(p.dataEntrada);
         return `<div class="card row" style="padding:14px 16px;align-items:center">
-          <div style="flex:1;min-width:220px"><div><span class="code" style="color:var(--green-700);font-weight:600">${esc(p.codigo)}</span> · <b>${esc(p.titulo)}</b></div>
+          <div style="flex:1;min-width:200px;max-width:100%"><div style="overflow-wrap:anywhere"><span class="code" style="color:var(--green-700);font-weight:600">${esc(p.codigo)}</span> · <b>${esc(p.titulo)}</b></div>
             <div class="muted" style="font-size:12.5px">${esc(p.gerencia)} · ${esc(p.tipo)} · ${esc(p.demandante || '—')}${d != null ? ` · aguardando há <b>${d} dia(s)</b>` : ''}</div></div>
           ${GP.etapaPill(p.etapa)} ${p.entrada ? resPill(p.entrada.resultado) : ''}
           <button class="btn btn-primary btn-sm" data-entrada="${p.id}">${icon('funil', 15)} ${p.entrada ? 'Reavaliar entrada' : 'Avaliar entrada'}</button>
@@ -82,7 +82,7 @@
       if(!e) return `<p class="muted" style="margin:0 0 10px">Ainda não passou pelo checklist de entrada.</p><button class="btn btn-primary btn-sm" data-entrada="${p.id}">${icon('funil', 15)} Avaliar entrada</button>`;
       return `<div class="row" style="margin-bottom:10px">${resPill(e.resultado)}<span class="dim" style="font-size:12.5px">em ${fmt.dataHora(e.data)}</span><span class="spacer"></span><button class="btn btn-ghost btn-sm" data-entrada="${p.id}">Reavaliar</button></div>
         ${e.motivos && e.motivos.length ? `<p style="margin:0 0 10px">${e.motivos.map(esc).join('<br>')}</p>` : ''}
-        <div class="stack" style="gap:6px">${M.ENTRADA.map((q, i) => `<div class="row" style="flex-wrap:nowrap;align-items:flex-start;font-size:13px"><span style="flex:none;width:44px">${e.respostas[q.id] === 'sim' ? U.pill('Sim', 'ok') : U.pill('Não', q.tipo === 'barreira' ? 'bad' : 'warn')}</span><span>${i + 1}. ${esc(q.pergunta)}</span></div>`).join('')}</div>
+        <div class="stack" style="gap:6px">${M.ENTRADA.map((q, i) => `<div class="row" style="flex-wrap:nowrap;align-items:flex-start;font-size:13px"><span style="flex:none;width:96px">${e.respostas[q.id] === 'sim' ? U.pill('Sim', 'ok') : e.respostas[q.id] === 'nao' ? U.pill('Não', q.tipo === 'barreira' ? 'bad' : 'warn') : U.pill('Sem resposta', 'neutral')}</span><span>${i + 1}. ${esc(q.pergunta)}</span></div>`).join('')}</div>
         ${e.obs ? `<p class="muted" style="margin:10px 0 0">Obs.: ${esc(e.obs)}</p>` : ''}`;
     } });
 

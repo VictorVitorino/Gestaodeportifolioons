@@ -236,7 +236,7 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
 .escala button:hover{border-color:var(--green-200)}
 .escala button.on{border-color:var(--green);background:var(--green-50);color:var(--green-700)}
 .escala button.on b{color:var(--green)}
-.peso-row{display:grid;grid-template-columns:minmax(0,1fr) 150px 44px;gap:12px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.peso-row{display:grid;grid-template-columns:minmax(0,1fr) 150px 84px;gap:12px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
 .peso-row .num{text-align:right;font-weight:600}
 details summary{list-style:none} details summary::-webkit-details-marker{display:none}
 details summary::before{content:"▸";display:inline-block;margin-right:8px;color:var(--green);transition:transform .15s} details[open] summary::before{transform:rotate(90deg)}
@@ -266,6 +266,12 @@ details summary::before{content:"▸";display:inline-block;margin-right:8px;colo
 .g-col.over{background:var(--bad)}
 .g-cap{position:absolute;left:0;right:0;border-top:2px dashed var(--green);z-index:1}
 
+/* ---------- QA final ---------- */
+.side-backdrop{position:fixed;inset:0;z-index:15;background:rgba(20,28,20,.3)}
+.page-h h1,.tbl td,.kcard,.card b,.card h3,.g-lbl,.callout,.card p,.card li,.hist{overflow-wrap:anywhere}
+.tbl td{min-width:0}
+.hint{font-weight:500;color:var(--green-700);font-size:12px;min-height:16px}
+
 /* ---------- responsive ---------- */
 @media (max-width:1100px){ .g4{grid-template-columns:repeat(2,minmax(0,1fr))} .g3{grid-template-columns:repeat(2,minmax(0,1fr))} .lvl-cards{grid-template-columns:1fr} }
 @media (max-width:900px){
@@ -279,11 +285,13 @@ details summary::before{content:"▸";display:inline-block;margin-right:8px;colo
   .g-head,.g-row{grid-template-columns:130px minmax(0,1fr)}
   .aval-res{position:static}
   .escala{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .peso-row{grid-template-columns:minmax(0,1fr) 100px 40px}
+  .peso-row{grid-template-columns:minmax(0,1fr) 84px}
+  .peso-row input[type=range]{display:none}
   .form{grid-template-columns:1fr}
   .levels .seg button span{display:none}
 }
 @media (max-width:600px){
+  .hm{display:none}
   .g4{grid-template-columns:1fr}
   .topbar{flex-wrap:wrap}
   .topbar .ons{height:24px}
@@ -320,13 +328,27 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     pct: (v, d=0) => v == null || isNaN(v) ? '—' : nf(d).format(v * 100) + '%',
     brl: v => v == null || v === '' || isNaN(v) ? '—' : 'R$ ' + nf(0).format(v),
     mi: v => v == null || v === '' || isNaN(v) ? '—' : 'R$ ' + nf(2).format(v / 1e6) + ' mi',
-    data: v => { if(!v) return '—'; const [y,m,d] = String(v).slice(0,10).split('-'); return d && m && y ? `${d}/${m}/${y}` : esc(v); },
-    dataHora: v => v ? new Date(v).toLocaleString('pt-BR', {dateStyle:'short', timeStyle:'short'}) : '—',
+    data: v => { if(!v) return '—'; const [y,m,d] = String(v).slice(0,10).split('-'); return d && m && y ? `${esc(d)}/${esc(m)}/${esc(y)}` : esc(v); },
+    dataHora: v => { const d = v ? new Date(v) : null; return d && !isNaN(d) ? d.toLocaleString('pt-BR', {dateStyle:'short', timeStyle:'short'}) : '—'; },
+    /** número para campo de texto no formato brasileiro (sem separador de milhar) */
+    campo: v => v == null || v === '' || isNaN(v) ? '' : String(v).replace('.', ','),
   };
   const sum = (a, f = x => x) => a.reduce((s, x) => s + (+f(x) || 0), 0);
-  const hoje = () => new Date().toISOString().slice(0, 10);
+  /** Data de hoje no fuso local (AAAA-MM-DD) */
+  const hoje = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+  /** Número no formato brasileiro: "150.000" → 150000; "1,5" → 1.5; "1.234,56" → 1234.56; "" → ''; inválido → NaN */
+  const numBR = v => {
+    if(typeof v === 'number') return v;
+    let s = String(v ?? '').trim().replace(/R\$|\s/g, ''); if(!s) return '';
+    if(s.includes('.') && s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+    else if(s.includes(',')){ if((s.match(/,/g) || []).length > 1) return NaN; s = s.replace(',', '.'); }
+    else if(/^-?\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
+    return /^-?\d+(\.\d+)?$/.test(s) ? +s : NaN;
+  };
+  /** Texto para busca/comparação sem acento e sem caixa */
+  const normTxt = s => String(s ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   const uid = p => p + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  GP.util = { esc, clone, fmt, sum, hoje, uid };
+  GP.util = { esc, clone, fmt, sum, hoje, uid, numBR, normTxt };
 
   /* ------------------------------------------------------------------ ícones */
   const I = {
@@ -398,7 +420,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
       quando:'No planejamento do ano ou do trimestre e antes do comitê de portfólio.' },
   ];
   GP.nivel = () => S.ui.nivel || 1;
-  GP.setNivel = n => { S.ui.nivel = n; GP.save(); render(); toast(`Nível ${n} · ${GP.NIVEIS[n-1].nome}`); };
+  GP.setNivel = n => { n = Math.max(1, Math.min(3, +n || 1)); S.ui.nivel = n; GP.save(); fecharMenuMovel(); render(); toast(`Nível ${n} · ${GP.NIVEIS[n-1].nome}`); };
 
   /* ------------------------------------------------------------------ rotas */
   const parse = () => {
@@ -411,7 +433,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
   GP.rota = parse;
   GP.go = h => { if(location.hash === h) render(); else location.hash = h; };
   GP.refresh = () => render(true);
-  window.addEventListener('hashchange', () => { closeModal(); render(); });
+  window.addEventListener('hashchange', () => { closeModal(); fecharMenuMovel(); render(); });
 
   /* ------------------------------------------------------------- componentes */
   const pill = (txt, tom = 'neutral') => `<span class="pill t-${tom}"><i></i>${esc(txt)}</span>`;
@@ -424,17 +446,20 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
   /** Tabela ordenável: cols [{key, label, align, fmt(v,row), sortVal(row), sort:false}], rows, id (para lembrar ordenação), rowAttr(row) */
   const table = ({cols, rows, id, rowAttr, vazioTxt = 'Nenhum registro.'}) => {
     const sk = id ? S.ui['sort:' + id] : null; let rs = rows.slice();
-    if(sk){ const c = cols.find(c => c.key === sk.key); if(c){ const g = c.sortVal || (r => r[c.key]); rs.sort((a, b) => { const x = g(a), y = g(b); return ((x ?? '') > (y ?? '') ? 1 : (x ?? '') < (y ?? '') ? -1 : 0) * sk.dir; }); } }
-    return `<div class="tbl-wrap"><table class="tbl"><thead><tr>${cols.map(c => { const s = id && c.sort !== false; return `<th class="${c.align || ''} ${s ? 'sort' : ''}" ${s ? `data-sort="${esc(id)}|${esc(c.key)}"` : ''}>${esc(c.label)}${sk && sk.key === c.key ? (sk.dir > 0 ? ' ↑' : ' ↓') : ''}</th>`; }).join('')}</tr></thead>
-      <tbody>${rs.length ? rs.map(r => `<tr ${rowAttr ? rowAttr(r) : ''}>${cols.map(c => `<td class="${c.align || ''}">${c.fmt ? c.fmt(r[c.key], r) : esc(r[c.key])}</td>`).join('')}</tr>`).join('') : `<tr><td colspan="${cols.length}" class="dim" style="text-align:center;padding:28px">${esc(vazioTxt)}</td></tr>`}</tbody></table></div>`;
+    if(sk){ const c = cols.find(c => c.key === sk.key); if(c){ const g = c.sortVal || (r => r[c.key]);
+      rs.sort((a, b) => { const x = g(a), y = g(b); const r = (typeof x === 'number' || typeof y === 'number') ? (x ?? -Infinity) - (y ?? -Infinity) : String(x ?? '').localeCompare(String(y ?? ''), 'pt-BR', { sensitivity:'base', numeric:true }); return r * sk.dir; }); } }
+    return `<div class="tbl-wrap"><table class="tbl"><thead><tr>${cols.map(c => { const s = id && c.sort !== false; return `<th class="${c.align || ''} ${s ? 'sort' : ''} ${c.hm ? 'hm' : ''}" ${s ? `data-sort="${esc(id)}|${esc(c.key)}" tabindex="0" aria-sort="${sk && sk.key === c.key ? (sk.dir > 0 ? 'ascending' : 'descending') : 'none'}"` : ''}>${esc(c.label)}${sk && sk.key === c.key ? (sk.dir > 0 ? ' ↑' : ' ↓') : ''}</th>`; }).join('')}</tr></thead>
+      <tbody>${rs.length ? rs.map(r => `<tr ${rowAttr ? rowAttr(r) : ''}>${cols.map(c => `<td class="${c.align || ''} ${c.hm ? 'hm' : ''}">${c.fmt ? c.fmt(r[c.key], r) : esc(r[c.key])}</td>`).join('')}</tr>`).join('') : `<tr><td colspan="${cols.length}" class="dim" style="text-align:center;padding:28px">${esc(vazioTxt)}</td></tr>`}</tbody></table></div>`;
   };
   GP.ui = { pill, pageHead, secH, kpi, callout, vazio, tabs, table, icon };
 
   /* ------------------------------------------------------- modal, toast, tip */
-  function modal(html, {largo} = {}){ closeModal(); const d = document.createElement('div'); d.className = 'modal-bg'; d.dataset.close = '1';
+  let focoAntes = null;
+  function modal(html, {largo} = {}){ const ant = document.activeElement; closeModal(); focoAntes = ant; const d = document.createElement('div'); d.className = 'modal-bg'; d.dataset.close = '1';
     d.innerHTML = `<div class="modal ${largo ? 'wide' : ''}" role="dialog" aria-modal="true">${html}</div>`; document.body.appendChild(d);
     const f = d.querySelector('input, select, textarea, .btn-primary'); if(f) f.focus(); return d.querySelector('.modal'); }
-  function closeModal(){ document.querySelectorAll('.modal-bg').forEach(m => m.remove()); }
+  function closeModal(){ const tinha = document.querySelector('.modal-bg'); document.querySelectorAll('.modal-bg').forEach(m => m.remove());
+    if(tinha && focoAntes && document.contains(focoAntes)) try { focoAntes.focus(); } catch(e){} focoAntes = null; }
   function toast(msg){ let t = document.querySelector('.toast'); if(!t){ t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
     t.innerHTML = msg; t.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('on'), 3200); }
   function busy(on, msg = 'Processando…'){ document.querySelectorAll('.busy').forEach(b => b.remove()); if(!on) return;
@@ -448,9 +473,17 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
   document.addEventListener('click', e => {
     const c = e.target.closest('[data-close]'); if(c && (c === e.target || c.tagName === 'BUTTON')){ closeModal(); return; }
     const s = e.target.closest('[data-sort]');
-    if(s){ const [id, key] = s.dataset.sort.split('|'); const cur = S.ui['sort:' + id]; S.ui['sort:' + id] = cur && cur.key === key ? (cur.dir > 0 ? {key, dir:-1} : null) : {key, dir:1}; GP.save(); GP.refresh(); }
+    if(s){ const [id, key] = s.dataset.sort.split('|'); const cur = S.ui['sort:' + id]; S.ui['sort:' + id] = cur && cur.key === key ? (cur.dir > 0 ? {key, dir:-1} : null) : {key, dir:1}; GP.save(); GP.refresh();
+      const n = document.querySelector(`th[data-sort="${CSS.escape(s.dataset.sort)}"]`); if(n) n.focus(); }
   });
-  document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape'){ if(document.querySelector('.modal-bg')) closeModal(); else fecharMenuMovel(); return; }
+    if(e.key === 'Tab'){ const m = document.querySelector('.modal-bg .modal'); if(m){ const f = [...m.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])')].filter(x => x.offsetParent !== null);
+      if(f.length){ const a = f[0], z = f[f.length - 1]; if(!m.contains(document.activeElement)){ e.preventDefault(); a.focus(); } else if(e.shiftKey && document.activeElement === a){ e.preventDefault(); z.focus(); } else if(!e.shiftKey && document.activeElement === z){ e.preventDefault(); a.focus(); } } } }
+    if((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('th[data-sort]')){ e.preventDefault(); e.target.click(); }
+  });
+  const fecharMenuMovel = () => { const s = document.querySelector('.side.open'); if(s){ s.classList.remove('open'); const b = document.querySelector('.side-backdrop'); if(b) b.remove(); } };
+  GP.fecharMenuMovel = fecharMenuMovel;
   // Tooltip do menu recolhido
   let tipEl = null;
   const showTip = el => { if(!document.querySelector('.shell.mini') || window.innerWidth <= 900) return; hideTip(); const r = el.getBoundingClientRect();
@@ -513,7 +546,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     const app = document.getElementById('app'); if(!app) return;
     const r = parse(), nivel = GP.nivel();
     const tela = TELAS.find(t => t.id === r.id) || TELAS.find(t => t.id === 'painel');
-    const mini = !!S.ui.menuMini, aberto = document.querySelector('.side.open');
+    const mini = !!S.ui.menuMini, aberto = document.querySelector('.side.open') && window.innerWidth <= 900;
     document.title = `${tela ? tela.titulo : 'Início'} · Gestão de Portfólio FEG`;
     app.innerHTML = `<div class="shell ${mini ? 'mini' : ''}">
       <aside class="side ${aberto ? 'open' : ''}" aria-label="Menu">${menu(r, tela, nivel)}</aside>
@@ -543,7 +576,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     const item = t => `<a class="nav-item ${tela && tela.id === t.id ? 'on' : ''}" href="#/${t.id}" data-tip="${esc(t.titulo)}" aria-label="${esc(t.titulo)}"><span class="ic">${icon(t.icone)}</span><span class="lbl">${esc(t.titulo)}</span></a>`;
     let h = `<a class="brand" href="#/painel" data-tip="Gestão de Portfólio FEG">${GP.logoFEG(36)}<span class="txt"><b>Gestão de Portfólio</b><span>Gerência FEG · ONS</span></span></a>`;
     GP.NIVEIS.forEach(L => { if(L.n > nivel) return; const ts = TELAS.filter(t => t.menu !== false && t.nivel === L.n && !t.rodape); if(!ts.length) return;
-      h += `<div class="nav-sec" title="Nível ${L.n} · ${esc(L.nome)}">${L.n} · ${esc(L.nome)}</div>` + ts.map(item).join(''); });
+      h += `<div class="nav-sec" title="Nível ${L.n} · ${esc(L.nome)}">Nível ${L.n} · ${esc(L.curto)}</div>` + ts.map(item).join(''); });
     if(nivel < 3) h += `<div class="nav-sec">Mais recursos</div><button class="nav-item" data-nivel="${nivel + 1}" data-tip="Ativar nível ${nivel + 1}" aria-label="Ativar nível ${nivel + 1}"><span class="ic">${icon('estrela')}</span><span class="lbl">Ativar nível ${nivel + 1}</span></button>`;
     h += `<div class="side-foot">${TELAS.filter(t => t.rodape).map(item).join('')}
       <button class="collapse-btn" data-recolher data-tip="${S.ui.menuMini ? 'Expandir menu' : 'Recolher menu'}" aria-label="${S.ui.menuMini ? 'Expandir menu' : 'Recolher menu'}">${icon(S.ui.menuMini ? 'expandir' : 'recolher')}<span class="lbl">Recolher menu</span></button></div>`;
@@ -567,8 +600,8 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     const nv = e.target.closest('[data-nivel]'); if(nv){ closeModal(); GP.setNivel(+nv.dataset.nivel); return; }
     if(e.target.closest('[data-ajuda-nivel]')){ GP.explicarNiveis(); return; }
     if(e.target.closest('[data-recolher]')){ S.ui.menuMini = !S.ui.menuMini; GP.save(); hideTip(); render(true); return; }
-    if(e.target.closest('[data-menu]')){ document.querySelector('.side').classList.toggle('open'); return; }
-    if(e.target.closest('.side .nav-item') && window.innerWidth <= 900){ const s = document.querySelector('.side'); if(s) s.classList.remove('open'); }
+    if(e.target.closest('[data-menu]')){ const s = document.querySelector('.side'); if(s.classList.contains('open')) fecharMenuMovel(); else { s.classList.add('open'); const b = document.createElement('div'); b.className = 'side-backdrop'; b.addEventListener('click', fecharMenuMovel); document.body.appendChild(b); const f = s.querySelector('.nav-item'); if(f) f.focus(); } return; }
+    if(e.target.closest('.side .nav-item') && window.innerWidth <= 900) fecharMenuMovel();
   });
 
   GP.start = () => { load(); render(); };
@@ -616,7 +649,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
       seNao:'É atividade de rotina/chamado: tratar no fluxo operacional (Azure DevOps, Jira ou atendimento).' },
     { id:'E2', tipo:'barreira', pergunta:'Está no escopo da FE (ferramentas eletroenergéticas e sua governança)?',
       seNao:'Fora do escopo da FE: encaminhar à área responsável.' },
-    { id:'E3', tipo:'barreira', pergunta:'Não repete um projeto que já está no acervo?',
+    { id:'E3', tipo:'barreira', pergunta:'É uma demanda nova, que não duplica um projeto do acervo?',
       seNao:'Duplicado: juntar ao projeto que já existe.' },
     { id:'E4', tipo:'informacao', pergunta:'O objetivo e o benefício esperado estão descritos?',
       seNao:'Descrever objetivo e benefício esperado.', sugerir: p => !!(p.descricao && p.beneficio) },
@@ -714,7 +747,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     const efetiva = +cap.fte * (1 - (+cap.reservaPct || 0) / 100);
     const execucao = lista.filter(p => p.etapa === 'execucao');
     const comprometido = cap.descontarExecucao ? execucao.reduce((a, p) => a + (p.esforcoFte || 0), 0) : 0;
-    const livre = efetiva - comprometido, orc = +cap.orcamento || 0;
+    const excesso = Math.max(0, comprometido - efetiva), livre = Math.max(0, efetiva - comprometido), orc = +cap.orcamento || 0;
     const rk = ranking(lista.filter(p => p.etapa === 'aprovado'), {}, crit);
     // fixados entram primeiro, na ordem do ranking
     const ordem = [...rk.filter(x => forcar[x.p.id] === 'in'), ...rk.filter(x => forcar[x.p.id] !== 'in')];
@@ -729,7 +762,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
       return Object.assign({}, x, { status, falta, acumFte: fte, acumCusto: custo });
     });
     const dentro = itens.filter(i => ['cabe', 'fixado', 'fixado_estoura'].includes(i.status));
-    return { efetiva, comprometido, livre, orcamento: orc, usadoFte: fte, usadoCusto: custo, sobraFte: livre - fte, sobraOrc: orc - custo,
+    return { efetiva, comprometido, excesso, livre, orcamento: orc, usadoFte: fte, usadoCusto: custo, sobraFte: livre - fte, sobraOrc: orc - custo,
       itens, dentro, cabem: dentro.length, candidatos: rk.length, semNota: lista.filter(p => p.etapa === 'aprovado' && !pontuar(p, crit).completo) };
   }
   const STATUS_CARTEIRA = {
@@ -747,13 +780,52 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
   function estadoInicial(){
     return { v: VERSAO, projetos: [], seq: 0, criterios: JSON.parse(JSON.stringify(CRITERIOS_PADRAO)), capacidade: Object.assign({}, CAPACIDADE_PADRAO), forcar: {}, ui: { nivel: 1, menuMini: false } };
   }
+  /* Higienização: tudo o que vem do armazenamento ou de um backup passa por aqui (tipos, ids seguros, catálogos). */
+  const idSeguro = v => String(v ?? '').replace(/[^\w-]/g, '').slice(0, 60);
+  const txt = (v, max = 2000) => typeof v === 'string' ? v.slice(0, max) : v == null ? '' : String(v).slice(0, max);
+  const numOuNull = v => v === '' || v == null || isNaN(v) ? null : Math.max(0, +v);
+  const dataOuVazio = v => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : '';
+  function limparProjeto(p){
+    if(!p || typeof p !== 'object' || !p.id || typeof p.titulo !== 'string') return null;
+    const o = {};
+    ['titulo', 'descricao', 'beneficio', 'area', 'ferramenta', 'demandante', 'patrocinador', 'responsavel', 'link', 'observacoes', 'codigo', 'tipo', 'origem'].forEach(k => o[k] = txt(p[k], k === 'titulo' ? 140 : 2000));
+    o.id = idSeguro(p.id); o.codigo = idSeguro(p.codigo) || o.id;
+    o.gerencia = CAT.gerencias.some(g => g.id === p.gerencia) ? p.gerencia : '';
+    o.etapa = ETAPAS.some(e => e.id === p.etapa) ? p.etapa : 'entrada';
+    o.obrigatorio = !!p.obrigatorio; o.exemplo = !!p.exemplo;
+    ['esforcoFte', 'duracaoMeses', 'custo'].forEach(k => o[k] = numOuNull(p[k]));
+    ['inicioPrevisto', 'fimPrevisto', 'dataEntrada'].forEach(k => o[k] = dataOuVazio(p[k]));
+    if(o.link && !/^https?:\/\//i.test(o.link)) o.link = '';
+    ['criadoEm', 'atualizadoEm'].forEach(k => { if(p[k]) o[k] = txt(p[k], 40); });
+    o.historico = Array.isArray(p.historico) ? p.historico.filter(h => h && typeof h === 'object').map(h => ({ data: txt(h.data, 40), acao: txt(h.acao, 60), detalhe: txt(h.detalhe, 1000) })) : [];
+    if(p.entrada && typeof p.entrada === 'object' && RESULTADO_ENTRADA[p.entrada.resultado]){
+      const r = {}; Object.entries(p.entrada.respostas || {}).forEach(([k, v]) => { if(ENTRADA.some(q => q.id === k) && (v === 'sim' || v === 'nao')) r[k] = v; });
+      o.entrada = { respostas: r, resultado: p.entrada.resultado, motivos: Array.isArray(p.entrada.motivos) ? p.entrada.motivos.map(m => txt(m, 300)) : [], obs: txt(p.entrada.obs, 300), data: txt(p.entrada.data, 40) };
+    }
+    if(p.avaliacao && typeof p.avaliacao === 'object'){
+      const r = {}; Object.entries(p.avaliacao.respostas || {}).forEach(([k, v]) => { if(/^[\w-]{1,20}$/.test(k) && v !== '' && v != null && !isNaN(v)) r[k] = Math.max(0, Math.min(3, Math.round(+v))); });
+      o.avaliacao = { respostas: r, obs: txt(p.avaliacao.obs, 300), data: txt(p.avaliacao.data, 40) };
+    }
+    return o;
+  }
+  function limparCriterios(cs){
+    if(!Array.isArray(cs) || !cs.length) return JSON.parse(JSON.stringify(CRITERIOS_PADRAO));
+    const ok = cs.filter(c => c && typeof c === 'object' && /^[\w-]{1,20}$/.test(c.id) && (c.eixo === 'valor' || c.eixo === 'esforco') && Array.isArray(c.niveis) && c.niveis.length === 4)
+      .map(c => ({ id: c.id, eixo: c.eixo, peso: Math.max(0, Math.min(100, Math.round(+c.peso || 0))), nome: txt(c.nome, 80), pergunta: txt(c.pergunta, 200), niveis: c.niveis.map(n => txt(n, 120)) }));
+    return ok.some(c => c.eixo === 'valor') && ok.some(c => c.eixo === 'esforco') ? ok : JSON.parse(JSON.stringify(CRITERIOS_PADRAO));
+  }
   function migrar(S){
-    S.ui = Object.assign({ nivel: 1, menuMini: false }, S.ui || {});
-    if(!Array.isArray(S.criterios) || !S.criterios.length) S.criterios = JSON.parse(JSON.stringify(CRITERIOS_PADRAO));
-    S.capacidade = Object.assign({}, CAPACIDADE_PADRAO, S.capacidade || {});
-    S.forcar = S.forcar || {};
-    S.projetos = S.projetos || [];
-    S.seq = S.seq || 0;
+    S = S && typeof S === 'object' ? S : estadoInicial();
+    const ui = S.ui && typeof S.ui === 'object' ? S.ui : {};
+    S.ui = Object.assign({}, ui, { nivel: Math.max(1, Math.min(3, Math.round(+ui.nivel) || 1)), menuMini: !!ui.menuMini });
+    S.criterios = limparCriterios(S.criterios);
+    const c = S.capacidade && typeof S.capacidade === 'object' ? S.capacidade : {};
+    S.capacidade = { periodo: txt(c.periodo ?? CAPACIDADE_PADRAO.periodo, 20), fte: numOuNull(c.fte) ?? CAPACIDADE_PADRAO.fte, reservaPct: Math.min(60, numOuNull(c.reservaPct) ?? CAPACIDADE_PADRAO.reservaPct),
+      orcamento: numOuNull(c.orcamento) ?? CAPACIDADE_PADRAO.orcamento, descontarExecucao: c.descontarExecucao === undefined ? CAPACIDADE_PADRAO.descontarExecucao : !!c.descontarExecucao };
+    const vistos = new Set();
+    S.projetos = (Array.isArray(S.projetos) ? S.projetos : []).map(limparProjeto).filter(p => p && !vistos.has(p.id) && vistos.add(p.id));
+    const f = {}; Object.entries(S.forcar && typeof S.forcar === 'object' ? S.forcar : {}).forEach(([k, v]) => { if(vistos.has(k) && (v === 'in' || v === 'out')) f[k] = v; }); S.forcar = f;
+    S.seq = Math.max(Math.round(+S.seq) || 0, ...S.projetos.map(p => +(String(p.codigo).match(/(\d+)$/) || [0, 0])[1] || 0));
     S.v = VERSAO;
     return S;
   }
@@ -772,7 +844,9 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     const e = {};
     OBRIGATORIOS.forEach(k => { if(!String(p[k] ?? '').trim()) e[k] = 'Campo obrigatório.'; });
     if(p.titulo && p.titulo.trim().length < 5) e.titulo = 'Use pelo menos 5 caracteres.';
-    if(p.link){ try { new URL(p.link); } catch(x) { e.link = 'Informe um endereço completo (https://…).'; } }
+    if(p.titulo && p.titulo.trim().length > 140) e.titulo = 'Use no máximo 140 caracteres.';
+    if(p.link){ let ok = false; try { ok = /^https?:$/.test(new URL(p.link).protocol); } catch(x) {} if(!ok) e.link = 'Informe um endereço completo começando com https:// (ou http://).'; }
+    ['inicioPrevisto', 'fimPrevisto'].forEach(k => { if(p[k] && (!/^\d{4}-\d{2}-\d{2}$/.test(p[k]) || p[k] < '2000-01-01' || p[k] > '2100-12-31')) e[k] = 'Informe uma data entre 2000 e 2100.'; });
     ['esforcoFte', 'duracaoMeses', 'custo'].forEach(k => { if(p[k] !== '' && p[k] != null && (isNaN(p[k]) || +p[k] < 0)) e[k] = 'Informe um número maior ou igual a zero.'; });
     if(p.inicioPrevisto && p.fimPrevisto && p.fimPrevisto < p.inicioPrevisto) e.fimPrevisto = 'O fim não pode ser antes do início.';
     const dup = S().projetos.find(x => x.id !== p.id && x.titulo && p.titulo && x.titulo.trim().toLowerCase() === p.titulo.trim().toLowerCase());
@@ -896,7 +970,9 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
 
   /* --------------------------------------------------------- formulário */
   const opt = (lista, sel, vazio = 'Selecione…') => `<option value="">${vazio}</option>` + lista.map(o => { const v = typeof o === 'string' ? o : o.id, l = typeof o === 'string' ? o : o.nome; return `<option value="${esc(v)}" ${v === sel ? 'selected' : ''}>${esc(l)}</option>`; }).join('');
-  const campo = (k, html, {full, ajuda} = {}) => `<label class="field ${full ? 'full' : ''}" data-campo="${k}">${esc(M.CAMPOS[k])}${M.OBRIGATORIOS.includes(k) ? ' <span class="req">*</span>' : ''}${ajuda ? `<small>${esc(ajuda)}</small>` : ''}${html}<span class="err-msg" data-err="${k}"></span></label>`;
+  const campo = (k, html, {full, ajuda, hint} = {}) => `<label class="field ${full ? 'full' : ''}" data-campo="${k}">${esc(M.CAMPOS[k])}${M.OBRIGATORIOS.includes(k) ? ' <span class="req">*</span>' : ''}${ajuda ? `<small>${esc(ajuda)}</small>` : ''}${html}${hint ? `<span class="hint" data-hint="${k}"></span>` : ''}<span class="err-msg" data-err="${k}"></span></label>`;
+  const numeroCampo = (k, v, ph) => `<input class="input" name="${k}" value="${esc(fmt.campo(v))}" inputmode="decimal" autocomplete="off" placeholder="${ph}" data-numero="${k}">`;
+  const NUM_FMT = { esforcoFte: n => fmt.n(n, n % 1 ? 1 : 0) + ' pessoa(s) em tempo integral', duracaoMeses: n => fmt.n(n, n % 1 ? 1 : 0) + ' mês(es)', custo: n => 'R$ ' + fmt.n(n, n % 1 ? 2 : 0) };
   const inp = (k, v, attrs = '') => `<input class="input" name="${k}" value="${esc(v ?? '')}" ${attrs}>`;
 
   function telaForm(el, r){
@@ -923,11 +999,11 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
           ${campo('responsavel', inp('responsavel', v.responsavel, 'maxlength="120"'))}
         </div></fieldset>
         <fieldset class="fieldset"><legend>Quanto e quando (estimativas)</legend><div class="form">
-          ${campo('esforcoFte', inp('esforcoFte', v.esforcoFte, 'type="number" min="0" step="0.5" inputmode="decimal"'), {ajuda:'Pessoas em tempo integral'})}
-          ${campo('duracaoMeses', inp('duracaoMeses', v.duracaoMeses, 'type="number" min="0" step="1"'))}
-          ${campo('custo', inp('custo', v.custo, 'type="number" min="0" step="1000"'), {ajuda:'Opcional'})}
-          ${campo('inicioPrevisto', inp('inicioPrevisto', v.inicioPrevisto, 'type="date"'))}
-          ${campo('fimPrevisto', inp('fimPrevisto', v.fimPrevisto, 'type="date"'))}
+          ${campo('esforcoFte', numeroCampo('esforcoFte', v.esforcoFte, 'Ex.: 1,5'), {ajuda:'Pessoas em tempo integral', hint:true})}
+          ${campo('duracaoMeses', numeroCampo('duracaoMeses', v.duracaoMeses, 'Ex.: 6'), {hint:true})}
+          ${campo('custo', numeroCampo('custo', v.custo, 'Ex.: 150.000'), {ajuda:'Opcional', hint:true})}
+          ${campo('inicioPrevisto', inp('inicioPrevisto', v.inicioPrevisto, 'type="date" min="2000-01-01" max="2100-12-31"'))}
+          ${campo('fimPrevisto', inp('fimPrevisto', v.fimPrevisto, 'type="date" min="2000-01-01" max="2100-12-31"'))}
           ${campo('link', inp('link', v.link, 'maxlength="300" placeholder="https://…"'), {ajuda:'Item no Azure DevOps ou Jira'})}
           ${campo('observacoes', `<textarea class="input" name="observacoes" maxlength="1200">${esc(v.observacoes || '')}</textarea>`, {full:true})}
         </div></fieldset>
@@ -935,9 +1011,12 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
           <a class="btn btn-ghost" href="${p ? '#/projeto/' + p.id : '#/acervo'}">Cancelar</a><span class="dim" style="font-size:12.5px"><span class="req" style="color:var(--bad)">*</span> obrigatório</span></div>
       </form>`;
     const f = el.querySelector('[data-form]');
+    const dica = i => { const n = GP.util.numBR(i.value), h = el.querySelector(`[data-hint="${i.dataset.numero}"]`); if(h) h.textContent = n === '' ? '' : isNaN(n) || n < 0 ? 'Valor não reconhecido' : '= ' + NUM_FMT[i.dataset.numero](n); };
+    el.querySelectorAll('[data-numero]').forEach(i => { dica(i); i.addEventListener('input', () => dica(i)); });
     f.addEventListener('submit', e => {
       e.preventDefault();
       const d = Object.fromEntries(new FormData(f).entries()); d.obrigatorio = f.obrigatorio.checked;
+      ['esforcoFte', 'duracaoMeses', 'custo'].forEach(k => { d[k] = GP.util.numBR(d[k]); });
       const res = p ? P.atualizar(p.id, d) : P.criar(d);
       el.querySelectorAll('[data-err]').forEach(x => x.textContent = ''); el.querySelectorAll('.input.err,.select.err').forEach(x => x.classList.remove('err'));
       if(!res.ok){
@@ -952,10 +1031,10 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
   /* ---------------------------------------------------------------- acervo */
   const GRUPOS = [['todos', 'Todos'], ['andamento', 'Em andamento'], ['concluido', 'Concluídos'], ['fora', 'Não entram / cancelados']];
   function filtrar(lista, f){
-    const q = (f.q || '').trim().toLowerCase();
+    const q = GP.util.normTxt((f.q || '').trim());
     return lista.filter(p => (!f.grupo || f.grupo === 'todos' || M.etapa(p.etapa).grupo === f.grupo)
       && (!f.etapa || p.etapa === f.etapa) && (!f.gerencia || p.gerencia === f.gerencia) && (!f.tipo || p.tipo === f.tipo)
-      && (!q || [p.codigo, p.titulo, p.area, p.ferramenta, p.responsavel, p.demandante].join(' ').toLowerCase().includes(q)));
+      && (!q || GP.util.normTxt([p.codigo, p.titulo, p.area, p.ferramenta, p.responsavel, p.demandante].join(' ')).includes(q)));
   }
   function telaAcervo(el){
     const S = GP.state(), f = S.ui.filtroAcervo = Object.assign({ grupo:'todos', q:'', gerencia:'', tipo:'', etapa:'' }, S.ui.filtroAcervo);
@@ -970,12 +1049,12 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     const cols = [
       { key:'codigo', label:'Código', fmt:(v, r) => `<span class="code">${esc(v)}</span>` },
       { key:'titulo', label:'Projeto', fmt:(v, r) => `<b style="font-weight:600">${esc(v)}</b><small>${esc([r.area, r.ferramenta].filter(Boolean).join(' · ') || '—')}</small>` },
-      { key:'gerencia', label:'Gerência' },
-      { key:'tipo', label:'Tipo', fmt:(v, r) => `${esc(v)}${r.obrigatorio ? ' <span class="tag" title="Obrigatório por lei/regulação">obrigatório</span>' : ''}` },
+      { key:'gerencia', label:'Gerência', hm:true },
+      { key:'tipo', label:'Tipo', hm:true, fmt:(v, r) => `${esc(v)}${r.obrigatorio ? ' <span class="tag" title="Obrigatório por lei/regulação">obrigatório</span>' : ''}` },
       { key:'etapa', label:'Etapa', fmt:v => etapaPill(v), sortVal:r => M.etapa(r.etapa).ordem },
       ...GP.acervoColunas.filter(c => c.nivel <= GP.nivel()).map(c => c.coluna),
-      { key:'responsavel', label:'Responsável', fmt:v => esc(v || '—') },
-      { key:'fimPrevisto', label:'Fim previsto', fmt:v => fmt.data(v) },
+      { key:'responsavel', label:'Responsável', hm:true, fmt:v => esc(v || '—') },
+      { key:'fimPrevisto', label:'Fim previsto', hm:true, fmt:v => fmt.data(v) },
     ];
     el.innerHTML = U.pageHead({ titulo:'Acervo de projetos', sub:'Todos os projetos cadastrados: em andamento, concluídos e os que não entraram.',
         acoes:`<button class="btn btn-ghost" data-importar-csv>${icon('upload', 16)} Importar</button><button class="btn btn-ghost" data-exportar-csv>${icon('download', 16)} Exportar para Excel</button><a class="btn btn-primary" href="#/novo">${icon('novo', 16)} Novo projeto</a>` }) +
@@ -1107,7 +1186,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     const dias = d => d ? Math.max(0, Math.round((Date.now() - new Date(d + 'T00:00:00').getTime()) / 864e5)) : null;
     const corpoFila = fila.length ? `<div class="stack" style="gap:10px">${fila.map(p => { const d = dias(p.dataEntrada);
         return `<div class="card row" style="padding:14px 16px;align-items:center">
-          <div style="flex:1;min-width:220px"><div><span class="code" style="color:var(--green-700);font-weight:600">${esc(p.codigo)}</span> · <b>${esc(p.titulo)}</b></div>
+          <div style="flex:1;min-width:200px;max-width:100%"><div style="overflow-wrap:anywhere"><span class="code" style="color:var(--green-700);font-weight:600">${esc(p.codigo)}</span> · <b>${esc(p.titulo)}</b></div>
             <div class="muted" style="font-size:12.5px">${esc(p.gerencia)} · ${esc(p.tipo)} · ${esc(p.demandante || '—')}${d != null ? ` · aguardando há <b>${d} dia(s)</b>` : ''}</div></div>
           ${GP.etapaPill(p.etapa)} ${p.entrada ? resPill(p.entrada.resultado) : ''}
           <button class="btn btn-primary btn-sm" data-entrada="${p.id}">${icon('funil', 15)} ${p.entrada ? 'Reavaliar entrada' : 'Avaliar entrada'}</button>
@@ -1131,7 +1210,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
       if(!e) return `<p class="muted" style="margin:0 0 10px">Ainda não passou pelo checklist de entrada.</p><button class="btn btn-primary btn-sm" data-entrada="${p.id}">${icon('funil', 15)} Avaliar entrada</button>`;
       return `<div class="row" style="margin-bottom:10px">${resPill(e.resultado)}<span class="dim" style="font-size:12.5px">em ${fmt.dataHora(e.data)}</span><span class="spacer"></span><button class="btn btn-ghost btn-sm" data-entrada="${p.id}">Reavaliar</button></div>
         ${e.motivos && e.motivos.length ? `<p style="margin:0 0 10px">${e.motivos.map(esc).join('<br>')}</p>` : ''}
-        <div class="stack" style="gap:6px">${M.ENTRADA.map((q, i) => `<div class="row" style="flex-wrap:nowrap;align-items:flex-start;font-size:13px"><span style="flex:none;width:44px">${e.respostas[q.id] === 'sim' ? U.pill('Sim', 'ok') : U.pill('Não', q.tipo === 'barreira' ? 'bad' : 'warn')}</span><span>${i + 1}. ${esc(q.pergunta)}</span></div>`).join('')}</div>
+        <div class="stack" style="gap:6px">${M.ENTRADA.map((q, i) => `<div class="row" style="flex-wrap:nowrap;align-items:flex-start;font-size:13px"><span style="flex:none;width:96px">${e.respostas[q.id] === 'sim' ? U.pill('Sim', 'ok') : e.respostas[q.id] === 'nao' ? U.pill('Não', q.tipo === 'barreira' ? 'bad' : 'warn') : U.pill('Sem resposta', 'neutral')}</span><span>${i + 1}. ${esc(q.pergunta)}</span></div>`).join('')}</div>
         ${e.obs ? `<p class="muted" style="margin:10px 0 0">Obs.: ${esc(e.obs)}</p>` : ''}`;
     } });
 
@@ -1256,8 +1335,9 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     const soma = eixo => rasc.filter(r => S.criterios.find(c => c.id === r.id).eixo === eixo).reduce((a, r) => a + (+r.peso || 0), 0);
     const bloco = eixo => `<div class="card stack" style="gap:10px">${U.secH(esc(M.EIXOS[eixo]), 'Os pesos deste eixo precisam somar 100%.')}
       ${S.criterios.filter(c => c.eixo === eixo).map(c => `<div class="peso-row"><div><b>${esc(c.nome)}</b><div class="muted" style="font-size:12.5px">${esc(c.pergunta)}</div></div>
-        <input type="range" min="0" max="60" step="5" value="${c.peso}" data-peso="${c.id}" aria-label="Peso de ${esc(c.nome)}"><span class="num" data-peso-v="${c.id}">${c.peso}%</span></div>`).join('')}
-      <div class="row" style="justify-content:space-between"><span class="muted">Soma</span><b data-soma="${eixo}"></b></div></div>`;
+        <input type="range" min="0" max="100" step="1" value="${+c.peso}" data-peso="${esc(c.id)}" aria-label="Peso de ${esc(c.nome)} (controle deslizante)">
+        <span class="row" style="gap:4px;flex-wrap:nowrap"><input class="input num" style="width:62px;padding:6px 8px;text-align:right" inputmode="numeric" value="${+c.peso}" data-peso-n="${esc(c.id)}" aria-label="Peso de ${esc(c.nome)} em %">%</span></div>`).join('')}
+      <div class="row" style="justify-content:space-between"><span class="muted">Soma <button class="btn btn-ghost btn-sm" data-normalizar="${eixo}" style="margin-left:8px">Ajustar para 100%</button></span><b data-soma="${eixo}"></b></div></div>`;
     el.innerHTML = U.pageHead({ titulo:'Critérios e pesos', sub:'Defina a importância (%) de cada pergunta. O ranking muda na hora. Os pesos iniciais são uma sugestão para a FEG validar.',
         acoes:`<button class="btn btn-ghost" data-restaurar>${icon('relogio', 16)} Restaurar sugestão</button>` }) +
       `<div class="grid aval-grid"><div class="stack">${bloco('valor')}${bloco('esforco')}
@@ -1272,7 +1352,14 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
       const rk = M.ranking(P.todos().filter(p => p.etapa === 'aprovado'), {}, crit).slice(0, 8);
       el.querySelector('[data-previa]').innerHTML = rk.length ? rk.map(x => `<div class="row" style="flex-wrap:nowrap;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)"><b style="width:18px">${x.pos}</b>${notaHtml(x.s.valor)}<span style="font-size:13px">${esc(x.p.codigo)} · ${esc(x.p.titulo)}</span></div>`).join('') : '<span class="dim">Avalie projetos aprovados para ver a prévia.</span>';
     };
-    el.querySelectorAll('[data-peso]').forEach(i => i.addEventListener('input', () => { rasc.find(r => r.id === i.dataset.peso).peso = +i.value; el.querySelector(`[data-peso-v="${i.dataset.peso}"]`).textContent = i.value + '%'; atualizar(); }));
+    const definir = (id, v) => { v = Math.max(0, Math.min(100, Math.round(+v) || 0)); rasc.find(r => r.id === id).peso = v;
+      const rg = el.querySelector(`[data-peso="${id}"]`), nb = el.querySelector(`[data-peso-n="${id}"]`); if(rg && +rg.value !== v) rg.value = v; if(nb && document.activeElement !== nb) nb.value = v; atualizar(); };
+    el.querySelectorAll('[data-peso]').forEach(i => i.addEventListener('input', () => { definir(i.dataset.peso, i.value); el.querySelector(`[data-peso-n="${i.dataset.peso}"]`).value = i.value; }));
+    el.querySelectorAll('[data-peso-n]').forEach(i => { i.addEventListener('input', () => { if(i.value.trim() !== '') definir(i.dataset.pesoN, GP.util.numBR(i.value)); }); i.addEventListener('blur', () => { i.value = rasc.find(r => r.id === i.dataset.pesoN).peso; }); });
+    el.querySelectorAll('[data-normalizar]').forEach(b => b.onclick = () => { const ids = S.criterios.filter(c => c.eixo === b.dataset.normalizar).map(c => c.id), rs = rasc.filter(r => ids.includes(r.id)), tot = rs.reduce((a, r) => a + r.peso, 0);
+      if(!tot){ rs.forEach((r, i) => r.peso = Math.floor(100 / rs.length) + (i < 100 % rs.length ? 1 : 0)); }
+      else { rs.forEach(r => r.peso = Math.floor(r.peso / tot * 100)); let resto = 100 - rs.reduce((a, r) => a + r.peso, 0); rs.slice().sort((a, b) => b.peso - a.peso).forEach(r => { if(resto > 0){ r.peso++; resto--; } }); }
+      rs.forEach(r => { el.querySelector(`[data-peso="${r.id}"]`).value = r.peso; el.querySelector(`[data-peso-n="${r.id}"]`).value = r.peso; }); atualizar(); });
     el.querySelector('[data-salvar-pesos]').onclick = () => { S.criterios.forEach(c => c.peso = +rasc.find(r => r.id === c.id).peso); GP.save(); GP.toast('Pesos salvos. O ranking foi recalculado.'); GP.refresh(); };
     el.querySelector('[data-restaurar]').onclick = () => GP.confirmar('Restaurar pesos sugeridos?', '<p>Os pesos voltam aos valores iniciais. As respostas dos projetos não mudam.</p>', 'Restaurar', () => { S.criterios = JSON.parse(JSON.stringify(M.CRITERIOS_PADRAO)); GP.save(); GP.toast('Pesos restaurados.'); GP.refresh(); });
     atualizar();
@@ -1380,27 +1467,28 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
   /* -------------------------------------------------- carteira e capacidade */
   function telaCarteira(el){
     const S = GP.state(), cap = S.capacidade, c = carteira();
-    const pctUso = c.livre > 0 ? Math.min(1, c.usadoFte / c.livre) : 1;
+    const pctUso = c.livre > 0 ? Math.min(1, c.usadoFte / c.livre) : (c.usadoFte > 0 ? 1 : 0);
     el.innerHTML = U.pageHead({ titulo:'Carteira e capacidade', sub:'Informe quantas pessoas e quanto orçamento existem. O sistema percorre o ranking e mostra o que cabe. O comitê pode fixar ou excluir projetos.',
         acoes:`${GP.botaoPDF()}<button class="btn btn-ghost" data-pauta>${icon('acervo', 16)} Pauta do comitê</button>` }) +
       `<div class="grid cap-grid">
         <div class="card stack" style="gap:12px">${U.secH('Capacidade do período')}
           <label class="field">Período<input class="input" data-cap="periodo" value="${esc(cap.periodo)}" maxlength="20"></label>
-          <label class="field">Pessoas disponíveis (FTE)<small>Total da equipe dedicada a projetos</small><input class="input" type="number" min="0" step="0.5" data-cap="fte" value="${cap.fte}"></label>
-          <label class="field">Reserva (%)<small>Para sustentação, demandas urgentes e imprevistos</small><input class="input" type="number" min="0" max="60" step="5" data-cap="reservaPct" value="${cap.reservaPct}"></label>
-          <label class="field">Orçamento para novos projetos (R$)<small>Deixe 0 para não limitar por orçamento</small><input class="input" type="number" min="0" step="10000" data-cap="orcamento" value="${cap.orcamento}"></label>
+          <label class="field">Pessoas disponíveis (FTE)<small>Total da equipe dedicada a projetos</small><input class="input" inputmode="decimal" data-cap="fte" data-num="1" value="${esc(fmt.campo(cap.fte))}"></label>
+          <label class="field">Reserva (%)<small>Para sustentação, demandas urgentes e imprevistos (0 a 60)</small><input class="input" inputmode="decimal" data-cap="reservaPct" data-num="1" value="${esc(fmt.campo(cap.reservaPct))}"></label>
+          <label class="field">Orçamento para novos projetos (R$)<small>Ex.: 4.000.000. Use 0 para não limitar por orçamento</small><input class="input" inputmode="decimal" data-cap="orcamento" data-num="1" value="${esc(fmt.n(cap.orcamento))}"></label>
           <label class="check-row"><input type="checkbox" data-cap="descontarExecucao" ${cap.descontarExecucao ? 'checked' : ''}><span>Descontar pessoas já alocadas em projetos em execução</span></label>
           <button class="btn btn-ghost btn-sm" data-cap-padrao>Restaurar valores sugeridos</button>
         </div>
         <div class="stack">
           <div class="grid g4">
-            ${U.kpi({ rotulo:'Pessoas para novos projetos', valor:f1(c.livre), unidade:'FTE', sub:`${f1(cap.fte)} − ${cap.reservaPct}% reserva − ${f1(c.comprometido)} em execução` })}
+            ${U.kpi({ rotulo:'Pessoas para novos projetos', valor:f1(c.livre), unidade:'FTE', sub:`${f1(cap.fte)} − ${fmt.n(cap.reservaPct)}% reserva − ${f1(c.comprometido)} em execução` })}
             ${U.kpi({ rotulo:'Usadas pela carteira', valor:f1(c.usadoFte), unidade:'FTE', sub:`sobram ${f1(c.sobraFte)} FTE`, cor: c.sobraFte < 0 ? 'var(--bad)' : 'var(--green)' })}
             ${U.kpi({ rotulo:'Orçamento usado', valor: fmt.n(c.usadoCusto / 1e6, 2), unidade:'R$ mi', sub: c.orcamento ? `de ${fmt.mi(c.orcamento)}` : 'sem limite de orçamento' })}
             ${U.kpi({ rotulo:'Projetos que cabem', valor:`${c.cabem}<small>/ ${c.candidatos}</small>`, sub:'aprovados e avaliados' })}
           </div>
           <div class="card">${U.secH('Uso da capacidade')}<div class="bar" style="height:14px"><i style="width:${pctUso * 100}%;background:${c.sobraFte < 0 ? 'var(--bad)' : 'var(--green)'}"></i></div>
             <div class="row" style="justify-content:space-between;font-size:12.5px;margin-top:6px" class="muted"><span>${fmt.pct(c.livre > 0 ? c.usadoFte / c.livre : 0)} das pessoas disponíveis</span><span>${f1(c.usadoFte)} de ${f1(c.livre)} FTE</span></div></div>
+          ${c.excesso > 0 ? U.callout(`<p><b>Atenção:</b> os projetos em execução já ocupam ${f1(c.comprometido)} FTE, ${f1(c.excesso)} a mais do que a capacidade disponível (${f1(c.efetiva)} FTE após a reserva). Não há espaço para novos projetos.</p>`, 'warn') : ''}
           ${U.callout('<p>Ordem: projetos <b>fixados pelo comitê</b> → ranking de prioridade (obrigatórios primeiro). Um projeto que não cabe é pulado e o próximo é testado. Projetos sem estimativa de pessoas não entram na conta.</p>')}
         </div></div>
       <div style="margin-top:16px">${c.itens.length ? U.table({ cols:[
@@ -1416,8 +1504,13 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
         : U.vazio('Sem candidatos', 'A carteira usa os projetos aprovados com avaliação de prioridade completa.', '<a class="btn btn-primary" href="#/avaliar">Avaliar projetos</a>')}
       ${c.semNota.length ? `<p class="dim" style="font-size:12.5px">${c.semNota.length} aprovado(s) sem avaliação completa não entram na conta: ${c.semNota.map(p => `<a class="link" href="#/avaliar/${p.id}">${esc(p.codigo)}</a>`).join(', ')}.</p>` : ''}</div>`;
     el.querySelectorAll('[data-cap]').forEach(i => i.addEventListener('change', () => {
-      const k = i.dataset.cap; cap[k] = i.type === 'checkbox' ? i.checked : i.type === 'number' ? Math.max(0, +i.value || 0) : i.value; if(k === 'reservaPct') cap[k] = Math.min(60, cap[k]); GP.save(); GP.refresh(); }));
-    el.querySelectorAll('[data-forcar]').forEach(s => s.addEventListener('change', () => { if(s.value) S.forcar[s.dataset.forcar] = s.value; else delete S.forcar[s.dataset.forcar]; GP.save(); GP.refresh(); }));
+      const k = i.dataset.cap;
+      if(i.type === 'checkbox') cap[k] = i.checked;
+      else if(i.dataset.num){ const n = GP.util.numBR(i.value); if(n === '' || isNaN(n) || n < 0){ GP.toast('Valor não reconhecido. Use números como 10 ou 1,5.'); i.value = k === 'orcamento' ? fmt.n(cap[k]) : fmt.campo(cap[k]); return; } cap[k] = k === 'reservaPct' ? Math.min(60, n) : n; }
+      else cap[k] = i.value.slice(0, 20);
+      GP.save(); const foco = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.cap : null; GP.refresh();
+      const alvo = document.querySelector(`[data-cap="${foco || k}"]`); if(alvo) alvo.focus(); }));
+    el.querySelectorAll('[data-forcar]').forEach(s => s.addEventListener('change', () => { if(s.value) S.forcar[s.dataset.forcar] = s.value; else delete S.forcar[s.dataset.forcar]; GP.save(); GP.refresh(); const a = document.querySelector(`[data-forcar="${s.dataset.forcar}"]`); if(a) a.focus(); }));
     el.querySelector('[data-cap-padrao]').onclick = () => { S.capacidade = Object.assign({}, M.CAPACIDADE_PADRAO); GP.save(); GP.refresh(); };
     el.querySelector('[data-pauta]').onclick = () => pauta(c);
   }
@@ -1449,18 +1542,23 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     let html = U.pageHead({ titulo:'Roadmap', sub:'Quando cada projeto acontece e quantas pessoas ele ocupa por mês. Use as datas previstas do cadastro.', acoes: GP.botaoPDF() }) +
       `<div class="chips" style="margin-bottom:14px">${[['ativos', 'Aprovados e em execução'], ['todos', 'Todos com datas']].map(([k, l]) => `<a class="chip ${mostrar === k ? 'on' : ''}" href="#/roadmap?ver=${k}">${l}</a>`).join('')}</div>`;
     if(!com.length){ el.innerHTML = html + U.vazio('Sem projetos com datas', 'Informe início e fim previstos no cadastro para ver o roadmap.', '<a class="btn btn-primary" href="#/acervo">Ir ao acervo</a>'); return; }
-    const ini = com.map(p => p.inicioPrevisto.slice(0, 7)).sort()[0], fim = com.map(p => p.fimPrevisto.slice(0, 7)).sort().at(-1);
+    let ini = com.map(p => p.inicioPrevisto.slice(0, 7)).sort()[0], fim = com.map(p => p.fimPrevisto.slice(0, 7)).sort().at(-1);
+    const mesIdx = s => +s.slice(0, 4) * 12 + (+s.slice(5, 7) - 1), deIdx = i => `${Math.floor(i / 12)}-${String(i % 12 + 1).padStart(2, '0')}`;
+    const JANELA = 72; let cortado = false;
+    if(mesIdx(fim) - mesIdx(ini) + 1 > JANELA){ cortado = true; const h0 = Math.max(mesIdx(ini), Math.min(mesIdx(hoje().slice(0, 7)) - 12, mesIdx(fim) - JANELA + 1)); ini = deIdx(h0); fim = deIdx(h0 + JANELA - 1); }
     const dm = M.demandaMensal(com.filter(p => p.etapa !== 'concluido' && p.etapa !== 'cancelado' && p.etapa !== 'nao_entra'), ini, fim), n = dm.length;
     const pos = d => { const [y, m] = d.slice(0, 7).split('-').map(Number), [y0, m0] = ini.split('-').map(Number); const dia = +d.slice(8, 10) || 1; return ((y - y0) * 12 + (m - m0) + (dia - 1) / 31) / n * 100; };
     const capMes = +S.capacidade.fte * (1 - S.capacidade.reservaPct / 100), maxF = Math.max(capMes, ...dm.map(x => x.fte), 1);
     const hojePos = hoje().slice(0, 7) >= ini && hoje().slice(0, 7) <= fim ? pos(hoje()) : null;
     html += `<div class="card"><div class="gantt-wrap"><div class="gantt" style="min-width:${150 + n * 34}px">
         <div class="g-head"><div class="g-lbl"></div><div class="g-track">${dm.map((x, i) => `<span style="left:${i / n * 100}%;width:${100 / n}%">${MESES[+x.mes.slice(5) - 1]}${x.mes.endsWith('-01') || i === 0 ? `<b>${x.mes.slice(0, 4)}</b>` : ''}</span>`).join('')}</div></div>
-        ${com.map(p => { const e = M.etapa(p.etapa), l = pos(p.inicioPrevisto), w = Math.max(1.5, pos(p.fimPrevisto) + 100 / n / 31 - l);
+        ${com.map(p => { const e = M.etapa(p.etapa), l0 = pos(p.inicioPrevisto), r0 = pos(p.fimPrevisto) + 100 / n / 31, l = Math.max(0, l0), w = Math.max(1.5, Math.min(100, r0) - l);
+          if(p.fimPrevisto.slice(0, 7) < ini || p.inicioPrevisto.slice(0, 7) > fim) return '';
           return `<a class="g-row" href="#/projeto/${p.id}"><div class="g-lbl"><span class="code">${esc(p.codigo)}</span> ${esc(p.titulo)}</div><div class="g-track">${hojePos != null ? `<i class="g-hoje" style="left:${hojePos}%"></i>` : ''}<span class="g-bar t-${e.tom}" style="left:${l}%;width:${w}%" title="${esc(p.codigo)} · ${fmt.data(p.inicioPrevisto)} a ${fmt.data(p.fimPrevisto)} · ${esc(e.nome)}">${p.esforcoFte != null ? f1(p.esforcoFte) + ' FTE' : ''}</span></div></a>`; }).join('')}
         <div class="g-row g-dem"><div class="g-lbl"><b>Pessoas por mês</b><br><span class="dim" style="font-size:11.5px">linha = capacidade (${f1(capMes)} FTE)</span></div><div class="g-track" style="height:70px">
           <i class="g-cap" style="bottom:${capMes / maxF * 100}%"></i>${dm.map((x, i) => `<span class="g-col ${x.fte > capMes + 1e-9 ? 'over' : ''}" style="left:${i / n * 100 + 0.4}%;width:${100 / n - 0.8}%;height:${x.fte / maxF * 100}%" title="${x.mes}: ${f1(x.fte)} FTE"></span>`).join('')}</div></div>
       </div></div>
+      ${cortado ? `<p class="dim" style="font-size:12.5px;margin:8px 0 0">Mostrando ${JANELA} meses (${esc(ini)} a ${esc(fim)}). Projetos fora dessa janela não aparecem; confira datas muito distantes no cadastro.</p>` : ''}
       <div class="legend" style="margin-top:10px"><span><i style="background:var(--ok-bg);border:1px solid var(--ok)"></i>Aprovado / em execução</span><span><i style="background:var(--neutral-bg);border:1px solid var(--muted)"></i>Em espera / concluído</span><span><i style="background:var(--bad)"></i>Mês acima da capacidade</span>${hojePos != null ? '<span><i style="background:var(--green)"></i>Hoje</span>' : ''}</div></div>`;
     if(sem.length) html += `<div class="card" style="margin-top:16px">${U.secH(`Sem datas previstas (${sem.length})`, 'Informe início e fim no cadastro para que apareçam no roadmap.')}<div class="chips">${sem.map(p => `<a class="chip" href="#/novo/${p.id}">${esc(p.codigo)} · ${esc(p.titulo.slice(0, 50))}${p.titulo.length > 50 ? '…' : ''}</a>`).join('')}</div></div>`;
     el.innerHTML = html;
@@ -1571,12 +1669,13 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
   const data = s => { s = String(s || '').trim(); if(!s) return ''; let m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
     if(m) return valida(m[3], m[2], m[1]) ? `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}` : 'inválida';
     m = s.match(/^(\d{4})-(\d{2})-(\d{2})/); return m && valida(m[1], m[2], m[3]) ? m[0] : 'inválida'; };
-  const numero = s => { s = String(s ?? '').trim().replace(/[R$\s]/g, ''); if(!s) return ''; if(/,\d{1,2}$/.test(s) || (s.includes(',') && !s.includes('.'))) s = s.replace(/\./g, '').replace(',', '.'); else s = s.replace(/,/g, ''); return isNaN(+s) ? 'inválido' : +s; };
+  const numero = s => { const n = GP.util.numBR(s); return n === '' ? '' : isNaN(n) || n < 0 ? 'inválido' : n; };
   /** Converte as linhas da planilha em projetos e valida cada um. */
   function prepararImportacao(linhas){
     if(linhas.length < 2) return { erroGeral:'A planilha precisa ter o cabeçalho e pelo menos uma linha.' };
     const cab = linhas[0].map(norm), idx = {};
     COLUNAS.forEach(([k, l]) => { const i = cab.indexOf(norm(l)); if(i >= 0) idx[k] = i; });
+    const ie = cab.indexOf('etapa'); if(ie >= 0) idx.etapa = ie;
     if(idx.titulo == null) return { erroGeral:'Não encontrei a coluna "Título". Use o modelo de planilha.' };
     const titulos = new Set(P.todos().map(p => p.titulo.trim().toLowerCase()));
     const itens = linhas.slice(1).map((l, n) => {
@@ -1586,32 +1685,37 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
       const d = { titulo:v('titulo'), descricao:v('descricao'), beneficio:v('beneficio'), gerencia: ger ? ger.id : v('gerencia'), area:v('area'), ferramenta:v('ferramenta'),
         demandante:v('demandante'), patrocinador:v('patrocinador'), responsavel:v('responsavel'), tipo: tipo || v('tipo'), origem: orig || '', obrigatorio: /^(sim|s|x|1|true)$/i.test(v('obrigatorio')),
         esforcoFte: numero(v('esforcoFte')), duracaoMeses: numero(v('duracaoMeses')), custo: numero(v('custo')), inicioPrevisto: data(v('inicioPrevisto')), fimPrevisto: data(v('fimPrevisto')), link:v('link'), observacoes:v('observacoes') };
+      const et = idx.etapa != null ? M.ETAPAS.find(e => norm(e.nome) === norm(l[idx.etapa]) || e.id === String(l[idx.etapa] || '').trim()) : null;
       const erros = Object.assign({}, M.validar(d));
       if(d.gerencia && !ger) erros.gerencia = `Gerência "${d.gerencia}" não reconhecida (use FEG, FEL, FEN ou FER).`;
       if(d.tipo && !tipo) erros.tipo = `Tipo "${d.tipo}" não reconhecido.`;
       ['esforcoFte', 'duracaoMeses', 'custo'].forEach(k => { if(d[k] === 'inválido') erros[k] = 'Número inválido.'; });
       ['inicioPrevisto', 'fimPrevisto'].forEach(k => { if(d[k] === 'inválida') erros[k] = 'Data inválida (use dd/mm/aaaa).'; });
       const t = d.titulo.toLowerCase(); if(t && titulos.has(t) && !erros.titulo) erros.titulo = 'Já existe no acervo ou repetido na planilha.'; if(t) titulos.add(t);
-      return { linha: n + 2, d, erros };
+      return { linha: n + 2, d, erros, etapa: et ? et.id : null };
     });
     return { itens, validos: itens.filter(i => !Object.keys(i.erros).length) };
   }
   function abrirImportacao(arquivo){
     const r = new FileReader();
     r.onload = () => {
-      const res = prepararImportacao(lerCSV(String(r.result)));
+      const res = prepararImportacao(lerCSV(decodificar(r.result)));
       if(res.erroGeral){ GP.toast(esc(res.erroGeral)); return; }
       const inval = res.itens.filter(i => Object.keys(i.erros).length);
       const m = GP.modal(`<h3>Importar planilha</h3><p class="muted" style="margin:0 0 12px">${esc(arquivo.name)} · ${res.itens.length} linha(s)</p>
         <div class="row" style="margin-bottom:12px">${U.pill(`${res.validos.length} prontas para importar`, 'ok')} ${inval.length ? U.pill(`${inval.length} com erro (serão ignoradas)`, 'bad') : ''}</div>
         ${inval.length ? `<div class="tbl-wrap" style="max-height:240px;overflow:auto"><table class="tbl"><thead><tr><th>Linha</th><th>Título</th><th>Problema</th></tr></thead><tbody>${inval.map(i => `<tr><td>${i.linha}</td><td>${esc(i.d.titulo || '—')}</td><td>${Object.entries(i.erros).map(([k, e]) => `<b>${esc(M.CAMPOS[k] || k)}:</b> ${esc(e)}`).join('<br>')}</td></tr>`).join('')}</tbody></table></div>` : ''}
-        <p class="muted" style="font-size:12.5px">Os projetos importados entram como <b>Nova demanda</b> e passam pelo funil de entrada.</p>
+        ${res.itens.some(i => i.etapa && i.etapa !== 'entrada') ? `<label class="check-row" style="margin:6px 0"><input type="checkbox" data-manter-etapa><span>Manter a etapa informada na planilha (coluna “Etapa”). Sem marcar, todos entram como <b>Nova demanda</b> e passam pelo funil.</span></label>` : `<p class="muted" style="font-size:12.5px">Os projetos importados entram como <b>Nova demanda</b> e passam pelo funil de entrada.</p>`}
+        <p class="dim" style="font-size:12px;margin:0">A planilha traz os dados do cadastro. Checklist de entrada, avaliações e pesos só voltam por <b>backup</b>.</p>
         <div class="m-act"><button class="btn btn-ghost" data-close="1">Cancelar</button><button class="btn btn-primary" data-confirmar ${res.validos.length ? '' : 'disabled'}>Importar ${res.validos.length} projeto(s)</button></div>`, { largo:true });
-      m.querySelector('[data-confirmar]').onclick = () => { let n = 0; res.validos.forEach(i => { const x = P.criar(i.d); if(x.ok){ n++; P.registrar(x.projeto, 'Importação', `Importado da planilha ${arquivo.name} (linha ${i.linha}).`); } });
+      m.querySelector('[data-confirmar]').onclick = () => { const manter = !!(m.querySelector('[data-manter-etapa]') || {}).checked; let n = 0;
+        res.validos.forEach(i => { const x = P.criar(i.d); if(x.ok){ n++; P.registrar(x.projeto, 'Importação', `Importado da planilha ${arquivo.name} (linha ${i.linha}).`); if(manter && i.etapa && i.etapa !== 'entrada') P.mudarEtapa(x.projeto.id, i.etapa, 'Etapa trazida da planilha.'); } });
         GP.save(); GP.closeModal(); GP.toast(`${n} projeto(s) importado(s).`); GP.go('#/acervo'); };
     };
-    r.readAsText(arquivo, 'utf-8');
+    r.readAsArrayBuffer(arquivo);
   }
+  /** Lê o arquivo como UTF-8; se não for UTF-8 válido (CSV "ANSI" do Excel), usa Windows-1252. */
+  const decodificar = buf => { try { return new TextDecoder('utf-8', { fatal:true }).decode(buf); } catch(e){ return new TextDecoder('windows-1252').decode(buf); } };
 
   /* ------------------------------------------------------------ backup JSON */
   function exportarBackup(){
@@ -1622,9 +1726,12 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
   function restaurarBackup(arquivo){
     const r = new FileReader();
     r.onload = () => { let j; try { j = JSON.parse(String(r.result)); } catch(e){ GP.toast('Arquivo inválido: não é um JSON.'); return; }
-      if(!j || j.tipo !== 'BACKUP_GESTAO_PORTFOLIO_FEG' || !j.estado || !Array.isArray(j.estado.projetos)){ GP.toast('Este arquivo não é um backup do sistema.'); return; }
-      GP.confirmar('Restaurar backup?', `<p>O backup de ${fmt.dataHora(j.exportadoEm)} tem <b>${j.estado.projetos.length} projeto(s)</b>. Os dados atuais deste navegador serão substituídos.</p>`, 'Restaurar', () => {
-        const ui = GP.state().ui; const est = M.migrar(j.estado); est.ui = Object.assign({}, est.ui, { nivel: ui.nivel, menuMini: ui.menuMini }); GP.resetState(est); GP.toast('Backup restaurado.'); GP.go('#/painel'); }); };
+      if(!j || j.tipo !== 'BACKUP_GESTAO_PORTFOLIO_FEG' || !j.estado || typeof j.estado !== 'object' || !Array.isArray(j.estado.projetos)){ GP.toast('Este arquivo não é um backup do sistema.'); return; }
+      let est; try { est = M.migrar(JSON.parse(JSON.stringify(j.estado))); } catch(e){ GP.toast('Backup corrompido: não foi possível ler os dados.'); return; }
+      const descartados = j.estado.projetos.length - est.projetos.length;
+      const quando = fmt.dataHora(j.exportadoEm);
+      GP.confirmar('Restaurar backup?', `<p>Backup ${quando !== '—' ? 'de ' + quando : 'sem data'} com <b>${est.projetos.length} projeto(s) válido(s)</b>${descartados ? ` (${descartados} registro(s) inválido(s) serão descartados)` : ''}. Os dados atuais deste navegador serão substituídos.</p>`, 'Restaurar', () => {
+        const ui = GP.state().ui; est.ui = Object.assign({}, est.ui, { nivel: ui.nivel, menuMini: ui.menuMini }); GP.resetState(est); GP.toast('Backup restaurado.'); GP.go('#/painel'); }); };
     r.readAsText(arquivo, 'utf-8');
   }
   const escolherArquivo = (aceita, fn) => { const i = document.createElement('input'); i.type = 'file'; i.accept = aceita; i.style.display = 'none'; i.onchange = () => { if(i.files[0]) fn(i.files[0]); i.remove(); }; document.body.appendChild(i); i.click(); };
@@ -1640,14 +1747,21 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
       const titulo = (document.querySelector('.topbar .ttl b') || {}).textContent || 'Portfólio';
       const w = document.createElement('div'); w.style.cssText = 'position:absolute;left:-20000px;top:0;width:1240px;background:#fff;padding:28px';
       w.innerHTML = `<div style="display:flex;align-items:center;gap:14px;border-bottom:1px solid #E4E3E4;padding-bottom:12px;margin-bottom:18px">${GP.logoFEG(34)}<div><b style="font-size:15px">Gestão de Portfólio · FEG</b><div style="font-size:12px;color:#5E655F">${esc(titulo)} · ${fmt.data(hoje())}</div></div><img src="${GP.LOGO_ONS}" style="height:30px;margin-left:auto"></div>`;
-      const c = el.cloneNode(true); c.querySelectorAll('.actions, button, select, input[type=range], [data-noprint]').forEach(x => x.remove()); w.appendChild(c); document.body.appendChild(w);
-      const cv = await window.html2canvas(w, { scale:1.6, backgroundColor:'#ffffff', logging:false, windowWidth:1300 }); w.remove();
+      const c = el.cloneNode(true);
+      c.querySelectorAll('select').forEach((s, i) => { const o = el.querySelectorAll('select')[i]; const t = document.createElement('span'); t.textContent = o && o.selectedOptions[0] ? o.selectedOptions[0].textContent : ''; s.replaceWith(t); });
+      c.querySelectorAll('input:not([type=checkbox]):not([type=radio]):not([type=range])').forEach((x, i) => { const t = document.createElement('div'); t.className = 'input'; t.textContent = x.value; x.replaceWith(t); });
+      c.querySelectorAll('.actions, button, input[type=range], [data-noprint]').forEach(x => x.remove()); w.appendChild(c); document.body.appendChild(w);
+      const escala = 1.6, topo = w.getBoundingClientRect().top;
+      const cortes = [...w.querySelectorAll('tr, .card, .page-h, .g-row, .callout, .kpi')].map(x => Math.round((x.getBoundingClientRect().bottom - topo) * escala)).sort((a, b) => a - b);
+      const cv = await window.html2canvas(w, { scale:escala, backgroundColor:'#ffffff', logging:false, windowWidth:1300 }); w.remove();
       const pdf = new window.jspdf.jsPDF({ orientation:'landscape', unit:'pt', format:'a4', compress:true });
       const PW = pdf.internal.pageSize.getWidth(), PH = pdf.internal.pageSize.getHeight(), M0 = 20, util = PW - 2 * M0, alt = PH - 2 * M0 - 12;
       const pxPag = cv.width * alt / util; let y = 0, pg = 0;
-      while(y < cv.height){ const h = Math.min(pxPag, cv.height - y), part = document.createElement('canvas'); part.width = cv.width; part.height = h; part.getContext('2d').drawImage(cv, 0, y, cv.width, h, 0, 0, cv.width, h);
+      while(y < cv.height){ let h = Math.min(pxPag, cv.height - y);
+        if(y + h < cv.height){ const bom = cortes.filter(k => k > y + pxPag * 0.5 && k <= y + h).pop(); if(bom) h = bom - y; }
+        const part = document.createElement('canvas'); part.width = cv.width; part.height = h; part.getContext('2d').drawImage(cv, 0, y, cv.width, h, 0, 0, cv.width, h);
         if(pg) pdf.addPage(); pdf.addImage(part.toDataURL('image/jpeg', .92), 'JPEG', M0, M0, util, h * util / cv.width); y += h; pg++;
-        pdf.setFontSize(8); pdf.setTextColor(120); pdf.text(`Gestao de Portfolio FEG - ${titulo.normalize('NFD').replace(/[̀-ͯ]/g, '')} - pagina ${pg}`, M0, PH - 10); }
+        pdf.setFontSize(8); pdf.setTextColor(120); pdf.text(`Gestão de Portfólio FEG · ${titulo} · ${fmt.data(hoje())} · página ${pg}`, M0, PH - 10); }
       pdf.save(`portfolio-feg-${titulo.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${hoje()}.pdf`);
       GP.toast('PDF gerado. Se o download não começar, abra o arquivo no Chrome ou Edge.');
     } catch(e){ console.error(e); GP.toast('Não foi possível gerar o PDF neste visualizador. Abra o arquivo no Chrome ou Edge.'); }

@@ -16,13 +16,27 @@
     pct: (v, d=0) => v == null || isNaN(v) ? '—' : nf(d).format(v * 100) + '%',
     brl: v => v == null || v === '' || isNaN(v) ? '—' : 'R$ ' + nf(0).format(v),
     mi: v => v == null || v === '' || isNaN(v) ? '—' : 'R$ ' + nf(2).format(v / 1e6) + ' mi',
-    data: v => { if(!v) return '—'; const [y,m,d] = String(v).slice(0,10).split('-'); return d && m && y ? `${d}/${m}/${y}` : esc(v); },
-    dataHora: v => v ? new Date(v).toLocaleString('pt-BR', {dateStyle:'short', timeStyle:'short'}) : '—',
+    data: v => { if(!v) return '—'; const [y,m,d] = String(v).slice(0,10).split('-'); return d && m && y ? `${esc(d)}/${esc(m)}/${esc(y)}` : esc(v); },
+    dataHora: v => { const d = v ? new Date(v) : null; return d && !isNaN(d) ? d.toLocaleString('pt-BR', {dateStyle:'short', timeStyle:'short'}) : '—'; },
+    /** número para campo de texto no formato brasileiro (sem separador de milhar) */
+    campo: v => v == null || v === '' || isNaN(v) ? '' : String(v).replace('.', ','),
   };
   const sum = (a, f = x => x) => a.reduce((s, x) => s + (+f(x) || 0), 0);
-  const hoje = () => new Date().toISOString().slice(0, 10);
+  /** Data de hoje no fuso local (AAAA-MM-DD) */
+  const hoje = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+  /** Número no formato brasileiro: "150.000" → 150000; "1,5" → 1.5; "1.234,56" → 1234.56; "" → ''; inválido → NaN */
+  const numBR = v => {
+    if(typeof v === 'number') return v;
+    let s = String(v ?? '').trim().replace(/R\$|\s/g, ''); if(!s) return '';
+    if(s.includes('.') && s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+    else if(s.includes(',')){ if((s.match(/,/g) || []).length > 1) return NaN; s = s.replace(',', '.'); }
+    else if(/^-?\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
+    return /^-?\d+(\.\d+)?$/.test(s) ? +s : NaN;
+  };
+  /** Texto para busca/comparação sem acento e sem caixa */
+  const normTxt = s => String(s ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   const uid = p => p + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  GP.util = { esc, clone, fmt, sum, hoje, uid };
+  GP.util = { esc, clone, fmt, sum, hoje, uid, numBR, normTxt };
 
   /* ------------------------------------------------------------------ ícones */
   const I = {
@@ -94,7 +108,7 @@
       quando:'No planejamento do ano ou do trimestre e antes do comitê de portfólio.' },
   ];
   GP.nivel = () => S.ui.nivel || 1;
-  GP.setNivel = n => { S.ui.nivel = n; GP.save(); render(); toast(`Nível ${n} · ${GP.NIVEIS[n-1].nome}`); };
+  GP.setNivel = n => { n = Math.max(1, Math.min(3, +n || 1)); S.ui.nivel = n; GP.save(); fecharMenuMovel(); render(); toast(`Nível ${n} · ${GP.NIVEIS[n-1].nome}`); };
 
   /* ------------------------------------------------------------------ rotas */
   const parse = () => {
@@ -107,7 +121,7 @@
   GP.rota = parse;
   GP.go = h => { if(location.hash === h) render(); else location.hash = h; };
   GP.refresh = () => render(true);
-  window.addEventListener('hashchange', () => { closeModal(); render(); });
+  window.addEventListener('hashchange', () => { closeModal(); fecharMenuMovel(); render(); });
 
   /* ------------------------------------------------------------- componentes */
   const pill = (txt, tom = 'neutral') => `<span class="pill t-${tom}"><i></i>${esc(txt)}</span>`;
@@ -120,17 +134,20 @@
   /** Tabela ordenável: cols [{key, label, align, fmt(v,row), sortVal(row), sort:false}], rows, id (para lembrar ordenação), rowAttr(row) */
   const table = ({cols, rows, id, rowAttr, vazioTxt = 'Nenhum registro.'}) => {
     const sk = id ? S.ui['sort:' + id] : null; let rs = rows.slice();
-    if(sk){ const c = cols.find(c => c.key === sk.key); if(c){ const g = c.sortVal || (r => r[c.key]); rs.sort((a, b) => { const x = g(a), y = g(b); return ((x ?? '') > (y ?? '') ? 1 : (x ?? '') < (y ?? '') ? -1 : 0) * sk.dir; }); } }
-    return `<div class="tbl-wrap"><table class="tbl"><thead><tr>${cols.map(c => { const s = id && c.sort !== false; return `<th class="${c.align || ''} ${s ? 'sort' : ''}" ${s ? `data-sort="${esc(id)}|${esc(c.key)}"` : ''}>${esc(c.label)}${sk && sk.key === c.key ? (sk.dir > 0 ? ' ↑' : ' ↓') : ''}</th>`; }).join('')}</tr></thead>
-      <tbody>${rs.length ? rs.map(r => `<tr ${rowAttr ? rowAttr(r) : ''}>${cols.map(c => `<td class="${c.align || ''}">${c.fmt ? c.fmt(r[c.key], r) : esc(r[c.key])}</td>`).join('')}</tr>`).join('') : `<tr><td colspan="${cols.length}" class="dim" style="text-align:center;padding:28px">${esc(vazioTxt)}</td></tr>`}</tbody></table></div>`;
+    if(sk){ const c = cols.find(c => c.key === sk.key); if(c){ const g = c.sortVal || (r => r[c.key]);
+      rs.sort((a, b) => { const x = g(a), y = g(b); const r = (typeof x === 'number' || typeof y === 'number') ? (x ?? -Infinity) - (y ?? -Infinity) : String(x ?? '').localeCompare(String(y ?? ''), 'pt-BR', { sensitivity:'base', numeric:true }); return r * sk.dir; }); } }
+    return `<div class="tbl-wrap"><table class="tbl"><thead><tr>${cols.map(c => { const s = id && c.sort !== false; return `<th class="${c.align || ''} ${s ? 'sort' : ''} ${c.hm ? 'hm' : ''}" ${s ? `data-sort="${esc(id)}|${esc(c.key)}" tabindex="0" aria-sort="${sk && sk.key === c.key ? (sk.dir > 0 ? 'ascending' : 'descending') : 'none'}"` : ''}>${esc(c.label)}${sk && sk.key === c.key ? (sk.dir > 0 ? ' ↑' : ' ↓') : ''}</th>`; }).join('')}</tr></thead>
+      <tbody>${rs.length ? rs.map(r => `<tr ${rowAttr ? rowAttr(r) : ''}>${cols.map(c => `<td class="${c.align || ''} ${c.hm ? 'hm' : ''}">${c.fmt ? c.fmt(r[c.key], r) : esc(r[c.key])}</td>`).join('')}</tr>`).join('') : `<tr><td colspan="${cols.length}" class="dim" style="text-align:center;padding:28px">${esc(vazioTxt)}</td></tr>`}</tbody></table></div>`;
   };
   GP.ui = { pill, pageHead, secH, kpi, callout, vazio, tabs, table, icon };
 
   /* ------------------------------------------------------- modal, toast, tip */
-  function modal(html, {largo} = {}){ closeModal(); const d = document.createElement('div'); d.className = 'modal-bg'; d.dataset.close = '1';
+  let focoAntes = null;
+  function modal(html, {largo} = {}){ const ant = document.activeElement; closeModal(); focoAntes = ant; const d = document.createElement('div'); d.className = 'modal-bg'; d.dataset.close = '1';
     d.innerHTML = `<div class="modal ${largo ? 'wide' : ''}" role="dialog" aria-modal="true">${html}</div>`; document.body.appendChild(d);
     const f = d.querySelector('input, select, textarea, .btn-primary'); if(f) f.focus(); return d.querySelector('.modal'); }
-  function closeModal(){ document.querySelectorAll('.modal-bg').forEach(m => m.remove()); }
+  function closeModal(){ const tinha = document.querySelector('.modal-bg'); document.querySelectorAll('.modal-bg').forEach(m => m.remove());
+    if(tinha && focoAntes && document.contains(focoAntes)) try { focoAntes.focus(); } catch(e){} focoAntes = null; }
   function toast(msg){ let t = document.querySelector('.toast'); if(!t){ t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
     t.innerHTML = msg; t.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('on'), 3200); }
   function busy(on, msg = 'Processando…'){ document.querySelectorAll('.busy').forEach(b => b.remove()); if(!on) return;
@@ -144,9 +161,17 @@
   document.addEventListener('click', e => {
     const c = e.target.closest('[data-close]'); if(c && (c === e.target || c.tagName === 'BUTTON')){ closeModal(); return; }
     const s = e.target.closest('[data-sort]');
-    if(s){ const [id, key] = s.dataset.sort.split('|'); const cur = S.ui['sort:' + id]; S.ui['sort:' + id] = cur && cur.key === key ? (cur.dir > 0 ? {key, dir:-1} : null) : {key, dir:1}; GP.save(); GP.refresh(); }
+    if(s){ const [id, key] = s.dataset.sort.split('|'); const cur = S.ui['sort:' + id]; S.ui['sort:' + id] = cur && cur.key === key ? (cur.dir > 0 ? {key, dir:-1} : null) : {key, dir:1}; GP.save(); GP.refresh();
+      const n = document.querySelector(`th[data-sort="${CSS.escape(s.dataset.sort)}"]`); if(n) n.focus(); }
   });
-  document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape'){ if(document.querySelector('.modal-bg')) closeModal(); else fecharMenuMovel(); return; }
+    if(e.key === 'Tab'){ const m = document.querySelector('.modal-bg .modal'); if(m){ const f = [...m.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])')].filter(x => x.offsetParent !== null);
+      if(f.length){ const a = f[0], z = f[f.length - 1]; if(!m.contains(document.activeElement)){ e.preventDefault(); a.focus(); } else if(e.shiftKey && document.activeElement === a){ e.preventDefault(); z.focus(); } else if(!e.shiftKey && document.activeElement === z){ e.preventDefault(); a.focus(); } } } }
+    if((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('th[data-sort]')){ e.preventDefault(); e.target.click(); }
+  });
+  const fecharMenuMovel = () => { const s = document.querySelector('.side.open'); if(s){ s.classList.remove('open'); const b = document.querySelector('.side-backdrop'); if(b) b.remove(); } };
+  GP.fecharMenuMovel = fecharMenuMovel;
   // Tooltip do menu recolhido
   let tipEl = null;
   const showTip = el => { if(!document.querySelector('.shell.mini') || window.innerWidth <= 900) return; hideTip(); const r = el.getBoundingClientRect();
@@ -209,7 +234,7 @@
     const app = document.getElementById('app'); if(!app) return;
     const r = parse(), nivel = GP.nivel();
     const tela = TELAS.find(t => t.id === r.id) || TELAS.find(t => t.id === 'painel');
-    const mini = !!S.ui.menuMini, aberto = document.querySelector('.side.open');
+    const mini = !!S.ui.menuMini, aberto = document.querySelector('.side.open') && window.innerWidth <= 900;
     document.title = `${tela ? tela.titulo : 'Início'} · Gestão de Portfólio FEG`;
     app.innerHTML = `<div class="shell ${mini ? 'mini' : ''}">
       <aside class="side ${aberto ? 'open' : ''}" aria-label="Menu">${menu(r, tela, nivel)}</aside>
@@ -239,7 +264,7 @@
     const item = t => `<a class="nav-item ${tela && tela.id === t.id ? 'on' : ''}" href="#/${t.id}" data-tip="${esc(t.titulo)}" aria-label="${esc(t.titulo)}"><span class="ic">${icon(t.icone)}</span><span class="lbl">${esc(t.titulo)}</span></a>`;
     let h = `<a class="brand" href="#/painel" data-tip="Gestão de Portfólio FEG">${GP.logoFEG(36)}<span class="txt"><b>Gestão de Portfólio</b><span>Gerência FEG · ONS</span></span></a>`;
     GP.NIVEIS.forEach(L => { if(L.n > nivel) return; const ts = TELAS.filter(t => t.menu !== false && t.nivel === L.n && !t.rodape); if(!ts.length) return;
-      h += `<div class="nav-sec" title="Nível ${L.n} · ${esc(L.nome)}">${L.n} · ${esc(L.nome)}</div>` + ts.map(item).join(''); });
+      h += `<div class="nav-sec" title="Nível ${L.n} · ${esc(L.nome)}">Nível ${L.n} · ${esc(L.curto)}</div>` + ts.map(item).join(''); });
     if(nivel < 3) h += `<div class="nav-sec">Mais recursos</div><button class="nav-item" data-nivel="${nivel + 1}" data-tip="Ativar nível ${nivel + 1}" aria-label="Ativar nível ${nivel + 1}"><span class="ic">${icon('estrela')}</span><span class="lbl">Ativar nível ${nivel + 1}</span></button>`;
     h += `<div class="side-foot">${TELAS.filter(t => t.rodape).map(item).join('')}
       <button class="collapse-btn" data-recolher data-tip="${S.ui.menuMini ? 'Expandir menu' : 'Recolher menu'}" aria-label="${S.ui.menuMini ? 'Expandir menu' : 'Recolher menu'}">${icon(S.ui.menuMini ? 'expandir' : 'recolher')}<span class="lbl">Recolher menu</span></button></div>`;
@@ -263,8 +288,8 @@
     const nv = e.target.closest('[data-nivel]'); if(nv){ closeModal(); GP.setNivel(+nv.dataset.nivel); return; }
     if(e.target.closest('[data-ajuda-nivel]')){ GP.explicarNiveis(); return; }
     if(e.target.closest('[data-recolher]')){ S.ui.menuMini = !S.ui.menuMini; GP.save(); hideTip(); render(true); return; }
-    if(e.target.closest('[data-menu]')){ document.querySelector('.side').classList.toggle('open'); return; }
-    if(e.target.closest('.side .nav-item') && window.innerWidth <= 900){ const s = document.querySelector('.side'); if(s) s.classList.remove('open'); }
+    if(e.target.closest('[data-menu]')){ const s = document.querySelector('.side'); if(s.classList.contains('open')) fecharMenuMovel(); else { s.classList.add('open'); const b = document.createElement('div'); b.className = 'side-backdrop'; b.addEventListener('click', fecharMenuMovel); document.body.appendChild(b); const f = s.querySelector('.nav-item'); if(f) f.focus(); } return; }
+    if(e.target.closest('.side .nav-item') && window.innerWidth <= 900) fecharMenuMovel();
   });
 
   GP.start = () => { load(); render(); };

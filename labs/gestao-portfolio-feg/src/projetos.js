@@ -12,7 +12,9 @@
 
   /* --------------------------------------------------------- formulário */
   const opt = (lista, sel, vazio = 'Selecione…') => `<option value="">${vazio}</option>` + lista.map(o => { const v = typeof o === 'string' ? o : o.id, l = typeof o === 'string' ? o : o.nome; return `<option value="${esc(v)}" ${v === sel ? 'selected' : ''}>${esc(l)}</option>`; }).join('');
-  const campo = (k, html, {full, ajuda} = {}) => `<label class="field ${full ? 'full' : ''}" data-campo="${k}">${esc(M.CAMPOS[k])}${M.OBRIGATORIOS.includes(k) ? ' <span class="req">*</span>' : ''}${ajuda ? `<small>${esc(ajuda)}</small>` : ''}${html}<span class="err-msg" data-err="${k}"></span></label>`;
+  const campo = (k, html, {full, ajuda, hint} = {}) => `<label class="field ${full ? 'full' : ''}" data-campo="${k}">${esc(M.CAMPOS[k])}${M.OBRIGATORIOS.includes(k) ? ' <span class="req">*</span>' : ''}${ajuda ? `<small>${esc(ajuda)}</small>` : ''}${html}${hint ? `<span class="hint" data-hint="${k}"></span>` : ''}<span class="err-msg" data-err="${k}"></span></label>`;
+  const numeroCampo = (k, v, ph) => `<input class="input" name="${k}" value="${esc(fmt.campo(v))}" inputmode="decimal" autocomplete="off" placeholder="${ph}" data-numero="${k}">`;
+  const NUM_FMT = { esforcoFte: n => fmt.n(n, n % 1 ? 1 : 0) + ' pessoa(s) em tempo integral', duracaoMeses: n => fmt.n(n, n % 1 ? 1 : 0) + ' mês(es)', custo: n => 'R$ ' + fmt.n(n, n % 1 ? 2 : 0) };
   const inp = (k, v, attrs = '') => `<input class="input" name="${k}" value="${esc(v ?? '')}" ${attrs}>`;
 
   function telaForm(el, r){
@@ -39,11 +41,11 @@
           ${campo('responsavel', inp('responsavel', v.responsavel, 'maxlength="120"'))}
         </div></fieldset>
         <fieldset class="fieldset"><legend>Quanto e quando (estimativas)</legend><div class="form">
-          ${campo('esforcoFte', inp('esforcoFte', v.esforcoFte, 'type="number" min="0" step="0.5" inputmode="decimal"'), {ajuda:'Pessoas em tempo integral'})}
-          ${campo('duracaoMeses', inp('duracaoMeses', v.duracaoMeses, 'type="number" min="0" step="1"'))}
-          ${campo('custo', inp('custo', v.custo, 'type="number" min="0" step="1000"'), {ajuda:'Opcional'})}
-          ${campo('inicioPrevisto', inp('inicioPrevisto', v.inicioPrevisto, 'type="date"'))}
-          ${campo('fimPrevisto', inp('fimPrevisto', v.fimPrevisto, 'type="date"'))}
+          ${campo('esforcoFte', numeroCampo('esforcoFte', v.esforcoFte, 'Ex.: 1,5'), {ajuda:'Pessoas em tempo integral', hint:true})}
+          ${campo('duracaoMeses', numeroCampo('duracaoMeses', v.duracaoMeses, 'Ex.: 6'), {hint:true})}
+          ${campo('custo', numeroCampo('custo', v.custo, 'Ex.: 150.000'), {ajuda:'Opcional', hint:true})}
+          ${campo('inicioPrevisto', inp('inicioPrevisto', v.inicioPrevisto, 'type="date" min="2000-01-01" max="2100-12-31"'))}
+          ${campo('fimPrevisto', inp('fimPrevisto', v.fimPrevisto, 'type="date" min="2000-01-01" max="2100-12-31"'))}
           ${campo('link', inp('link', v.link, 'maxlength="300" placeholder="https://…"'), {ajuda:'Item no Azure DevOps ou Jira'})}
           ${campo('observacoes', `<textarea class="input" name="observacoes" maxlength="1200">${esc(v.observacoes || '')}</textarea>`, {full:true})}
         </div></fieldset>
@@ -51,9 +53,12 @@
           <a class="btn btn-ghost" href="${p ? '#/projeto/' + p.id : '#/acervo'}">Cancelar</a><span class="dim" style="font-size:12.5px"><span class="req" style="color:var(--bad)">*</span> obrigatório</span></div>
       </form>`;
     const f = el.querySelector('[data-form]');
+    const dica = i => { const n = GP.util.numBR(i.value), h = el.querySelector(`[data-hint="${i.dataset.numero}"]`); if(h) h.textContent = n === '' ? '' : isNaN(n) || n < 0 ? 'Valor não reconhecido' : '= ' + NUM_FMT[i.dataset.numero](n); };
+    el.querySelectorAll('[data-numero]').forEach(i => { dica(i); i.addEventListener('input', () => dica(i)); });
     f.addEventListener('submit', e => {
       e.preventDefault();
       const d = Object.fromEntries(new FormData(f).entries()); d.obrigatorio = f.obrigatorio.checked;
+      ['esforcoFte', 'duracaoMeses', 'custo'].forEach(k => { d[k] = GP.util.numBR(d[k]); });
       const res = p ? P.atualizar(p.id, d) : P.criar(d);
       el.querySelectorAll('[data-err]').forEach(x => x.textContent = ''); el.querySelectorAll('.input.err,.select.err').forEach(x => x.classList.remove('err'));
       if(!res.ok){
@@ -68,10 +73,10 @@
   /* ---------------------------------------------------------------- acervo */
   const GRUPOS = [['todos', 'Todos'], ['andamento', 'Em andamento'], ['concluido', 'Concluídos'], ['fora', 'Não entram / cancelados']];
   function filtrar(lista, f){
-    const q = (f.q || '').trim().toLowerCase();
+    const q = GP.util.normTxt((f.q || '').trim());
     return lista.filter(p => (!f.grupo || f.grupo === 'todos' || M.etapa(p.etapa).grupo === f.grupo)
       && (!f.etapa || p.etapa === f.etapa) && (!f.gerencia || p.gerencia === f.gerencia) && (!f.tipo || p.tipo === f.tipo)
-      && (!q || [p.codigo, p.titulo, p.area, p.ferramenta, p.responsavel, p.demandante].join(' ').toLowerCase().includes(q)));
+      && (!q || GP.util.normTxt([p.codigo, p.titulo, p.area, p.ferramenta, p.responsavel, p.demandante].join(' ')).includes(q)));
   }
   function telaAcervo(el){
     const S = GP.state(), f = S.ui.filtroAcervo = Object.assign({ grupo:'todos', q:'', gerencia:'', tipo:'', etapa:'' }, S.ui.filtroAcervo);
@@ -86,12 +91,12 @@
     const cols = [
       { key:'codigo', label:'Código', fmt:(v, r) => `<span class="code">${esc(v)}</span>` },
       { key:'titulo', label:'Projeto', fmt:(v, r) => `<b style="font-weight:600">${esc(v)}</b><small>${esc([r.area, r.ferramenta].filter(Boolean).join(' · ') || '—')}</small>` },
-      { key:'gerencia', label:'Gerência' },
-      { key:'tipo', label:'Tipo', fmt:(v, r) => `${esc(v)}${r.obrigatorio ? ' <span class="tag" title="Obrigatório por lei/regulação">obrigatório</span>' : ''}` },
+      { key:'gerencia', label:'Gerência', hm:true },
+      { key:'tipo', label:'Tipo', hm:true, fmt:(v, r) => `${esc(v)}${r.obrigatorio ? ' <span class="tag" title="Obrigatório por lei/regulação">obrigatório</span>' : ''}` },
       { key:'etapa', label:'Etapa', fmt:v => etapaPill(v), sortVal:r => M.etapa(r.etapa).ordem },
       ...GP.acervoColunas.filter(c => c.nivel <= GP.nivel()).map(c => c.coluna),
-      { key:'responsavel', label:'Responsável', fmt:v => esc(v || '—') },
-      { key:'fimPrevisto', label:'Fim previsto', fmt:v => fmt.data(v) },
+      { key:'responsavel', label:'Responsável', hm:true, fmt:v => esc(v || '—') },
+      { key:'fimPrevisto', label:'Fim previsto', hm:true, fmt:v => fmt.data(v) },
     ];
     el.innerHTML = U.pageHead({ titulo:'Acervo de projetos', sub:'Todos os projetos cadastrados: em andamento, concluídos e os que não entraram.',
         acoes:`<button class="btn btn-ghost" data-importar-csv>${icon('upload', 16)} Importar</button><button class="btn btn-ghost" data-exportar-csv>${icon('download', 16)} Exportar para Excel</button><a class="btn btn-primary" href="#/novo">${icon('novo', 16)} Novo projeto</a>` }) +

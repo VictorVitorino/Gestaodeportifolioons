@@ -226,7 +226,7 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
 .escala button:hover{border-color:var(--green-200)}
 .escala button.on{border-color:var(--green);background:var(--green-50);color:var(--green-700)}
 .escala button.on b{color:var(--green)}
-.peso-row{display:grid;grid-template-columns:minmax(0,1fr) 150px 44px;gap:12px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.peso-row{display:grid;grid-template-columns:minmax(0,1fr) 150px 84px;gap:12px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
 .peso-row .num{text-align:right;font-weight:600}
 details summary{list-style:none} details summary::-webkit-details-marker{display:none}
 details summary::before{content:"▸";display:inline-block;margin-right:8px;color:var(--green);transition:transform .15s} details[open] summary::before{transform:rotate(90deg)}
@@ -256,6 +256,12 @@ details summary::before{content:"▸";display:inline-block;margin-right:8px;colo
 .g-col.over{background:var(--bad)}
 .g-cap{position:absolute;left:0;right:0;border-top:2px dashed var(--green);z-index:1}
 
+/* ---------- QA final ---------- */
+.side-backdrop{position:fixed;inset:0;z-index:15;background:rgba(20,28,20,.3)}
+.page-h h1,.tbl td,.kcard,.card b,.card h3,.g-lbl,.callout,.card p,.card li,.hist{overflow-wrap:anywhere}
+.tbl td{min-width:0}
+.hint{font-weight:500;color:var(--green-700);font-size:12px;min-height:16px}
+
 /* ---------- responsive ---------- */
 @media (max-width:1100px){ .g4{grid-template-columns:repeat(2,minmax(0,1fr))} .g3{grid-template-columns:repeat(2,minmax(0,1fr))} .lvl-cards{grid-template-columns:1fr} }
 @media (max-width:900px){
@@ -269,11 +275,13 @@ details summary::before{content:"▸";display:inline-block;margin-right:8px;colo
   .g-head,.g-row{grid-template-columns:130px minmax(0,1fr)}
   .aval-res{position:static}
   .escala{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .peso-row{grid-template-columns:minmax(0,1fr) 100px 40px}
+  .peso-row{grid-template-columns:minmax(0,1fr) 84px}
+  .peso-row input[type=range]{display:none}
   .form{grid-template-columns:1fr}
   .levels .seg button span{display:none}
 }
 @media (max-width:600px){
+  .hm{display:none}
   .g4{grid-template-columns:1fr}
   .topbar{flex-wrap:wrap}
   .topbar .ons{height:24px}

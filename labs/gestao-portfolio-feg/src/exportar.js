@@ -59,12 +59,13 @@
   const data = s => { s = String(s || '').trim(); if(!s) return ''; let m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
     if(m) return valida(m[3], m[2], m[1]) ? `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}` : 'inválida';
     m = s.match(/^(\d{4})-(\d{2})-(\d{2})/); return m && valida(m[1], m[2], m[3]) ? m[0] : 'inválida'; };
-  const numero = s => { s = String(s ?? '').trim().replace(/[R$\s]/g, ''); if(!s) return ''; if(/,\d{1,2}$/.test(s) || (s.includes(',') && !s.includes('.'))) s = s.replace(/\./g, '').replace(',', '.'); else s = s.replace(/,/g, ''); return isNaN(+s) ? 'inválido' : +s; };
+  const numero = s => { const n = GP.util.numBR(s); return n === '' ? '' : isNaN(n) || n < 0 ? 'inválido' : n; };
   /** Converte as linhas da planilha em projetos e valida cada um. */
   function prepararImportacao(linhas){
     if(linhas.length < 2) return { erroGeral:'A planilha precisa ter o cabeçalho e pelo menos uma linha.' };
     const cab = linhas[0].map(norm), idx = {};
     COLUNAS.forEach(([k, l]) => { const i = cab.indexOf(norm(l)); if(i >= 0) idx[k] = i; });
+    const ie = cab.indexOf('etapa'); if(ie >= 0) idx.etapa = ie;
     if(idx.titulo == null) return { erroGeral:'Não encontrei a coluna "Título". Use o modelo de planilha.' };
     const titulos = new Set(P.todos().map(p => p.titulo.trim().toLowerCase()));
     const itens = linhas.slice(1).map((l, n) => {
@@ -74,32 +75,37 @@
       const d = { titulo:v('titulo'), descricao:v('descricao'), beneficio:v('beneficio'), gerencia: ger ? ger.id : v('gerencia'), area:v('area'), ferramenta:v('ferramenta'),
         demandante:v('demandante'), patrocinador:v('patrocinador'), responsavel:v('responsavel'), tipo: tipo || v('tipo'), origem: orig || '', obrigatorio: /^(sim|s|x|1|true)$/i.test(v('obrigatorio')),
         esforcoFte: numero(v('esforcoFte')), duracaoMeses: numero(v('duracaoMeses')), custo: numero(v('custo')), inicioPrevisto: data(v('inicioPrevisto')), fimPrevisto: data(v('fimPrevisto')), link:v('link'), observacoes:v('observacoes') };
+      const et = idx.etapa != null ? M.ETAPAS.find(e => norm(e.nome) === norm(l[idx.etapa]) || e.id === String(l[idx.etapa] || '').trim()) : null;
       const erros = Object.assign({}, M.validar(d));
       if(d.gerencia && !ger) erros.gerencia = `Gerência "${d.gerencia}" não reconhecida (use FEG, FEL, FEN ou FER).`;
       if(d.tipo && !tipo) erros.tipo = `Tipo "${d.tipo}" não reconhecido.`;
       ['esforcoFte', 'duracaoMeses', 'custo'].forEach(k => { if(d[k] === 'inválido') erros[k] = 'Número inválido.'; });
       ['inicioPrevisto', 'fimPrevisto'].forEach(k => { if(d[k] === 'inválida') erros[k] = 'Data inválida (use dd/mm/aaaa).'; });
       const t = d.titulo.toLowerCase(); if(t && titulos.has(t) && !erros.titulo) erros.titulo = 'Já existe no acervo ou repetido na planilha.'; if(t) titulos.add(t);
-      return { linha: n + 2, d, erros };
+      return { linha: n + 2, d, erros, etapa: et ? et.id : null };
     });
     return { itens, validos: itens.filter(i => !Object.keys(i.erros).length) };
   }
   function abrirImportacao(arquivo){
     const r = new FileReader();
     r.onload = () => {
-      const res = prepararImportacao(lerCSV(String(r.result)));
+      const res = prepararImportacao(lerCSV(decodificar(r.result)));
       if(res.erroGeral){ GP.toast(esc(res.erroGeral)); return; }
       const inval = res.itens.filter(i => Object.keys(i.erros).length);
       const m = GP.modal(`<h3>Importar planilha</h3><p class="muted" style="margin:0 0 12px">${esc(arquivo.name)} · ${res.itens.length} linha(s)</p>
         <div class="row" style="margin-bottom:12px">${U.pill(`${res.validos.length} prontas para importar`, 'ok')} ${inval.length ? U.pill(`${inval.length} com erro (serão ignoradas)`, 'bad') : ''}</div>
         ${inval.length ? `<div class="tbl-wrap" style="max-height:240px;overflow:auto"><table class="tbl"><thead><tr><th>Linha</th><th>Título</th><th>Problema</th></tr></thead><tbody>${inval.map(i => `<tr><td>${i.linha}</td><td>${esc(i.d.titulo || '—')}</td><td>${Object.entries(i.erros).map(([k, e]) => `<b>${esc(M.CAMPOS[k] || k)}:</b> ${esc(e)}`).join('<br>')}</td></tr>`).join('')}</tbody></table></div>` : ''}
-        <p class="muted" style="font-size:12.5px">Os projetos importados entram como <b>Nova demanda</b> e passam pelo funil de entrada.</p>
+        ${res.itens.some(i => i.etapa && i.etapa !== 'entrada') ? `<label class="check-row" style="margin:6px 0"><input type="checkbox" data-manter-etapa><span>Manter a etapa informada na planilha (coluna “Etapa”). Sem marcar, todos entram como <b>Nova demanda</b> e passam pelo funil.</span></label>` : `<p class="muted" style="font-size:12.5px">Os projetos importados entram como <b>Nova demanda</b> e passam pelo funil de entrada.</p>`}
+        <p class="dim" style="font-size:12px;margin:0">A planilha traz os dados do cadastro. Checklist de entrada, avaliações e pesos só voltam por <b>backup</b>.</p>
         <div class="m-act"><button class="btn btn-ghost" data-close="1">Cancelar</button><button class="btn btn-primary" data-confirmar ${res.validos.length ? '' : 'disabled'}>Importar ${res.validos.length} projeto(s)</button></div>`, { largo:true });
-      m.querySelector('[data-confirmar]').onclick = () => { let n = 0; res.validos.forEach(i => { const x = P.criar(i.d); if(x.ok){ n++; P.registrar(x.projeto, 'Importação', `Importado da planilha ${arquivo.name} (linha ${i.linha}).`); } });
+      m.querySelector('[data-confirmar]').onclick = () => { const manter = !!(m.querySelector('[data-manter-etapa]') || {}).checked; let n = 0;
+        res.validos.forEach(i => { const x = P.criar(i.d); if(x.ok){ n++; P.registrar(x.projeto, 'Importação', `Importado da planilha ${arquivo.name} (linha ${i.linha}).`); if(manter && i.etapa && i.etapa !== 'entrada') P.mudarEtapa(x.projeto.id, i.etapa, 'Etapa trazida da planilha.'); } });
         GP.save(); GP.closeModal(); GP.toast(`${n} projeto(s) importado(s).`); GP.go('#/acervo'); };
     };
-    r.readAsText(arquivo, 'utf-8');
+    r.readAsArrayBuffer(arquivo);
   }
+  /** Lê o arquivo como UTF-8; se não for UTF-8 válido (CSV "ANSI" do Excel), usa Windows-1252. */
+  const decodificar = buf => { try { return new TextDecoder('utf-8', { fatal:true }).decode(buf); } catch(e){ return new TextDecoder('windows-1252').decode(buf); } };
 
   /* ------------------------------------------------------------ backup JSON */
   function exportarBackup(){
@@ -110,9 +116,12 @@
   function restaurarBackup(arquivo){
     const r = new FileReader();
     r.onload = () => { let j; try { j = JSON.parse(String(r.result)); } catch(e){ GP.toast('Arquivo inválido: não é um JSON.'); return; }
-      if(!j || j.tipo !== 'BACKUP_GESTAO_PORTFOLIO_FEG' || !j.estado || !Array.isArray(j.estado.projetos)){ GP.toast('Este arquivo não é um backup do sistema.'); return; }
-      GP.confirmar('Restaurar backup?', `<p>O backup de ${fmt.dataHora(j.exportadoEm)} tem <b>${j.estado.projetos.length} projeto(s)</b>. Os dados atuais deste navegador serão substituídos.</p>`, 'Restaurar', () => {
-        const ui = GP.state().ui; const est = M.migrar(j.estado); est.ui = Object.assign({}, est.ui, { nivel: ui.nivel, menuMini: ui.menuMini }); GP.resetState(est); GP.toast('Backup restaurado.'); GP.go('#/painel'); }); };
+      if(!j || j.tipo !== 'BACKUP_GESTAO_PORTFOLIO_FEG' || !j.estado || typeof j.estado !== 'object' || !Array.isArray(j.estado.projetos)){ GP.toast('Este arquivo não é um backup do sistema.'); return; }
+      let est; try { est = M.migrar(JSON.parse(JSON.stringify(j.estado))); } catch(e){ GP.toast('Backup corrompido: não foi possível ler os dados.'); return; }
+      const descartados = j.estado.projetos.length - est.projetos.length;
+      const quando = fmt.dataHora(j.exportadoEm);
+      GP.confirmar('Restaurar backup?', `<p>Backup ${quando !== '—' ? 'de ' + quando : 'sem data'} com <b>${est.projetos.length} projeto(s) válido(s)</b>${descartados ? ` (${descartados} registro(s) inválido(s) serão descartados)` : ''}. Os dados atuais deste navegador serão substituídos.</p>`, 'Restaurar', () => {
+        const ui = GP.state().ui; est.ui = Object.assign({}, est.ui, { nivel: ui.nivel, menuMini: ui.menuMini }); GP.resetState(est); GP.toast('Backup restaurado.'); GP.go('#/painel'); }); };
     r.readAsText(arquivo, 'utf-8');
   }
   const escolherArquivo = (aceita, fn) => { const i = document.createElement('input'); i.type = 'file'; i.accept = aceita; i.style.display = 'none'; i.onchange = () => { if(i.files[0]) fn(i.files[0]); i.remove(); }; document.body.appendChild(i); i.click(); };
@@ -128,14 +137,21 @@
       const titulo = (document.querySelector('.topbar .ttl b') || {}).textContent || 'Portfólio';
       const w = document.createElement('div'); w.style.cssText = 'position:absolute;left:-20000px;top:0;width:1240px;background:#fff;padding:28px';
       w.innerHTML = `<div style="display:flex;align-items:center;gap:14px;border-bottom:1px solid #E4E3E4;padding-bottom:12px;margin-bottom:18px">${GP.logoFEG(34)}<div><b style="font-size:15px">Gestão de Portfólio · FEG</b><div style="font-size:12px;color:#5E655F">${esc(titulo)} · ${fmt.data(hoje())}</div></div><img src="${GP.LOGO_ONS}" style="height:30px;margin-left:auto"></div>`;
-      const c = el.cloneNode(true); c.querySelectorAll('.actions, button, select, input[type=range], [data-noprint]').forEach(x => x.remove()); w.appendChild(c); document.body.appendChild(w);
-      const cv = await window.html2canvas(w, { scale:1.6, backgroundColor:'#ffffff', logging:false, windowWidth:1300 }); w.remove();
+      const c = el.cloneNode(true);
+      c.querySelectorAll('select').forEach((s, i) => { const o = el.querySelectorAll('select')[i]; const t = document.createElement('span'); t.textContent = o && o.selectedOptions[0] ? o.selectedOptions[0].textContent : ''; s.replaceWith(t); });
+      c.querySelectorAll('input:not([type=checkbox]):not([type=radio]):not([type=range])').forEach((x, i) => { const t = document.createElement('div'); t.className = 'input'; t.textContent = x.value; x.replaceWith(t); });
+      c.querySelectorAll('.actions, button, input[type=range], [data-noprint]').forEach(x => x.remove()); w.appendChild(c); document.body.appendChild(w);
+      const escala = 1.6, topo = w.getBoundingClientRect().top;
+      const cortes = [...w.querySelectorAll('tr, .card, .page-h, .g-row, .callout, .kpi')].map(x => Math.round((x.getBoundingClientRect().bottom - topo) * escala)).sort((a, b) => a - b);
+      const cv = await window.html2canvas(w, { scale:escala, backgroundColor:'#ffffff', logging:false, windowWidth:1300 }); w.remove();
       const pdf = new window.jspdf.jsPDF({ orientation:'landscape', unit:'pt', format:'a4', compress:true });
       const PW = pdf.internal.pageSize.getWidth(), PH = pdf.internal.pageSize.getHeight(), M0 = 20, util = PW - 2 * M0, alt = PH - 2 * M0 - 12;
       const pxPag = cv.width * alt / util; let y = 0, pg = 0;
-      while(y < cv.height){ const h = Math.min(pxPag, cv.height - y), part = document.createElement('canvas'); part.width = cv.width; part.height = h; part.getContext('2d').drawImage(cv, 0, y, cv.width, h, 0, 0, cv.width, h);
+      while(y < cv.height){ let h = Math.min(pxPag, cv.height - y);
+        if(y + h < cv.height){ const bom = cortes.filter(k => k > y + pxPag * 0.5 && k <= y + h).pop(); if(bom) h = bom - y; }
+        const part = document.createElement('canvas'); part.width = cv.width; part.height = h; part.getContext('2d').drawImage(cv, 0, y, cv.width, h, 0, 0, cv.width, h);
         if(pg) pdf.addPage(); pdf.addImage(part.toDataURL('image/jpeg', .92), 'JPEG', M0, M0, util, h * util / cv.width); y += h; pg++;
-        pdf.setFontSize(8); pdf.setTextColor(120); pdf.text(`Gestao de Portfolio FEG - ${titulo.normalize('NFD').replace(/[̀-ͯ]/g, '')} - pagina ${pg}`, M0, PH - 10); }
+        pdf.setFontSize(8); pdf.setTextColor(120); pdf.text(`Gestão de Portfólio FEG · ${titulo} · ${fmt.data(hoje())} · página ${pg}`, M0, PH - 10); }
       pdf.save(`portfolio-feg-${titulo.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${hoje()}.pdf`);
       GP.toast('PDF gerado. Se o download não começar, abra o arquivo no Chrome ou Edge.');
     } catch(e){ console.error(e); GP.toast('Não foi possível gerar o PDF neste visualizador. Abra o arquivo no Chrome ou Edge.'); }

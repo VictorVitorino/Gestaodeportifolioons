@@ -114,8 +114,9 @@
     const soma = eixo => rasc.filter(r => S.criterios.find(c => c.id === r.id).eixo === eixo).reduce((a, r) => a + (+r.peso || 0), 0);
     const bloco = eixo => `<div class="card stack" style="gap:10px">${U.secH(esc(M.EIXOS[eixo]), 'Os pesos deste eixo precisam somar 100%.')}
       ${S.criterios.filter(c => c.eixo === eixo).map(c => `<div class="peso-row"><div><b>${esc(c.nome)}</b><div class="muted" style="font-size:12.5px">${esc(c.pergunta)}</div></div>
-        <input type="range" min="0" max="60" step="5" value="${c.peso}" data-peso="${c.id}" aria-label="Peso de ${esc(c.nome)}"><span class="num" data-peso-v="${c.id}">${c.peso}%</span></div>`).join('')}
-      <div class="row" style="justify-content:space-between"><span class="muted">Soma</span><b data-soma="${eixo}"></b></div></div>`;
+        <input type="range" min="0" max="100" step="1" value="${+c.peso}" data-peso="${esc(c.id)}" aria-label="Peso de ${esc(c.nome)} (controle deslizante)">
+        <span class="row" style="gap:4px;flex-wrap:nowrap"><input class="input num" style="width:62px;padding:6px 8px;text-align:right" inputmode="numeric" value="${+c.peso}" data-peso-n="${esc(c.id)}" aria-label="Peso de ${esc(c.nome)} em %">%</span></div>`).join('')}
+      <div class="row" style="justify-content:space-between"><span class="muted">Soma <button class="btn btn-ghost btn-sm" data-normalizar="${eixo}" style="margin-left:8px">Ajustar para 100%</button></span><b data-soma="${eixo}"></b></div></div>`;
     el.innerHTML = U.pageHead({ titulo:'Critérios e pesos', sub:'Defina a importância (%) de cada pergunta. O ranking muda na hora. Os pesos iniciais são uma sugestão para a FEG validar.',
         acoes:`<button class="btn btn-ghost" data-restaurar>${icon('relogio', 16)} Restaurar sugestão</button>` }) +
       `<div class="grid aval-grid"><div class="stack">${bloco('valor')}${bloco('esforco')}
@@ -130,7 +131,14 @@
       const rk = M.ranking(P.todos().filter(p => p.etapa === 'aprovado'), {}, crit).slice(0, 8);
       el.querySelector('[data-previa]').innerHTML = rk.length ? rk.map(x => `<div class="row" style="flex-wrap:nowrap;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)"><b style="width:18px">${x.pos}</b>${notaHtml(x.s.valor)}<span style="font-size:13px">${esc(x.p.codigo)} · ${esc(x.p.titulo)}</span></div>`).join('') : '<span class="dim">Avalie projetos aprovados para ver a prévia.</span>';
     };
-    el.querySelectorAll('[data-peso]').forEach(i => i.addEventListener('input', () => { rasc.find(r => r.id === i.dataset.peso).peso = +i.value; el.querySelector(`[data-peso-v="${i.dataset.peso}"]`).textContent = i.value + '%'; atualizar(); }));
+    const definir = (id, v) => { v = Math.max(0, Math.min(100, Math.round(+v) || 0)); rasc.find(r => r.id === id).peso = v;
+      const rg = el.querySelector(`[data-peso="${id}"]`), nb = el.querySelector(`[data-peso-n="${id}"]`); if(rg && +rg.value !== v) rg.value = v; if(nb && document.activeElement !== nb) nb.value = v; atualizar(); };
+    el.querySelectorAll('[data-peso]').forEach(i => i.addEventListener('input', () => { definir(i.dataset.peso, i.value); el.querySelector(`[data-peso-n="${i.dataset.peso}"]`).value = i.value; }));
+    el.querySelectorAll('[data-peso-n]').forEach(i => { i.addEventListener('input', () => { if(i.value.trim() !== '') definir(i.dataset.pesoN, GP.util.numBR(i.value)); }); i.addEventListener('blur', () => { i.value = rasc.find(r => r.id === i.dataset.pesoN).peso; }); });
+    el.querySelectorAll('[data-normalizar]').forEach(b => b.onclick = () => { const ids = S.criterios.filter(c => c.eixo === b.dataset.normalizar).map(c => c.id), rs = rasc.filter(r => ids.includes(r.id)), tot = rs.reduce((a, r) => a + r.peso, 0);
+      if(!tot){ rs.forEach((r, i) => r.peso = Math.floor(100 / rs.length) + (i < 100 % rs.length ? 1 : 0)); }
+      else { rs.forEach(r => r.peso = Math.floor(r.peso / tot * 100)); let resto = 100 - rs.reduce((a, r) => a + r.peso, 0); rs.slice().sort((a, b) => b.peso - a.peso).forEach(r => { if(resto > 0){ r.peso++; resto--; } }); }
+      rs.forEach(r => { el.querySelector(`[data-peso="${r.id}"]`).value = r.peso; el.querySelector(`[data-peso-n="${r.id}"]`).value = r.peso; }); atualizar(); });
     el.querySelector('[data-salvar-pesos]').onclick = () => { S.criterios.forEach(c => c.peso = +rasc.find(r => r.id === c.id).peso); GP.save(); GP.toast('Pesos salvos. O ranking foi recalculado.'); GP.refresh(); };
     el.querySelector('[data-restaurar]').onclick = () => GP.confirmar('Restaurar pesos sugeridos?', '<p>Os pesos voltam aos valores iniciais. As respostas dos projetos não mudam.</p>', 'Restaurar', () => { S.criterios = JSON.parse(JSON.stringify(M.CRITERIOS_PADRAO)); GP.save(); GP.toast('Pesos restaurados.'); GP.refresh(); });
     atualizar();

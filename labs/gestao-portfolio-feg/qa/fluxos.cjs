@@ -276,4 +276,134 @@ module.exports = {
       check(/\.pdf$/.test(dl.suggestedFilename()), 'PDF não gerado em ' + rota);
     }
   },
+  /* Passo 8 — regressões dos defeitos do QA independente */
+  async 'qa8-01: backup malformado não trava o app'({ p, ir, check }){
+    const arq = require('path').join(require('os').tmpdir(), 'qa-bk-ruim.json');
+    require('fs').writeFileSync(arq, JSON.stringify({ tipo:'BACKUP_GESTAO_PORTFOLIO_FEG', exportadoEm:'xx', estado:{ projetos:[null, 5, { id:'ok-1', titulo:'Projeto válido do backup', etapa:'xyz', gerencia:'FEN', esforcoFte:'abc', link:'javascript:alert(1)' }] } }));
+    await ir('#/config');
+    const [fc] = await Promise.all([p.waitForEvent('filechooser'), p.click('[data-restaurar-backup]')]);
+    await fc.setFiles(arq); await p.waitForTimeout(200);
+    const t = await p.textContent('.modal');
+    check(/sem data/.test(t) && /1 projeto\(s\) válido/.test(t) && /2 registro\(s\) inválido/.test(t), 'confirmação deveria explicar validos/descartados e data ausente: ' + t.slice(0, 160));
+    await p.click('.modal [data-ok]'); await p.waitForTimeout(250);
+    for(const r of ['#/painel', '#/acervo', '#/config', '#/funil']){ await ir(r); check(!/Erro ao montar/.test(await p.textContent('#conteudo')), 'tela quebrou após backup ruim: ' + r); }
+    const pr = await p.evaluate(() => GP.projetos.todos()[0]);
+    check(pr.etapa === 'entrada' && pr.esforcoFte === null && pr.link === '', 'projeto do backup deveria ser higienizado');
+  },
+  async 'qa8-02: números no formato brasileiro no cadastro'({ p, ir, check }){
+    await ir('#/novo');
+    await p.fill('[name=titulo]', 'Projeto números BR'); await p.fill('[name=descricao]', 'd'); await p.selectOption('[name=gerencia]', 'FEG');
+    await p.fill('[name=demandante]', 'x'); await p.selectOption('[name=tipo]', 'Projeto');
+    await p.fill('[name=custo]', '150.000'); await p.fill('[name=esforcoFte]', '1,5'); await p.fill('[name=duracaoMeses]', '6');
+    check(/R\$ 150\.000/.test(await p.textContent('[data-hint="custo"]')), 'dica deveria mostrar R$ 150.000');
+    await p.click('[data-form] button[type=submit]'); await p.waitForTimeout(250);
+    const r = await p.evaluate(() => { const x = GP.projetos.todos()[0]; return [x.custo, x.esforcoFte, x.duracaoMeses]; });
+    check(r[0] === 150000 && r[1] === 1.5 && r[2] === 6, 'valores gravados errados: ' + JSON.stringify(r));
+    await p.click('a.btn:has-text("Editar")'); await p.waitForTimeout(150);
+    check(await p.inputValue('[name=esforcoFte]') === '1,5', 'edição deveria mostrar 1,5');
+    await p.fill('[name=custo]', '12,3,4'); await p.click('[data-form] button[type=submit]'); await p.waitForTimeout(150);
+    check(/número/.test(await p.textContent('[data-err="custo"]')), 'número inválido deveria ser recusado');
+  },
+  async 'qa8-03: datas absurdas recusadas e roadmap com janela'({ p, ir, check }){
+    const e = await p.evaluate(() => GP.modelo.validar({ titulo:'Datas teste', descricao:'d', gerencia:'FEG', demandante:'x', tipo:'Projeto', inicioPrevisto:'2026-01-01', fimPrevisto:'9999-12-31' }));
+    check(!!e.fimPrevisto, 'fim 9999 deveria ser recusado');
+    await p.evaluate(() => { GP.modelo.carregarExemplos(); const S = GP.state(); S.ui.nivel = 3; const x = S.projetos.find(q => q.codigo === 'PRJ-002'); x.inicioPrevisto = '2020-01-01'; x.fimPrevisto = '2035-12-31'; GP.save(); });
+    await ir('#/roadmap');
+    const fora = await p.$$eval('.g-bar', bs => bs.filter(b => parseFloat(b.style.left) > 100 || parseFloat(b.style.left) < 0).length);
+    check(fora === 0, 'barras não deveriam sair do quadro');
+    check(await p.locator('.g-col').count() > 0 && /Mostrando 72 meses/.test(await p.textContent('#conteudo')), 'roadmap deveria limitar a janela e manter a demanda mensal');
+  },
+  async 'qa8-04: data de hoje no fuso local'({ p, check }){
+    const ctx = await p.context().browser().newContext({ timezoneId:'America/Sao_Paulo' }); const q = await ctx.newPage();
+    await q.clock.setFixedTime(new Date('2026-10-04T01:30:00Z'));   // 03/10 22:30 em Brasília
+    await q.goto(p.url().split('#')[0] + '#/painel'); await q.waitForTimeout(200);
+    check(await q.evaluate(() => GP.util.hoje()) === '2026-10-03', 'hoje() deveria usar a data local');
+    await ctx.close();
+  },
+  async 'qa8-05: backup não executa HTML injetado'({ p, ir, check }){
+    const arq = require('path').join(require('os').tmpdir(), 'qa-bk-xss.json');
+    const x = '<img src=x onerror="window.__xss=1">';
+    require('fs').writeFileSync(arq, JSON.stringify({ tipo:'BACKUP_GESTAO_PORTFOLIO_FEG', estado:{ ui:{ nivel:3 }, capacidade:{ reservaPct:x, fte:x, periodo:x }, forcar:{}, criterios:[{ id:x, eixo:'valor', peso:x, nome:x, pergunta:x, niveis:[x,x,x,x] }],
+      projetos:[{ id:'a"><img src=x onerror=window.__xss=2>', codigo:x, titulo:'Projeto '+x, etapa:'aprovado', gerencia:'FEN', tipo:x, esforcoFte:1 }] } }));
+    await ir('#/config');
+    const [fc] = await Promise.all([p.waitForEvent('filechooser'), p.click('[data-restaurar-backup]')]);
+    await fc.setFiles(arq); await p.waitForTimeout(200); await p.click('.modal [data-ok]'); await p.waitForTimeout(200);
+    await p.evaluate(() => { GP.state().ui.nivel = 3; GP.save(); });
+    for(const r of ['#/painel', '#/acervo', '#/carteira', '#/criterios', '#/ranking', '#/funil?aba=quadro']){ await ir(r, 150); }
+    const id = await p.evaluate(() => GP.projetos.todos()[0].id); await ir('#/projeto/' + id, 150);
+    check(await p.evaluate(() => window.__xss === undefined), 'HTML injetado via backup foi executado');
+  },
+  async 'qa8-06: menu no celular fecha com Esc e clique fora'({ p, ir, check }){
+    await p.setViewportSize({ width:390, height:844 }); await ir('#/acervo');
+    await p.click('[data-menu]'); await p.waitForTimeout(150);
+    check(await p.locator('.side.open').count() === 1 && await p.locator('.side-backdrop').count() === 1, 'menu deveria abrir com fundo');
+    await p.keyboard.press('Escape'); await p.waitForTimeout(100);
+    check(await p.locator('.side.open').count() === 0, 'Esc deveria fechar o menu');
+    await p.click('[data-menu]'); await p.waitForTimeout(100); await p.mouse.click(370, 600); await p.waitForTimeout(150);
+    check(await p.locator('.side.open').count() === 0, 'clique fora deveria fechar o menu');
+    await p.click('[data-menu]'); await p.waitForTimeout(100); await p.click('.side [data-nivel="2"]'); await p.waitForTimeout(150);
+    check(await p.locator('.side.open').count() === 0, 'trocar de nível deveria fechar o menu');
+    await p.setViewportSize({ width:1440, height:900 });
+  },
+  async 'qa8-07: pergunta sem resposta não aparece como Não'({ p, ir, check }){
+    const id = await p.evaluate(() => { const r = GP.projetos.criar({ titulo:'Projeto parcial', descricao:'d', gerencia:'FEG', demandante:'x', tipo:'Projeto' }).projeto; GP.projetos.registrarEntrada(r.id, { E2:'nao' }); return r.id; });
+    await ir('#/projeto/' + id);
+    const t = await p.textContent('[data-secao="entrada"]');
+    check((t.match(/Sem resposta/g) || []).length === 5 && (t.match(/Não/g) || []).length >= 1, 'deveria mostrar 5 "Sem resposta"');
+  },
+  async 'qa8-08: teclado — ordenar, foco na carteira e modal'({ p, ir, check }){
+    await p.evaluate(() => { GP.modelo.carregarExemplos(); GP.state().ui.nivel = 3; GP.save(); });
+    await ir('#/acervo');
+    await p.focus('th[data-sort="acervo|codigo"]'); await p.keyboard.press('Enter'); await p.keyboard.press('Enter'); await p.waitForTimeout(150);
+    check(/PRJ-014/.test(await p.locator('tbody tr').first().textContent()), 'ordenar pelo teclado falhou');
+    await ir('#/carteira');
+    await p.fill('[data-cap="fte"]', '12'); await p.press('[data-cap="fte"]', 'Tab'); await p.waitForTimeout(200);
+    check(await p.evaluate(() => document.activeElement && document.activeElement.dataset && !!document.activeElement.dataset.cap), 'foco deveria continuar nos campos da carteira');
+    await p.click('[data-pauta]'); await p.waitForTimeout(100);
+    for(let i = 0; i < 6; i++) await p.keyboard.press('Tab');
+    check(await p.evaluate(() => !!document.activeElement.closest('.modal')), 'foco deveria ficar preso no modal');
+    await p.keyboard.press('Escape'); await p.waitForTimeout(100);
+    check(await p.evaluate(() => document.activeElement && document.activeElement.matches('[data-pauta]')), 'foco deveria voltar ao botão que abriu o modal');
+  },
+  async 'qa8-09: títulos longos não estouram o layout'({ p, ir, check }){
+    const id = await p.evaluate(() => GP.projetos.criar({ titulo:'A'.repeat(140), descricao:'B'.repeat(800), gerencia:'FEG', demandante:'x', tipo:'Projeto' }).projeto.id);
+    for(const r of ['#/projeto/' + id, '#/funil', '#/acervo']){ await ir(r, 150); const sw = await p.evaluate(() => document.documentElement.scrollWidth); check(sw <= 1442, `rolagem horizontal em ${r} (${sw})`); }
+  },
+  async 'qa8-10: link só aceita http/https'({ p, check }){
+    const e = await p.evaluate(() => GP.modelo.validar({ titulo:'Link teste', descricao:'d', gerencia:'FEG', demandante:'x', tipo:'Projeto', link:'javascript:alert(1)' }));
+    check(!!e.link, 'javascript: deveria ser recusado');
+  },
+  async 'qa8-11: capacidade não fica negativa e avisa'({ p, ir, check }){
+    await p.evaluate(() => { GP.modelo.carregarExemplos(); const S = GP.state(); S.ui.nivel = 3; S.capacidade.fte = 0; GP.save(); });
+    await ir('#/carteira');
+    const t = await p.textContent('#conteudo');
+    check(/Pessoas para novos projetos\s*0,0/.test(t) && /Atenção:/.test(t) && !/-\d/.test(t.replace(/PRJ-\d+/g, '').replace(/\d+-\d+/g, '')), 'capacidade deveria ser 0 com aviso, sem negativos');
+  },
+  async 'qa8-12: busca ignora acentos e ordenação em português'({ p, ir, check }){
+    await p.evaluate(() => ['Árvore de decisão teste', 'abacaxi teste', 'Bravo teste', 'Égua teste'].forEach(t => GP.projetos.criar({ titulo:t, descricao:'d', gerencia:'FEG', demandante:'x', tipo:'Projeto' })));
+    await ir('#/acervo'); await p.fill('[data-f="q"]', 'arvore'); await p.waitForTimeout(400);
+    check(await p.locator('tbody tr').count() === 1, 'busca "arvore" deveria achar "Árvore"');
+    await p.fill('[data-f="q"]', ''); await p.waitForTimeout(400);
+    await p.click('th[data-sort="acervo|titulo"]'); await p.waitForTimeout(150);
+    const ord = await p.$$eval('tbody tr td:nth-child(2) b', bs => bs.map(b => b.textContent.split(' ')[0]));
+    check(ord.join(',') === 'abacaxi,Árvore,Bravo,Égua', 'ordenação deveria seguir o português: ' + ord.join(','));
+  },
+  async 'qa8-13: planilha ANSI (Excel) e manter etapa'({ p, ir, check }){
+    const arq = require('path').join(require('os').tmpdir(), 'qa-ansi.csv');
+    const txt = 'Título;Descrição;Gerência;Demandante;Tipo;Etapa\r\nAção de integração do módulo;Descrição com acentuação;FEN;Área de estudos;Projeto;Em execução\r\n';
+    require('fs').writeFileSync(arq, Buffer.from(txt, 'latin1'));
+    await ir('#/acervo');
+    const [fc] = await Promise.all([p.waitForEvent('filechooser'), p.click('#conteudo [data-importar-csv]')]);
+    await fc.setFiles(arq); await p.waitForTimeout(250);
+    check(/1 prontas/.test(await p.textContent('.modal')), 'CSV ANSI deveria ser lido');
+    await p.check('.modal [data-manter-etapa]'); await p.click('.modal [data-confirmar]'); await p.waitForTimeout(250);
+    const r = await p.evaluate(() => [GP.projetos.todos()[0].titulo, GP.projetos.todos()[0].etapa]);
+    check(r[0] === 'Ação de integração do módulo' && r[1] === 'execucao', 'acentos/etapa da planilha: ' + JSON.stringify(r));
+  },
+  async 'qa8-14: PDF da carteira'({ p, ir, check, recarregar }){
+    await p.evaluate(() => { GP.modelo.carregarExemplos(); GP.state().ui.nivel = 3; GP.save(); }); await recarregar();
+    await ir('#/carteira', 250);
+    const [dl] = await Promise.all([p.waitForEvent('download', { timeout:60000 }), p.click('[data-pdf]')]);
+    check(/\.pdf$/.test(dl.suggestedFilename()), 'PDF da carteira não gerado');
+  },
 };
