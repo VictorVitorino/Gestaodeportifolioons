@@ -126,13 +126,54 @@
   /** Etapas em que faz sentido priorizar */
   const ETAPAS_PRIORIZAVEIS = ['aprovado', 'execucao', 'espera', 'triagem'];
 
+  /* --------------------------------------------- capacidade e carteira (nível 3) */
+  const CAPACIDADE_PADRAO = { periodo:'2027', fte:10, reservaPct:15, orcamento:4000000, descontarExecucao:true };
+  /**
+   * Monta a carteira que cabe: percorre o ranking dos aprovados e inclui enquanto houver pessoas (FTE) e orçamento.
+   * forcar: {id:'in'|'out'} — decisão manual do comitê (fixar ou excluir).
+   */
+  function montarCarteira(lista, cap = CAPACIDADE_PADRAO, forcar = {}, crit){
+    const efetiva = +cap.fte * (1 - (+cap.reservaPct || 0) / 100);
+    const execucao = lista.filter(p => p.etapa === 'execucao');
+    const comprometido = cap.descontarExecucao ? execucao.reduce((a, p) => a + (p.esforcoFte || 0), 0) : 0;
+    const livre = efetiva - comprometido, orc = +cap.orcamento || 0;
+    const rk = ranking(lista.filter(p => p.etapa === 'aprovado'), {}, crit);
+    // fixados entram primeiro, na ordem do ranking
+    const ordem = [...rk.filter(x => forcar[x.p.id] === 'in'), ...rk.filter(x => forcar[x.p.id] !== 'in')];
+    let fte = 0, custo = 0;
+    const itens = ordem.map(x => {
+      const f = x.p.esforcoFte, c = x.p.custo || 0; let status, falta = null;
+      if(forcar[x.p.id] === 'out') status = 'excluido';
+      else if(f == null) status = 'sem_estimativa';
+      else if(forcar[x.p.id] === 'in'){ status = (fte + f > livre + 1e-9 || (orc && custo + c > orc + 1e-9)) ? 'fixado_estoura' : 'fixado'; fte += f; custo += c; }
+      else if(fte + f <= livre + 1e-9 && (!orc || custo + c <= orc + 1e-9)){ status = 'cabe'; fte += f; custo += c; }
+      else { status = 'nao_cabe'; falta = fte + f > livre + 1e-9 ? { tipo:'FTE', valor: fte + f - livre } : { tipo:'R$', valor: custo + c - orc }; }
+      return Object.assign({}, x, { status, falta, acumFte: fte, acumCusto: custo });
+    });
+    const dentro = itens.filter(i => ['cabe', 'fixado', 'fixado_estoura'].includes(i.status));
+    return { efetiva, comprometido, livre, orcamento: orc, usadoFte: fte, usadoCusto: custo, sobraFte: livre - fte, sobraOrc: orc - custo,
+      itens, dentro, cabem: dentro.length, candidatos: rk.length, semNota: lista.filter(p => p.etapa === 'aprovado' && !pontuar(p, crit).completo) };
+  }
+  const STATUS_CARTEIRA = {
+    cabe:{ nome:'Cabe', tom:'ok' }, fixado:{ nome:'Fixado pelo comitê', tom:'ok' }, fixado_estoura:{ nome:'Fixado, mas estoura', tom:'bad' },
+    nao_cabe:{ nome:'Não cabe agora', tom:'warn' }, excluido:{ nome:'Excluído pelo comitê', tom:'neutral' }, sem_estimativa:{ nome:'Sem estimativa de FTE', tom:'warn' },
+  };
+  /** Pessoas (FTE) alocadas por mês, considerando projetos com início e fim previstos. */
+  function demandaMensal(lista, de, ate){
+    const meses = []; let [y, m] = de.split('-').map(Number); const [y2, m2] = ate.split('-').map(Number);
+    while(y < y2 || (y === y2 && m <= m2)){ meses.push(`${y}-${String(m).padStart(2, '0')}`); m++; if(m > 12){ m = 1; y++; } if(meses.length > 60) break; }
+    return meses.map(mes => ({ mes, fte: lista.filter(p => p.inicioPrevisto && p.fimPrevisto && p.inicioPrevisto.slice(0, 7) <= mes && p.fimPrevisto.slice(0, 7) >= mes).reduce((a, p) => a + (p.esforcoFte || 0), 0) }));
+  }
+
   /* --------------------------------------------------------------- estado */
   function estadoInicial(){
-    return { v: VERSAO, projetos: [], seq: 0, criterios: JSON.parse(JSON.stringify(CRITERIOS_PADRAO)), ui: { nivel: 1, menuMini: false } };
+    return { v: VERSAO, projetos: [], seq: 0, criterios: JSON.parse(JSON.stringify(CRITERIOS_PADRAO)), capacidade: Object.assign({}, CAPACIDADE_PADRAO), forcar: {}, ui: { nivel: 1, menuMini: false } };
   }
   function migrar(S){
     S.ui = Object.assign({ nivel: 1, menuMini: false }, S.ui || {});
     if(!Array.isArray(S.criterios) || !S.criterios.length) S.criterios = JSON.parse(JSON.stringify(CRITERIOS_PADRAO));
+    S.capacidade = Object.assign({}, CAPACIDADE_PADRAO, S.capacidade || {});
+    S.forcar = S.forcar || {};
     S.projetos = S.projetos || [];
     S.seq = S.seq || 0;
     S.v = VERSAO;
@@ -257,6 +298,6 @@
     GP.save(); return n;
   }
 
-  GP.modelo = { VERSAO, CAT, ETAPAS, etapa, CAMPOS, OBRIGATORIOS, ENTRADA, RESULTADO_ENTRADA, avaliarEntrada, CRITERIOS_PADRAO, EIXOS, CORTE, QUADRANTES, ETAPAS_PRIORIZAVEIS, criterios, sugestao, notaEixo, pontuar, ranking, estadoInicial, migrar, validar, carregarExemplos };
+  GP.modelo = { VERSAO, CAT, ETAPAS, etapa, CAMPOS, OBRIGATORIOS, ENTRADA, RESULTADO_ENTRADA, avaliarEntrada, CRITERIOS_PADRAO, EIXOS, CORTE, QUADRANTES, ETAPAS_PRIORIZAVEIS, criterios, sugestao, notaEixo, pontuar, ranking, CAPACIDADE_PADRAO, STATUS_CARTEIRA, montarCarteira, demandaMensal, estadoInicial, migrar, validar, carregarExemplos };
   GP.projetos = projetos;
 })();

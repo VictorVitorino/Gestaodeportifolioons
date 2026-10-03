@@ -188,4 +188,36 @@ module.exports = {
     await p.locator('#conteudo a.att').first().click(); await p.waitForTimeout(200);
     check(!/#\/painel/.test(p.url()), 'item de atenção deveria levar à tela de resolução');
   },
+  /* Passo 6 — capacidade e roadmap */
+  async 'passo6: carteira encaixa pelo ranking e respeita decisões do comitê'({ p, ir, check }){
+    await p.evaluate(() => { GP.modelo.carregarExemplos(); const S = GP.state(); S.ui.nivel = 3; GP.save(); });
+    await ir('#/carteira');
+    let t = await p.textContent('#conteudo');
+    check(/Pessoas para novos projetos\s*2,0/.test(t), 'FTE livre deveria ser 2,0 (10 − 15% − 6,5)');
+    check(/Projetos que cabem\s*1\s*\/\s*5/.test(t), 'deveriam caber 1 de 5');
+    await p.uncheck('[data-cap="descontarExecucao"]'); await p.waitForTimeout(200);
+    t = await p.textContent('#conteudo');
+    check(/Projetos que cabem\s*4\s*\/\s*5/.test(t), 'sem descontar execução deveriam caber 4 de 5');
+    const id14 = await p.evaluate(() => GP.projetos.todos().find(x => x.codigo === 'PRJ-014').id);
+    await p.selectOption(`[data-forcar="${id14}"]`, 'in'); await p.waitForTimeout(200);
+    check(/Fixado/.test(await p.locator('tbody tr').first().textContent()), 'projeto fixado deveria ir para o topo');
+    await p.fill('[data-cap="fte"]', '20'); await p.press('[data-cap="fte"]', 'Tab'); await p.waitForTimeout(200);
+    check(/Projetos que cabem\s*5\s*\/\s*5/.test(await p.textContent('#conteudo')), 'com 20 FTE deveriam caber todos');
+    await p.click('[data-pauta]'); await p.waitForTimeout(150);
+    const pauta = await p.inputValue('.modal [data-txt]');
+    check(/PAUTA DO COMITÊ/.test(pauta) && /PRJ-014/.test(pauta), 'pauta do comitê incompleta');
+    await p.keyboard.press('Escape');
+    await p.click('[data-cap-padrao]'); await p.waitForTimeout(150);
+    check(await p.evaluate(() => GP.state().capacidade.fte) === 10, 'restaurar capacidade falhou');
+  },
+  async 'passo6: roadmap mostra barras, demanda mensal e itens sem data'({ p, ir, check }){
+    await p.evaluate(() => { GP.modelo.carregarExemplos(); const S = GP.state(); S.ui.nivel = 3; GP.save(); });
+    await ir('#/roadmap');
+    const barras = await p.locator('.g-bar').count();
+    check(barras === 8, `roadmap deveria ter 8 barras (aprovados/execução com datas), veio ${barras}`);
+    check(await p.locator('.g-col').count() > 6, 'demanda mensal ausente');
+    check(/Sem datas previstas \(1\)/.test(await p.textContent('#conteudo')), 'deveria listar 1 projeto sem datas (em espera)');
+    await ir('#/painel');
+    check(/Capacidade · 2027/.test(await p.textContent('#conteudo')), 'painel do nível 3 deveria mostrar bloco de capacidade');
+  },
 };

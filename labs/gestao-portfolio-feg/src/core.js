@@ -239,7 +239,7 @@
     const item = t => `<a class="nav-item ${tela && tela.id === t.id ? 'on' : ''}" href="#/${t.id}" data-tip="${esc(t.titulo)}" aria-label="${esc(t.titulo)}"><span class="ic">${icon(t.icone)}</span><span class="lbl">${esc(t.titulo)}</span></a>`;
     let h = `<a class="brand" href="#/painel" data-tip="Gestão de Portfólio FEG">${GP.logoFEG(36)}<span class="txt"><b>Gestão de Portfólio</b><span>Gerência FEG · ONS</span></span></a>`;
     GP.NIVEIS.forEach(L => { if(L.n > nivel) return; const ts = TELAS.filter(t => t.menu !== false && t.nivel === L.n && !t.rodape); if(!ts.length) return;
-      h += `<div class="nav-sec">${L.n} · ${esc(L.nome)}</div>` + ts.map(item).join(''); });
+      h += `<div class="nav-sec" title="Nível ${L.n} · ${esc(L.nome)}">${L.n} · ${esc(L.nome)}</div>` + ts.map(item).join(''); });
     if(nivel < 3) h += `<div class="nav-sec">Mais recursos</div><button class="nav-item" data-nivel="${nivel + 1}" data-tip="Ativar nível ${nivel + 1}" aria-label="Ativar nível ${nivel + 1}"><span class="ic">${icon('estrela')}</span><span class="lbl">Ativar nível ${nivel + 1}</span></button>`;
     h += `<div class="side-foot">${TELAS.filter(t => t.rodape).map(item).join('')}
       <button class="collapse-btn" data-recolher data-tip="${S.ui.menuMini ? 'Expandir menu' : 'Recolher menu'}" aria-label="${S.ui.menuMini ? 'Expandir menu' : 'Recolher menu'}">${icon(S.ui.menuMini ? 'expandir' : 'recolher')}<span class="lbl">Recolher menu</span></button></div>`;

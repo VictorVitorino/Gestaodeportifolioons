@@ -109,3 +109,29 @@ test('exemplos: avaliações geram ranking coerente', () => {
   assert.match(rk[1].p.titulo, /Base única/);              // 60
   assert.match(rk.at(-1).p.titulo, /chuva-vazão/);         // empata com automação em 41,7, perde no esforço
 });
+
+test('carteira: reserva, execução comprometida, encaixe por ranking e decisões manuais', () => {
+  const GP = carregar(), M = GP.modelo; M.carregarExemplos();
+  const cap = { fte: 10, reservaPct: 15, orcamento: 4000000, descontarExecucao: true };
+  const c = M.montarCarteira(GP.projetos.todos(), cap);
+  assert.equal(c.efetiva, 8.5); assert.equal(c.comprometido, 6.5); assert.equal(c.livre, 2);
+  // ranking aprovados: PRJ-002 (2,0 FTE) cabe; PRJ-013 (2,5) não; PRJ-003 (1,5) não (2+1,5>2)...
+  assert.deepEqual([...c.dentro.map(i => i.p.codigo)], ['PRJ-002']);
+  assert.equal(c.itens.find(i => i.p.codigo === 'PRJ-013').status, 'nao_cabe');
+  const sem = M.montarCarteira(GP.projetos.todos(), { ...cap, descontarExecucao: false });
+  assert.equal(sem.livre, 8.5);
+  assert.deepEqual([...sem.dentro.map(i => i.p.codigo)], ['PRJ-002', 'PRJ-013', 'PRJ-003', 'PRJ-004']);   // 2+2,5+1,5+1 = 7; PRJ-014 (2) estoura 8,5
+  const id002 = GP.projetos.todos().find(p => p.codigo === 'PRJ-002').id, id014 = GP.projetos.todos().find(p => p.codigo === 'PRJ-014').id;
+  const f = M.montarCarteira(GP.projetos.todos(), { ...cap, descontarExecucao: false }, { [id002]: 'out', [id014]: 'in' });
+  assert.equal(f.itens.find(i => i.p.id === id002).status, 'excluido');
+  assert.equal(f.itens[0].p.id, id014); assert.equal(f.itens[0].status, 'fixado');
+  // orçamento como restrição
+  const o = M.montarCarteira(GP.projetos.todos(), { ...cap, descontarExecucao: false, orcamento: 1000000 });
+  assert.deepEqual([...o.dentro.map(i => i.p.codigo)], ['PRJ-002', 'PRJ-004']);   // 650 mil + 250 mil
+});
+
+test('demanda mensal de pessoas', () => {
+  const GP = carregar(), M = GP.modelo;
+  const lista = [{ inicioPrevisto: '2027-01-10', fimPrevisto: '2027-03-31', esforcoFte: 2 }, { inicioPrevisto: '2027-03-01', fimPrevisto: '2027-04-30', esforcoFte: 1 }];
+  assert.deepEqual([...M.demandaMensal(lista, '2027-01', '2027-05').map(x => x.fte)], [2, 2, 3, 1, 0]);
+});
