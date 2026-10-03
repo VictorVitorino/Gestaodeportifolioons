@@ -1,39 +1,13 @@
 /* =========================================================================
    Portfólio FEG — NÚCLEO COMUM (core.js)
-   -------------------------------------------------------------------------
-   Contrato para os módulos de nível (nivel1.js, nivel2.js, nivel3.js):
-
-   PF.registerLevel({
-     id: 1,                         // 1 | 2 | 3
-     nome: 'Fundamentos',           // nome do módulo
-     subtitulo: '...',              // frase curta
-     pergunta: '...',               // pergunta-guia do nível
-     objetivos: ['...'],            // objetivos de aprendizagem
-     unlock: { minPct: 70, desafio: true },   // regra para liberar o próximo nível
-     screens: [                     // telas que o nível ADICIONA ao menu
-       { id:'dashboard', titulo:'Dashboard', icone:'dashboard',
-         render(el, ctx){ el.innerHTML = '...'; } }   // ctx = {dados, nivel, go, refresh, st}
-     ],
-     questions: [ ... ],            // banco de perguntas (ver PF.quiz abaixo)
-     desafio: { titulo, descricao, render(el, ctx, done) }  // done({nota:0..100, ok:true, detalhe})
-   })
-
-   O núcleo adiciona automaticamente a cada nível as telas
-   "Perguntas & Respostas" (#/nN/perguntas) e "Desafio" (#/nN/desafio).
-
-   Dados: PF.base (conjunto ilustrativo imutável, definido em data.js) e
-   PF.db() (cópia de trabalho editável e persistida). Use sempre PF.db() nas telas.
-
-   Tipos de pergunta (PF.quiz):
-     {id, tipo:'conceito'|'analise'|'decisao', formato:'mc', enunciado, alternativas:[..], correta: idx, justificativa}
-     {formato:'num', calc:(d)=>number, tolerancia:0.5 | {rel:0.02}, unidade:'FTE', justificativa:(d,resp)=>html}
-     {formato:'pick', opcoes:(d)=>[{id,label}], correta:(d)=>id}
-     {formato:'multi', opcoes:(d)=>[{id,label}], corretas:(d)=>[ids]}
-     {formato:'decisao', itens:(d)=>[{id,label,cols:{..}}], colunas:[{key,label,fmt}],
-        limites:[{key:'fte', label:'FTE', max:12}], avaliar:(selIds,d)=>({ok, nota, feedback})}
-     {formato:'custom', render(el, d, answer)}   // answer(ok, valor)
-   Campos opcionais: contexto:(d)=>html, fonte:'FONTE_ONS'|'DECISAO_FUNCIONAL_PRODUTO'|'A_VALIDAR_FEG',
-     ver:'#/n1/inventario' (link "ver no sistema"), conceito:'texto curto', dica:'...'.
+   Contrato completo para os módulos: ver labs/portfolio-feg/CONTRATO.md
+   Resumo:
+   - PF.registerLevel({id, nome, subtitulo, pergunta, objetivos, unlock:{minPct, desafio},
+       screens:[{id, titulo, icone, escreve?, render(el, ctx)}], questions:[...], desafio:{titulo, descricao, render(el, ctx, done)}})
+   - PF.registerGlobal({id, titulo, icone, ordem, rodape?, render(el, ctx)})   → rota #/<id>
+   - Registros compartilhados: PF.registerDash, PF.registerKpi, PF.registerFichaTab, PF.registerGlossario, PF.registerConfigCard
+   - Dados: PF.base (referência, congelada) · PF.db() (trabalho) · PF.write/append/arquivar/validar · PF.regra/badge · PF.hash · PF.msg
+   - Perguntas: erro não revela a resposta; "Ver resposta" retira o crédito; alternativas embaralhadas por semente.
    ========================================================================= */
 (function(){
   'use strict';
@@ -105,7 +79,7 @@
   PF.icon = icon; PF.ICONS = ICONS;
 
   /* ----------------------------------------------------------------- state */
-  const freshState = () => ({ v:1, instrutor:false, respostas:{}, desafios:{}, medalhas:{}, work:null, mod:{}, ui:{}, nome:'' });
+  const freshState = () => ({ v:1, instrutor:false, respostas:{}, desafios:{}, concluidos:{}, medalhas:{}, work:null, mod:{}, ui:{}, perfil:{nome:''} });
   let S;
   try { S = JSON.parse(localStorage.getItem(KEY)) || freshState(); } catch(e){ S = freshState(); }
   S = Object.assign(freshState(), S);
@@ -122,7 +96,7 @@
   PF.db = () => { if(!S.work || S.workV !== dataV()) { S.work = clone(PF.base); S.workV = dataV(); save(); } return S.work; };
   PF.saveDb = () => save();
   PF.resetDb = () => { S.work = clone(PF.base); S.workV = dataV(); save(); };
-  PF.fonteLabel = { FONTE_ONS:'Fonte ONS', DECISAO_FUNCIONAL_PRODUTO:'Decisão de produto', A_VALIDAR_FEG:'A validar FEG', ILUSTRATIVO:'Ilustrativo' };
+  PF.fonteLabel = { FONTE_ONS:'Fonte ONS · documento aprovado', DECISAO_FUNCIONAL_PRODUTO:'Decisão de produto', A_VALIDAR_FEG:'A validar FEG', ILUSTRATIVO:'Ilustrativo' };
 
   /* ---------------------------------------------------------------- levels */
   const LEVELS = [];
@@ -136,30 +110,51 @@
   };
   const lvl = id => LEVELS.find(l=>l.id===id);
   PF.level = lvl;
+  const graded = q => !q.aprofundamento && !q.conferirFonte;
+  const counts = r => !!(r && r.best && !r.revelada);
   PF.levelStats = id => {
     const L = lvl(id); if(!L) return {total:0, ok:0, feitas:0, pct:0};
-    const qs = L.questions, total = qs.length;
-    const ok = qs.filter(q => S.respostas[q.id] && S.respostas[q.id].ok).length;
+    const qs = L.questions.filter(graded), total = qs.length;
+    const ok = qs.filter(q => counts(S.respostas[q.id])).length;
     const feitas = qs.filter(q => S.respostas[q.id]).length;
-    return { total, ok, feitas, pct: total ? ok/total : 0, desafio: S.desafios[id] || null };
+    const porTipo = {}; ['conceito','analise','decisao'].forEach(t => { const g = qs.filter(q=>q.tipo===t); porTipo[t] = {total:g.length, ok:g.filter(q=>counts(S.respostas[q.id])).length}; });
+    return { total, ok, feitas, pct: total ? ok/total : 0, desafio: S.desafios[id] || null, porTipo };
   };
   PF.levelDone = id => {
     const L = lvl(id); if(!L) return false;
+    if(S.concluidos[id]) return true;
     const st = PF.levelStats(id);
-    return st.pct*100 >= L.unlock.minPct && (!L.unlock.desafio || !L.desafio || !!(st.desafio && st.desafio.feito));
+    return st.pct*100 >= L.unlock.minPct - 1e-9 && (!L.unlock.desafio || !L.desafio || !!(st.desafio && st.desafio.feito));
   };
   PF.unlocked = id => id === 1 || S.instrutor || PF.levelDone(id-1);
   PF.currentLevel = () => { let c = 1; LEVELS.forEach(L => { if(PF.unlocked(L.id)) c = L.id; }); return c; };
   PF.award = (id, label) => { if(!S.medalhas[id]){ S.medalhas[id] = {label, ts: new Date().toISOString()}; save(); toast(`${icon('trophy',16)} Medalha: <b>${esc(label)}</b>`); } };
-  const checkLevelMedals = () => LEVELS.forEach(L => { if(PF.levelDone(L.id)) PF.award('nivel-'+L.id, `Nível ${L.id} concluído — ${L.nome}`); });
+  const checkLevelMedals = () => LEVELS.forEach(L => { if(!S.concluidos[L.id] && PF.levelDone(L.id)){ S.concluidos[L.id] = new Date().toISOString(); save(); }
+    if(S.concluidos[L.id]) PF.award('nivel-'+L.id, `Nível ${L.id} concluído — ${L.nome}`); });
+  PF.resetLevel = id => { LEVELS.filter(L=>L.id>=id).forEach(L => { (L.questions||[]).forEach(q=>delete S.respostas[q.id]); delete S.desafios[L.id]; delete S.concluidos[L.id]; delete S.medalhas['nivel-'+L.id]; }); save(); };
+
+  /* --------------------------------------------------------------- globals */
+  const GLOBALS = [];
+  PF.globals = () => GLOBALS;
+  PF.registerGlobal = def => { const i = GLOBALS.findIndex(g=>g.id===def.id); if(i>=0) GLOBALS[i]=def; else GLOBALS.push(def); GLOBALS.sort((a,b)=>(a.ordem||50)-(b.ordem||50)); };
+  /* Registros compartilhados entre telas globais e níveis */
+  PF.dash = []; PF.kpis = []; PF.fichaTabs = []; PF.glossario = []; PF.configCards = [];
+  PF.registerDash = b => { PF.dash.push(b); PF.dash.sort((a,b)=>(a.nivel-b.nivel)||((a.ordem||50)-(b.ordem||50))); };
+  PF.registerKpi = k => { const i = PF.kpis.findIndex(x=>x.id===k.id); if(i>=0) PF.kpis[i]=k; else PF.kpis.push(k); };
+  PF.registerFichaTab = t => { PF.fichaTabs.push(t); PF.fichaTabs.sort((a,b)=>(a.nivel-b.nivel)||((a.ordem||50)-(b.ordem||50))); };
+  PF.registerGlossario = (nivel, itens) => itens.forEach(x => PF.glossario.push(Object.assign({nivel}, x)));
+  PF.registerConfigCard = c => PF.configCards.push(c);
 
   /* ---------------------------------------------------------------- router */
   const parse = () => {
-    const h = (location.hash || '#/inicio').replace(/^#\/?/, '');
-    const [a, b] = h.split('/');
-    if(/^n[1-3]$/.test(a)) return { nivel: +a.slice(1), screen: b || null };
-    return { nivel: 0, screen: a || 'inicio' };
+    const raw = (location.hash || '#/inicio').replace(/^#\/?/, '');
+    const [path, qs] = raw.split('?');
+    const query = {}; (qs||'').split('&').filter(Boolean).forEach(kv => { const [k,v] = kv.split('='); query[decodeURIComponent(k)] = decodeURIComponent(v||''); });
+    const [a, b] = path.split('/');
+    if(/^n[1-3]$/.test(a)) return { nivel: +a.slice(1), screen: b || null, query };
+    return { nivel: 0, screen: a || 'inicio', query };
   };
+  PF.route = parse;
   PF.go = path => { if(location.hash === path) render(); else location.hash = path; };
   PF.refresh = () => render(true);
   window.addEventListener('hashchange', () => render());
@@ -308,132 +303,289 @@
   charts.niceMax = niceMax;
   PF.charts = charts;
 
+  /* ------------------------------------------------------- dados & regras */
+  /** Hash FNV-1a 32 bits sobre JSON com chaves ordenadas (detecção de mudança; não é segurança). */
+  const stable = v => Array.isArray(v) ? '['+v.map(stable).join(',')+']' : (v && typeof v==='object') ? '{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+stable(v[k])).join(',')+'}' : JSON.stringify(v);
+  PF.hash = obj => { let h = 0x811c9dc5; const s = stable(obj); for(let i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return ('0000000'+h.toString(16)).slice(-8); };
+  const deepFreeze = o => { if(o && typeof o==='object' && !Object.isFrozen(o)){ Object.freeze(o); Object.values(o).forEach(deepFreeze); } return o; };
+  PF.perfil = () => S.perfil || (S.perfil = {nome:''});
+  const autor = () => (PF.perfil().nome || '').trim() || 'Aprendiz (perfil local)';
+
+  const MSG = {
+    REQUIRED: c => `Preencha ${c.campo || 'o campo obrigatório'}.`,
+    INVALID_URL: () => 'O link precisa ser um endereço válido (ex.: https://…).',
+    HIERARCHY_MISMATCH: c => c.campo === 'squadId' ? 'A squad escolhida não pertence a esta comunidade.' : 'A comunidade escolhida não pertence a esta gerência.',
+    VALIDATION_ERROR: c => c.texto || 'Verifique os dados informados.',
+    INCOMPATIBLE_UNIT: () => 'Esta linha está em outra unidade e não entra na soma em FTE. O app não converte horas em FTE.',
+    SOURCE_REQUIRED: () => 'Valor sem fonte ou período: fica fora dos indicadores.',
+    SNAPSHOT_LOCKED: () => 'Fotografia fechada não muda. Gere uma nova versão ou registre uma correção.',
+    RULE_NOT_VALIDATED: c => `Este material usa regras ainda não validadas pela FEG${c.lista?': '+c.lista:''}.`,
+    JUSTIFICATIVA: c => `Escreva uma justificativa com pelo menos ${c.min||20} caracteres.`,
+  };
+  /** Mensagem em linguagem simples; o código técnico vai no tooltip. */
+  PF.msg = (codigo, c={}) => (MSG[codigo] ? MSG[codigo](c) : codigo);
+  PF.msgHtml = (codigo, c={}) => `<span title="${esc(codigo)}">${esc(PF.msg(codigo, c))}</span>`;
+
+  const ROTULO_CAMPO = { titulo:'o título', descricaoObjetivo:'a descrição/objetivo', gerenciaId:'a gerência', comunidadeId:'a comunidade', responsavel:'o responsável' };
+  /** Validação de iniciativas (regras do repositório: initiativeRules.js + hierarquia das migrations 0012/0014). Retorna [{campo, codigo, msg}] */
+  PF.validar = (colecao, o, d = PF.db()) => {
+    const errs = []; const push = (campo, codigo, extra={}) => errs.push({campo, codigo, msg: PF.msg(codigo, Object.assign({campo: ROTULO_CAMPO[campo]||campo}, extra))});
+    if(colecao === 'iniciativas'){
+      ['titulo','descricaoObjetivo','gerenciaId','comunidadeId','responsavel'].forEach(k => { if(!String(o[k] ?? '').trim()) push(k, 'REQUIRED'); });
+      if(o.linkOperacional){ try{ new URL(o.linkOperacional); } catch(e){ push('linkOperacional', 'INVALID_URL'); } }
+      const com = (d.comunidades||[]).find(c=>c.id===o.comunidadeId);
+      if(o.comunidadeId && o.gerenciaId && (!com || com.gerenciaId !== o.gerenciaId || com.ativo === false)) push('comunidadeId', 'HIERARCHY_MISMATCH');
+      if(o.squadId){ const sq = (d.squads||[]).find(s=>s.id===o.squadId); if(!sq || sq.comunidadeId !== o.comunidadeId || sq.ativo === false) errs.push({campo:'squadId', codigo:'HIERARCHY_MISMATCH', msg:PF.msg('HIERARCHY_MISMATCH',{campo:'squadId'})}); }
+    }
+    return errs;
+  };
+  /** Edita um registro do Trabalho: valida, grava histórico por campo, rowVersion++. Retorna {ok, errors}. */
+  PF.write = (colecao, id, patch, {justificativa=''}={}) => {
+    const d = PF.db(), arr = d[colecao]; const reg = arr && arr.find(x=>x.id===id);
+    if(!reg) return { ok:false, errors:[{codigo:'VALIDATION_ERROR', msg:'Registro não encontrado.'}] };
+    const merged = Object.assign({}, reg, patch);
+    const errors = PF.validar(colecao, merged, d); if(errors.length) return { ok:false, errors };
+    const quando = new Date().toISOString(); d.historico = d.historico || [];
+    Object.keys(patch).forEach(k => { if(stable(reg[k]) !== stable(patch[k])) d.historico.push({ id: uid('H'), entidade: colecao, entidadeId: id, campoAlterado: k, valorAnterior: reg[k] ?? null, valorNovo: patch[k] ?? null,
+      usuarioId: autor(), alteradoEm: quando, origemAlteracao: 'APP_TRILHA', justificativa, simulacao: true }); });
+    Object.assign(reg, patch, { rowVersion: (reg.rowVersion||0) + 1, updatedAt: quando }); save();
+    return { ok:true, errors:[] };
+  };
+  /** Acrescenta registro append-only (decisoes, pendencias, avaliacoes, historico, snapshotsForum, medicoesBeneficio…). */
+  PF.append = (colecao, reg) => { const d = PF.db(); d[colecao] = d[colecao] || [];
+    const r = Object.assign({ id: uid(colecao.slice(0,3).toUpperCase()), registradoEm: new Date().toISOString(), usuarioId: autor(), simulacao: true }, reg);
+    d[colecao].push(r); save(); return r; };
+  /** Arquivar = ativo:false com justificativa (não existe excluir). */
+  PF.arquivar = (id, justificativa) => { if(String(justificativa||'').trim().length < 10) return { ok:false, errors:[{codigo:'VALIDATION_ERROR', msg:PF.msg('JUSTIFICATIVA',{min:10})}] };
+    return PF.write('iniciativas', id, { ativo:false }, { justificativa }); };
+
+  /** Regra/parâmetro vigente pelo código (R13…). Lê do Trabalho (parâmetros editáveis) ou da referência. */
+  PF.regra = (codigo, {base=false}={}) => { const src = base ? PF.base : PF.db(); const rs = ((src && src.regras) || []).filter(r=>r.codigo===codigo);
+    if(!rs.length) return null; const vig = rs.filter(r=>r.vigente !== false); return (vig.length ? vig : rs).slice().sort((a,b)=>(b.versao||1)-(a.versao||1))[0]; };
+  const BADGE = r => {
+    if(!r) return null;
+    const o = r.origemRegra, t = r.tipoFonte;
+    if(o === 'ILUSTRATIVO') return { cls:'ILUSTRATIVO', txt:'Ilustrativo' };
+    if(o === 'FONTE_ONS' && t === 'DOCUMENTO_ONS_APROVADO') return { cls:'FONTE_ONS', txt:'Fonte ONS · documento aprovado' };
+    if(o === 'FONTE_ONS') return { cls:'A_VALIDAR_FEG', txt:'A validar FEG (sem documento aprovado)' };
+    if(o === 'A_VALIDAR_FEG' && t === 'PROPOSTA_CONSULTORIA'){ const s = (String(r.referencia||'').match(/\bs\d{1,3}\b/)||[])[0]; return { cls:'A_VALIDAR_FEG', txt:`Proposta A&M${s?' · '+s:''} · a validar` }; }
+    if(o === 'A_VALIDAR_FEG' && t === 'COMENTARIO_REVISAO') return { cls:'A_VALIDAR_FEG', txt:'Rascunho de revisão · a validar' };
+    if(o === 'A_VALIDAR_FEG') return { cls:'A_VALIDAR_FEG', txt:'A validar FEG' };
+    if(o === 'DECISAO_FUNCIONAL_PRODUTO' && t === 'REF_MERCADO') return { cls:'DECISAO_FUNCIONAL_PRODUTO', txt:'Decisão de produto · Ref. mercado' };
+    if(o === 'DECISAO_FUNCIONAL_PRODUTO') return { cls:'DECISAO_FUNCIONAL_PRODUTO', txt:'Decisão de produto' };
+    return { cls:'ILUSTRATIVO', txt: o || 'Sem rótulo' };
+  };
+  /** Badge de origem. Aceita código de regra ('R13'), origem ('A_VALIDAR_FEG'|'ILUSTRATIVO'…) ou objeto {origemRegra, tipoFonte, referencia}. Clique abre a ficha da regra. */
+  PF.badge = x => {
+    if(!x) return '';
+    if(Array.isArray(x)) return x.map(PF.badge).join(' ');
+    let r = null, code = null;
+    if(typeof x === 'string' && /^R\d/.test(x)){ r = PF.regra(x); code = x; if(!r) return `<span class="tag fonte-A_VALIDAR_FEG" title="Regra ${esc(x)} não cadastrada">A validar FEG</span>`; }
+    else if(typeof x === 'string') r = { origemRegra: x };
+    else r = x;
+    const b = BADGE(r);
+    return `<span class="tag fonte-${b.cls}" ${code?`data-pf-regra="${esc(code)}" style="cursor:pointer"`:''} title="${esc((code?code+' · ':'')+(r.referencia||PF.fonteLabel[r.origemRegra]||''))}">${esc(b.txt)}</span>`;
+  };
+  PF.fichaRegra = code => { const r = PF.regra(code); if(!r) return;
+    const val = r.valor === undefined ? '—' : (typeof r.valor === 'object' ? `<code style="white-space:pre-wrap">${esc(JSON.stringify(r.valor, null, 1))}</code>` : esc(r.valor));
+    modal(`<div class="eyebrow">Ficha da regra · ${esc(r.codigo)}</div><h3>${esc(r.nome || r.chave || r.codigo)}</h3><div class="row" style="margin-bottom:12px">${PF.badge(r.codigo)}</div>
+      <div class="tbl-wrap"><table class="tbl"><tbody>
+        <tr><td class="dim">Valor</td><td>${val}</td></tr>
+        <tr><td class="dim">Origem</td><td>${esc(r.origemRegra||'—')}</td></tr>
+        <tr><td class="dim">Tipo de fonte</td><td>${esc(r.tipoFonte||'—')}</td></tr>
+        <tr><td class="dim">Status de validação</td><td>${esc(r.statusValidacao||'A_VALIDAR')}</td></tr>
+        <tr><td class="dim">Versão</td><td>${esc(r.versao||1)}${r.vigente===false?' (não vigente)':''}</td></tr>
+        <tr><td class="dim">Referência</td><td>${esc(r.referencia||'—')}</td></tr>
+        ${r.descricao?`<tr><td class="dim">Descrição</td><td>${esc(r.descricao)}</td></tr>`:''}
+      </tbody></table></div>
+      <p class="dim" style="font-size:12.5px">Nenhuma regra deste app é oficial. Promoção real só fora do app, com documento ONS aprovado.</p>
+      <div class="m-act"><button class="btn btn-primary btn-sm" data-pf-close="1">Fechar</button></div>`); };
+  PF.ui.badge = PF.badge;
+  PF.ui.seloExercicio = () => `<div class="selo-exercicio">${icon('edit',14)} Exercício: registro simulado, sem efeito oficial</div>`;
+  /** Atualiza só um contêiner (use em eventos 'input' contínuos, como sliders; PF.refresh fica para 'change'). */
+  PF.patch = (root, sel, html) => { const t = (root||document).querySelector(sel); if(t) t.innerHTML = html; };
+  document.addEventListener('click', e => { const b = e.target.closest('[data-pf-regra]'); if(b){ e.preventDefault(); e.stopPropagation(); PF.fichaRegra(b.dataset.pfRegra); } }, true);
+
   /* ------------------------------------------------------------------ quiz */
   const TYPE_LABEL = { conceito:'Conceito', analise:'Análise do portfólio', decisao:'Decisão de escolha' };
   const answerOf = qid => S.respostas[qid];
-  const record = (q, ok, val) => { const prev = S.respostas[q.id]; S.respostas[q.id] = { ok:!!ok, val, n:(prev?prev.n:0)+1, ts:new Date().toISOString() }; save(); checkLevelMedals(); };
   const resolve = (x, d, extra) => typeof x === 'function' ? x(d, extra) : x;
-  const near = (v, ans, tol) => { if(tol && typeof tol==='object' && tol.rel!=null) return Math.abs(v-ans) <= Math.abs(ans)*tol.rel + 1e-9; return Math.abs(v-ans) <= (tol ?? 0.01) + 1e-9; };
+  const near = (v, ans, tol) => { if(ans == null || isNaN(ans)) return false; if(tol && typeof tol==='object' && tol.rel!=null) return Math.abs(v-ans) <= Math.abs(ans)*tol.rel + 1e-9; return Math.abs(v-ans) <= (tol ?? 0.01) + 1e-9; };
+  const qData = q => q.usaTrabalho ? PF.db() : PF.base;
+  /** Registra uma tentativa. best preserva o melhor resultado; revelada retira o crédito. */
+  const record = (q, ok, val) => { const p = S.respostas[q.id] || {}; S.respostas[q.id] = { ok:!!ok, best: !!(ok || p.best), n:(p.n||0)+1, val, revelada: !!p.revelada, retry:false, ts:new Date().toISOString() }; save(); checkLevelMedals(); };
+  const seeded = seed => { let h = 0x811c9dc5; for(let i=0;i<seed.length;i++){ h ^= seed.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return () => { h = (h + 0x6D2B79F5) >>> 0; let t = h; t = Math.imul(t ^ t>>>15, t|1); t ^= t + Math.imul(t ^ t>>>7, t|61); return ((t ^ t>>>14) >>> 0) / 4294967296; }; };
+  const shuffle = (arr, seed) => { const a = arr.slice(), r = seeded(seed); for(let i=a.length-1;i>0;i--){ const j = Math.floor(r()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; } return a; };
+  /** Normaliza alternativas: strings → ids 'A','B',…; correta numérica → id. */
+  const mcOpts = q => (q.alternativas||[]).map((a,i) => typeof a === 'string' ? {id:'ABCDEFGHIJ'[i], label:a} : {id:String(a.id), label:a.texto ?? a.label ?? '', html:a.html});
+  const mcCorrect = q => typeof q.correta === 'number' ? 'ABCDEFGHIJ'[q.correta] : String(q.correta);
 
-  function renderQuestion(host, q, level){
-    const d = PF.db(), prev = answerOf(q.id), done = !!prev;
-    const head = `<div class="qh"><span class="qtype ${q.tipo}">${TYPE_LABEL[q.tipo]||q.tipo}</span>${tag(q.fonte)}${q.conceito?`<span class="dim" style="font-size:12px">· ${esc(q.conceito)}</span>`:''}<span class="spacer"></span>${q.ver?`<a class="btn-text" href="${esc(q.ver)}">ver no sistema →</a>`:''}</div>
-      <h2>${resolve(q.enunciado, d)}</h2>${q.contexto?`<div>${resolve(q.contexto, d)}</div>`:''}`;
-    let body = '';
-    const fb = (ok, html) => `<div class="feedback ${ok?'ok':'err'}"><h4>${ok?'Correto!':'Ainda não.'}</h4>${html||''}</div>`;
-    const just = (resp) => { const j = resolve(q.justificativa, d, resp); return j ? `<p>${j}</p>` : ''; };
-    const retry = `<div class="row"><button class="btn btn-ghost btn-sm" data-q-retry="1">${icon('reset',14)} Tentar de novo</button><span class="dim" style="font-size:12px">Tentativas: ${prev?prev.n:0}</span></div>`;
+  function renderQuestion(host, q){
+    const d = qData(q), rec = answerOf(q.id) || null;
+    const fresh = !rec || rec.retry;                        // nova tentativa
+    const showGab = !!(rec && rec.revelada && !rec.retry);   // gabarito revelado
+    const showOk = !!(rec && !rec.retry && !rec.revelada && rec.ok);
+    const showErr = !!(rec && !rec.retry && !rec.revelada && !rec.ok);
+    const locked = !fresh;
     const f = q.formato || 'mc';
+    const seed = q.id + ':' + ((rec && rec.n) || 0);
+    const head = `<div class="qh"><span class="qtype ${q.tipo}">${TYPE_LABEL[q.tipo]||q.tipo}</span>${q.regra?PF.badge(q.regra):PF.ui.tag(q.fonte)}
+        ${q.aprofundamento?'<span class="tag fonte-ILUSTRATIVO">Aprofundamento · não conta</span>':''}${q.conferirFonte?'<span class="tag fonte-ILUSTRATIVO">Conferir fonte · não conta</span>':''}
+        ${q.conceito?`<span class="dim" style="font-size:12px">· ${esc(q.conceito)}</span>`:''}<span class="spacer"></span>${q.ver?`<a class="btn-text" href="${esc(q.ver)}">ver no sistema →</a>`:''}</div>
+      <h2>${resolve(q.enunciado, d)}</h2>${q.contexto?`<div>${resolve(q.contexto, d)}</div>`:''}
+      ${(q.tipo!=='conceito' && !q.usaTrabalho)?'<div class="dim" style="font-size:12px">Calculado sobre os dados de referência (o conjunto de exemplo original).</div>':''}`;
+    const just = resp => { const j = resolve(q.justificativa, d, resp); return j ? `<div>${String(j).startsWith('<')?j:`<p>${j}</p>`}</div>` : ''; };
+    const okBox = (extra='') => `<div class="feedback ok"><h4>${icon('check',16)} Correto!</h4>${extra}${just(rec && rec.val)}</div>`;
+    const errBox = (extra='') => `<div class="feedback err"><h4>Ainda não.</h4>${extra}<p>${esc(q.dica || 'Revise a aula rápida da tela indicada e tente de novo.')}</p></div>`;
+    const gabBox = (extra='') => `<div class="feedback"><h4>${icon('info',16)} Resposta revelada <span class="muted" style="font-weight:400;font-size:13px">· esta pergunta não conta para o desbloqueio</span></h4>${extra}${just(rec && rec.val)}</div>`;
+    const actions = () => {
+      if(showErr) return `<div class="row"><button class="btn btn-primary btn-sm" data-q-retry="1">${icon('reset',14)} Tentar de novo</button><button class="btn btn-ghost btn-sm" data-q-reveal="1">Ver resposta</button><span class="dim" style="font-size:12px">Tentativas: ${rec.n}</span></div>`;
+      if(showOk || showGab) return `<div class="row"><button class="btn btn-ghost btn-sm" data-q-retry="1">${icon('reset',14)} Praticar de novo</button><span class="dim" style="font-size:12px">Tentativas: ${rec.n}${rec.best && !rec.revelada ? ' · já acertou' : ''}</span></div>`;
+      return rec && rec.n ? `<span class="dim" style="font-size:12px">Tentativas anteriores: ${rec.n}${rec.best && !rec.revelada ? ' · já acertou (crédito mantido)' : ''}</span>` : '';
+    };
+    let body = '';
     if(f === 'mc' || f === 'pick'){
-      const opts = f==='mc' ? q.alternativas.map((t,i)=>({id:i, label:t})) : resolve(q.opcoes, d);
-      const correct = f==='mc' ? q.correta : resolve(q.correta, d);
-      body = `<div class="opts">${opts.map((o,i)=>{ const cls = done ? (o.id===correct ? 'right' : (prev.val===o.id ? 'wrong' : '')) : '';
-        return `<button class="opt ${cls}" data-q-opt="${esc(o.id)}" ${done?'disabled':''}><span class="l">${'ABCDEFGHIJ'[i]||''}</span><span>${o.html || esc(o.label)}</span></button>`; }).join('')}</div>`;
-      if(done) body += fb(prev.ok, just(prev.val)) + retry;
+      const opts = shuffle(f==='mc' ? mcOpts(q) : resolve(q.opcoes, d).map(o=>({id:String(o.id), label:o.label, html:o.html})), seed);
+      const correct = String(f==='mc' ? mcCorrect(q) : resolve(q.correta, d));
+      const chosen = rec && rec.val != null ? String(rec.val) : null;
+      body = `<div class="opts">${opts.map((o,i)=>{ let cls = '';
+          if(showOk && o.id===correct) cls = 'right'; else if(showErr && o.id===chosen) cls = 'wrong'; else if(showGab && o.id===correct) cls = 'right'; else if(showGab && o.id===chosen) cls = 'wrong';
+          return `<button class="opt ${cls}" data-q-opt="${esc(o.id)}" ${locked?'disabled':''}><span class="l">${'ABCDEFGHIJ'[i]}</span><span>${o.html || esc(o.label)}</span></button>`; }).join('')}</div>`;
+      if(showOk) body += okBox(); else if(showErr) body += errBox(); else if(showGab) body += gabBox();
     } else if(f === 'multi'){
-      const opts = resolve(q.opcoes, d), corr = resolve(q.corretas, d).map(String);
-      const sel = done ? (prev.val||[]).map(String) : (PF.ui_state('multi:'+q.id, [])||[]);
-      body = `<p class="dim" style="margin:0">Marque todas as que se aplicam.</p><div class="opts">${opts.map((o,i)=>{ const id=String(o.id), on=sel.includes(id);
-        const cls = done ? (corr.includes(id) ? 'right' : (on ? 'wrong' : '')) : (on?'sel':'');
-        return `<button class="opt ${cls}" data-q-multi="${esc(id)}" ${done?'disabled':''}><span class="l">${on?'☑':'☐'}</span><span>${o.html || esc(o.label)}</span></button>`; }).join('')}</div>`;
-      body += done ? fb(prev.ok, just(prev.val)) + retry : `<div><button class="btn btn-primary btn-sm" data-q-submit-multi="1">Responder</button></div>`;
+      const opts = shuffle(resolve(q.opcoes, d).map(o=>({id:String(o.id), label:o.label, html:o.html})), seed), corr = resolve(q.corretas, d).map(String);
+      const sel = fresh ? (PF.ui_state('multi:'+q.id, [])||[]) : ((rec.val||[]).map(String));
+      body = `<p class="dim" style="margin:0">Marque todas as que se aplicam.</p><div class="opts">${opts.map((o,i)=>{ const id=o.id, on=sel.includes(id); let cls = fresh ? (on?'sel':'') : (on?'sel':'');
+          if(showOk && corr.includes(id)) cls = 'right'; if(showGab) cls = corr.includes(id) ? 'right' : (on ? 'wrong' : '');
+          return `<button class="opt ${cls}" data-q-multi="${esc(id)}" ${locked?'disabled':''}><span class="l">${on?'☑':'☐'}</span><span>${o.html || esc(o.label)}</span></button>`; }).join('')}</div>`;
+      if(fresh) body += `<div><button class="btn btn-primary btn-sm" data-q-submit-multi="1">Responder</button></div>`;
+      if(showOk) body += okBox(); else if(showErr) body += errBox('<p>A combinação marcada não confere (pode faltar ou sobrar alternativa).</p>'); else if(showGab) body += gabBox();
     } else if(f === 'num'){
-      const ans = resolve(q.calc, d);
-      body = `<div class="row"><input class="input num" type="number" step="any" data-q-num="1" style="width:180px" value="${done?esc(prev.val):''}" ${done?'disabled':''} placeholder="sua resposta">${q.unidade?`<span class="muted">${esc(q.unidade)}</span>`:''}
-        ${done?'':'<button class="btn btn-primary btn-sm" data-q-submit-num="1">Responder</button>'}</div>${q.dica && !done?`<p class="dim" style="margin:0;font-size:13px">Dica: ${esc(q.dica)}</p>`:''}`;
-      if(done) body += fb(prev.ok, `<p>Resposta esperada: <b class="lime">${fmt.n(ans, q.casas ?? 1)}${q.unidade?' '+esc(q.unidade):''}</b>.</p>` + just(prev.val)) + retry;
+      const ans = resolve(q.calc, d), cs = q.casas ?? 1;
+      body = `<div class="row"><input class="input num" type="number" step="any" data-q-num="1" style="width:180px" value="${!fresh && rec && rec.val!=null ? esc(rec.val) : ''}" ${locked?'disabled':''} placeholder="sua resposta">${q.unidade?`<span class="muted">${esc(q.unidade)}</span>`:''}
+        ${fresh?'<button class="btn btn-primary btn-sm" data-q-submit-num="1">Responder</button>':''}</div>`;
+      const exp = `<p>Resposta esperada: <b class="lime">${fmt.n(ans, cs)}${q.unidade?' '+esc(q.unidade):''}</b>.</p>`;
+      if(showOk) body += okBox(exp); else if(showErr) body += errBox(); else if(showGab) body += gabBox(exp);
     } else if(f === 'decisao'){
-      const itens = resolve(q.itens, d), lim = resolve(q.limites, d) || [], cols = q.colunas || [];
-      const sel = done ? (prev.val||[]) : (PF.ui_state('dec:'+q.id, [])||[]);
-      const tot = k => sum(itens.filter(i=>sel.includes(i.id)), i=>i.cols[k]);
+      const itens = resolve(q.itens, d), lim = resolve(q.limites, d) || [], cols = q.colunas || [], fixos = (q.fixos||[]).map(String);
+      const sel = fresh ? Array.from(new Set([...(PF.ui_state('dec:'+q.id, null) ?? (q.preSel||[])).map(String), ...fixos])) : (rec.val||[]).map(String);
+      const tot = k => sum(itens.filter(i=>sel.includes(String(i.id))), i=>i.cols[k]);
       body = `<div class="tbl-wrap"><table class="tbl"><thead><tr><th></th><th>Iniciativa</th>${cols.map(c=>`<th class="r">${esc(c.label)}</th>`).join('')}</tr></thead><tbody>
-        ${itens.map(it=>`<tr class="click ${sel.includes(it.id)?'sel':''}" data-q-dec="${esc(it.id)}"><td class="c"><input type="checkbox" ${sel.includes(it.id)?'checked':''} ${done?'disabled':''} tabindex="-1"></td><td>${esc(it.label)}${it.sub?`<small>${esc(it.sub)}</small>`:''}</td>${cols.map(c=>`<td class="r num">${c.fmt?c.fmt(it.cols[c.key], it):esc(it.cols[c.key])}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+        ${itens.map(it=>{ const id = String(it.id), fx = fixos.includes(id); return `<tr class="${locked||fx?'':'click'} ${sel.includes(id)?'sel':''}" ${locked||fx?'':`data-q-dec="${esc(id)}"`}><td class="c"><input type="checkbox" ${sel.includes(id)?'checked':''} disabled tabindex="-1" aria-label="${esc(it.label)}"></td><td>${esc(it.label)}${fx?' <span class="tag fonte-ILUSTRATIVO">fixa</span>':''}${it.sub?`<small>${esc(it.sub)}</small>`:''}</td>${cols.map(c=>`<td class="r num">${c.fmt?c.fmt(it.cols[c.key], it):esc(it.cols[c.key])}</td>`).join('')}</tr>`; }).join('')}</tbody></table></div>
         <div class="dec-total">${lim.map(l=>{ const t=tot(l.key), over = l.max!=null && t>l.max+1e-9; return `<span class="t ${over?'over':''}">${esc(l.label)}<b class="num">${fmt.n(t, l.casas??1)}${l.max!=null?` / ${fmt.n(l.max, l.casas??1)}`:''}</b></span>`; }).join('')}
           ${(q.totais||[]).map(k=>`<span class="t">${esc(k.label)}<b class="num">${fmt.n(tot(k.key), k.casas??1)}</b></span>`).join('')}
-          <span class="spacer"></span>${done?'':`<button class="btn btn-primary btn-sm" data-q-submit-dec="1">Registrar decisão</button>`}</div>`;
-      if(done){ const r = q.avaliar(prev.val, d); body += `<div class="feedback ${r.ok?'ok':'err'}"><h4>${r.ok?'Boa decisão!':'Dá para melhorar.'} ${r.nota!=null?`<span class="muted" style="font-weight:400">· nota ${fmt.n(r.nota)}/100</span>`:''}</h4>${r.feedback||''}</div>` + retry; }
+          <span class="spacer"></span>${fresh?`<button class="btn btn-primary btn-sm" data-q-submit-dec="1">Registrar decisão</button>`:''}</div>`;
+      if(!fresh){ const r = q.avaliar(rec.val||[], d) || {};
+        const fb = `<div class="feedback ${r.ok?'ok':'err'}"><h4>${r.ok?icon('check',16)+' Boa decisão!':'Dá para melhorar.'} ${r.nota!=null?`<span class="muted" style="font-weight:400">· nota ${fmt.n(r.nota)}/100</span>`:''}</h4>${r.feedback||''}${r.ok||showGab?just(rec.val):''}</div>`;
+        body += fb + (showGab && !r.ok && q.gabarito ? `<div class="feedback"><h4>Gabarito</h4>${resolve(q.gabarito, d)}</div>` : ''); }
     } else if(f === 'custom'){
       body = `<div data-q-custom="1"></div>`;
-      if(done) body += fb(prev.ok, just(prev.val)) + retry;
+      if(showOk) body += okBox(); else if(showErr) body += errBox(); else if(showGab) body += gabBox(q.gabarito ? resolve(q.gabarito, d) : '');
     }
-    host.innerHTML = `<div class="qcard">${head}${body}</div>`;
+    host.innerHTML = `<div class="qcard">${head}${body}${actions()}</div>`;
     const answer = (ok, val) => { record(q, ok, val); PF.refresh(); };
-    if(f==='custom' && !done) q.render(host.querySelector('[data-q-custom]'), d, answer);
-    if(f==='custom' && done && q.renderDone) q.renderDone(host.querySelector('[data-q-custom]'), d, prev);
+    const cEl = host.querySelector('[data-q-custom]');
+    if(cEl){ if(fresh) q.render(cEl, d, answer); else if(q.renderDone) q.renderDone(cEl, d, rec); }
     host.onclick = e => {
       const t = e.target;
-      if(t.closest('[data-q-retry]')){ delete S.respostas[q.id]; save(); PF.refresh(); return; }
+      if(t.closest('[data-q-retry]')){ S.respostas[q.id] = Object.assign({}, S.respostas[q.id], { retry:true }); save();   /* 'revelada' permanece: o crédito não volta */ PF.set_ui('multi:'+q.id, []); PF.set_ui('dec:'+q.id, null); PF.refresh(); return; }
+      if(t.closest('[data-q-reveal]')){ PF.confirm('Ver a resposta?', 'Ao ver a resposta, esta pergunta deixa de contar para o desbloqueio do nível (você ainda pode praticar).', 'Ver resposta', () => { S.respostas[q.id] = Object.assign({}, S.respostas[q.id], { revelada:true, retry:false }); save(); PF.refresh(); }); return; }
+      if(!fresh) return;
       const o = t.closest('[data-q-opt]');
-      if(o && !done){ const opts = f==='mc' ? null : resolve(q.opcoes, d); const raw = o.dataset.qOpt;
-        const val = f==='mc' ? +raw : (opts.find(x=>String(x.id)===raw)||{}).id; const correct = f==='mc' ? q.correta : resolve(q.correta, d);
-        answer(String(val)===String(correct), val); return; }
+      if(o){ const id = o.dataset.qOpt; const correct = String(f==='mc' ? mcCorrect(q) : resolve(q.correta, d)); answer(id === correct, id); return; }
       const m = t.closest('[data-q-multi]');
-      if(m && !done){ const id = m.dataset.qMulti; let s = (PF.ui_state('multi:'+q.id, [])||[]).slice(); s = s.includes(id) ? s.filter(x=>x!==id) : [...s, id]; PF.set_ui('multi:'+q.id, s); PF.refresh(); return; }
+      if(m){ const id = m.dataset.qMulti; let s = (PF.ui_state('multi:'+q.id, [])||[]).slice(); s = s.includes(id) ? s.filter(x=>x!==id) : [...s, id]; PF.set_ui('multi:'+q.id, s); PF.refresh(); return; }
       if(t.closest('[data-q-submit-multi]')){ const s = (PF.ui_state('multi:'+q.id, [])||[]).map(String), c = resolve(q.corretas, d).map(String);
-        if(!s.length){ toast('Marque ao menos uma alternativa.'); return; }
-        PF.set_ui('multi:'+q.id, []); answer(s.length===c.length && s.every(x=>c.includes(x)), s); return; }
+        if(!s.length){ toast('Marque ao menos uma alternativa.'); return; } PF.set_ui('multi:'+q.id, []); answer(s.length===c.length && s.every(x=>c.includes(x)), s); return; }
       if(t.closest('[data-q-submit-num]')){ const inp = host.querySelector('[data-q-num]'); const v = parseFloat(String(inp.value).replace(',','.'));
         if(isNaN(v)){ toast('Digite um número.'); inp.focus(); return; } answer(near(v, resolve(q.calc, d), q.tolerancia), v); return; }
       const dr = t.closest('[data-q-dec]');
-      if(dr && !done){ const id = dr.dataset.qDec; let s = (PF.ui_state('dec:'+q.id, [])||[]).slice(); s = s.includes(id) ? s.filter(x=>x!==id) : [...s, id]; PF.set_ui('dec:'+q.id, s); PF.refresh(); return; }
-      if(t.closest('[data-q-submit-dec]')){ const s = PF.ui_state('dec:'+q.id, [])||[]; if(!s.length){ toast('Selecione ao menos uma iniciativa.'); return; }
-        const r = q.avaliar(s, d); PF.set_ui('dec:'+q.id, []); answer(r.ok, s); return; }
+      if(dr){ const id = dr.dataset.qDec; let s = (PF.ui_state('dec:'+q.id, null) ?? (q.preSel||[])).map(String).slice(); s = s.includes(id) ? s.filter(x=>x!==id) : [...s, id]; PF.set_ui('dec:'+q.id, s); PF.refresh(); return; }
+      if(t.closest('[data-q-submit-dec]')){ const fixos = (q.fixos||[]).map(String); const s = Array.from(new Set([...(PF.ui_state('dec:'+q.id, null) ?? (q.preSel||[])).map(String), ...fixos]));
+        if(!s.length){ toast('Selecione ao menos uma iniciativa.'); return; } const r = q.avaliar(s, d) || {}; PF.set_ui('dec:'+q.id, null); answer(!!r.ok, s); return; }
     };
-    const inp = host.querySelector('[data-q-num]'); if(inp && !done) inp.addEventListener('keydown', e=>{ if(e.key==='Enter') host.querySelector('[data-q-submit-num]').click(); });
+    const inp = host.querySelector('[data-q-num]'); if(inp && fresh) inp.addEventListener('keydown', e=>{ if(e.key==='Enter') host.querySelector('[data-q-submit-num]').click(); });
   }
 
-  function screenQuiz(el, L){
+  const statusIcon = rec => !rec ? null : rec.revelada ? {c:'rev', t:'👁'} : (rec.best ? {c:'ok', t:'✓'} : {c:'err', t:'!'});
+  function tabPerguntas(el, L){
     const qs = L.questions, st = PF.levelStats(L.id);
     let cur = PF.ui_state('quiz:'+L.id, qs[0] && qs[0].id); if(!qs.find(q=>q.id===cur)) cur = qs[0] && qs[0].id;
-    const groups = ['conceito','analise','decisao'];
-    const list = groups.map(g => { const gq = qs.filter(q=>q.tipo===g); if(!gq.length) return '';
-      return `<div class="grp">${TYPE_LABEL[g]}</div>` + gq.map(q => { const a = answerOf(q.id); const n = qs.indexOf(q)+1;
-        return `<button class="${q.id===cur?'on':''}" data-q-go="${esc(q.id)}"><span class="st ${a?(a.ok?'ok':'err'):''}">${a?(a.ok?'✓':'!'):n}</span><span>${esc(q.titulo || ('Pergunta '+n))}</span></button>`; }).join(''); }).join('');
+    const list = ['conceito','analise','decisao'].map(g => { const gq = qs.filter(q=>q.tipo===g); if(!gq.length) return '';
+      return `<div class="grp">${TYPE_LABEL[g]}</div>` + gq.map(q => { const s = statusIcon(answerOf(q.id)), n = qs.indexOf(q)+1;
+        return `<button class="${q.id===cur?'on':''}" data-q-go="${esc(q.id)}"><span class="st ${s?s.c:''}">${s?s.t:n}</span><span>${esc(q.titulo || ('Pergunta '+n))}${q.aprofundamento||q.conferirFonte?' <small class="dim">(extra)</small>':''}</span></button>`; }).join(''); }).join('');
     const idx = qs.findIndex(q=>q.id===cur);
-    el.innerHTML = PF.ui.pageHead({ eyebrow:`Nível ${L.id} · ${esc(L.nome)}`, title:'Perguntas &amp; Respostas',
-        sub:`Conceitos, análise do portfólio e decisões de escolha. Acerte <b class="lime">${L.unlock.minPct}%</b> ${L.desafio && L.unlock.desafio?'e conclua o desafio ':''}para liberar o próximo nível.`,
-        actions:`<span class="pill tone-lime"><i></i>${st.ok}/${st.total} corretas · ${fmt.pct(st.pct)}</span>` }) +
-      `<div class="bar" style="margin:-6px 0 18px"><i style="width:${st.pct*100}%"></i></div>
-       <div class="quiz"><nav class="qlist" aria-label="Perguntas">${list}</nav><div><div data-q-host></div>
+    el.innerHTML = `<div class="row" style="margin-bottom:10px"><span class="pill tone-lime"><i></i>${st.ok}/${st.total} corretas · ${fmt.pct(st.pct)}</span><span class="dim" style="font-size:13px">Meta: ${L.unlock.minPct}%${L.desafio && L.unlock.desafio?' + desafio':''}. Errar não revela a resposta; “Ver resposta” retira o crédito daquela pergunta.</span></div>
+      <div class="bar" style="margin-bottom:18px"><i style="width:${st.pct*100}%"></i></div>
+      <div class="quiz"><nav class="qlist" aria-label="Perguntas">${list}</nav><div><div data-q-host></div>
        <div class="row" style="margin-top:14px"><button class="btn btn-ghost btn-sm" data-q-nav="-1" ${idx<=0?'disabled':''}>← Anterior</button><span class="spacer"></span>
        <button class="btn btn-ghost btn-sm" data-q-nav="1" ${idx>=qs.length-1?'disabled':''}>Próxima →</button></div></div></div>`;
-    const q = qs[idx]; if(q) renderQuestion(el.querySelector('[data-q-host]'), q, L);
+    const q = qs[idx]; if(q) renderQuestion(el.querySelector('[data-q-host]'), q);
     el.querySelector('.qlist').onclick = e => { const b = e.target.closest('[data-q-go]'); if(b){ PF.set_ui('quiz:'+L.id, b.dataset.qGo); PF.refresh(); } };
     el.querySelectorAll('[data-q-nav]').forEach(b => b.onclick = () => { const n = qs[idx + (+b.dataset.qNav)]; if(n){ PF.set_ui('quiz:'+L.id, n.id); PF.refresh(); } });
   }
-  PF.quiz = { renderQuestion, screenQuiz, record };
-
-  function screenDesafio(el, L){
-    const st = PF.levelStats(L.id), D = L.desafio, des = S.desafios[L.id];
-    if(!D){ el.innerHTML = PF.ui.pageHead({title:'Desafio', sub:'Este nível não tem desafio.'}); return; }
-    el.innerHTML = PF.ui.pageHead({ eyebrow:`Nível ${L.id} · Desafio`, title: esc(D.titulo), sub: D.descricao,
-        actions: des && des.feito ? `<span class="pill tone-ok"><i></i>Concluído · nota ${fmt.n(des.nota)}</span> <button class="btn btn-ghost btn-sm" data-des-reset="1">${icon('reset',14)} Refazer</button>` : '' }) + `<div data-des-host></div>`;
+  function tabDesafio(el, L){
+    const D = L.desafio, des = S.desafios[L.id];
+    if(!D){ el.innerHTML = '<p class="muted">Este nível não tem desafio.</p>'; return; }
+    const refazendo = des && des.refazendo;
+    el.innerHTML = `<div class="sec-h"><div><h3>${esc(D.titulo)}</h3><p>${D.descricao||''}</p></div>
+      ${des && des.feito ? `<div class="row"><span class="pill tone-ok"><i></i>Concluído · nota ${fmt.n(des.nota)}</span>${refazendo?'':`<button class="btn btn-ghost btn-sm" data-des-redo="1">${icon('reset',14)} Refazer</button>`}</div>` : ''}</div><div data-des-host></div>`;
     const host = el.querySelector('[data-des-host]');
-    D.render(host, ctx(L.id), (r) => { S.desafios[L.id] = Object.assign({ feito: r.ok !== false, nota: r.nota ?? 100, ts: new Date().toISOString() }, r); save(); checkLevelMedals();
-      toast(r.ok !== false ? `${icon('trophy',16)} Desafio do nível ${L.id} concluído!` : 'Desafio registrado. Revise o feedback e tente de novo.'); PF.refresh(); });
-    const rb = el.querySelector('[data-des-reset]'); if(rb) rb.onclick = () => { delete S.desafios[L.id]; save(); PF.refresh(); };
+    D.render(host, ctx(L.id), (r) => {
+      const prev = S.desafios[L.id]; const hist = prev ? [...(prev.historico||[]), {feito:prev.feito, nota:prev.nota, ts:prev.ts}] : [];
+      const ok = r.ok !== false;
+      S.desafios[L.id] = Object.assign({}, r, { feito: ok || !!(prev && prev.feito), nota: ok ? (r.nota ?? 100) : (prev && prev.feito ? prev.nota : (r.nota ?? 0)), ts: new Date().toISOString(), historico: hist, refazendo:false, ultima:{ok, nota:r.nota} });
+      save(); checkLevelMedals();
+      toast(ok ? `${icon('trophy',16)} Desafio do nível ${L.id} concluído!` : 'Desafio registrado. Revise o feedback e tente de novo.'); PF.refresh(); });
+    const rb = el.querySelector('[data-des-redo]'); if(rb) rb.onclick = () => { S.desafios[L.id].refazendo = true; save(); PF.refresh(); };
   }
+  function tabDominio(el, L){
+    const st = PF.levelStats(L.id), qs = L.questions.filter(graded);
+    const conc = {}; qs.forEach(q => { const k = q.conceito || TYPE_LABEL[q.tipo]; (conc[k] ||= {t:0, ok:0}).t++; if(counts(S.respostas[q.id])) conc[k].ok++; });
+    const pend = qs.filter(q => { const r = S.respostas[q.id]; return r && !counts(r); });
+    el.innerHTML = `<div class="grid g4">${['conceito','analise','decisao'].map(t=>PF.ui.kpi({label:TYPE_LABEL[t], value:`${st.porTipo[t].ok}<small>/ ${st.porTipo[t].total}</small>`, tone: st.porTipo[t].total && st.porTipo[t].ok===st.porTipo[t].total ? 'ok' : ''})).join('')}
+        ${PF.ui.kpi({label:'Desafio', value: st.desafio && st.desafio.feito ? '✓' : '—', sub: st.desafio && st.desafio.feito ? 'nota '+fmt.n(st.desafio.nota) : 'pendente', tone: st.desafio && st.desafio.feito ? 'ok' : ''})}</div>
+      <div class="grid g2" style="margin-top:16px"><div class="card">${PF.ui.section('Domínio por conceito','Perguntas graduadas acertadas sem revelar a resposta.')}${charts.hbar(Object.entries(conc).map(([k,v])=>({label:k, value:v.t?v.ok/v.t:0, color: v.ok===v.t?'ok':'lime'})), {max:1, fmt:v=>fmt.pct(v)})}</div>
+        <div class="card">${PF.ui.section('Para revisar', pend.length ? 'Perguntas com erro ou resposta revelada (marcadas com ! ou 👁).' : 'Nada pendente.')}${pend.length?`<div class="stack" style="gap:6px">${pend.map(q=>`<button class="btn-text" style="text-align:left" data-q-goto="${esc(q.id)}">${esc(q.titulo||q.id)}</button>`).join('')}</div>`:''}
+        ${PF.levelDone(L.id)?PF.ui.callout('dica', `<p>Nível concluído${L.id<3?` — o nível ${L.id+1} está liberado.`:'!'}</p>`):''}</div></div>`;
+    el.querySelectorAll('[data-q-goto]').forEach(b => b.onclick = () => { PF.set_ui('quiz:'+L.id, b.dataset.qGoto); PF.go(`#/n${L.id}/trilha?aba=perguntas`); });
+  }
+  function screenTrilha(el, L, aba){
+    const st = PF.levelStats(L.id), tabs = [['perguntas','Perguntas & Respostas'], ...(L.desafio?[['desafio','Desafio']]:[]), ['dominio','Domínio']];
+    if(!tabs.find(t=>t[0]===aba)) aba = 'perguntas';
+    el.innerHTML = PF.ui.pageHead({ eyebrow:`Nível ${L.id} · ${esc(L.nome)}`, title:'Trilha do nível',
+        sub:`Conceitos, análise do portfólio e decisões de escolha. Para liberar o próximo nível: <b class="lime">${L.unlock.minPct}%</b> das perguntas graduadas${L.desafio && L.unlock.desafio?' e o desafio concluído':''}.`,
+        actions:`<span class="pill tone-lime"><i></i>${fmt.pct(st.pct)} · desafio ${st.desafio && st.desafio.feito ? '✓' : 'pendente'}</span>` }) +
+      `<div class="tabs" role="tablist">${tabs.map(([k,l])=>`<a class="tab ${k===aba?'on':''}" href="#/n${L.id}/trilha?aba=${k}" role="tab">${esc(l)}</a>`).join('')}</div><div data-trilha></div>`;
+    const host = el.querySelector('[data-trilha]');
+    if(aba === 'desafio') tabDesafio(host, L); else if(aba === 'dominio') tabDominio(host, L); else tabPerguntas(host, L);
+  }
+  PF.quiz = { renderQuestion, record };
+  /** Abas simples reutilizáveis: PF.ui.tabs(base, [[id,label]], atual) gera links #base?aba=id */
+  PF.ui.tabs = (base, tabs, cur) => `<div class="tabs" role="tablist">${tabs.map(([k,l])=>`<a class="tab ${k===cur?'on':''}" href="${base}?aba=${encodeURIComponent(k)}" role="tab">${esc(l)}</a>`).join('')}</div>`;
 
   /* ------------------------------------------------------------- PDF export */
-  /** PF.exportPDF(element, 'arquivo.pdf', {title}) — usa html2canvas + jsPDF embutidos */
+  /** PF.exportPDF(element, 'arquivo.pdf', {title}) — html2canvas + jsPDF embutidos; marca d'água de exercício em todas as páginas. */
   PF.exportPDF = async (el, file='portfolio-feg.pdf', {title}={}) => {
-    if(!window.html2canvas || !window.jspdf){ toast('Exportação indisponível: abra o arquivo completo (versão em arquivo único).'); return; }
+    if(!window.html2canvas || !window.jspdf){ toast('Exportação indisponível neste modo. Use o arquivo único public/portfolio-feg.html.'); return; }
     busy(true, 'Gerando PDF…');
     try{
       if(document.fonts && document.fonts.ready) await document.fonts.ready;
       const wrap = document.createElement('div'); wrap.className='pdf-capture'; wrap.style.cssText='position:absolute;left:-20000px;top:0;width:1280px';
-      wrap.innerHTML = `<div style="display:flex;align-items:center;gap:18px;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:12px;margin-bottom:18px"><img src="${PF.LOGO_MAESTRO||''}" style="height:24px"><div style="display:flex;flex-direction:column;padding-left:18px;border-left:1px solid rgba(255,255,255,.12)"><span class="eyebrow">${esc(PF.APP_NAME)}</span><span style="font-family:Outfit,sans-serif;font-weight:300;font-size:16px">${esc(title||document.title)} · ${new Date().toLocaleDateString('pt-BR')}</span></div><img src="${PF.LOGO_ONS||''}" style="height:36px;margin-left:auto"></div>`;
-      const c = el.cloneNode(true); c.querySelectorAll('button, .actions, [data-noprint]').forEach(b=>b.remove()); wrap.appendChild(c);
+      wrap.innerHTML = `<div style="display:flex;align-items:center;gap:18px;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:12px;margin-bottom:18px"><img src="${PF.LOGO_MAESTRO||''}" style="height:24px"><div style="display:flex;flex-direction:column;padding-left:18px;border-left:1px solid rgba(255,255,255,.12)"><span class="eyebrow">${esc(PF.APP_NAME)} · exercício didático</span><span style="font-family:Outfit,sans-serif;font-weight:300;font-size:16px">${esc(title||document.title)} · ${new Date().toLocaleDateString('pt-BR')} · autor: Aprendiz (perfil local)</span></div><img src="${PF.LOGO_ONS||''}" style="height:36px;margin-left:auto"></div>`;
+      const c = el.cloneNode(true); c.querySelectorAll('button, .actions, [data-noprint], input[type=range]').forEach(b=>b.remove()); wrap.appendChild(c);
       document.body.appendChild(wrap);
-      const cv = await window.html2canvas(wrap, {scale:2, backgroundColor:'#54575C', logging:false, windowWidth:1320});
+      const cv = await window.html2canvas(wrap, {scale:1.5, backgroundColor:'#54575C', logging:false, windowWidth:1320});
       wrap.remove();
       const pdf = new window.jspdf.jsPDF({orientation:'landscape', unit:'pt', format:'a4', compress:true});
-      const PW = pdf.internal.pageSize.getWidth(), PH = pdf.internal.pageSize.getHeight();
-      const pxPerPage = cv.width * PH / PW; let y = 0, page = 0;
+      const PW = pdf.internal.pageSize.getWidth(), PH = pdf.internal.pageSize.getHeight(), FOOT = 22;
+      const pxPerPage = cv.width * (PH-FOOT) / PW; let y = 0, page = 0;
       while(y < cv.height){ const h = Math.min(pxPerPage, cv.height - y); const part = document.createElement('canvas'); part.width = cv.width; part.height = h;
         part.getContext('2d').drawImage(cv, 0, y, cv.width, h, 0, 0, cv.width, h);
         if(page) pdf.addPage(); pdf.setFillColor(84,87,92); pdf.rect(0,0,PW,PH,'F');
-        pdf.addImage(part.toDataURL('image/jpeg', .9), 'JPEG', 0, 0, PW, h * PW / cv.width); y += h; page++; }
+        pdf.addImage(part.toDataURL('image/jpeg', .9), 'JPEG', 0, 0, PW, h * PW / cv.width); y += h; page++;
+        pdf.setFontSize(8); pdf.setTextColor(211,206,34); pdf.text('EXERCICIO DIDATICO - DADOS FICTICIOS - NAO E RECOMENDACAO DA FEG/ONS - regras a validar pela FEG', 18, PH-8);
+        pdf.setTextColor(200,200,200); pdf.text(`pag. ${page}`, PW-50, PH-8); }
       pdf.save(file); toast(`PDF <b>${esc(file)}</b> gerado. Se o download não começar, abra o arquivo no Chrome ou Edge.`);
     } catch(err){ console.error(err); toast('Não foi possível gerar o PDF neste visualizador. Abra o arquivo no Chrome ou Edge.'); }
     finally { busy(false); }
@@ -445,14 +597,15 @@
     const P=[['y','M0 380H257V311H700'],['w','M0 407H286V338H1267V0'],['y','M0 435H316V366H1299V0'],['y','M348 405H1340V0'],['y','M697 435H1528V0'],['w','M0 460H173V586H1559V0'],['y','M0 484H148V615H957V1080'],['y','M145 646H924V1080']];
     return `<svg class="circuit" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${P.map(p=>`<path d="${p[1]}" fill="none" stroke="${p[0]==='y'?'#D3CE22':'#fff'}" stroke-opacity="${p[0]==='y'?0.35:0.18}" stroke-width="4"/>`).join('')}</svg>`;
   }
+  const firstHref = L => L.screens[0] ? `#/n${L.id}/${L.screens[0].id}` : `#/n${L.id}/trilha`;
   function screenHome(el){
-    const cur = PF.currentLevel();
-    const medals = Object.values(S.medalhas);
+    const cur = PF.currentLevel(), medals = Object.values(S.medalhas), started = Object.keys(S.respostas).length > 0;
     el.innerHTML = `<section class="hero">${circuit()}
         <div class="eyebrow">${esc(PF.APP_SUB)}</div>
         <h1>Gestão de portfólio,<br><b>do simples ao avançado.</b></h1>
-        <p>${PF.HOME_LEAD || 'Três módulos progressivos. Cada nível adiciona telas ao menu, novas perguntas e um desafio de decisão. Os dados são fictícios e servem para aprender — regras oficiais dependem de validação da FEG.'}</p>
-        <div class="row" style="margin-top:18px"><a class="btn btn-primary" href="#/n${cur}/${(lvl(cur)&&lvl(cur).screens[0]?lvl(cur).screens[0].id:'perguntas')}">${Object.keys(S.respostas).length?'Continuar':'Começar'} no nível ${cur} →</a>
+        <p>${PF.HOME_LEAD || 'Três módulos progressivos. Cada nível adiciona telas ao menu, perguntas e um desafio de decisão. Os dados são fictícios e servem para aprender; nenhuma regra aqui é oficial do ONS.'}</p>
+        <div class="row" style="margin-top:18px"><a class="btn btn-primary" href="${lvl(cur)?firstHref(lvl(cur)):'#/inicio'}">${started?'Continuar':'Começar'} no nível ${cur} →</a>
+        ${GLOBALS.find(g=>g.id==='dashboard')?`<a class="btn btn-ghost" href="#/dashboard">${icon('dashboard',16)} Dashboard</a>`:''}
         <a class="btn btn-ghost" href="#/fontes">${icon('info',16)} Fontes e premissas</a></div></section>
       <div class="levels">${LEVELS.map(L=>{ const st = PF.levelStats(L.id), un = PF.unlocked(L.id), dn = PF.levelDone(L.id);
         return `<article class="lvl ${L.id===cur?'current':''} ${un?'':'locked'}">
@@ -461,91 +614,100 @@
           <div class="q">“${esc(L.pergunta||'')}”</div>
           <ul>${(L.objetivos||[]).slice(0,4).map(o=>`<li>${esc(o)}</li>`).join('')}</ul>
           <div><div class="row" style="justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px"><span>${st.ok}/${st.total} perguntas</span><span>${L.desafio?(st.desafio&&st.desafio.feito?'desafio ✓':'desafio pendente'):''}</span></div><div class="bar"><i style="width:${st.pct*100}%"></i></div></div>
-          <div class="foot">${un?`<a class="btn btn-primary btn-sm" href="#/n${L.id}/${L.screens[0]?L.screens[0].id:'perguntas'}">Entrar →</a>`:`<span class="dim" style="font-size:12.5px">${icon('lock',14)} Conclua o nível ${L.id-1}: ${lvl(L.id-1)?lvl(L.id-1).unlock.minPct:70}% + desafio</span>`}
-            <span class="dim" style="font-size:12px">${L.screens.length} telas · ${st.total} perguntas</span></div></article>`; }).join('')}</div>
+          <div class="foot">${un?`<a class="btn btn-primary btn-sm" href="${firstHref(L)}">Entrar →</a>`:`<span class="dim" style="font-size:12.5px">${icon('lock',14)} Conclua o nível ${L.id-1}: ${lvl(L.id-1)?lvl(L.id-1).unlock.minPct:70}% + desafio</span>`}
+            <span class="dim" style="font-size:12px">${L.screens.length} telas · ${L.questions.length} perguntas</span></div></article>`; }).join('')}</div>
       ${medals.length?`<div class="card" style="margin-top:18px"><div class="sec-h"><div><h3>Medalhas</h3></div></div><div class="medals">${medals.map(m=>`<span class="medal">${icon('trophy',14)} ${esc(m.label)}</span>`).join('')}</div></div>`:''}`;
   }
   function screenFontes(el){
-    const F = PF.FONTES_NOTA || '';
     el.innerHTML = PF.ui.pageHead({eyebrow:'Transparência', title:'Fontes e premissas', sub:'O sistema separa o que vem de fonte oficial do que é decisão de produto ou ainda precisa ser validado pela FEG. Os dados de exemplo são fictícios.'}) +
-      `<div class="grid g2">${['FONTE_ONS','DECISAO_FUNCIONAL_PRODUTO','A_VALIDAR_FEG','ILUSTRATIVO'].map(k=>`<div class="card"><div class="row" style="margin-bottom:8px">${tag(k)}</div><div class="muted">${esc(({
-        FONTE_ONS:'Conteúdo extraído de documento oficial (ex.: deck A&M Etapa 3 do novo modelo organizacional da FE, modelo de dados do Portfólio FE). Citado com a origem.',
-        DECISAO_FUNCIONAL_PRODUTO:'Escolha de desenho deste sistema para fins didáticos (ex.: fórmula de um indicador, escala de 1 a 5). Não é regra ONS.',
-        A_VALIDAR_FEG:'Pesos, limites, critérios e periodicidades que precisam ser validados pela FEG antes de qualquer uso oficial.',
-        ILUSTRATIVO:'Dados fictícios de iniciativas, pessoas, valores e datas, criados apenas para exercícios.'})[k])}</div></div>`).join('')}</div>${F?`<div class="card" style="margin-top:16px">${F}</div>`:''}`;
+      `<div class="grid g2">${[['FONTE_ONS','Conteúdo de documento ONS aprovado e citado. Hoje nenhum item do app atende esse critério.'],['A_VALIDAR_FEG','Pesos, limites, critérios, periodicidades e conteúdo de proposta de consultoria (deck A&M) que a FEG precisa validar.'],['DECISAO_FUNCIONAL_PRODUTO','Escolha de desenho deste sistema para fins didáticos (ex.: fórmula de um indicador). Não é regra ONS.'],['ILUSTRATIVO','Dados fictícios de iniciativas, valores, datas e papéis, criados apenas para exercícios.']].map(([k,t])=>`<div class="card"><div class="row" style="margin-bottom:8px">${PF.ui.tag(k)}</div><div class="muted">${esc(t)}</div></div>`).join('')}</div>`;
   }
   function screenConfig(el){
-    el.innerHTML = PF.ui.pageHead({eyebrow:'Configurações', title:'Progresso e dados', sub:'Tudo fica salvo apenas neste navegador.'}) +
-      `<div class="grid g2"><div class="card stack"><h3>Modo instrutor</h3><p class="muted" style="margin:0">Libera todos os níveis sem precisar concluir os anteriores (útil para demonstração e facilitação).</p>
+    el.innerHTML = PF.ui.pageHead({eyebrow:'Configurações', title:'Perfil, progresso e dados', sub:'Tudo fica salvo apenas neste navegador.'}) +
+      `<div class="grid g2"><div class="card stack"><h3>Perfil local</h3><p class="muted" style="margin:0">Usado no histórico das alterações. Nunca é impresso nos PDFs.</p><label class="field">Seu nome<input class="input" data-cfg-nome value="${esc(PF.perfil().nome)}" maxlength="40" placeholder="ex.: Ana"></label></div>
+      <div class="card stack"><h3>Modo instrutor</h3><p class="muted" style="margin:0">Libera todos os níveis para demonstração. É um atalho didático, não controle de acesso, e não promove nenhuma regra.</p>
         <label class="row" style="cursor:pointer"><input type="checkbox" data-cfg-instr ${S.instrutor?'checked':''}> Ativar modo instrutor</label></div>
-      <div class="card stack"><h3>Dados de exemplo</h3><p class="muted" style="margin:0">As telas permitem editar o portfólio. Restaure o conjunto original quando quiser.</p><div><button class="btn btn-ghost btn-sm" data-cfg-db>${icon('reset',14)} Restaurar dados de exemplo</button></div></div>
-      <div class="card stack"><h3>Progresso</h3><p class="muted" style="margin:0">Apaga respostas, desafios e medalhas. Os dados do portfólio não são afetados.</p><div class="row">${LEVELS.map(L=>`<button class="btn btn-ghost btn-sm" data-cfg-lvl="${L.id}">${icon('reset',14)} Nível ${L.id}</button>`).join('')}<button class="btn btn-ghost btn-sm" data-cfg-all>${icon('reset',14)} Tudo</button></div></div>
-      <div class="card stack"><h3>Exportar</h3><p class="muted" style="margin:0">Baixe o progresso e o portfólio de trabalho em JSON.</p><div><button class="btn btn-ghost btn-sm" data-cfg-json>${icon('download',14)} Exportar JSON</button></div></div></div>`;
+      <div class="card stack"><h3>Dados de trabalho</h3><p class="muted" style="margin:0">Edições, pendências e decisões registradas nas telas ficam nos dados de trabalho. As perguntas usam sempre a referência original.</p><div><button class="btn btn-ghost btn-sm" data-cfg-db>${icon('reset',14)} Restaurar dados de exemplo</button></div></div>
+      <div class="card stack"><h3>Progresso</h3><p class="muted" style="margin:0">Reiniciar um nível bloqueia os níveis seguintes. Os dados de trabalho não são afetados.</p><div class="row">${LEVELS.map(L=>`<button class="btn btn-ghost btn-sm" data-cfg-lvl="${L.id}">${icon('reset',14)} Nível ${L.id}</button>`).join('')}<button class="btn btn-ghost btn-sm" data-cfg-all>${icon('reset',14)} Tudo</button></div></div>
+      <div class="card stack"><h3>Exportar</h3><p class="muted" style="margin:0">Progresso e dados de trabalho em JSON (marcado como exercício: não importar em sistemas reais).</p><div><button class="btn btn-ghost btn-sm" data-cfg-json>${icon('download',14)} Exportar JSON</button></div></div>
+      ${PF.configCards.map((c,i)=>`<div class="card stack" data-cfg-card="${i}"></div>`).join('')}</div>`;
+    PF.configCards.forEach((c,i) => { try{ c.render(el.querySelector(`[data-cfg-card="${i}"]`)); } catch(e){ console.error(e); } });
+    el.querySelector('[data-cfg-nome]').onchange = e => { PF.perfil().nome = e.target.value.trim(); save(); toast('Perfil salvo.'); };
     el.querySelector('[data-cfg-instr]').onchange = e => { S.instrutor = e.target.checked; save(); PF.refresh(); toast(S.instrutor?'Modo instrutor ativado: todos os níveis liberados.':'Modo instrutor desativado.'); };
-    el.querySelector('[data-cfg-db]').onclick = () => PF.confirm('Restaurar dados de exemplo?', 'As edições feitas no portfólio serão descartadas.', 'Restaurar', () => { PF.resetDb(); toast('Dados de exemplo restaurados.'); PF.refresh(); });
-    el.querySelectorAll('[data-cfg-lvl]').forEach(b => b.onclick = () => { const id = +b.dataset.cfgLvl; PF.confirm(`Reiniciar o nível ${id}?`, 'Apaga as respostas e o desafio deste nível.', 'Reiniciar', () => {
-      (lvl(id).questions||[]).forEach(q=>delete S.respostas[q.id]); delete S.desafios[id]; delete S.medalhas['nivel-'+id]; save(); toast(`Nível ${id} reiniciado.`); PF.refresh(); }); });
-    el.querySelector('[data-cfg-all]').onclick = () => PF.confirm('Apagar todo o progresso?', 'Respostas, desafios e medalhas dos 3 níveis.', 'Apagar', () => { S.respostas={}; S.desafios={}; S.medalhas={}; S.mod={}; save(); toast('Progresso apagado.'); PF.refresh(); });
-    el.querySelector('[data-cfg-json]').onclick = () => { const b = new Blob([JSON.stringify({exportado:new Date().toISOString(), estado:S}, null, 2)], {type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='portfolio-feg-progresso.json'; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},300); };
+    el.querySelector('[data-cfg-db]').onclick = () => PF.confirm('Restaurar dados de exemplo?', 'Edições, pendências e decisões registradas nas telas serão descartadas.', 'Restaurar', () => { PF.resetDb(); toast('Dados de exemplo restaurados.'); PF.refresh(); });
+    el.querySelectorAll('[data-cfg-lvl]').forEach(b => b.onclick = () => { const id = +b.dataset.cfgLvl; PF.confirm(`Reiniciar o nível ${id}?`, `Apaga respostas e desafio do nível ${id}${id<LEVELS.length?' e dos níveis seguintes, que voltam a ficar bloqueados':''}.`, 'Reiniciar', () => { PF.resetLevel(id); toast(`Nível ${id} reiniciado.`); PF.refresh(); }); });
+    el.querySelector('[data-cfg-all]').onclick = () => PF.confirm('Apagar todo o progresso?', 'Respostas, desafios, conclusões e medalhas dos 3 níveis.', 'Apagar', () => { S.respostas={}; S.desafios={}; S.concluidos={}; S.medalhas={}; S.mod={}; save(); toast('Progresso apagado.'); PF.refresh(); });
+    el.querySelector('[data-cfg-json]').onclick = () => { const b = new Blob([JSON.stringify({tipo:'EXERCICIO_TRILHA', naoImportar:true, ilustrativo:true, versaoDados:dataV(), exportadoEm:new Date().toISOString(), progresso:{respostas:S.respostas, desafios:S.desafios, concluidos:S.concluidos, medalhas:S.medalhas}, trabalho:S.work}, null, 2)], {type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='portfolio-feg-exercicio.json'; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},300); };
   }
 
   /* ---------------------------------------------------------------- render */
-  const ctx = (nivel) => ({ dados: PF.db(), nivel, go: PF.go, refresh: PF.refresh, st: PF.modState(nivel) });
+  const ctx = (nivel) => ({ dados: PF.db(), base: PF.base, nivel, go: PF.go, refresh: PF.refresh, st: PF.modState(nivel), route: parse() });
   PF.ctx = ctx;
   let lastKey = '';
   function render(keepScroll){
     const app = document.getElementById('app'); if(!app) return;
     const r = parse();
     const L = r.nivel ? lvl(r.nivel) : null;
-    const scr = L ? (L.screens.find(s=>s.id===r.screen) || (r.screen==='perguntas'||r.screen==='desafio' ? {id:r.screen} : L.screens[0])) : null;
-    const key = r.nivel+'/'+(scr?scr.id:r.screen);
-    const title = L ? `Nível ${L.id} · ${scr && scr.titulo ? scr.titulo : (r.screen==='desafio'?'Desafio':'Perguntas & Respostas')}` : ({inicio:'Início', fontes:'Fontes e premissas', config:'Configurações'})[r.screen] || 'Início';
+    let scrId = r.screen;
+    if(L && (scrId === 'perguntas' || scrId === 'desafio')){ r.query.aba = scrId; scrId = 'trilha'; }
+    const scr = L ? (L.screens.find(s=>s.id===scrId) || (scrId==='trilha' ? {id:'trilha', titulo:'Trilha do nível'} : L.screens[0] || {id:'trilha', titulo:'Trilha do nível'})) : null;
+    const G = !L ? GLOBALS.find(g=>g.id===r.screen) : null;
+    const key = r.nivel+'/'+(scr?scr.id:r.screen)+'/'+(r.query.aba||'');
+    const title = L ? (scr.titulo || 'Trilha do nível') : G ? G.titulo : (({inicio:'Início', fontes:'Fontes e premissas', config:'Configurações'})[r.screen] || 'Início');
     document.title = `${title} — ${PF.APP_NAME}`;
     const sideOpen = document.querySelector('.side.open');
-    app.innerHTML = `<div class="shell"><aside class="side ${sideOpen?'open':''}" aria-label="Menu">${sidebar(r)}</aside>
+    app.innerHTML = `<div class="shell"><aside class="side ${sideOpen?'open':''}" aria-label="Menu">${sidebar(r, scr)}</aside>
       <div class="main"><header class="topbar"><button class="menu-btn" data-pf-menu aria-label="Abrir menu">${icon('menu',18)}</button>
-        <div class="crumb"><span class="eyebrow">${L?`Nível ${L.id} · ${esc(L.nome)}`:esc(PF.APP_NAME)}</span><b>${esc(title.replace(/^Nível \d · /,''))}</b></div>
+        <div class="crumb"><span class="eyebrow">${L?`Nível ${L.id} · ${esc(L.nome)}`:esc(PF.APP_NAME)}</span><b>${esc(title)}</b></div>
         <div class="right"><span class="ilustrativo">${icon('info',13)} Dados fictícios para aprendizagem</span><img class="logo-o" src="${PF.LOGO_ONS||''}" alt="ONS — Operador Nacional do Sistema Elétrico"></div></header>
         <main class="content" id="pf-content"></main></div></div>`;
     const el = document.getElementById('pf-content');
     try{
       if(L && !PF.unlocked(L.id)) lockScreen(el, L);
-      else if(L && scr.id==='perguntas') screenQuiz(el, L);
-      else if(L && scr.id==='desafio') screenDesafio(el, L);
-      else if(L) scr.render(el, ctx(L.id));
+      else if(L && scr.id==='trilha') screenTrilha(el, L, r.query.aba);
+      else if(L){ scr.render(el, ctx(L.id)); if(scr.escreve) el.insertAdjacentHTML('afterbegin', PF.ui.seloExercicio()); }
+      else if(G && G.nivelMin && !PF.unlocked(G.nivelMin)) lockScreen(el, lvl(G.nivelMin));
+      else if(G) G.render(el, ctx(PF.currentLevel()));
       else if(r.screen==='fontes') screenFontes(el);
       else if(r.screen==='config') screenConfig(el);
       else screenHome(el);
     } catch(err){ console.error(err); el.innerHTML = `<div class="callout atencao"><span class="ic">${icon('risk',16)}</span><div><p><b>Erro ao montar a tela.</b></p><p class="dim">${esc(err && err.message)}</p></div></div>`; }
-    el.querySelectorAll('[data-pf-pdf]').forEach(b => b.addEventListener('click', () => PF.exportPDF(el, `portfolio-feg-${key.replace(/[^a-z0-9]+/gi,'-')}.pdf`, {title})));
+    el.querySelectorAll('[data-pf-pdf]').forEach(b => b.addEventListener('click', () => PF.exportPDF(el, `portfolio-feg-${key.replace(/[^a-z0-9]+/gi,'-').replace(/-+$/,'')}.pdf`, {title})));
     if(!keepScroll || key !== lastKey) window.scrollTo({top:0});
     lastKey = key;
   }
-  function sidebar(r){
-    const item = (href, ic, label, on, locked) => locked ? `<span class="nav-item locked" title="Bloqueado">${`<span class="ic">${icon('lock',16)}</span>`}${esc(label)}</span>` : `<a class="nav-item ${on?'on':''}" href="${href}"><span class="ic">${icon(ic,16)}</span>${esc(label)}</a>`;
+  function sidebar(r, scr){
+    const item = (href, ic, label, on) => `<a class="nav-item ${on?'on':''}" href="${href}"><span class="ic">${icon(ic,16)}</span>${esc(label)}</a>`;
     let h = `<div class="brand" onclick="location.hash='#/inicio'"><img src="${PF.LOGO_MAESTRO||''}" alt="maestro"><span>${esc(PF.APP_NAME)}</span></div>`;
     h += item('#/inicio','home','Início', r.nivel===0 && r.screen==='inicio');
+    GLOBALS.filter(g=>!g.rodape).forEach(g => h += item('#/'+g.id, g.icone||'dashboard', g.titulo, r.nivel===0 && r.screen===g.id));
+    const cur = PF.currentLevel();
     LEVELS.forEach(L => { const un = PF.unlocked(L.id), st = PF.levelStats(L.id);
-      h += `<div class="nav-group ${un?'':'locked'}"><div class="nav-group-h"><span><b>Nível ${L.id}</b> · ${esc(L.nome)}</span><span class="pct">${un?fmt.pct(st.pct):icon('lock',12)}</span></div>`;
+      const open = PF.ui_state('navOpen:'+L.id, null) ?? (r.nivel ? r.nivel===L.id : L.id===cur);
+      h += `<div class="nav-group ${un?'':'locked'}"><button class="nav-group-h" data-pf-nav="${L.id}" aria-expanded="${open}"><span><b>Nível ${L.id}</b> · ${esc(L.nome)}</span><span class="pct">${un?fmt.pct(st.pct)+(PF.levelDone(L.id)?' ✓':''):icon('lock',12)} ${open?'▾':'▸'}</span></button>`;
+      if(!open){ h += `</div>`; return; }
       if(!un){ h += `<div class="nav-lock">Conclua o nível ${L.id-1} para liberar: ${L.screens.map(s=>esc(s.titulo)).join(', ')}.</div></div>`; return; }
-      L.screens.forEach(s => h += item(`#/n${L.id}/${s.id}`, s.icone||'dashboard', s.titulo, r.nivel===L.id && r.screen===s.id));
-      h += item(`#/n${L.id}/perguntas`, 'question', 'Perguntas & Respostas', r.nivel===L.id && r.screen==='perguntas');
-      if(L.desafio) h += item(`#/n${L.id}/desafio`, 'trophy', 'Desafio do nível', r.nivel===L.id && r.screen==='desafio');
+      let grupo = null;
+      L.screens.forEach(s => { if(s.grupo && s.grupo !== grupo){ grupo = s.grupo; h += `<div class="nav-sub">${esc(grupo)}</div>`; }
+        h += item(`#/n${L.id}/${s.id}`, s.icone||'dashboard', s.titulo, r.nivel===L.id && scr && scr.id===s.id); });
+      h += item(`#/n${L.id}/trilha`, 'question', 'Trilha do nível', r.nivel===L.id && scr && scr.id==='trilha');
       h += `</div>`; });
-    h += `<div class="side-foot">${item('#/fontes','info','Fontes e premissas', r.screen==='fontes')}${item('#/config','settings','Configurações', r.screen==='config')}</div>`;
+    h += `<div class="side-foot">${GLOBALS.filter(g=>g.rodape).map(g=>item('#/'+g.id, g.icone||'info', g.titulo, r.screen===g.id)).join('')}${GLOBALS.find(g=>g.id==='fontes')?'':item('#/fontes','info','Fontes e premissas', r.screen==='fontes')}${item('#/config','settings','Configurações', r.screen==='config')}</div>`;
     return h;
   }
   function lockScreen(el, L){
     const prev = lvl(L.id-1), st = prev ? PF.levelStats(prev.id) : null;
     el.innerHTML = `<div class="lockscreen"><span class="ic">${icon('lock',30)}</span><div class="eyebrow">Nível ${L.id} · ${esc(L.nome)}</div><h2>Este módulo ainda está bloqueado</h2>
-      <p class="muted">Para liberar, conclua o nível ${prev.id} (${esc(prev.nome)}): acerte <b class="lime">${prev.unlock.minPct}%</b> das perguntas${prev.desafio&&prev.unlock.desafio?' e conclua o desafio':''}. Hoje: ${st.ok}/${st.total} corretas (${fmt.pct(st.pct)})${prev.desafio?` · desafio ${st.desafio&&st.desafio.feito?'✓':'pendente'}`:''}.</p>
-      <div class="row" style="justify-content:center"><a class="btn btn-primary" href="#/n${prev.id}/perguntas">Ir para as perguntas do nível ${prev.id}</a>${prev.desafio?`<a class="btn btn-ghost" href="#/n${prev.id}/desafio">Desafio do nível ${prev.id}</a>`:''}</div>
+      ${L.objetivos && L.objetivos.length ? `<div class="card" style="text-align:left;width:100%"><b>O que você vai aprender:</b><ul style="margin:6px 0 0;padding-left:18px">${L.objetivos.map(o=>`<li class="muted">${esc(o)}</li>`).join('')}</ul></div>`:''}
+      ${prev ? `<p class="muted">Para liberar, conclua o nível ${prev.id} (${esc(prev.nome)}): <b class="lime">${prev.unlock.minPct}%</b> das perguntas graduadas${prev.desafio&&prev.unlock.desafio?' e o desafio':''}. Hoje: ${st.ok}/${st.total} (${fmt.pct(st.pct)})${prev.desafio?` · desafio ${st.desafio&&st.desafio.feito?'✓':'pendente'}`:''}.</p>
+      <div class="row" style="justify-content:center"><a class="btn btn-primary" href="#/n${prev.id}/trilha?aba=perguntas">Perguntas do nível ${prev.id}</a>${prev.desafio?`<a class="btn btn-ghost" href="#/n${prev.id}/trilha?aba=desafio">Desafio do nível ${prev.id}</a>`:''}</div>` : ''}
       <p class="dim" style="font-size:12.5px">Facilitador? Ative o modo instrutor em <a href="#/config">Configurações</a>.</p></div>`;
   }
   document.addEventListener('click', e => {
     if(e.target.closest('[data-pf-menu]')){ document.querySelector('.side').classList.toggle('open'); return; }
+    const ng = e.target.closest('[data-pf-nav]'); if(ng){ const id = +ng.dataset.pfNav; const open = ng.getAttribute('aria-expanded') === 'true'; PF.set_ui('navOpen:'+id, !open); PF.refresh(); return; }
     if(e.target.closest('.side .nav-item') && window.innerWidth <= 980){ const s = document.querySelector('.side'); if(s) s.classList.remove('open'); }
   });
 
-  PF.start = () => { checkLevelMedals(); render(); };
+  PF.start = () => { deepFreeze(PF.base); PF.db(); checkLevelMedals(); render(); };
 })();
