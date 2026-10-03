@@ -70,3 +70,42 @@ test('exemplos: 14 projetos coerentes e sem duplicar', () => {
   assert.equal(ps.find(p => p.etapa === 'nao_entra').entrada.resultado, 'nao_entra');
   assert.equal(ps.find(p => p.etapa === 'triagem').entrada.resultado, 'falta_info');
 });
+
+test('priorização: nota por eixo, quadrante, classe e pesos', () => {
+  const GP = carregar(), M = GP.modelo;
+  const p = GP.projetos.criar(base).projeto;
+  GP.projetos.avaliar(p.id, { V1:3, V2:2, V3:3, V4:1, V5:3, V6:0, C1:2, C2:1, C3:1 });
+  const s = M.pontuar(p);
+  // valor = 25 + 20·2/3 + 20 + 15/3 + 10 + 0 = 73,33 ; esforço = 40·2/3 + 35/3 + 25/3 = 46,67
+  assert.ok(Math.abs(s.valor - 73.333) < 0.01, String(s.valor));
+  assert.ok(Math.abs(s.esforco - 46.667) < 0.01, String(s.esforco));
+  assert.equal(s.quadrante, 'rapido'); assert.equal(s.classe, 'A');
+  GP.projetos.avaliar(p.id, { V1:0 });
+  assert.equal(M.pontuar(p).completo, false); assert.equal(M.pontuar(p).faltam, 8);
+  // mudar pesos muda a nota
+  const crit = M.CRITERIOS_PADRAO.map(c => ({ ...c, peso: c.id === 'V1' ? 50 : c.id === 'V6' ? 0 : c.eixo === 'valor' ? 12.5 : c.peso }));
+  GP.projetos.avaliar(p.id, { V1:3, V2:0, V3:0, V4:0, V5:0, V6:3, C1:0, C2:0, C3:0 });
+  assert.equal(M.pontuar(p, crit).valor, 50);
+  assert.equal(M.pontuar(p).valor, 35);
+});
+
+test('ranking: obrigatórios no topo, ordem por valor e desempate por esforço', () => {
+  const GP = carregar(), M = GP.modelo;
+  const mk = (t, ob, r) => { const p = GP.projetos.criar({ ...base, titulo: t, obrigatorio: ob }).projeto; GP.projetos.avaliar(p.id, r); return p; };
+  const a = mk('Projeto A', false, { V1:0, V2:3, V3:3, V4:3, V5:3, V6:3, C1:3, C2:3, C3:3 });
+  const b = mk('Projeto B', true,  { V1:3, V2:0, V3:0, V4:0, V5:0, V6:0, C1:0, C2:0, C3:0 });
+  const c = mk('Projeto C', false, { V1:0, V2:3, V3:3, V4:3, V5:3, V6:3, C1:0, C2:0, C3:0 });
+  mk('Projeto D', false, { V1:1 });
+  const rk = M.ranking(GP.projetos.todos());
+  assert.deepEqual([...rk.map(x => x.p.titulo)], ['Projeto B', 'Projeto C', 'Projeto A']);
+  assert.deepEqual([...M.ranking(GP.projetos.todos(), { obrigatoriosNoTopo:false }).map(x => x.p.titulo)], ['Projeto C', 'Projeto A', 'Projeto B']);
+});
+
+test('exemplos: avaliações geram ranking coerente', () => {
+  const GP = carregar(), M = GP.modelo; M.carregarExemplos();
+  const rk = M.ranking(GP.projetos.todos().filter(p => p.etapa === 'aprovado'));
+  assert.equal(rk.length, 5);
+  assert.match(rk[0].p.titulo, /requisito regulatório/);   // obrigatório
+  assert.match(rk[1].p.titulo, /Base única/);              // 60
+  assert.match(rk.at(-1).p.titulo, /chuva-vazão/);         // empata com automação em 41,7, perde no esforço
+});

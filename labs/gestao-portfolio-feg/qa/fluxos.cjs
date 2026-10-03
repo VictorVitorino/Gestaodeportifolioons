@@ -126,4 +126,48 @@ module.exports = {
     check(await p.locator('.quadro .col').count() === 8, 'quadro deveria ter 8 colunas (etapas)');
     check(await p.locator('.quadro .kcard').count() === 14, 'quadro deveria mostrar os 14 projetos');
   },
+  /* Passo 4 — priorização */
+  async 'passo4: avaliar projeto calcula nota e vai ao ranking'({ p, ir, check }){
+    await p.evaluate(() => { const S = GP.state(); S.ui.nivel = 2; GP.save(); });
+    const id = await p.evaluate(() => { const r = GP.projetos.criar({ titulo:'Projeto prioridade QA', descricao:'d', beneficio:'b', gerencia:'FEN', demandante:'x', patrocinador:'y', tipo:'Projeto', esforcoFte:2, duracaoMeses:6 }).projeto; GP.projetos.mudarEtapa(r.id, 'aprovado'); return r.id; });
+    await ir('#/avaliar');
+    check(await p.locator(`[data-avaliar="${id}"]`).count() === 1, 'projeto aprovado deveria estar na lista de avaliação');
+    await ir('#/avaliar/' + id);
+    check(await p.locator('.escala button.on[data-c="C1"][data-v="2"]').count() === 1, 'C1 deveria vir sugerido como 2 (12 pessoas-mês)');
+    check(/Faltam 8/.test(await p.textContent('[data-resultado]')), 'resultado parcial deveria indicar 8 faltando');
+    for(const [c, v] of [['V1',3],['V2',2],['V3',3],['V4',1],['V5',3],['V6',0],['C2',1],['C3',1]]) await p.click(`.escala [data-c="${c}"][data-v="${v}"]`);
+    const res = await p.textContent('[data-resultado]');
+    check(/73/.test(res) && /47/.test(res), 'nota deveria ser valor 73 / esforço 47: ' + res.replace(/\s+/g, ' ').slice(0, 80));
+    check(/Ganho rápido/.test(res), 'quadrante deveria ser "Ganho rápido"');
+    await p.click('[data-salvar]'); await p.waitForTimeout(250);
+    check(/#\/ranking/.test(p.url()), 'após salvar deveria ir ao ranking');
+    check(/Projeto prioridade QA/.test(await p.locator('tbody tr').first().textContent()), 'projeto deveria estar no topo do ranking');
+    await ir('#/projeto/' + id);
+    check(/Priorização/.test(await p.textContent('#conteudo')) && /Ganho rápido/.test(await p.textContent('#conteudo')), 'ficha deveria mostrar a priorização no nível 2');
+  },
+  async 'passo4: pesos precisam somar 100% e mudam o ranking'({ p, ir, check }){
+    await p.evaluate(() => { GP.modelo.carregarExemplos(); const S = GP.state(); S.ui.nivel = 2; GP.save(); });
+    await ir('#/ranking');
+    const antes = await p.locator('tbody tr').count();
+    check(antes === 5, `ranking de aprovados deveria ter 5 (veio ${antes})`);
+    check(/requisito regulatório/.test(await p.locator('tbody tr').first().textContent()), 'obrigatório deveria estar no topo');
+    await p.click('[data-topo]'); await p.waitForTimeout(150);
+    check(/requisito regulatório/.test(await p.locator('tbody tr').first().textContent()), 'sem "obrigatórios no topo" ele ainda lidera pela nota (73)');
+    await ir('#/criterios');
+    await p.$eval('[data-peso="V1"]', i => { i.value = 40; i.dispatchEvent(new Event('input')); });
+    check(await p.locator('[data-salvar-pesos][disabled]').count() === 1, 'soma ≠ 100% deveria bloquear salvar');
+    check(/115%/.test(await p.textContent('[data-soma="valor"]')), 'soma deveria mostrar 115%');
+    await p.$eval('[data-peso="V2"]', i => { i.value = 5; i.dispatchEvent(new Event('input')); });
+    check(await p.locator('[data-salvar-pesos][disabled]').count() === 0, 'soma = 100% deveria liberar salvar');
+    await p.click('[data-salvar-pesos]'); await p.waitForTimeout(150);
+    check(await p.evaluate(() => GP.state().criterios.find(c => c.id === 'V1').peso) === 40, 'peso não foi salvo');
+    await p.click('[data-restaurar]'); await p.click('.modal [data-ok]'); await p.waitForTimeout(150);
+    check(await p.evaluate(() => GP.state().criterios.find(c => c.id === 'V1').peso) === 25, 'restaurar sugestão falhou');
+    await ir('#/matriz');
+    check(await p.locator('[data-ponto]').count() === 5, 'matriz deveria mostrar 5 pontos (aprovados)');
+    await p.click('[data-escopo="ativos"]'); await p.waitForTimeout(150);
+    check(await p.locator('[data-ponto]').count() === 9, 'matriz "todos os ativos" deveria mostrar 9');
+    await ir('#/acervo');
+    check(/Valor/.test(await p.textContent('thead')), 'acervo no nível 2 deveria ter coluna Valor');
+  },
 };

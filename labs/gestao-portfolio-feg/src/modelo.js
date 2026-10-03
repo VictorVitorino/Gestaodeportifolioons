@@ -64,12 +64,75 @@
     incompleto: { nome:'Aguardando respostas', tom:'neutral', etapa:null },
   };
 
+  /* ------------------------------------------------- critérios de priorização */
+  /** Escala 0–3 com âncoras. Eixo "valor" ordena o ranking; eixo "esforco" posiciona na matriz e desempata. Pesos em % (sugestão a validar pela FEG). */
+  const CRITERIOS_PADRAO = [
+    { id:'V1', eixo:'valor', peso:25, nome:'Obrigação regulatória ou legal', pergunta:'Existe exigência regulatória ou legal que depende deste projeto?',
+      niveis:['Nenhuma', 'Recomendação ou boa prática', 'Exigência futura (mais de 12 meses)', 'Exigência vigente ou com prazo próximo'] },
+    { id:'V2', eixo:'valor', peso:20, nome:'Alinhamento estratégico', pergunta:'Quanto o projeto contribui para os objetivos estratégicos da FE/ONS?',
+      niveis:['Sem relação', 'Contribuição indireta', 'Apoia um objetivo estratégico', 'Essencial para um objetivo estratégico'] },
+    { id:'V3', eixo:'valor', peso:20, nome:'Risco à operação se não fizer', pergunta:'Se o projeto não for feito, qual o risco para a operação e os estudos?',
+      niveis:['Nenhum', 'Baixo', 'Moderado: afeta prazo ou qualidade dos estudos', 'Alto: pode afetar processos críticos da operação'] },
+    { id:'V4', eixo:'valor', peso:15, nome:'Ganho de eficiência', pergunta:'Quanto o projeto reduz tempo, retrabalho ou trabalho manual?',
+      niveis:['Nenhum', 'Pequeno', 'Relevante e visível', 'Grande: elimina trabalho manual ou reduz muito o tempo'] },
+    { id:'V5', eixo:'valor', peso:10, nome:'Abrangência', pergunta:'Quantas pessoas ou áreas se beneficiam?',
+      niveis:['Uma pessoa', 'Uma equipe', 'Várias equipes ou áreas', 'Todo o ONS ou agentes externos'] },
+    { id:'V6', eixo:'valor', peso:10, nome:'Redução de dependência tecnológica', pergunta:'O projeto reduz dependência de fornecedor ou de tecnologia ultrapassada?',
+      niveis:['Nenhuma', 'Pequena', 'Média', 'Elimina uma dependência crítica'] },
+    { id:'C1', eixo:'esforco', peso:40, nome:'Esforço da equipe', pergunta:'Quanto trabalho o projeto exige da equipe?',
+      niveis:['Até 1 pessoa-mês', 'Até 6 pessoas-mês', 'Até 18 pessoas-mês', 'Mais de 18 pessoas-mês'] },
+    { id:'C2', eixo:'esforco', peso:35, nome:'Complexidade e incerteza', pergunta:'Quão conhecida é a solução?',
+      niveis:['Solução conhecida', 'Pouca incerteza', 'Alguma incerteza técnica', 'Tecnologia nova ou alta incerteza'] },
+    { id:'C3', eixo:'esforco', peso:25, nome:'Dependências', pergunta:'Depende de outras áreas, sistemas ou fornecedores?',
+      niveis:['Nenhuma', 'Uma dependência simples', 'Algumas dependências', 'Muitas ou críticas'] },
+  ];
+  const EIXOS = { valor:'Valor (por que fazer?)', esforco:'Esforço (quanto custa fazer?)' };
+  const CORTE = { valor:50, esforco:50, classeA:70, classeB:40 };
+  const QUADRANTES = {
+    rapido:     { nome:'Ganho rápido', desc:'Alto valor e baixo esforço: fazer primeiro.', cor:'#3E6801' },
+    estrategico:{ nome:'Estratégico', desc:'Alto valor e alto esforço: planejar e fatiar.', cor:'#2F6FA3' },
+    complementar:{ nome:'Complementar', desc:'Baixo valor e baixo esforço: encaixar se sobrar capacidade.', cor:'#B7791F' },
+    repensar:   { nome:'Repensar', desc:'Baixo valor e alto esforço: questionar antes de fazer.', cor:'#B9381F' },
+  };
+  const criterios = () => (GP.state() && GP.state().criterios) || CRITERIOS_PADRAO;
+  /** Sugestões de resposta a partir do cadastro (o usuário confirma). */
+  function sugestao(p, id){
+    if(id === 'V1') return p.obrigatorio ? 3 : null;
+    if(id === 'C1'){ if(p.esforcoFte == null || p.duracaoMeses == null) return null; const pm = p.esforcoFte * p.duracaoMeses; return pm <= 1 ? 0 : pm <= 6 ? 1 : pm <= 18 ? 2 : 3; }
+    return null;
+  }
+  /** Nota de um eixo (0–100) = Σ (resposta/3 × peso) / Σ pesos × 100. null se faltar resposta. */
+  function notaEixo(resp, eixo, crit = criterios()){
+    const cs = crit.filter(c => c.eixo === eixo && c.peso > 0); const tot = cs.reduce((a, c) => a + c.peso, 0);
+    if(!cs.length || !tot) return null;
+    if(cs.some(c => resp[c.id] == null)) return null;
+    return cs.reduce((a, c) => a + (resp[c.id] / 3) * c.peso, 0) / tot * 100;
+  }
+  /** Resultado da priorização de um projeto. */
+  function pontuar(p, crit = criterios()){
+    const resp = (p.avaliacao && p.avaliacao.respostas) || {};
+    const valor = notaEixo(resp, 'valor', crit), esforco = notaEixo(resp, 'esforco', crit);
+    const faltam = crit.filter(c => c.peso > 0 && resp[c.id] == null).length;
+    const quadrante = valor == null || esforco == null ? null : valor >= CORTE.valor ? (esforco < CORTE.esforco ? 'rapido' : 'estrategico') : (esforco < CORTE.esforco ? 'complementar' : 'repensar');
+    const classe = valor == null ? null : valor >= CORTE.classeA ? 'A' : valor >= CORTE.classeB ? 'B' : 'C';
+    return { valor, esforco, faltam, completo: valor != null && esforco != null, quadrante, classe };
+  }
+  /** Ranking: avaliados por valor desc; obrigatórios primeiro (opcional); desempate por menor esforço e código. */
+  function ranking(lista, { obrigatoriosNoTopo = true } = {}, crit = criterios()){
+    return lista.map(p => ({ p, s: pontuar(p, crit) })).filter(x => x.s.completo)
+      .sort((a, b) => (obrigatoriosNoTopo ? (b.p.obrigatorio ? 1 : 0) - (a.p.obrigatorio ? 1 : 0) : 0) || b.s.valor - a.s.valor || a.s.esforco - b.s.esforco || a.p.codigo.localeCompare(b.p.codigo))
+      .map((x, i) => Object.assign(x, { pos: i + 1 }));
+  }
+  /** Etapas em que faz sentido priorizar */
+  const ETAPAS_PRIORIZAVEIS = ['aprovado', 'execucao', 'espera', 'triagem'];
+
   /* --------------------------------------------------------------- estado */
   function estadoInicial(){
-    return { v: VERSAO, projetos: [], seq: 0, ui: { nivel: 1, menuMini: false } };
+    return { v: VERSAO, projetos: [], seq: 0, criterios: JSON.parse(JSON.stringify(CRITERIOS_PADRAO)), ui: { nivel: 1, menuMini: false } };
   }
   function migrar(S){
     S.ui = Object.assign({ nivel: 1, menuMini: false }, S.ui || {});
+    if(!Array.isArray(S.criterios) || !S.criterios.length) S.criterios = JSON.parse(JSON.stringify(CRITERIOS_PADRAO));
     S.projetos = S.projetos || [];
     S.seq = S.seq || 0;
     S.v = VERSAO;
@@ -143,6 +206,15 @@
       if(alvo && p.etapa !== alvo && ['entrada', 'triagem', 'aprovado', 'nao_entra'].includes(p.etapa)) projetos.mudarEtapa(id, alvo, r.motivos.join(' '));
       GP.save(); return { ok:true, r };
     },
+    /** Salva as respostas da priorização (0–3 por critério). */
+    avaliar(id, respostas, obs = ''){
+      const p = projetos.get(id); if(!p) return { ok:false };
+      const r = {}; Object.entries(respostas || {}).forEach(([k, v]) => { if(v !== '' && v != null && !isNaN(v)) r[k] = Math.max(0, Math.min(3, +v)); });
+      p.avaliacao = { respostas: r, obs: (obs || '').trim(), data: new Date().toISOString() };
+      const s = pontuar(p);
+      registrar(p, 'Priorização', s.completo ? `Valor ${s.valor.toFixed(1)} · esforço ${s.esforco.toFixed(1)} · ${QUADRANTES[s.quadrante].nome}` : `Avaliação parcial (faltam ${s.faltam} resposta(s)).`);
+      GP.save(); return { ok:true, s };
+    },
     excluir(id){ const i = S().projetos.findIndex(p => p.id === id); if(i < 0) return false; S().projetos.splice(i, 1); GP.save(); return true; },
     registrar,
   };
@@ -164,6 +236,8 @@
     ['Base única de cadastro de usinas para todos os modelos', 'FEG', 'Plataformização', '', 'Projeto', 'Estratégica', false, 'aprovado', 2.5, 9, 1200000, '2027-01-04', '2027-09-30', 'Evitar divergência de cadastro entre modelos.'],
     ['Refatoração do código legado do modelo chuva-vazão', 'FER', 'Recursos Hidrológicos', 'SMAP/ONS', 'Sustentação / melhoria', 'Operacional', false, 'aprovado', 2, 8, 700000, '2027-04-01', '2027-11-30', 'Reduzir risco de falha e facilitar manutenção.'],
   ];
+  /** Respostas de exemplo [V1..V6, C1..C3] por índice de EXEMPLOS (null = não avaliado) */
+  const AVAL_EX = [[0,3,2,3,2,3,3,2,2],[3,2,3,1,3,0,2,1,1],[0,2,2,2,2,1,1,1,1],[0,1,2,3,1,1,1,0,0],null,[0,2,2,3,2,1,2,2,0],null,[0,2,1,3,2,0,2,1,2],[0,1,1,2,2,0,1,1,0],null,null,[0,2,1,1,1,2,2,3,1],[0,3,2,2,3,2,3,2,2],[0,1,3,1,1,2,2,2,0]];
   const PESSOAS = ['Ana Souza', 'Bruno Lima', 'Carla Mendes', 'Diego Rocha', 'Elisa Prado', 'Fábio Nunes'];
   function carregarExemplos(){
     let n = 0;
@@ -178,10 +252,11 @@
       if(et === 'nao_entra') projetos.registrarEntrada(id, Object.assign({}, sim, { E1:'nao' }), 'Ajuste cosmético, sem entrega de projeto.');
       else if(et === 'triagem') projetos.registrarEntrada(id, Object.assign({}, sim, { E5:'nao' }));
       else if(et !== 'entrada'){ projetos.registrarEntrada(id, sim); if(et !== 'aprovado') projetos.mudarEtapa(id, et); }
+      const av = AVAL_EX[i]; if(av) projetos.avaliar(id, Object.fromEntries(['V1','V2','V3','V4','V5','V6','C1','C2','C3'].map((k, j) => [k, av[j]])));
     });
     GP.save(); return n;
   }
 
-  GP.modelo = { VERSAO, CAT, ETAPAS, etapa, CAMPOS, OBRIGATORIOS, ENTRADA, RESULTADO_ENTRADA, avaliarEntrada, estadoInicial, migrar, validar, carregarExemplos };
+  GP.modelo = { VERSAO, CAT, ETAPAS, etapa, CAMPOS, OBRIGATORIOS, ENTRADA, RESULTADO_ENTRADA, avaliarEntrada, CRITERIOS_PADRAO, EIXOS, CORTE, QUADRANTES, ETAPAS_PRIORIZAVEIS, criterios, sugestao, notaEixo, pontuar, ranking, estadoInicial, migrar, validar, carregarExemplos };
   GP.projetos = projetos;
 })();
