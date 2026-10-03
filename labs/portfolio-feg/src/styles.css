@@ -70,6 +70,8 @@ h1,h2,h3,h4,h5{font-family:var(--display);margin:0;font-weight:400;letter-spacin
 /* ---------- buttons ---------- */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:10px 18px;font-family:var(--display);font-weight:500;font-size:14.5px;transition:transform .15s,background .15s,border-color .15s;white-space:nowrap}
 .btn:hover{transform:translateY(-1px)}
+a.btn{text-decoration:none}
+a.btn-ghost{color:var(--white)}
 .btn-primary{background:var(--lime);color:var(--ink)}
 .btn-primary:hover{background:#e0db3a}
 .btn-ghost{border:1px solid var(--line-2)}
@@ -258,7 +260,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;colo
   .side.open{transform:none}
   .menu-btn{display:grid}
   .g2,.g3{grid-template-columns:1fr}
-  .quiz{grid-template-columns:1fr}
+  .quiz{grid-template-columns:minmax(0,1fr)}
   .qlist{position:static;flex-direction:row;overflow-x:auto}
   .qlist .grp{display:none}
   .qlist button{flex:none}

@@ -22,7 +22,7 @@ O pedido é um sistema **simples**, para pessoas que estão aprendendo. A especi
 
 | Arquivo | Conteúdo | Dono |
 |---|---|---|
-| `src/core.js`, `src/styles.css` | Núcleo (layout, menu, rotas, perguntas, gráficos, PDF, dados) | já pronto — **não editar** (relate problemas) |
+| `src/core.js`, `src/styles.css` | Núcleo (layout, menu, rotas, perguntas, gráficos, PDF, dados) | núcleo estável; mudanças só com revisão de integração (ver "Ajustes da integração final") |
 | `src/data.js` | `PF.base` completo (§4 da spec) | etapa Dados |
 | `src/calc.js` | `PF.calc` — funções **puras** de todos os indicadores dos 3 níveis | etapa Dados |
 | `src/globais.js` | Telas globais: Dashboard, Indicadores, Inventário, Decisões, Fontes e premissas (+ Glossário) | etapa Globais |
@@ -96,6 +96,25 @@ Classes CSS úteis: `.grid .g2 .g3 .g4 .g-auto .card .card.hl .stack .row .space
 ```
 Comportamento (core): errar **não** revela a resposta (mostra `dica`); "Ver resposta" pede confirmação e retira o crédito; acerto mostra a justificativa.
 Use o modelo de justificativa da spec para perguntas de análise: **Resposta · Como calculei · Leitura · Cuidado · Próximo passo**.
+
+### Ajustes da integração final (core e globais)
+- **Badges:** quando a regra tem `contradicao:true`, o badge é "A validar FEG · fontes em conflito" (§2.2, regra 1). `marca` (ex.: R07, R24) acrescenta o selo "Ilustrativo". Referência com vários slides vira `s143…`, e a lista completa fica no tooltip.
+- **Perguntas:**
+  - `dicas:{A:'…'}` (ou `d=>({…})`, ou `dica` na opção do `pick`) dá a dica da alternativa errada escolhida. Nunca escreva dica para a correta;
+  - `alternativas` pode ser uma função de `d`;
+  - `onAnswer(ok, val, d, rec)` é um gancho chamado depois de cada resposta;
+  - o campo `num` é texto e aceita vírgula ou ponto.
+- **Modais:**
+  - `PF.confirm` abre por cima do modal aberto e fecha só a si mesmo;
+  - Escape fecha o modal de cima;
+  - navegar (`hashchange`) fecha os modais.
+- **PDF:** o botão `PF.pdfButton` mostra antes o aviso `RULE_NOT_VALIDATED`, com as regras a validar citadas na tela (`PF.regrasAValidar(el)`). O rodapé traz a data de referência e `PF.versaoParametros()`.
+- **Registros:**
+  - `PF.write` grava `operacao:'ALTERACAO'` no histórico;
+  - em `PF.append`, `registradoEm`, `usuarioId` e `simulacao:true` vêm sempre do core.
+- **Tabelas:** `PF.ui.table` aceita `labelHtml` na coluna.
+- **Gráficos:** `bars`, `line` e `bubble` sem formatador próprio escolhem divisões com rótulos exatos.
+- **Ficha da iniciativa:** `PF.abrirFicha(id, aba, {pendencia:{tipo, campo}})` abre direto no formulário de pendência.
 
 ## 4. Como testar (cada construtor)
 1. `node --check` nos seus arquivos.

@@ -8,6 +8,8 @@
    - Registros compartilhados: PF.registerDash, PF.registerKpi, PF.registerFichaTab, PF.registerGlossario, PF.registerConfigCard
    - Dados: PF.base (referência, congelada) · PF.db() (trabalho) · PF.write/append/arquivar/validar · PF.regra/badge · PF.hash · PF.msg
    - Perguntas: erro não revela a resposta; "Ver resposta" retira o crédito; alternativas embaralhadas por semente.
+     Opcionais: dicas:{id:texto} (dica da alternativa errada escolhida), alternativas como função de d, onAnswer(ok, val, d, rec).
+   - PDF: PF.pdfButton → aviso RULE_NOT_VALIDATED com as regras a validar da tela antes de exportar (§2.4 item 8).
    ========================================================================= */
 (function(){
   'use strict';
@@ -157,7 +159,7 @@
   PF.route = parse;
   PF.go = path => { if(location.hash === path) render(); else location.hash = path; };
   PF.refresh = () => render(true);
-  window.addEventListener('hashchange', () => render());
+  window.addEventListener('hashchange', () => { closeModal(); render(); });   /* navegar fecha modais abertos (o render pode abrir um novo) */
 
   /* -------------------------------------------------------------- ui bits */
   const tag = f => f ? `<span class="tag fonte-${esc(f)}" title="${esc(PF.fonteLabel[f]||f)}">${esc(PF.fonteLabel[f]||f)}</span>` : '';
@@ -168,45 +170,57 @@
   const callout = (kind, html, title) => `<div class="callout ${kind}"><span class="ic">${icon(kind==='conceito'?'book':kind==='atencao'?'risk':'bulb',16)}</span><div>${title?`<p><b>${esc(title)}</b></p>`:''}${html}</div></div>`;
   const section = (title, sub, actions='') => `<div class="sec-h"><div><h3>${esc(title)}</h3>${sub?`<p>${sub}</p>`:''}</div>${actions?`<div class="row">${actions}</div>`:''}</div>`;
   const pageHead = ({eyebrow, title, sub, actions}) => `<div class="page-h"><div>${eyebrow?`<div class="eyebrow">${eyebrow}</div>`:''}<h1>${title}</h1>${sub?`<p>${sub}</p>`:''}</div>${actions?`<div class="actions">${actions}</div>`:''}</div>`;
-  /** table({cols:[{key,label,align:'r'|'c',fmt:(v,row)=>html, sort:true}], rows, rowAttr:(r)=>'', id}) — sortable columns persist in ui state */
+  /** table({cols:[{key,label,labelHtml?,align:'r'|'c',fmt:(v,row)=>html, sort:true}], rows, rowAttr:(r)=>'', id}) — sortable columns persist in ui state.
+      labelHtml (opcional) entra sem escape no cabeçalho (ex.: badge de regra). */
   const table = ({cols, rows, rowAttr, id, empty='Nenhum registro.'}) => {
     const sk = id ? PF.ui_state('sort:'+id, null) : null;
     let rs = rows.slice();
     if(sk){ const c = cols.find(c=>c.key===sk.key); if(c){ const g = c.sortVal || (r=>r[c.key]);
       rs.sort((a,b)=>{ const x=g(a), y=g(b); return (x>y?1:x<y?-1:0)*(sk.dir); }); } }
-    return `<div class="tbl-wrap"><table class="tbl"><thead><tr>${cols.map(c=>`<th class="${c.align||''} ${id&&c.sort!==false?'sort':''}" ${id&&c.sort!==false?`data-pf-sort="${esc(id)}|${esc(c.key)}"`:''}>${esc(c.label)}${sk&&sk.key===c.key?(sk.dir>0?' ▲':' ▼'):''}</th>`).join('')}</tr></thead>
+    return `<div class="tbl-wrap"><table class="tbl"><thead><tr>${cols.map(c=>`<th class="${c.align||''} ${id&&c.sort!==false?'sort':''}" ${id&&c.sort!==false?`data-pf-sort="${esc(id)}|${esc(c.key)}"`:''}>${c.labelHtml != null ? c.labelHtml : esc(c.label)}${sk&&sk.key===c.key?(sk.dir>0?' ▲':' ▼'):''}</th>`).join('')}</tr></thead>
       <tbody>${rs.length ? rs.map(r=>`<tr ${rowAttr?rowAttr(r):''}>${cols.map(c=>`<td class="${c.align||''}">${c.fmt?c.fmt(r[c.key], r):esc(r[c.key])}</td>`).join('')}</tr>`).join('') : `<tr><td colspan="${cols.length}" class="dim" style="text-align:center;padding:24px">${esc(empty)}</td></tr>`}</tbody></table></div>`;
   };
   PF.ui = { esc, tag, kpi, pill, callout, section, pageHead, table, icon };
 
   /* --------------------------------------------------------- modal/toast */
-  function modal(html, {wide}={}){ closeModal(); const d=document.createElement('div'); d.className='modal-bg'; d.dataset.pfClose='1';
+  /** modal(html, {wide, stack}) — stack:true abre por cima do modal atual sem fechá-lo (usado por PF.confirm). */
+  function modal(html, {wide, stack}={}){ if(!stack) closeModal(); const d=document.createElement('div'); d.className='modal-bg'; d.dataset.pfClose='1'; if(stack) d.dataset.pfStack='1';
     d.innerHTML=`<div class="modal" role="dialog" aria-modal="true" style="${wide?'width:min(900px,100%)':''}">${html}</div>`; document.body.appendChild(d);
     const f = d.querySelector('.btn-primary, input, select'); if(f) f.focus(); return d.querySelector('.modal'); }
   function closeModal(){ document.querySelectorAll('.modal-bg').forEach(m=>m.remove()); }
+  /** Fecha só o modal de cima quando ele foi empilhado; senão fecha todos (comportamento original). */
+  const closeTop = from => { const bg = (from && from.closest('.modal-bg')) || Array.from(document.querySelectorAll('.modal-bg')).pop();
+    if(bg && bg.dataset.pfStack) bg.remove(); else closeModal(); };
   function toast(msg){ let t=document.querySelector('.toast'); if(!t){ t=document.createElement('div'); t.className='toast'; t.setAttribute('role','status'); document.body.appendChild(t); }
     t.innerHTML=msg; t.classList.add('on'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('on'), 3800); }
   function busy(on, msg='Processando…'){ document.querySelectorAll('.busy').forEach(b=>b.remove()); if(!on) return;
     const d=document.createElement('div'); d.className='busy'; d.innerHTML=`<div><i></i>${msg}</div>`; document.body.appendChild(d); }
   PF.modal = modal; PF.closeModal = closeModal; PF.toast = toast; PF.busy = busy;
-  /** confirm não bloqueante (window.confirm é bloqueado em visualizadores sandbox) */
+  /** confirm não bloqueante (window.confirm é bloqueado em visualizadores sandbox). Abre por cima de um modal já aberto
+      (ex.: ficha da iniciativa) e, ao confirmar ou cancelar, fecha só a própria caixa. */
   PF.confirm = (title, html, okLabel, onOk) => {
-    const m = modal(`<h3>${esc(title)}</h3><div class="muted">${html}</div><div class="m-act"><button class="btn btn-ghost btn-sm" data-pf-close="1">Cancelar</button><button class="btn btn-primary btn-sm" data-pf-ok="1">${esc(okLabel)}</button></div>`);
-    m.querySelector('[data-pf-ok]').addEventListener('click', () => { closeModal(); onOk(); });
+    const m = modal(`<h3>${esc(title)}</h3><div class="muted">${html}</div><div class="m-act"><button class="btn btn-ghost btn-sm" data-pf-close="1">Cancelar</button><button class="btn btn-primary btn-sm" data-pf-ok="1">${esc(okLabel)}</button></div>`, {stack:true});
+    m.querySelector('[data-pf-ok]').addEventListener('click', () => { m.closest('.modal-bg').remove(); onOk(); });
   };
   document.addEventListener('click', e => {
-    const c = e.target.closest('[data-pf-close]'); if(c && (c === e.target || c.tagName==='BUTTON')) { closeModal(); return; }
+    const c = e.target.closest('[data-pf-close]'); if(c && (c === e.target || c.tagName==='BUTTON')) { closeTop(c); return; }
     const s = e.target.closest('[data-pf-sort]');
     if(s){ const [id, key] = s.dataset.pfSort.split('|'); const cur = PF.ui_state('sort:'+id, null);
       PF.set_ui('sort:'+id, cur && cur.key===key ? (cur.dir>0 ? {key, dir:-1} : null) : {key, dir:1}); PF.refresh(); }
   });
-  document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+  document.addEventListener('keydown', e => { if(e.key==='Escape') closeTop(null); });
 
   /* -------------------------------------------------------------- charts */
   const PALETTE = ['#D3CE22','#F2F2F2','#AEAB33','#8EC5D6','#E9B44C','#A9ACB0','#9CCB5B','#E4675A','#7E7C24','#C9B8E8'];
   const TONE = { ok:'#9CCB5B', warn:'#E9B44C', bad:'#E4675A', info:'#8EC5D6', lime:'#D3CE22', olive:'#AEAB33', paper:'#F2F2F2', dim:'#9A9DA2' };
   const color = (c, i) => TONE[c] || c || PALETTE[i % PALETTE.length];
   const niceMax = v => { if(!(v>0)) return 1; const p = Math.pow(10, Math.floor(Math.log10(v))), n = v/p; return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p; };
+  /** Frações do eixo [0..1] com rótulos exatos: escolhe 4, 5, 2, 3, 6 ou 1 divisões para que cada passo caiba em `dec` casas
+      (ex.: máximo 5 com contagens → 0,1,2,3,4,5; nunca "0,1,3,4,5"). dec null = 4 divisões (formatador próprio do módulo). */
+  const tickFracs = (a, b, dec) => { let n = 4;
+    if(dec != null){ const k = Math.pow(10, dec), ok = x => Math.abs(x*k - Math.round(x*k)) < 1e-6;
+      n = [4,5,2,3,6,1].find(m => ok((b-a)/m) && ok(a)) || 4; }
+    return Array.from({length:n+1}, (_, i) => i/n); };
   const charts = {
     PALETTE, TONE, color,
     /** barras horizontais: items [{label, value, color?, title?, mark?}], opts {max, fmt, markLabel} */
@@ -217,12 +231,12 @@
         <span class="v">${f(it.value, it)}</span></div>`).join('')}</div>`;
     },
     /** barras verticais (agrupadas opcionalmente): cats ['A','B'], series [{name, values:[..], color}] */
-    bars(cats, series, {height=220, fmt:f=v=>fmt.n(v,0), max}={}){
-      const W = 640, H = height, L = 36, B = 34, T = 14, pw = W-L-8, ph = H-B-T;
+    bars(cats, series, {height=220, fmt:f, max}={}){
+      const W = 640, H = height, L = 36, B = 34, T = 14, pw = W-L-8, ph = H-B-T, own = !!f; f = f || (v=>fmt.n(v,0));
       const m = max ?? niceMax(Math.max(...series.flatMap(s=>s.values)));
       const gw = pw/cats.length, bw = Math.min(42, (gw-12)/series.length);
       let g = '';
-      [0,.25,.5,.75,1].forEach(t=>{ const y=T+ph*(1-t); g+=`<line x1="${L}" y1="${y}" x2="${W-8}" y2="${y}" stroke="rgba(255,255,255,${t?0.08:0.2})"/><text x="${L-6}" y="${y+4}" fill="#9A9DA2" font-size="10" text-anchor="end">${esc(f(m*t))}</text>`; });
+      tickFracs(0, m, own ? null : 0).forEach(t=>{ const y=T+ph*(1-t); g+=`<line x1="${L}" y1="${y}" x2="${W-8}" y2="${y}" stroke="rgba(255,255,255,${t?0.08:0.2})"/><text x="${L-6}" y="${y+4}" fill="#9A9DA2" font-size="10" text-anchor="end">${esc(f(m*t))}</text>`; });
       cats.forEach((c,ci)=>{ const x0 = L + ci*gw + (gw - bw*series.length)/2;
         series.forEach((s,si)=>{ const v=s.values[ci]||0, h=ph*v/m, x=x0+si*bw, y=T+ph-h;
           g+=`<rect x="${x+1}" y="${y}" width="${bw-2}" height="${Math.max(0,h)}" rx="3" fill="${color(s.color,si)}"><title>${esc(s.name)} · ${esc(c)}: ${esc(f(v))}</title></rect>`; });
@@ -260,9 +274,9 @@
         const lab = (x,y,t,a) => t?`<text x="${x}" y="${y}" fill="rgba(255,255,255,.42)" font-size="10.5" letter-spacing="1.4" text-anchor="${a}" font-family="Outfit,sans-serif">${esc(String(t).toUpperCase())}</text>`:'';
         g += lab(L+8,T+16,ql[0],'start') + lab(L+pw-8,T+16,ql[1],'end') + lab(L+8,T+ph-8,ql[2],'start') + lab(L+pw-8,T+ph-8,ql[3],'end');
       }
-      const ticks = (a,b) => [0,.25,.5,.75,1].map(t=>a+(b-a)*t);
-      ticks(xMin,xMax).forEach(v=>g+=`<text x="${X(v)}" y="${T+ph+16}" fill="#9A9DA2" font-size="10" text-anchor="middle">${esc(o.xFmt?o.xFmt(v):fmt.n(v,v%1?1:0))}</text>`);
-      ticks(yMin,yMax).forEach(v=>g+=`<text x="${L-8}" y="${Y(v)+4}" fill="#9A9DA2" font-size="10" text-anchor="end">${esc(o.yFmt?o.yFmt(v):fmt.n(v,v%1?1:0))}</text>`);
+      const ticks = (a,b,own) => tickFracs(a, b, own ? null : 1).map(t=>a+(b-a)*t);   /* sem formatador próprio: rótulos exatos com até 1 casa */
+      ticks(xMin,xMax,!!o.xFmt).forEach(v=>g+=`<text x="${X(v)}" y="${T+ph+16}" fill="#9A9DA2" font-size="10" text-anchor="middle">${esc(o.xFmt?o.xFmt(v):fmt.n(v,Math.abs(v%1)>1e-9?1:0))}</text>`);
+      ticks(yMin,yMax,!!o.yFmt).forEach(v=>g+=`<text x="${L-8}" y="${Y(v)+4}" fill="#9A9DA2" font-size="10" text-anchor="end">${esc(o.yFmt?o.yFmt(v):fmt.n(v,Math.abs(v%1)>1e-9?1:0))}</text>`);
       if(o.xLabel) g += `<text x="${L+pw/2}" y="${H-6}" fill="#C3C5C8" font-size="11.5" text-anchor="middle">${esc(o.xLabel)} →</text>`;
       if(o.yLabel) g += `<text x="14" y="${T+ph/2}" fill="#C3C5C8" font-size="11.5" text-anchor="middle" transform="rotate(-90 14 ${T+ph/2})">${esc(o.yLabel)} →</text>`;
       points.slice().sort((a,b)=>(b.r||1)-(a.r||1)).forEach((p,i)=>{ const rr = o.fixedR || (6 + 16*Math.sqrt((p.r||1)/rMax)); const hl = o.highlight && o.highlight===p.id;
@@ -280,12 +294,12 @@
         <text x="100" y="116" text-anchor="middle" fill="#9A9DA2" font-size="11">${esc(label)}</text></svg>`;
     },
     /** linhas: xLabels [..], series [{name, values, color, dash}] */
-    line(xLabels, series, {height=220, fmt:f=v=>fmt.n(v,0), max, min=0, refLine}={}){
-      const W=640, H=height, L=40, R=12, T=14, B=30, pw=W-L-R, ph=H-T-B;
+    line(xLabels, series, {height=220, fmt:f, max, min=0, refLine}={}){
+      const W=640, H=height, L=40, R=12, T=14, B=30, pw=W-L-R, ph=H-T-B, own = !!f; f = f || (v=>fmt.n(v,0));
       const m = max ?? niceMax(Math.max(...series.flatMap(s=>s.values), refLine?.value||0));
       const X = i => L + (xLabels.length<2?pw/2:i*pw/(xLabels.length-1)), Y = v => T + ph*(1-(v-min)/(m-min||1));
       let g='';
-      [0,.25,.5,.75,1].forEach(t=>{ const v=min+(m-min)*t; g+=`<line x1="${L}" y1="${Y(v)}" x2="${W-R}" y2="${Y(v)}" stroke="rgba(255,255,255,${t?0.08:0.2})"/><text x="${L-6}" y="${Y(v)+4}" fill="#9A9DA2" font-size="10" text-anchor="end">${esc(f(v))}</text>`; });
+      tickFracs(min, m, own ? null : 0).forEach(t=>{ const v=min+(m-min)*t; g+=`<line x1="${L}" y1="${Y(v)}" x2="${W-R}" y2="${Y(v)}" stroke="rgba(255,255,255,${t?0.08:0.2})"/><text x="${L-6}" y="${Y(v)+4}" fill="#9A9DA2" font-size="10" text-anchor="end">${esc(f(v))}</text>`; });
       if(refLine) g+=`<line x1="${L}" y1="${Y(refLine.value)}" x2="${W-R}" y2="${Y(refLine.value)}" stroke="#E4675A" stroke-dasharray="5 4"/><text x="${W-R}" y="${Y(refLine.value)-5}" fill="#E4675A" font-size="10.5" text-anchor="end">${esc(refLine.label||'')}</text>`;
       xLabels.forEach((l,i)=>g+=`<text x="${X(i)}" y="${H-10}" fill="#C3C5C8" font-size="10.5" text-anchor="middle">${esc(l)}</text>`);
       series.forEach((s,si)=>{ const pts = s.values.map((v,i)=>`${X(i)},${Y(v)}`).join(' ');
@@ -346,14 +360,15 @@
     const merged = Object.assign({}, reg, patch);
     const errors = PF.validar(colecao, merged, d); if(errors.length) return { ok:false, errors };
     const quando = new Date().toISOString(); d.historico = d.historico || [];
-    Object.keys(patch).forEach(k => { if(stable(reg[k]) !== stable(patch[k])) d.historico.push({ id: uid('H'), entidade: colecao, entidadeId: id, campoAlterado: k, valorAnterior: reg[k] ?? null, valorNovo: patch[k] ?? null,
+    Object.keys(patch).forEach(k => { if(stable(reg[k]) !== stable(patch[k])) d.historico.push({ id: uid('H'), entidade: colecao, entidadeId: id, operacao: 'ALTERACAO', campoAlterado: k, valorAnterior: reg[k] ?? null, valorNovo: patch[k] ?? null,
       usuarioId: autor(), alteradoEm: quando, origemAlteracao: 'APP_TRILHA', justificativa, simulacao: true }); });
     Object.assign(reg, patch, { rowVersion: (reg.rowVersion||0) + 1, updatedAt: quando }); save();
     return { ok:true, errors:[] };
   };
   /** Acrescenta registro append-only (decisoes, pendencias, avaliacoes, historico, snapshotsForum, medicoesBeneficio…). */
   PF.append = (colecao, reg) => { const d = PF.db(); d[colecao] = d[colecao] || [];
-    const r = Object.assign({ id: uid(colecao.slice(0,3).toUpperCase()), registradoEm: new Date().toISOString(), usuarioId: autor(), simulacao: true }, reg);
+    /* registradoEm, usuarioId e simulacao são sempre do core (o módulo não sobrescreve); o id pode vir do módulo */
+    const r = Object.assign({ id: uid(colecao.slice(0,3).toUpperCase()) }, reg, { registradoEm: new Date().toISOString(), usuarioId: autor(), simulacao: true });
     d[colecao].push(r); save(); return r; };
   /** Arquivar = ativo:false com justificativa (não existe excluir). */
   PF.arquivar = (id, justificativa) => { if(String(justificativa||'').trim().length < 10) return { ok:false, errors:[{codigo:'VALIDATION_ERROR', msg:PF.msg('JUSTIFICATIVA',{min:10})}] };
@@ -362,13 +377,17 @@
   /** Regra/parâmetro vigente pelo código (R13…). Lê do Trabalho (parâmetros editáveis) ou da referência. */
   PF.regra = (codigo, {base=false}={}) => { const src = base ? PF.base : PF.db(); const rs = ((src && src.regras) || []).filter(r=>r.codigo===codigo);
     if(!rs.length) return null; const vig = rs.filter(r=>r.vigente !== false); return (vig.length ? vig : rs).slice().sort((a,b)=>(b.versao||1)-(a.versao||1))[0]; };
+  /** Slides citados na referência ("s4/s56", "s231–s235"); expressão com mais de 9 caracteres vira "s143…" (lista completa no tooltip e na ficha da regra). */
+  const slidesRef = ref => { const m = String(ref||'').match(/\bs\d{1,3}\b(?:\s*(?:\/|–|-|,)\s*s\d{1,3}\b)*/); if(!m) return '';
+    const s = m[0].replace(/\s*,\s*/g, ', ').replace(/\s*([\/–-])\s*/g, '$1'); return s.length > 9 ? s.match(/^s\d+/)[0] + '…' : s; };   /* badge cabe em 390 px */
   const BADGE = r => {
     if(!r) return null;
     const o = r.origemRegra, t = r.tipoFonte;
+    if(r.contradicao) return { cls:'A_VALIDAR_FEG', txt:'A validar FEG · fontes em conflito' };   /* §2.2 regra 1 (precedência) e §2.3 */
     if(o === 'ILUSTRATIVO') return { cls:'ILUSTRATIVO', txt:'Ilustrativo' };
     if(o === 'FONTE_ONS' && t === 'DOCUMENTO_ONS_APROVADO') return { cls:'FONTE_ONS', txt:'Fonte ONS · documento aprovado' };
     if(o === 'FONTE_ONS') return { cls:'A_VALIDAR_FEG', txt:'A validar FEG (sem documento aprovado)' };
-    if(o === 'A_VALIDAR_FEG' && t === 'PROPOSTA_CONSULTORIA'){ const s = (String(r.referencia||'').match(/\bs\d{1,3}\b/)||[])[0]; return { cls:'A_VALIDAR_FEG', txt:`Proposta A&M${s?' · '+s:''} · a validar` }; }
+    if(o === 'A_VALIDAR_FEG' && t === 'PROPOSTA_CONSULTORIA'){ const s = slidesRef(r.referencia); return { cls:'A_VALIDAR_FEG', txt:`Proposta A&M${s?' · '+s:''} · a validar` }; }
     if(o === 'A_VALIDAR_FEG' && t === 'COMENTARIO_REVISAO') return { cls:'A_VALIDAR_FEG', txt:'Rascunho de revisão · a validar' };
     if(o === 'A_VALIDAR_FEG') return { cls:'A_VALIDAR_FEG', txt:'A validar FEG' };
     if(o === 'DECISAO_FUNCIONAL_PRODUTO' && t === 'REF_MERCADO') return { cls:'DECISAO_FUNCIONAL_PRODUTO', txt:'Decisão de produto · Ref. mercado' };
@@ -384,7 +403,8 @@
     else if(typeof x === 'string') r = { origemRegra: x };
     else r = x;
     const b = BADGE(r);
-    return `<span class="tag fonte-${b.cls}" ${code?`data-pf-regra="${esc(code)}" style="cursor:pointer"`:''} title="${esc((code?code+' · ':'')+(r.referencia||PF.fonteLabel[r.origemRegra]||''))}">${esc(b.txt)}</span>`;
+    const marca = r.marca && b.cls !== r.marca ? ` <span class="tag fonte-${esc(r.marca)}" title="${esc((code?code+' · ':'')+'marca de interface: '+(PF.fonteLabel[r.marca]||r.marca))}">${esc(PF.fonteLabel[r.marca]||r.marca)}</span>` : '';   /* ex.: R07, R24 */
+    return `<span class="tag fonte-${b.cls}" ${code?`data-pf-regra="${esc(code)}" style="cursor:pointer"`:''} title="${esc((code?code+' · ':'')+(r.referencia||PF.fonteLabel[r.origemRegra]||''))}">${esc(b.txt)}</span>${marca}`;
   };
   PF.fichaRegra = code => { const r = PF.regra(code); if(!r) return;
     const val = r.valor === undefined ? '—' : (typeof r.valor === 'object' ? `<code style="white-space:pre-wrap">${esc(JSON.stringify(r.valor, null, 1))}</code>` : esc(r.valor));
@@ -410,6 +430,9 @@
   const TYPE_LABEL = { conceito:'Conceito', analise:'Análise do portfólio', decisao:'Decisão de escolha' };
   const answerOf = qid => S.respostas[qid];
   const resolve = (x, d, extra) => typeof x === 'function' ? x(d, extra) : x;
+  /** Número digitado com vírgula ou ponto ("43,9", "43.9", "1.234,5", "43,9%"); vazio ou texto → NaN. */
+  const numBR = raw => { let t = String(raw ?? '').trim().replace(/\s/g,'').replace(/%$/,''); if(!t) return NaN;
+    if(t.includes(',') && t.includes('.')) t = t.replace(/\./g,''); t = t.replace(',', '.'); return /^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?$/i.test(t) ? Number(t) : NaN; };
   const near = (v, ans, tol) => { if(ans == null || isNaN(ans)) return false; if(tol && typeof tol==='object' && tol.rel!=null) return Math.abs(v-ans) <= Math.abs(ans)*tol.rel + 1e-9; return Math.abs(v-ans) <= (tol ?? 0.01) + 1e-9; };
   const qData = q => q.usaTrabalho ? PF.db() : PF.base;
   /** Registra uma tentativa. best preserva o melhor resultado; revelada retira o crédito. */
@@ -417,7 +440,10 @@
   const seeded = seed => { let h = 0x811c9dc5; for(let i=0;i<seed.length;i++){ h ^= seed.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return () => { h = (h + 0x6D2B79F5) >>> 0; let t = h; t = Math.imul(t ^ t>>>15, t|1); t ^= t + Math.imul(t ^ t>>>7, t|61); return ((t ^ t>>>14) >>> 0) / 4294967296; }; };
   const shuffle = (arr, seed) => { const a = arr.slice(), r = seeded(seed); for(let i=a.length-1;i>0;i--){ const j = Math.floor(r()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; } return a; };
   /** Normaliza alternativas: strings → ids 'A','B',…; correta numérica → id. */
-  const mcOpts = q => (q.alternativas||[]).map((a,i) => typeof a === 'string' ? {id:'ABCDEFGHIJ'[i], label:a} : {id:String(a.id), label:a.texto ?? a.label ?? '', html:a.html});
+  const mcOpts = (q, d) => (resolve(q.alternativas, d)||[]).map((a,i) => typeof a === 'string' ? {id:'ABCDEFGHIJ'[i], label:a} : {id:String(a.id), label:a.texto ?? a.label ?? '', html:a.html, dica:a.dica});
+  /** Dica mostrada ao errar: a específica da alternativa escolhida (q.dicas[id] ou opção.dica), senão q.dica. Nunca aponta a correta. */
+  const dicaDe = (q, d, val, opts) => { if(val != null && !Array.isArray(val)){ const ds = resolve(q.dicas, d) || {}, o = (opts||[]).find(x => x.id === String(val));
+      if(ds[String(val)]) return ds[String(val)]; if(o && o.dica) return o.dica; } return resolve(q.dica, d); };
   const mcCorrect = q => typeof q.correta === 'number' ? 'ABCDEFGHIJ'[q.correta] : String(q.correta);
 
   function renderQuestion(host, q){
@@ -436,7 +462,8 @@
       ${(q.tipo!=='conceito' && !q.usaTrabalho)?'<div class="dim" style="font-size:12px">Calculado sobre os dados de referência (o conjunto de exemplo original).</div>':''}`;
     const just = resp => { const j = resolve(q.justificativa, d, resp); return j ? `<div>${String(j).startsWith('<')?j:`<p>${j}</p>`}</div>` : ''; };
     const okBox = (extra='') => `<div class="feedback ok"><h4>${icon('check',16)} Correto!</h4>${extra}${just(rec && rec.val)}</div>`;
-    const errBox = (extra='') => `<div class="feedback err"><h4>Ainda não.</h4>${extra}<p>${esc(q.dica || 'Revise a aula rápida da tela indicada e tente de novo.')}</p></div>`;
+    let optsVis = null;   /* alternativas exibidas (mc/pick), para a dica por alternativa */
+    const errBox = (extra='') => `<div class="feedback err"><h4>Ainda não.</h4>${extra}<p>${esc(dicaDe(q, d, rec && rec.val, optsVis) || 'Revise a aula rápida da tela indicada e tente de novo.')}</p></div>`;
     const gabBox = (extra='') => `<div class="feedback"><h4>${icon('info',16)} Resposta revelada <span class="muted" style="font-weight:400;font-size:13px">· esta pergunta não conta para o desbloqueio</span></h4>${extra}${just(rec && rec.val)}</div>`;
     const actions = () => {
       if(showErr) return `<div class="row"><button class="btn btn-primary btn-sm" data-q-retry="1">${icon('reset',14)} Tentar de novo</button><button class="btn btn-ghost btn-sm" data-q-reveal="1">Ver resposta</button><span class="dim" style="font-size:12px">Tentativas: ${rec.n}</span></div>`;
@@ -445,7 +472,7 @@
     };
     let body = '';
     if(f === 'mc' || f === 'pick'){
-      const opts = shuffle(f==='mc' ? mcOpts(q) : resolve(q.opcoes, d).map(o=>({id:String(o.id), label:o.label, html:o.html})), seed);
+      const opts = optsVis = shuffle(f==='mc' ? mcOpts(q, d) : resolve(q.opcoes, d).map(o=>({id:String(o.id), label:o.label, html:o.html, dica:o.dica})), seed);
       const correct = String(f==='mc' ? mcCorrect(q) : resolve(q.correta, d));
       const chosen = rec && rec.val != null ? String(rec.val) : null;
       body = `<div class="opts">${opts.map((o,i)=>{ let cls = '';
@@ -462,7 +489,7 @@
       if(showOk) body += okBox(); else if(showErr) body += errBox('<p>A combinação marcada não confere (pode faltar ou sobrar alternativa).</p>'); else if(showGab) body += gabBox();
     } else if(f === 'num'){
       const ans = resolve(q.calc, d), cs = q.casas ?? 1;
-      body = `<div class="row"><input class="input num" type="number" step="any" data-q-num="1" style="width:180px" value="${!fresh && rec && rec.val!=null ? esc(rec.val) : ''}" ${locked?'disabled':''} placeholder="sua resposta">${q.unidade?`<span class="muted">${esc(q.unidade)}</span>`:''}
+      body = `<div class="row"><input class="input num" type="text" inputmode="decimal" autocomplete="off" data-q-num="1" style="width:180px" value="${!fresh && rec && rec.val!=null ? esc(rec.val) : ''}" ${locked?'disabled':''} placeholder="sua resposta">${q.unidade?`<span class="muted">${esc(q.unidade)}</span>`:''}
         ${fresh?'<button class="btn btn-primary btn-sm" data-q-submit-num="1">Responder</button>':''}</div>`;
       const exp = `<p>Resposta esperada: <b class="lime">${fmt.n(ans, cs)}${q.unidade?' '+esc(q.unidade):''}</b>.</p>`;
       if(showOk) body += okBox(exp); else if(showErr) body += errBox(); else if(showGab) body += gabBox(exp);
@@ -483,7 +510,9 @@
       if(showOk) body += okBox(); else if(showErr) body += errBox(); else if(showGab) body += gabBox(q.gabarito ? resolve(q.gabarito, d) : '');
     }
     host.innerHTML = `<div class="qcard">${head}${body}${actions()}</div>`;
-    const answer = (ok, val) => { record(q, ok, val); PF.refresh(); };
+    const answer = (ok, val) => { record(q, ok, val);
+      if(q.onAnswer){ try { q.onAnswer(!!ok, val, d, S.respostas[q.id]); } catch(err){ console.error(err); } }   /* gancho opcional (ex.: medalha) */
+      PF.refresh(); };
     const cEl = host.querySelector('[data-q-custom]');
     if(cEl){ if(fresh) q.render(cEl, d, answer); else if(q.renderDone) q.renderDone(cEl, d, rec); }
     host.onclick = e => {
@@ -497,7 +526,7 @@
       if(m){ const id = m.dataset.qMulti; let s = (PF.ui_state('multi:'+q.id, [])||[]).slice(); s = s.includes(id) ? s.filter(x=>x!==id) : [...s, id]; PF.set_ui('multi:'+q.id, s); PF.refresh(); return; }
       if(t.closest('[data-q-submit-multi]')){ const s = (PF.ui_state('multi:'+q.id, [])||[]).map(String), c = resolve(q.corretas, d).map(String);
         if(!s.length){ toast('Marque ao menos uma alternativa.'); return; } PF.set_ui('multi:'+q.id, []); answer(s.length===c.length && s.every(x=>c.includes(x)), s); return; }
-      if(t.closest('[data-q-submit-num]')){ const inp = host.querySelector('[data-q-num]'); const v = parseFloat(String(inp.value).replace(',','.'));
+      if(t.closest('[data-q-submit-num]')){ const inp = host.querySelector('[data-q-num]'); const v = numBR(inp.value);
         if(isNaN(v)){ toast('Digite um número.'); inp.focus(); return; } answer(near(v, resolve(q.calc, d), q.tolerancia), v); return; }
       const dr = t.closest('[data-q-dec]');
       if(dr){ const id = dr.dataset.qDec; let s = (PF.ui_state('dec:'+q.id, null) ?? (q.preSel||[])).map(String).slice(); s = s.includes(id) ? s.filter(x=>x!==id) : [...s, id]; PF.set_ui('dec:'+q.id, s); PF.refresh(); return; }
@@ -507,6 +536,8 @@
     const inp = host.querySelector('[data-q-num]'); if(inp && fresh) inp.addEventListener('keydown', e=>{ if(e.key==='Enter') host.querySelector('[data-q-submit-num]').click(); });
   }
 
+  /** Badge de origem da meta de desbloqueio (R36b, a validar) e da regra (R36a, DFP), quando cadastradas. */
+  const metaBadge = () => ['R36a','R36b'].filter(c => PF.regra(c)).map(c => PF.badge(c)).join(' ');
   const statusIcon = rec => !rec ? null : rec.revelada ? {c:'rev', t:'👁'} : (rec.best ? {c:'ok', t:'✓'} : {c:'err', t:'!'});
   function tabPerguntas(el, L){
     const qs = L.questions, st = PF.levelStats(L.id);
@@ -515,7 +546,7 @@
       return `<div class="grp">${TYPE_LABEL[g]}</div>` + gq.map(q => { const s = statusIcon(answerOf(q.id)), n = qs.indexOf(q)+1;
         return `<button class="${q.id===cur?'on':''}" data-q-go="${esc(q.id)}"><span class="st ${s?s.c:''}">${s?s.t:n}</span><span>${esc(q.titulo || ('Pergunta '+n))}${q.aprofundamento||q.conferirFonte?' <small class="dim">(extra)</small>':''}</span></button>`; }).join(''); }).join('');
     const idx = qs.findIndex(q=>q.id===cur);
-    el.innerHTML = `<div class="row" style="margin-bottom:10px"><span class="pill tone-lime"><i></i>${st.ok}/${st.total} corretas · ${fmt.pct(st.pct)}</span><span class="dim" style="font-size:13px">Meta: ${L.unlock.minPct}%${L.desafio && L.unlock.desafio?' + desafio':''}. Errar não revela a resposta; “Ver resposta” retira o crédito daquela pergunta.</span></div>
+    el.innerHTML = `<div class="row" style="margin-bottom:10px"><span class="pill tone-lime"><i></i>${st.ok}/${st.total} corretas · ${fmt.pct(st.pct)}</span><span class="dim" style="font-size:13px">Meta: ${L.unlock.minPct}%${L.desafio && L.unlock.desafio?' + desafio':''} ${metaBadge()}. Errar não revela a resposta; “Ver resposta” retira o crédito daquela pergunta.</span></div>
       <div class="bar" style="margin-bottom:18px"><i style="width:${st.pct*100}%"></i></div>
       <div class="quiz"><nav class="qlist" aria-label="Perguntas">${list}</nav><div><div data-q-host></div>
        <div class="row" style="margin-top:14px"><button class="btn btn-ghost btn-sm" data-q-nav="-1" ${idx<=0?'disabled':''}>← Anterior</button><span class="spacer"></span>
@@ -543,7 +574,7 @@
     const st = PF.levelStats(L.id), qs = L.questions.filter(graded);
     const conc = {}; qs.forEach(q => { const k = q.conceito || TYPE_LABEL[q.tipo]; (conc[k] ||= {t:0, ok:0}).t++; if(counts(S.respostas[q.id])) conc[k].ok++; });
     const pend = qs.filter(q => { const r = S.respostas[q.id]; return r && !counts(r); });
-    el.innerHTML = `<div class="grid g4">${['conceito','analise','decisao'].map(t=>PF.ui.kpi({label:TYPE_LABEL[t], value:`${st.porTipo[t].ok}<small>/ ${st.porTipo[t].total}</small>`, tone: st.porTipo[t].total && st.porTipo[t].ok===st.porTipo[t].total ? 'ok' : ''})).join('')}
+    el.innerHTML = `<div class="row" style="margin-bottom:10px"><span class="dim" style="font-size:13px">Meta de desbloqueio: ${L.unlock.minPct}% das graduadas${L.desafio && L.unlock.desafio?' + desafio':''}</span>${metaBadge()}</div><div class="grid g4">${['conceito','analise','decisao'].map(t=>PF.ui.kpi({label:TYPE_LABEL[t], value:`${st.porTipo[t].ok}<small>/ ${st.porTipo[t].total}</small>`, tone: st.porTipo[t].total && st.porTipo[t].ok===st.porTipo[t].total ? 'ok' : ''})).join('')}
         ${PF.ui.kpi({label:'Desafio', value: st.desafio && st.desafio.feito ? '✓' : '—', sub: st.desafio && st.desafio.feito ? 'nota '+fmt.n(st.desafio.nota) : 'pendente', tone: st.desafio && st.desafio.feito ? 'ok' : ''})}</div>
       <div class="grid g2" style="margin-top:16px"><div class="card">${PF.ui.section('Domínio por conceito','Perguntas graduadas acertadas sem revelar a resposta.')}${charts.hbar(Object.entries(conc).map(([k,v])=>({label:k, value:v.t?v.ok/v.t:0, color: v.ok===v.t?'ok':'lime'})), {max:1, fmt:v=>fmt.pct(v)})}</div>
         <div class="card">${PF.ui.section('Para revisar', pend.length ? 'Perguntas com erro ou resposta revelada (marcadas com ! ou 👁).' : 'Nada pendente.')}${pend.length?`<div class="stack" style="gap:6px">${pend.map(q=>`<button class="btn-text" style="text-align:left" data-q-goto="${esc(q.id)}">${esc(q.titulo||q.id)}</button>`).join('')}</div>`:''}
@@ -580,17 +611,35 @@
       const pdf = new window.jspdf.jsPDF({orientation:'landscape', unit:'pt', format:'a4', compress:true});
       const PW = pdf.internal.pageSize.getWidth(), PH = pdf.internal.pageSize.getHeight(), FOOT = 22;
       const pxPerPage = cv.width * (PH-FOOT) / PW; let y = 0, page = 0;
+      const ascii = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^\x20-\x7E]/g,'-');
+      const dRef = (() => { try { const v = PF.calc && PF.calc.ref ? PF.calc.ref(PF.db()) : (PF.base.dataReferencia||''); return v ? v.split('-').reverse().join('/') : ''; } catch(e){ return ''; } })();
+      const rodape = ascii(`ref. ${dRef} (ilustrativa) - parametros ${PF.versaoParametros()}`);
       while(y < cv.height){ const h = Math.min(pxPerPage, cv.height - y); const part = document.createElement('canvas'); part.width = cv.width; part.height = h;
         part.getContext('2d').drawImage(cv, 0, y, cv.width, h, 0, 0, cv.width, h);
         if(page) pdf.addPage(); pdf.setFillColor(84,87,92); pdf.rect(0,0,PW,PH,'F');
         pdf.addImage(part.toDataURL('image/jpeg', .9), 'JPEG', 0, 0, PW, h * PW / cv.width); y += h; page++;
-        pdf.setFontSize(8); pdf.setTextColor(211,206,34); pdf.text('EXERCICIO DIDATICO - DADOS FICTICIOS - NAO E RECOMENDACAO DA FEG/ONS - regras a validar pela FEG', 18, PH-8);
+        pdf.setFontSize(7.5); pdf.setTextColor(211,206,34); pdf.text('EXERCICIO DIDATICO - DADOS FICTICIOS - NAO E RECOMENDACAO DA FEG/ONS - regras a validar pela FEG', 18, PH-13);
+        pdf.setTextColor(200,200,200); pdf.text(rodape, 18, PH-4);
         pdf.setTextColor(200,200,200); pdf.text(`pag. ${page}`, PW-50, PH-8); }
       pdf.save(file); toast(`PDF <b>${esc(file)}</b> gerado. Se o download não começar, abra o arquivo no Chrome ou Edge.`);
     } catch(err){ console.error(err); toast('Não foi possível gerar o PDF neste visualizador. Abra o arquivo no Chrome ou Edge.'); }
     finally { busy(false); }
   };
   PF.pdfButton = (label='Salvar PDF') => `<button class="btn btn-ghost btn-sm" data-pf-pdf="1">${icon('pdf',15)} ${esc(label)}</button>`;
+  /** Regras "a validar" citadas por badges da tela (data-pf-regra com rótulo A_VALIDAR_FEG), em ordem natural. */
+  PF.regrasAValidar = el => Array.from(new Set(Array.from((el||document).querySelectorAll('[data-pf-regra].fonte-A_VALIDAR_FEG')).map(b => b.dataset.pfRegra)))
+    .sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true}));
+  /** §2.4 item 8: antes de exportar, mostra o aviso RULE_NOT_VALIDATED com a lista das regras a validar usadas na tela. */
+  PF.exportarComAviso = (el, file, opts={}) => {
+    const lista = PF.regrasAValidar(el);
+    if(!lista.length) return PF.exportPDF(el, file, opts);
+    PF.confirm('Exportar exercício (PDF)', `<p>${PF.msgHtml('RULE_NOT_VALIDATED', {lista: lista.join(', ')})}</p><p>O PDF sai com marca d'água de exercício em todas as páginas. Não é recomendação da FEG/ONS.</p>`, 'Exportar PDF',
+      () => PF.exportPDF(el, file, Object.assign({}, opts, {regras: lista})));
+  };
+  /** Versão dos parâmetros para a linha de metadados e o rodapé do PDF: "v1" ou "v1 (alterados: R20 v2)". */
+  PF.versaoParametros = (d = PF.db()) => { const base = (d && d.versaoParametros) || 'v1';
+    const alt = Array.from(new Set(((d && d.regras) || []).filter(r => r.vigente !== false && (r.versao||1) > 1).map(r => `${r.codigo} ${r.rotuloVersao || 'v'+r.versao}`)));
+    return alt.length ? `${base} (alterados: ${alt.join(', ')})` : base; };
 
   /* ----------------------------------------------------------- core screens */
   function circuit(){
@@ -672,7 +721,7 @@
       else if(r.screen==='config') screenConfig(el);
       else screenHome(el);
     } catch(err){ console.error(err); el.innerHTML = `<div class="callout atencao"><span class="ic">${icon('risk',16)}</span><div><p><b>Erro ao montar a tela.</b></p><p class="dim">${esc(err && err.message)}</p></div></div>`; }
-    el.querySelectorAll('[data-pf-pdf]').forEach(b => b.addEventListener('click', () => PF.exportPDF(el, `portfolio-feg-${key.replace(/[^a-z0-9]+/gi,'-').replace(/-+$/,'')}.pdf`, {title})));
+    el.querySelectorAll('[data-pf-pdf]').forEach(b => b.addEventListener('click', () => PF.exportarComAviso(el, `portfolio-feg-${key.replace(/[^a-z0-9]+/gi,'-').replace(/-+$/,'')}.pdf`, {title})));
     if(!keepScroll || key !== lastKey) window.scrollTo({top:0});
     lastKey = key;
   }
@@ -699,7 +748,7 @@
     const prev = lvl(L.id-1), st = prev ? PF.levelStats(prev.id) : null;
     el.innerHTML = `<div class="lockscreen"><span class="ic">${icon('lock',30)}</span><div class="eyebrow">Nível ${L.id} · ${esc(L.nome)}</div><h2>Este módulo ainda está bloqueado</h2>
       ${L.objetivos && L.objetivos.length ? `<div class="card" style="text-align:left;width:100%"><b>O que você vai aprender:</b><ul style="margin:6px 0 0;padding-left:18px">${L.objetivos.map(o=>`<li class="muted">${esc(o)}</li>`).join('')}</ul></div>`:''}
-      ${prev ? `<p class="muted">Para liberar, conclua o nível ${prev.id} (${esc(prev.nome)}): <b class="lime">${prev.unlock.minPct}%</b> das perguntas graduadas${prev.desafio&&prev.unlock.desafio?' e o desafio':''}. Hoje: ${st.ok}/${st.total} (${fmt.pct(st.pct)})${prev.desafio?` · desafio ${st.desafio&&st.desafio.feito?'✓':'pendente'}`:''}.</p>
+      ${prev ? `<p class="muted">Para liberar, conclua o nível ${prev.id} (${esc(prev.nome)}): <b class="lime">${prev.unlock.minPct}%</b> das perguntas graduadas${prev.desafio&&prev.unlock.desafio?' e o desafio':''} ${metaBadge()}. Hoje: ${st.ok}/${st.total} (${fmt.pct(st.pct)})${prev.desafio?` · desafio ${st.desafio&&st.desafio.feito?'✓':'pendente'}`:''}.</p>
       <div class="row" style="justify-content:center"><a class="btn btn-primary" href="#/n${prev.id}/trilha?aba=perguntas">Perguntas do nível ${prev.id}</a>${prev.desafio?`<a class="btn btn-ghost" href="#/n${prev.id}/trilha?aba=desafio">Desafio do nível ${prev.id}</a>`:''}</div>` : ''}
       <p class="dim" style="font-size:12.5px">Facilitador? Ative o modo instrutor em <a href="#/config">Configurações</a>.</p></div>`;
   }
