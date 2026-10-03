@@ -31,6 +31,39 @@
   ];
   const etapa = id => ETAPAS.find(e => e.id === id) || ETAPAS[0];
 
+  /* ------------------------------------------------ checklist de entrada */
+  /** Perguntas Sim/Não. tipo 'barreira' → "Não" = não entra; tipo 'informacao' → "Não" = falta informação. */
+  const ENTRADA = [
+    { id:'E1', tipo:'barreira', pergunta:'É um projeto (tem início, fim e uma entrega) e não uma tarefa de rotina, chamado ou incidente?',
+      seNao:'É atividade de rotina/chamado: tratar no fluxo operacional (Azure DevOps, Jira ou atendimento).' },
+    { id:'E2', tipo:'barreira', pergunta:'Está no escopo da FE (ferramentas eletroenergéticas e sua governança)?',
+      seNao:'Fora do escopo da FE: encaminhar à área responsável.' },
+    { id:'E3', tipo:'barreira', pergunta:'Não repete um projeto que já está no acervo?',
+      seNao:'Duplicado: juntar ao projeto que já existe.' },
+    { id:'E4', tipo:'informacao', pergunta:'O objetivo e o benefício esperado estão descritos?',
+      seNao:'Descrever objetivo e benefício esperado.', sugerir: p => !!(p.descricao && p.beneficio) },
+    { id:'E5', tipo:'informacao', pergunta:'Tem demandante e patrocinador identificados?',
+      seNao:'Identificar demandante e patrocinador.', sugerir: p => !!(p.demandante && p.patrocinador) },
+    { id:'E6', tipo:'informacao', pergunta:'Tem uma estimativa mínima de esforço ou de prazo?',
+      seNao:'Informar estimativa de esforço (FTE) ou duração.', sugerir: p => p.esforcoFte != null || p.duracaoMeses != null },
+  ];
+  /** Resultado do checklist: {resultado:'entra'|'nao_entra'|'falta_info'|'incompleto', motivos:[...], pendentes:[ids]} */
+  function avaliarEntrada(resp = {}){
+    const pendentes = ENTRADA.filter(q => resp[q.id] !== 'sim' && resp[q.id] !== 'nao').map(q => q.id);
+    const barreiras = ENTRADA.filter(q => q.tipo === 'barreira' && resp[q.id] === 'nao');
+    if(barreiras.length) return { resultado:'nao_entra', motivos: barreiras.map(q => q.seNao), pendentes };
+    if(pendentes.length) return { resultado:'incompleto', motivos: [], pendentes };
+    const faltas = ENTRADA.filter(q => q.tipo === 'informacao' && resp[q.id] === 'nao');
+    if(faltas.length) return { resultado:'falta_info', motivos: faltas.map(q => q.seNao), pendentes };
+    return { resultado:'entra', motivos: [], pendentes };
+  }
+  const RESULTADO_ENTRADA = {
+    entra:      { nome:'Entra no portfólio', tom:'ok',   etapa:'aprovado' },
+    falta_info: { nome:'Falta informação',   tom:'warn', etapa:'triagem' },
+    nao_entra:  { nome:'Não entra',          tom:'bad',  etapa:'nao_entra' },
+    incompleto: { nome:'Aguardando respostas', tom:'neutral', etapa:null },
+  };
+
   /* --------------------------------------------------------------- estado */
   function estadoInicial(){
     return { v: VERSAO, projetos: [], seq: 0, ui: { nivel: 1, menuMini: false } };
@@ -100,6 +133,16 @@
       const de = etapa(p.etapa).nome; p.etapa = nova; p.atualizadoEm = new Date().toISOString();
       registrar(p, 'Etapa', `${de} → ${etapa(nova).nome}${motivo ? '. Motivo: ' + motivo : ''}`); GP.save(); return true;
     },
+    /** Registra o checklist de entrada e move a etapa conforme o resultado. */
+    registrarEntrada(id, respostas, obs = ''){
+      const p = projetos.get(id); if(!p) return { ok:false };
+      const r = avaliarEntrada(respostas); if(r.resultado === 'incompleto') return { ok:false, r };
+      p.entrada = { respostas: Object.assign({}, respostas), resultado: r.resultado, motivos: r.motivos, obs: (obs || '').trim(), data: new Date().toISOString() };
+      registrar(p, 'Entrada', `${RESULTADO_ENTRADA[r.resultado].nome}${r.motivos.length ? ': ' + r.motivos.join(' ') : ''}${p.entrada.obs ? ' Obs.: ' + p.entrada.obs : ''}`);
+      const alvo = RESULTADO_ENTRADA[r.resultado].etapa;
+      if(alvo && p.etapa !== alvo && ['entrada', 'triagem', 'aprovado', 'nao_entra'].includes(p.etapa)) projetos.mudarEtapa(id, alvo, r.motivos.join(' '));
+      GP.save(); return { ok:true, r };
+    },
     excluir(id){ const i = S().projetos.findIndex(p => p.id === id); if(i < 0) return false; S().projetos.splice(i, 1); GP.save(); return true; },
     registrar,
   };
@@ -128,13 +171,17 @@
       if(S().projetos.some(p => p.titulo === x[0] + ' (exemplo)')) return;
       const [titulo, gerencia, area, ferramenta, tipo, origem, obrigatorio, et, esforcoFte, duracaoMeses, custo, inicioPrevisto, fimPrevisto, beneficio] = x;
       const r = projetos.criar({ titulo: titulo + ' (exemplo)', descricao: 'Projeto fictício para demonstrar o sistema. ' + beneficio, beneficio, gerencia, area, ferramenta, tipo, origem, obrigatorio,
-        demandante: 'Área usuária de ' + area, patrocinador: 'Gerente ' + gerencia, responsavel: PESSOAS[i % PESSOAS.length], esforcoFte, duracaoMeses, custo, inicioPrevisto, fimPrevisto,
+        demandante: 'Área usuária de ' + area, patrocinador: i === 4 ? '' : 'Gerente ' + gerencia, responsavel: PESSOAS[i % PESSOAS.length], esforcoFte, duracaoMeses, custo, inicioPrevisto, fimPrevisto,
         dataEntrada: `2026-0${1 + (i % 9)}-1${i % 9}`, exemplo: true });
-      if(r.ok){ n++; if(et !== 'entrada') projetos.mudarEtapa(r.projeto.id, et, et === 'nao_entra' ? 'Sem benefício para o negócio; fora do foco do portfólio.' : ''); }
+      if(!r.ok) return; n++;
+      const id = r.projeto.id, sim = Object.fromEntries(ENTRADA.map(q => [q.id, 'sim']));
+      if(et === 'nao_entra') projetos.registrarEntrada(id, Object.assign({}, sim, { E1:'nao' }), 'Ajuste cosmético, sem entrega de projeto.');
+      else if(et === 'triagem') projetos.registrarEntrada(id, Object.assign({}, sim, { E5:'nao' }));
+      else if(et !== 'entrada'){ projetos.registrarEntrada(id, sim); if(et !== 'aprovado') projetos.mudarEtapa(id, et); }
     });
     GP.save(); return n;
   }
 
-  GP.modelo = { VERSAO, CAT, ETAPAS, etapa, CAMPOS, OBRIGATORIOS, estadoInicial, migrar, validar, carregarExemplos };
+  GP.modelo = { VERSAO, CAT, ETAPAS, etapa, CAMPOS, OBRIGATORIOS, ENTRADA, RESULTADO_ENTRADA, avaliarEntrada, estadoInicial, migrar, validar, carregarExemplos };
   GP.projetos = projetos;
 })();

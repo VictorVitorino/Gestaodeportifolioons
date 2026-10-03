@@ -5,7 +5,6 @@
   const provisoria = (id, nivel, ordem, titulo, icone) => GP.tela({ id, nivel, ordem, titulo, icone,
     render(el){ el.innerHTML = U.pageHead({ titulo, sub: GP.NIVEIS[nivel - 1].nome }) + U.vazio('Em construção', 'Esta tela será entregue nos próximos passos.'); } });
   provisoria('painel', 1, 1, 'Painel', 'painel');
-  provisoria('funil', 1, 4, 'Funil de entrada', 'funil');
   provisoria('avaliar', 2, 10, 'Avaliar projetos', 'avaliar');
   provisoria('ranking', 2, 11, 'Ranking', 'ranking');
   provisoria('matriz', 2, 12, 'Matriz valor × esforço', 'matriz');

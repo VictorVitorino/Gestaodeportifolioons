@@ -92,4 +92,38 @@ module.exports = {
     await ir('#/config'); await p.click('[data-exemplos]'); await p.waitForTimeout(150);
     check(await p.evaluate(() => GP.projetos.todos().length) === 14, 'carregar exemplos duas vezes não pode duplicar');
   },
+  /* Passo 3 — funil de entrada */
+  async 'passo3: checklist decide entra / falta informação / não entra'({ p, ir, check }){
+    const id = await p.evaluate(() => GP.projetos.criar({ titulo:'Projeto funil QA', descricao:'d', beneficio:'b', gerencia:'FEN', demandante:'x', tipo:'Projeto' }).projeto.id);
+    await ir('#/funil');
+    check(await p.locator(`[data-entrada="${id}"]`).count() === 1, 'projeto novo deveria estar na fila de entrada');
+    await p.click(`[data-entrada="${id}"]`); await p.waitForTimeout(150);
+    check(await p.locator('.modal [data-registrar][disabled]').count() === 1, 'registrar deveria ficar bloqueado sem respostas');
+    check(/O cadastro indica: <b>Não<\/b>/.test(await p.innerHTML('.modal')), 'sugestão do cadastro (patrocinador ausente) não apareceu');
+    for(const q of ['E1','E2','E3','E4','E6']) await p.click(`.modal [data-q="${q}"][data-v="sim"]`);
+    await p.click('.modal [data-q="E5"][data-v="nao"]');
+    check(/Falta informação/.test(await p.textContent('.modal [data-resultado]')), 'resultado deveria ser "Falta informação"');
+    await p.click('.modal [data-registrar]'); await p.waitForTimeout(200);
+    check(await p.evaluate(i => GP.projetos.get(i).etapa, id) === 'triagem', 'falta de informação deveria levar a "Em triagem"');
+    await p.click(`[data-entrada="${id}"]`); await p.waitForTimeout(150);
+    await p.click('.modal [data-q="E5"][data-v="sim"]');
+    check(/Entra no portfólio/.test(await p.textContent('.modal [data-resultado]')), 'todas "Sim" deveria dar "Entra"');
+    await p.click('.modal [data-registrar]'); await p.waitForTimeout(200);
+    check(await p.evaluate(i => GP.projetos.get(i).etapa, id) === 'aprovado', '"Entra" deveria aprovar o projeto');
+    check(await p.locator(`[data-entrada="${id}"]`).count() === 0, 'projeto aprovado deveria sair da fila');
+    await ir('#/projeto/' + id);
+    check(/Entrada no portfólio/.test(await p.textContent('#conteudo')) && /Entra no portfólio/.test(await p.textContent('#conteudo')), 'ficha deveria mostrar o resultado da entrada');
+    await p.click(`[data-entrada="${id}"]`); await p.click('.modal [data-q="E2"][data-v="nao"]'); await p.fill('.modal [name=obs]', 'Pertence a outra diretoria');
+    await p.click('.modal [data-registrar]'); await p.waitForTimeout(200);
+    const t = await p.textContent('#conteudo');
+    check(/Fora do escopo da FE/.test(t) && /Pertence a outra diretoria/.test(t), 'motivo e observação do "Não entra" deveriam ir para o histórico');
+  },
+  async 'passo3: funil com exemplos e quadro por etapa'({ p, ir, check }){
+    await p.evaluate(() => GP.modelo.carregarExemplos());
+    await ir('#/funil');
+    check(await p.locator('[data-entrada]').count() === 3, 'fila deveria ter 3 (2 novas demandas + 1 em triagem)');
+    await ir('#/funil?aba=quadro');
+    check(await p.locator('.quadro .col').count() === 8, 'quadro deveria ter 8 colunas (etapas)');
+    check(await p.locator('.quadro .kcard').count() === 14, 'quadro deveria mostrar os 14 projetos');
+  },
 };
