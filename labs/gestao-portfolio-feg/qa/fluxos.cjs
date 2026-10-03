@@ -220,4 +220,60 @@ module.exports = {
     await ir('#/painel');
     check(/Capacidade · 2027/.test(await p.textContent('#conteudo')), 'painel do nível 3 deveria mostrar bloco de capacidade');
   },
+  /* Passo 7 — importar/exportar e PDF */
+  async 'passo7: planilha exporta e reimporta (ida e volta)'({ p, ir, check }){
+    const fs = require('fs'), os = require('os'), path = require('path');
+    await p.evaluate(() => GP.modelo.carregarExemplos());
+    await ir('#/acervo');
+    const [dl] = await Promise.all([p.waitForEvent('download'), p.click('[data-exportar-csv]')]);
+    const arq = path.join(os.tmpdir(), 'qa-portfolio.csv'); await dl.saveAs(arq);
+    const txt = fs.readFileSync(arq, 'utf8');
+    check(txt.charCodeAt(0) === 0xFEFF, 'CSV deveria ter BOM (acentos no Excel)');
+    check(txt.split('\r\n').length === 15, 'CSV deveria ter cabeçalho + 14 linhas');
+    check(/;Nota de valor;/.test(txt) && /73,3/.test(txt), 'CSV deveria trazer nota de valor com vírgula decimal');
+    // apaga tudo e reimporta
+    await p.evaluate(() => { const S = GP.state(); S.projetos = []; S.seq = 0; GP.save(); });
+    await ir('#/acervo');
+    const [fc] = await Promise.all([p.waitForEvent('filechooser'), p.click('#conteudo [data-importar-csv]')]);
+    await fc.setFiles(arq); await p.waitForTimeout(300);
+    check(/14 prontas para importar/.test(await p.textContent('.modal')), 'prévia deveria indicar 14 linhas válidas');
+    await p.click('.modal [data-confirmar]'); await p.waitForTimeout(300);
+    const r = await p.evaluate(() => ({ n: GP.projetos.todos().length, et: GP.projetos.todos().every(x => x.etapa === 'entrada'), fte: GP.projetos.todos().find(x => /nuvem/.test(x.titulo)).esforcoFte, ini: GP.projetos.todos().find(x => /nuvem/.test(x.titulo)).inicioPrevisto, obr: GP.projetos.todos().filter(x => x.obrigatorio).length }));
+    check(r.n === 14 && r.et, 'reimportação deveria criar 14 projetos como Nova demanda');
+    check(r.fte === 3 && r.ini === '2026-03-01' && r.obr === 1, 'números, datas e obrigatório deveriam sobreviver à ida e volta');
+  },
+  async 'passo7: importação aponta erros por linha'({ p, ir, check }){
+    const fs = require('fs'), os = require('os'), path = require('path');
+    const arq = path.join(os.tmpdir(), 'qa-erros.csv');
+    fs.writeFileSync(arq, '﻿Título;Descrição;Gerência;Demandante;Tipo;Esforço (FTE);Início previsto\r\nProjeto válido de teste;desc;FEN;área;Projeto;1,5;01/02/2027\r\nX;desc;ABC;área;Tipo inventado;abc;31/31/2027\r\n');
+    await ir('#/acervo');
+    const [fc] = await Promise.all([p.waitForEvent('filechooser'), p.click('#conteudo [data-importar-csv]')]);
+    await fc.setFiles(arq); await p.waitForTimeout(300);
+    const t = await p.textContent('.modal');
+    check(/1 prontas para importar/.test(t) && /1 com erro/.test(t), 'deveria separar 1 válida e 1 com erro');
+    check(/não reconhecida/.test(t) && /Número inválido/.test(t) && /Data inválida/.test(t), 'erros por campo não detalhados: ' + t.slice(0, 120));
+    await p.click('.modal [data-confirmar]'); await p.waitForTimeout(200);
+    check(await p.evaluate(() => GP.projetos.todos()[0].esforcoFte) === 1.5, '"1,5" deveria virar 1.5');
+  },
+  async 'passo7: backup e restauração preservam tudo'({ p, ir, check }){
+    await p.evaluate(() => { GP.modelo.carregarExemplos(); GP.state().criterios[0].peso = 30; GP.state().criterios[1].peso = 15; GP.save(); });
+    await ir('#/config');
+    const [dl] = await Promise.all([p.waitForEvent('download'), p.click('[data-backup]')]);
+    const arq = require('path').join(require('os').tmpdir(), 'qa-backup.json'); await dl.saveAs(arq);
+    await p.click('[data-apagar]'); await p.click('.modal [data-ok]'); await p.waitForTimeout(200);
+    check(await p.evaluate(() => GP.projetos.todos().length) === 0, 'apagar tudo deveria zerar');
+    const [fc] = await Promise.all([p.waitForEvent('filechooser'), p.click('[data-restaurar-backup]')]);
+    await fc.setFiles(arq); await p.waitForTimeout(200); await p.click('.modal [data-ok]'); await p.waitForTimeout(250);
+    const r = await p.evaluate(() => ({ n: GP.projetos.todos().length, peso: GP.state().criterios[0].peso, aval: GP.projetos.todos().filter(x => x.avaliacao).length }));
+    check(r.n === 14 && r.peso === 30 && r.aval === 10, 'backup não restaurou projetos, pesos e avaliações: ' + JSON.stringify(r));
+  },
+  async 'passo7: PDF do painel e do ranking'({ p, ir, check, recarregar }){
+    await p.evaluate(() => { GP.modelo.carregarExemplos(); GP.state().ui.nivel = 2; GP.save(); });
+    await recarregar();
+    for(const rota of ['#/painel', '#/ranking']){
+      await ir(rota, 250);
+      const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 60000 }), p.click('[data-pdf]')]);
+      check(/\.pdf$/.test(dl.suggestedFilename()), 'PDF não gerado em ' + rota);
+    }
+  },
 };

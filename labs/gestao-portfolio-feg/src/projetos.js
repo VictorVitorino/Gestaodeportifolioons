@@ -79,7 +79,7 @@
     if(!todos.length){
       el.innerHTML = U.pageHead({ titulo:'Acervo de projetos', sub:'Todos os projetos cadastrados: em andamento, concluídos e os que não entraram.' }) +
         U.vazio('Nenhum projeto cadastrado ainda', 'Comece cadastrando um projeto ou carregue exemplos fictícios para conhecer o sistema.',
-          `<div class="row" style="justify-content:center;margin-top:12px"><a class="btn btn-primary" href="#/novo">${icon('novo', 16)} Novo projeto</a><button class="btn btn-ghost" data-exemplos>Carregar exemplos</button></div>`);
+          `<div class="row" style="justify-content:center;margin-top:12px"><a class="btn btn-primary" href="#/novo">${icon('novo', 16)} Novo projeto</a><button class="btn btn-ghost" data-importar-csv>${icon('upload', 16)} Importar planilha</button><button class="btn btn-ghost" data-exemplos>Carregar exemplos</button></div>`);
       return;
     }
     const lista = filtrar(todos, f);
@@ -94,7 +94,7 @@
       { key:'fimPrevisto', label:'Fim previsto', fmt:v => fmt.data(v) },
     ];
     el.innerHTML = U.pageHead({ titulo:'Acervo de projetos', sub:'Todos os projetos cadastrados: em andamento, concluídos e os que não entraram.',
-        acoes:`<a class="btn btn-primary" href="#/novo">${icon('novo', 16)} Novo projeto</a>` }) +
+        acoes:`<button class="btn btn-ghost" data-importar-csv>${icon('upload', 16)} Importar</button><button class="btn btn-ghost" data-exportar-csv>${icon('download', 16)} Exportar para Excel</button><a class="btn btn-primary" href="#/novo">${icon('novo', 16)} Novo projeto</a>` }) +
       `<div class="chips" style="margin-bottom:12px">${GRUPOS.map(([k, l]) => `<button class="chip ${f.grupo === k ? 'on' : ''}" data-grupo="${k}">${l} <b>${filtrar(todos, {grupo:k}).length}</b></button>`).join('')}</div>
       <div class="filters">
         <div class="search"><span class="ic">${icon('busca', 16)}</span><input class="input" data-f="q" value="${esc(f.q)}" placeholder="Buscar por código, título, área, ferramenta, pessoa…" aria-label="Buscar"></div>

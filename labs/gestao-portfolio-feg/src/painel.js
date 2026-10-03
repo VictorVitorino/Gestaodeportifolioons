@@ -43,7 +43,7 @@
     const rk = nivel >= 2 ? M.ranking(ps.filter(p => p.etapa === 'aprovado')).slice(0, 5) : [];
     const extras = GP.painelBlocos.filter(b => b.nivel <= nivel).sort((a, b) => (a.ordem || 50) - (b.ordem || 50));
     el.innerHTML = U.pageHead({ titulo:'Painel do portfólio', sub:`Situação em ${fmt.data(hoje())}. Projetos de exemplo entram nas contas enquanto não forem removidos.`,
-        acoes:`<a class="btn btn-primary" href="#/novo">${icon('novo', 16)} Novo projeto</a>` }) +
+        acoes:`${GP.botaoPDF()}<a class="btn btn-primary" href="#/novo">${icon('novo', 16)} Novo projeto</a>` }) +
       `<div class="grid g4">
         ${U.kpi({ rotulo:'Projetos no acervo', valor: ps.length, sub:`${n(grupo('concluido'))} concluído(s) · ${n(grupo('fora'))} fora do portfólio` })}
         ${U.kpi({ rotulo:'Na fila de entrada', valor: n(p => p.etapa === 'entrada' || p.etapa === 'triagem'), sub:`${n(p => p.etapa === 'triagem')} em triagem`, cor: n(p => p.etapa === 'entrada' || p.etapa === 'triagem') ? 'var(--warn)' : '' })}

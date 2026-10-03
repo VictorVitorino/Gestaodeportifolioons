@@ -69,7 +69,7 @@
     const base = P.todos().filter(p => noEscopo(p, escopo)), rk = M.ranking(base, { obrigatoriosNoTopo: topo });
     const semNota = base.filter(p => !M.pontuar(p).completo);
     el.innerHTML = U.pageHead({ titulo:'Ranking de prioridade', sub:'Ordem sugerida para a equipe começar os projetos. A decisão final é do comitê; o ranking é o ponto de partida da conversa.',
-        acoes:`<a class="btn btn-ghost" href="#/criterios">${icon('pesos', 16)} Ajustar pesos</a>` }) +
+        acoes:`${GP.botaoPDF()}<a class="btn btn-ghost" href="#/criterios">${icon('pesos', 16)} Ajustar pesos</a>` }) +
       `<div class="filters"><div class="chips">${ESCOPOS.map(([k, l]) => `<button class="chip ${escopo === k ? 'on' : ''}" data-escopo="${k}">${esc(l)}</button>`).join('')}</div>
         <label class="row" style="gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" data-topo ${topo ? 'checked' : ''}> Obrigatórios no topo</label></div>
       ${rk.length ? U.table({ cols:[
@@ -97,7 +97,7 @@
     const rk = M.ranking(P.todos().filter(p => noEscopo(p, escopo)));
     const pts = rk.map(x => ({ x:x.s.esforco, y:x.s.valor, r: 7 + Math.min(10, (x.p.esforcoFte || 1) * 2), label:x.p.codigo, id:x.p.id, color:M.QUADRANTES[x.s.quadrante].cor, title:`${x.p.codigo} · ${x.p.titulo}\nValor ${n1(x.s.valor)} · Esforço ${n1(x.s.esforco)}` }));
     const porQ = k => rk.filter(x => x.s.quadrante === k);
-    el.innerHTML = U.pageHead({ titulo:'Matriz valor × esforço', sub:'Onde cada projeto avaliado cai. Comece pelos ganhos rápidos, planeje os estratégicos e questione os do quadrante “repensar”.' }) +
+    el.innerHTML = U.pageHead({ titulo:'Matriz valor × esforço', sub:'Onde cada projeto avaliado cai. Comece pelos ganhos rápidos, planeje os estratégicos e questione os do quadrante “repensar”.', acoes: GP.botaoPDF() }) +
       `<div class="filters"><div class="chips">${ESCOPOS.map(([k, l]) => `<button class="chip ${escopo === k ? 'on' : ''}" data-escopo="${k}">${esc(l)}</button>`).join('')}</div></div>
       ${rk.length ? `<div class="grid aval-grid"><div class="card">${GP.charts.matriz(pts, { xMax:100, yMax:100, qx:M.CORTE.esforco, qy:M.CORTE.valor, xLabel:'Esforço', yLabel:'Valor', quadrantes:['Ganho rápido', 'Estratégico', 'Complementar', 'Repensar'] })}
           <p class="dim" style="font-size:12px;margin:6px 0 0">Tamanho da bolha = pessoas (FTE). Clique numa bolha para abrir o projeto.</p></div>

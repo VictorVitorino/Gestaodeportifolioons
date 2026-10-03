@@ -13,7 +13,7 @@
     const S = GP.state(), cap = S.capacidade, c = carteira();
     const pctUso = c.livre > 0 ? Math.min(1, c.usadoFte / c.livre) : 1;
     el.innerHTML = U.pageHead({ titulo:'Carteira e capacidade', sub:'Informe quantas pessoas e quanto orçamento existem. O sistema percorre o ranking e mostra o que cabe. O comitê pode fixar ou excluir projetos.',
-        acoes:`<button class="btn btn-ghost" data-pauta>${icon('acervo', 16)} Pauta do comitê</button>` }) +
+        acoes:`${GP.botaoPDF()}<button class="btn btn-ghost" data-pauta>${icon('acervo', 16)} Pauta do comitê</button>` }) +
       `<div class="grid cap-grid">
         <div class="card stack" style="gap:12px">${U.secH('Capacidade do período')}
           <label class="field">Período<input class="input" data-cap="periodo" value="${esc(cap.periodo)}" maxlength="20"></label>
@@ -77,7 +77,7 @@
     const base = P.todos().filter(p => mostrar === 'todos' ? true : ['aprovado', 'execucao', 'espera'].includes(p.etapa));
     const com = base.filter(p => p.inicioPrevisto && p.fimPrevisto).sort((a, b) => a.inicioPrevisto.localeCompare(b.inicioPrevisto));
     const sem = base.filter(p => !(p.inicioPrevisto && p.fimPrevisto));
-    let html = U.pageHead({ titulo:'Roadmap', sub:'Quando cada projeto acontece e quantas pessoas ele ocupa por mês. Use as datas previstas do cadastro.' }) +
+    let html = U.pageHead({ titulo:'Roadmap', sub:'Quando cada projeto acontece e quantas pessoas ele ocupa por mês. Use as datas previstas do cadastro.', acoes: GP.botaoPDF() }) +
       `<div class="chips" style="margin-bottom:14px">${[['ativos', 'Aprovados e em execução'], ['todos', 'Todos com datas']].map(([k, l]) => `<a class="chip ${mostrar === k ? 'on' : ''}" href="#/roadmap?ver=${k}">${l}</a>`).join('')}</div>`;
     if(!com.length){ el.innerHTML = html + U.vazio('Sem projetos com datas', 'Informe início e fim previstos no cadastro para ver o roadmap.', '<a class="btn btn-primary" href="#/acervo">Ir ao acervo</a>'); return; }
     const ini = com.map(p => p.inicioPrevisto.slice(0, 7)).sort()[0], fim = com.map(p => p.fimPrevisto.slice(0, 7)).sort().at(-1);
