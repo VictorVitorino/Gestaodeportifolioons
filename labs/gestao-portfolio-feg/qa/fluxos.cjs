@@ -170,4 +170,22 @@ module.exports = {
     await ir('#/acervo');
     check(/Valor/.test(await p.textContent('thead')), 'acervo no nível 2 deveria ter coluna Valor');
   },
+  /* Passo 5 — painel */
+  async 'passo5: painel vazio orienta e com exemplos mostra indicadores'({ p, ir, check }){
+    await ir('#/painel');
+    check(/Boas-vindas/.test(await p.textContent('#conteudo')), 'painel vazio deveria mostrar boas-vindas');
+    await p.click('#conteudo [data-exemplos]'); await p.waitForTimeout(250);
+    const t = await p.textContent('#conteudo');
+    check(/Projetos no acervo\s*14/.test(t), 'KPI de acervo deveria ser 14');
+    check(/Na fila de entrada\s*3/.test(t), 'KPI fila de entrada deveria ser 3');
+    check(/Em execução\s*3/.test(t), 'KPI em execução deveria ser 3');
+    check(/Precisa de atenção \(\d+\)/.test(t), 'bloco "Precisa de atenção" ausente');
+    check(!/Top 5 da prioridade/.test(t), 'Top 5 só deveria aparecer no nível 2');
+    await p.click('.seg [data-nivel="2"]'); await p.waitForTimeout(200);
+    check(/Top 5 da prioridade/.test(await p.textContent('#conteudo')), 'Top 5 deveria aparecer no nível 2');
+    const n = await p.locator('#conteudo a.att').count();
+    check(n >= 3, `atenção deveria listar itens (veio ${n})`);
+    await p.locator('#conteudo a.att').first().click(); await p.waitForTimeout(200);
+    check(!/#\/painel/.test(p.url()), 'item de atenção deveria levar à tela de resolução');
+  },
 };
