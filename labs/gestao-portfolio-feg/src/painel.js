@@ -1,6 +1,6 @@
 /* =========================================================================
-   Painel — visão geral do portfólio (cresce com o nível)
-   Extensão: GP.painelBlocos — {nivel, ordem, render() → html} (ex.: capacidade no nível 3)
+   Painel - visão geral do portfólio (cresce com o nível)
+   Extensão: GP.painelBlocos - {nivel, ordem, render() → html} (ex.: capacidade no nível 3)
    ========================================================================= */
 (function(){
   'use strict';
@@ -42,7 +42,7 @@
     const etapas = ['entrada', 'triagem', 'aprovado', 'execucao', 'espera'].map((id, i) => ({ label: M.etapa(id).nome, value: n(p => p.etapa === id), color: i < 2 ? '#C6DCA4' : '#3E6801' }));
     const rk = nivel >= 2 ? M.ranking(ps.filter(p => p.etapa === 'aprovado')).slice(0, 5) : [];
     const extras = GP.painelBlocos.filter(b => b.nivel <= nivel).sort((a, b) => (a.ordem || 50) - (b.ordem || 50));
-    el.innerHTML = U.pageHead({ titulo:'Painel do portfólio', sub:`Situação em ${fmt.data(hoje())}. Projetos de exemplo entram nas contas enquanto não forem removidos.`,
+    el.innerHTML = U.pageHead({ titulo:'Entrada e triagem', sub:`Situação em ${fmt.data(hoje())}. Projetos de exemplo entram nas contas enquanto não forem removidos.`,
         acoes:`${GP.botaoPDF()}<a class="btn btn-primary" href="#/novo">${icon('novo', 16)} Novo projeto</a>` }) +
       `<div class="grid g4">
         ${U.kpi({ rotulo:'Projetos no acervo', valor: ps.length, sub:`${n(grupo('concluido'))} concluído(s) · ${n(grupo('fora'))} fora do portfólio` })}
@@ -64,5 +64,6 @@
   }
 
   GP.painelAtencao = atencao;
-  GP.tela({ id:'painel', nivel:1, ordem:1, titulo:'Painel', icone:'painel', render: tela });
+  GP.tela({ id:'entrada-resumo', nivel:1, ordem:1, titulo:'Entrada e triagem', icone:'painel', render: tela });
 })();
+

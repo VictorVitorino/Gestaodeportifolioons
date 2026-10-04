@@ -1,12 +1,12 @@
 /* =========================================================================
-   Nível 2 — Priorização: avaliar (perguntas 0–3), ranking, matriz e pesos
+   Nível 2 - Priorização: avaliar (perguntas 0-3), ranking, matriz e pesos
    ========================================================================= */
 (function(){
   'use strict';
   const GP = window.GP, U = GP.ui, M = GP.modelo, P = GP.projetos, { esc, fmt } = GP.util, icon = GP.icon;
-  const n1 = v => v == null ? '—' : fmt.n(v, 0);
+  const n1 = v => v == null ? '-' : fmt.n(v, 0);
   /** Selo colorido com a nota de valor */
-  const notaHtml = v => { if(v == null) return '<span class="score" style="background:var(--neutral-bg);color:var(--muted)">—</span>';
+  const notaHtml = v => { if(v == null) return '<span class="score" style="background:var(--neutral-bg);color:var(--muted)">-</span>';
     const cor = v >= M.CORTE.classeA ? ['var(--green)', '#fff'] : v >= M.CORTE.classeB ? ['var(--green-100)', 'var(--green-700)'] : ['var(--neutral-bg)', 'var(--muted)'];
     return `<span class="score" style="background:${cor[0]};color:${cor[1]}" title="Nota de valor (0 a 100)">${n1(v)}</span>`; };
   const quadPill = q => q ? `<span class="pill" style="color:${M.QUADRANTES[q].cor};background:${M.QUADRANTES[q].cor}14"><i></i>${esc(M.QUADRANTES[q].nome)}</span>` : U.pill('Não avaliado', 'neutral');
@@ -79,7 +79,7 @@
           { key:'barra', label:'', fmt:(v, r) => `<div class="bar" style="width:120px"><i style="width:${r.s.valor}%"></i></div>` },
           { key:'esf', label:'Esforço', align:'c', fmt:(v, r) => n1(r.s.esforco) },
           { key:'q', label:'Quadrante', fmt:(v, r) => quadPill(r.s.quadrante) },
-          { key:'fte', label:'FTE', align:'r', fmt:(v, r) => r.p.esforcoFte != null ? fmt.n(r.p.esforcoFte, 1) : '—' },
+          { key:'fte', label:'FTE', align:'r', fmt:(v, r) => r.p.esforcoFte != null ? fmt.n(r.p.esforcoFte, 1) : '-' },
         ], rows: rk.map(x => Object.assign({}, x, { esf:'', q:'', barra:'', fte:'' })), rowAttr: x => `class="click" data-abrir="${x.p.id}" tabindex="0"` })
         : U.vazio('Ranking vazio', 'Nenhum projeto avaliado neste filtro.', '<a class="btn btn-primary" href="#/avaliar">Avaliar projetos</a>')}
       ${semNota.length ? `<div class="card" style="margin-top:16px">${U.secH(`Sem avaliação completa (${semNota.length})`, 'Não entram no ranking até todas as perguntas serem respondidas.')}
@@ -159,3 +159,4 @@
   GP.tela({ id:'matriz', nivel:2, ordem:12, titulo:'Matriz valor × esforço', icone:'matriz', render: telaMatriz });
   GP.tela({ id:'criterios', nivel:2, ordem:13, titulo:'Critérios e pesos', icone:'pesos', render: telaCriterios });
 })();
+

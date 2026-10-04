@@ -1,5 +1,5 @@
 /* =========================================================================
-   Nível 3 — Carteira e capacidade (o que cabe) e Roadmap (quando acontece)
+   Nível 3 - Carteira e capacidade (o que cabe) e Roadmap (quando acontece)
    ========================================================================= */
 (function(){
   'use strict';
@@ -39,7 +39,7 @@
           { key:'pos', label:'#', fmt:v => `<b>${v}</b>` },
           { key:'p', label:'Projeto', fmt:v => `<span class="code">${esc(v.codigo)}</span> · <b style="font-weight:600">${esc(v.titulo)}</b>${v.obrigatorio ? ' <span class="tag">obrigatório</span>' : ''}<small>${esc(v.gerencia)} · ${esc(v.tipo)}</small>` },
           { key:'s', label:'Valor', align:'c', fmt:v => GP.notaHtml(v.valor) },
-          { key:'fte', label:'FTE', align:'r', fmt:(v, r) => r.p.esforcoFte != null ? f1(r.p.esforcoFte) : '—' },
+          { key:'fte', label:'FTE', align:'r', fmt:(v, r) => r.p.esforcoFte != null ? f1(r.p.esforcoFte) : '-' },
           { key:'custo', label:'Custo', align:'r', fmt:(v, r) => `<span style="white-space:nowrap">${fmt.mi(r.p.custo)}</span>` },
           { key:'status', label:'Situação', fmt:(v, r) => st(v) + (r.falta ? `<small>faltam ${r.falta.tipo === 'FTE' ? f1(r.falta.valor) + ' FTE' : fmt.mi(r.falta.valor)}</small>` : '') },
           { key:'acao', label:'Decisão do comitê', fmt:(v, r) => `<select class="select" style="width:auto;padding:6px 8px;font-size:13px" data-forcar="${r.p.id}" aria-label="Decisão para ${esc(r.p.codigo)}">
@@ -52,10 +52,10 @@
       if(i.type === 'checkbox') cap[k] = i.checked;
       else if(i.dataset.num){ const n = GP.util.numBR(i.value); if(n === '' || isNaN(n) || n < 0){ GP.toast('Valor não reconhecido. Use números como 10 ou 1,5.'); i.value = k === 'orcamento' ? fmt.n(cap[k]) : fmt.campo(cap[k]); return; } cap[k] = k === 'reservaPct' ? Math.min(60, n) : n; }
       else cap[k] = i.value.slice(0, 20);
-      GP.save(); const foco = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.cap : null; GP.refresh();
+      S.meta.capacidadeConfirmada = true; GP.save(); const foco = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.cap : null; GP.refresh();
       const alvo = document.querySelector(`[data-cap="${foco || k}"]`); if(alvo) alvo.focus(); }));
     el.querySelectorAll('[data-forcar]').forEach(s => s.addEventListener('change', () => { if(s.value) S.forcar[s.dataset.forcar] = s.value; else delete S.forcar[s.dataset.forcar]; GP.save(); GP.refresh(); const a = document.querySelector(`[data-forcar="${s.dataset.forcar}"]`); if(a) a.focus(); }));
-    el.querySelector('[data-cap-padrao]').onclick = () => { S.capacidade = Object.assign({}, M.CAPACIDADE_PADRAO); GP.save(); GP.refresh(); };
+    el.querySelector('[data-cap-padrao]').onclick = () => { S.capacidade = Object.assign({}, M.CAPACIDADE_PADRAO); S.meta.capacidadeConfirmada = false; GP.save(); GP.refresh(); };
     el.querySelector('[data-pauta]').onclick = () => pauta(c);
   }
   /** Pauta do comitê: texto pronto para copiar */
@@ -118,3 +118,4 @@
   GP.tela({ id:'carteira', nivel:3, ordem:20, titulo:'Carteira e capacidade', icone:'carteira', render: telaCarteira });
   GP.tela({ id:'roadmap', nivel:3, ordem:21, titulo:'Roadmap', icone:'roadmap', render: telaRoadmap });
 })();
+

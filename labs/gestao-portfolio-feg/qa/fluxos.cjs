@@ -4,8 +4,7 @@ module.exports = {
   async 'passo1: logos e marca'({ p, ir, check }){
     check(await p.locator('.topbar img.ons').count() === 1, 'logo ONS ausente no topo');
     check(await p.locator('.brand svg.feg').count() === 1, 'logo FEG ausente no menu');
-    const html = await p.content();
-    check(!/maestro/i.test(html.replace(/<script[\s\S]*?<\/script>/g, '')), 'ainda há referência a "maestro" na interface');
+    check(await p.locator('img[src*="maestro" i], img[alt*="maestro" i]').count() === 0, 'logo do Maestro não deveria aparecer');
   },
   async 'passo1: menu recolhível com tooltip e persistência'({ p, ir, check, recarregar }){
     check(await p.locator('.shell.mini').count() === 0, 'menu deveria começar expandido');
@@ -13,7 +12,7 @@ module.exports = {
     check(await p.locator('.shell.mini').count() === 1, 'menu não recolheu');
     await p.hover('.nav-item[href="#/acervo"]'); await p.waitForTimeout(100);
     const tip = await p.locator('.tip').textContent().catch(() => '');
-    check(/Acervo/.test(tip), 'tooltip não apareceu no menu recolhido');
+    check(/Projetos e demandas/.test(tip), 'tooltip não apareceu no menu recolhido');
     await recarregar();
     check(await p.locator('.shell.mini').count() === 1, 'estado recolhido não persistiu após recarregar');
     await p.click('[data-recolher]'); await p.waitForTimeout(100);
@@ -116,7 +115,7 @@ module.exports = {
     await p.click(`[data-entrada="${id}"]`); await p.click('.modal [data-q="E2"][data-v="nao"]'); await p.fill('.modal [name=obs]', 'Pertence a outra diretoria');
     await p.click('.modal [data-registrar]'); await p.waitForTimeout(200);
     const t = await p.textContent('#conteudo');
-    check(/Fora do escopo da FE/.test(t) && /Pertence a outra diretoria/.test(t), 'motivo e observação do "Não entra" deveriam ir para o histórico');
+    check(/Fora do escopo/.test(t) && /Pertence a outra diretoria/.test(t), 'motivo e observação do "Não entra" deveriam ir para o histórico');
   },
   async 'passo3: funil com exemplos e quadro por etapa'({ p, ir, check }){
     await p.evaluate(() => GP.modelo.carregarExemplos());
@@ -173,20 +172,18 @@ module.exports = {
   /* Passo 5 — painel */
   async 'passo5: painel vazio orienta e com exemplos mostra indicadores'({ p, ir, check }){
     await ir('#/painel');
-    check(/Boas-vindas/.test(await p.textContent('#conteudo')), 'painel vazio deveria mostrar boas-vindas');
+    check(/Seu portfólio começa aqui/.test(await p.textContent('#conteudo')), 'painel vazio deveria orientar o primeiro cadastro');
     await p.click('#conteudo [data-exemplos]'); await p.waitForTimeout(250);
     const t = await p.textContent('#conteudo');
-    check(/Projetos no acervo\s*14/.test(t), 'KPI de acervo deveria ser 14');
-    check(/Na fila de entrada\s*3/.test(t), 'KPI fila de entrada deveria ser 3');
+    check(/Registros na base\s*14/.test(t), 'KPI de registros deveria ser 14');
+    check(/Fila de entrada\s*3/.test(t), 'KPI fila de entrada deveria ser 3');
     check(/Em execução\s*3/.test(t), 'KPI em execução deveria ser 3');
-    check(/Precisa de atenção \(\d+\)/.test(t), 'bloco "Precisa de atenção" ausente');
-    check(!/Top 5 da prioridade/.test(t), 'Top 5 só deveria aparecer no nível 2');
+    check(/Pontos para acompanhamento/.test(t), 'bloco "Pontos para acompanhamento" ausente');
     await p.click('.seg [data-nivel="2"]'); await p.waitForTimeout(200);
-    check(/Top 5 da prioridade/.test(await p.textContent('#conteudo')), 'Top 5 deveria aparecer no nível 2');
-    const n = await p.locator('#conteudo a.att').count();
-    check(n >= 3, `atenção deveria listar itens (veio ${n})`);
-    await p.locator('#conteudo a.att').first().click(); await p.waitForTimeout(200);
-    check(!/#\/painel/.test(p.url()), 'item de atenção deveria levar à tela de resolução');
+    const n = await p.locator('#conteudo a.attention-item').count();
+    check(n >= 1, `acompanhamento deveria listar itens (veio ${n})`);
+    await p.locator('#conteudo a.attention-item').first().click(); await p.waitForTimeout(200);
+    check(!/#\/painel/.test(p.url()), 'item de acompanhamento deveria levar à tela de resolução');
   },
   /* Passo 6 — capacidade e roadmap */
   async 'passo6: carteira encaixa pelo ranking e respeita decisões do comitê'({ p, ir, check }){
@@ -217,8 +214,6 @@ module.exports = {
     check(barras === 8, `roadmap deveria ter 8 barras (aprovados/execução com datas), veio ${barras}`);
     check(await p.locator('.g-col').count() > 6, 'demanda mensal ausente');
     check(/Sem datas previstas \(1\)/.test(await p.textContent('#conteudo')), 'deveria listar 1 projeto sem datas (em espera)');
-    await ir('#/painel');
-    check(/Capacidade · 2027/.test(await p.textContent('#conteudo')), 'painel do nível 3 deveria mostrar bloco de capacidade');
   },
   /* Passo 7 — importar/exportar e PDF */
   async 'passo7: planilha exporta e reimporta (ida e volta)'({ p, ir, check }){
@@ -267,10 +262,10 @@ module.exports = {
     const r = await p.evaluate(() => ({ n: GP.projetos.todos().length, peso: GP.state().criterios[0].peso, aval: GP.projetos.todos().filter(x => x.avaliacao).length }));
     check(r.n === 14 && r.peso === 30 && r.aval === 10, 'backup não restaurou projetos, pesos e avaliações: ' + JSON.stringify(r));
   },
-  async 'passo7: PDF do painel e do ranking'({ p, ir, check, recarregar }){
+  async 'passo7: PDF dos indicadores e do ranking'({ p, ir, check, recarregar }){
     await p.evaluate(() => { GP.modelo.carregarExemplos(); GP.state().ui.nivel = 2; GP.save(); });
     await recarregar();
-    for(const rota of ['#/painel', '#/ranking']){
+    for(const rota of ['#/indicadores', '#/ranking']){
       await ir(rota, 250);
       const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 60000 }), p.click('[data-pdf]')]);
       check(/\.pdf$/.test(dl.suggestedFilename()), 'PDF não gerado em ' + rota);

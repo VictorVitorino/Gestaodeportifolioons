@@ -1,5 +1,5 @@
 /* =========================================================================
-   Nível 1 — Cadastro: Novo/Editar projeto, Acervo e Ficha do projeto
+   Nível 1 - Cadastro: Novo/Editar projeto, Acervo e Ficha do projeto
    Extensões: GP.fichaSecoes (seções da ficha) e GP.acervoColunas (colunas extras)
    ========================================================================= */
 (function(){
@@ -20,11 +20,16 @@
   function telaForm(el, r){
     const p = r.arg ? P.get(r.arg) : null;
     if(r.arg && !p){ el.innerHTML = U.vazio('Projeto não encontrado', 'Ele pode ter sido excluído.', '<a class="btn btn-primary" href="#/acervo">Ir para o acervo</a>'); return; }
-    const v = p || {};
-    el.innerHTML = U.pageHead({ titulo: p ? `Editar ${esc(p.codigo)}` : 'Novo projeto',
+    const draftKey = p ? p.id : 'novo';
+    const draft = GP.state().ui.rascunhos?.[draftKey];
+    const v = draft ? Object.assign({},p || {},draft) : p || {};
+    el.innerHTML = U.pageHead({ titulo: p ? `Editar ${esc(p.codigo)}` : 'Novo projeto ou demanda',
         sub: p ? esc(p.titulo) : 'Cadastre a demanda com as informações mínimas. Ela entra como <b>Nova demanda</b> e depois passa pelo funil de entrada.' }) +
       `<form class="stack" novalidate data-form>
+        ${draft ? '<div class="callout"><span class="ic">'+icon('relogio',16)+'</span><p>Rascunho recuperado. Revise os campos e salve o cadastro para incluí-lo nos indicadores. <button type="button" class="link" data-descartar-rascunho>Descartar rascunho</button></p></div>' : ''}
         <fieldset class="fieldset"><legend>O que é</legend><div class="form">
+          ${campo('natureza', `<select class="select" name="natureza"><option value="projeto" ${v.natureza !== 'demanda' ? 'selected' : ''}>Projeto</option><option value="demanda" ${v.natureza === 'demanda' ? 'selected' : ''}>Demanda</option></select>`, {ajuda:'Classificação usada na comparação dos indicadores'})}
+          ${campo('dataEntrada', inp('dataEntrada', v.dataEntrada || GP.util.hoje(), 'type="date" min="2000-01-01" max="2100-12-31"'), {ajuda:'Referência dos filtros de período e das entradas mensais'})}
           ${campo('titulo', inp('titulo', v.titulo, 'maxlength="140" placeholder="Ex.: Automação de testes dos modelos hidrológicos"'), {full:true})}
           ${campo('descricao', `<textarea class="input" name="descricao" maxlength="1200" placeholder="Qual problema resolve? O que será entregue?">${esc(v.descricao || '')}</textarea>`, {full:true})}
           ${campo('beneficio', inp('beneficio', v.beneficio, 'maxlength="300" placeholder="Ex.: reduzir em 30% o tempo das rodadas"'), {full:true, ajuda:'Resultado concreto esperado'})}
@@ -35,7 +40,7 @@
         <fieldset class="fieldset"><legend>Quem</legend><div class="form">
           ${campo('gerencia', `<select class="select" name="gerencia">${opt(M.CAT.gerencias, v.gerencia)}</select>`)}
           ${campo('area', inp('area', v.area, 'maxlength="120" placeholder="Ex.: Recursos Hidrológicos"'))}
-          ${campo('ferramenta', inp('ferramenta', v.ferramenta, 'maxlength="80" placeholder="Ex.: NEWAVE, DESSEM, ANAREDE"'))}
+          ${campo('ferramenta', inp('ferramenta', v.ferramenta, 'maxlength="80" placeholder="Ex.: NEWAVE, DESSEM, ANAREDE"'), {ajuda:'Ativo principal impactado pela iniciativa. Não substitui o inventário técnico.'})}
           ${campo('demandante', inp('demandante', v.demandante, 'maxlength="120" placeholder="Pessoa ou área que pediu"'))}
           ${campo('patrocinador', inp('patrocinador', v.patrocinador, 'maxlength="120"'))}
           ${campo('responsavel', inp('responsavel', v.responsavel, 'maxlength="120"'))}
@@ -43,29 +48,34 @@
         <fieldset class="fieldset"><legend>Quanto e quando (estimativas)</legend><div class="form">
           ${campo('esforcoFte', numeroCampo('esforcoFte', v.esforcoFte, 'Ex.: 1,5'), {ajuda:'Pessoas em tempo integral', hint:true})}
           ${campo('duracaoMeses', numeroCampo('duracaoMeses', v.duracaoMeses, 'Ex.: 6'), {hint:true})}
-          ${campo('custo', numeroCampo('custo', v.custo, 'Ex.: 150.000'), {ajuda:'Opcional', hint:true})}
+          ${campo('custo', numeroCampo('custo', v.custo, 'Ex.: 150.000'), {ajuda:'Estimativa total, sem representar gasto realizado', hint:true})}
+          ${campo('progresso', inp('progresso', v.progresso, 'inputmode="decimal" placeholder="Ex.: 45"'), {ajuda:'Avanço físico informado pelo responsável (0 a 100). Pode ficar em branco.'})}
           ${campo('inicioPrevisto', inp('inicioPrevisto', v.inicioPrevisto, 'type="date" min="2000-01-01" max="2100-12-31"'))}
           ${campo('fimPrevisto', inp('fimPrevisto', v.fimPrevisto, 'type="date" min="2000-01-01" max="2100-12-31"'))}
           ${campo('link', inp('link', v.link, 'maxlength="300" placeholder="https://…"'), {ajuda:'Item no Azure DevOps ou Jira'})}
           ${campo('observacoes', `<textarea class="input" name="observacoes" maxlength="1200">${esc(v.observacoes || '')}</textarea>`, {full:true})}
         </div></fieldset>
-        <div class="row"><button class="btn btn-primary" type="submit">${icon('check', 16)} ${p ? 'Salvar alterações' : 'Cadastrar projeto'}</button>
+        <div class="row"><button class="btn btn-primary" type="submit">${icon('check', 16)} ${p ? 'Salvar alterações' : 'Cadastrar registro'}</button>
           <a class="btn btn-ghost" href="${p ? '#/projeto/' + p.id : '#/acervo'}">Cancelar</a><span class="dim" style="font-size:12.5px"><span class="req" style="color:var(--bad)">*</span> obrigatório</span></div>
       </form>`;
     const f = el.querySelector('[data-form]');
+    const guardarRascunho = () => { const d = Object.fromEntries(new FormData(f).entries()); d.obrigatorio=f.elements.namedItem('obrigatorio').checked; (GP.state().ui.rascunhos ||= {})[draftKey]=d; GP.save(); };
+    f.addEventListener('input',guardarRascunho); f.addEventListener('change',guardarRascunho);
+    const descartar = el.querySelector('[data-descartar-rascunho]'); if(descartar) descartar.onclick=()=>{ delete GP.state().ui.rascunhos[draftKey]; GP.save(); GP.refresh(); };
     const dica = i => { const n = GP.util.numBR(i.value), h = el.querySelector(`[data-hint="${i.dataset.numero}"]`); if(h) h.textContent = n === '' ? '' : isNaN(n) || n < 0 ? 'Valor não reconhecido' : '= ' + NUM_FMT[i.dataset.numero](n); };
     el.querySelectorAll('[data-numero]').forEach(i => { dica(i); i.addEventListener('input', () => dica(i)); });
     f.addEventListener('submit', e => {
       e.preventDefault();
-      const d = Object.fromEntries(new FormData(f).entries()); d.obrigatorio = f.obrigatorio.checked;
-      ['esforcoFte', 'duracaoMeses', 'custo'].forEach(k => { d[k] = GP.util.numBR(d[k]); });
+      const d = Object.fromEntries(new FormData(f).entries()); d.obrigatorio = f.elements.namedItem('obrigatorio').checked;
+      ['esforcoFte', 'duracaoMeses', 'custo', 'progresso'].forEach(k => { d[k] = GP.util.numBR(d[k]); });
       const res = p ? P.atualizar(p.id, d) : P.criar(d);
       el.querySelectorAll('[data-err]').forEach(x => x.textContent = ''); el.querySelectorAll('.input.err,.select.err').forEach(x => x.classList.remove('err'));
       if(!res.ok){
         Object.entries(res.erros).forEach(([k, m]) => { const s = el.querySelector(`[data-err="${k}"]`); if(s) s.textContent = m; const i = f.elements[k]; if(i && i.classList) i.classList.add('err'); });
         const first = el.querySelector('.err'); if(first) first.focus(); GP.toast('Revise os campos destacados.'); return;
       }
-      GP.toast(p ? 'Alterações salvas.' : `Projeto <b>${esc(res.projeto.codigo)}</b> cadastrado.`);
+      delete GP.state().ui.rascunhos?.[draftKey]; GP.save();
+      GP.toast(p ? 'Alterações salvas.' : `Registro <b>${esc(res.projeto.codigo)}</b> cadastrado.`);
       GP.go('#/projeto/' + res.projeto.id);
     });
   }
@@ -90,19 +100,19 @@
     const lista = filtrar(todos, f);
     const cols = [
       { key:'codigo', label:'Código', fmt:(v, r) => `<span class="code">${esc(v)}</span>` },
-      { key:'titulo', label:'Projeto', fmt:(v, r) => `<b style="font-weight:600">${esc(v)}</b><small>${esc([r.area, r.ferramenta].filter(Boolean).join(' · ') || '—')}</small>` },
+      { key:'titulo', label:'Projeto', fmt:(v, r) => `<b style="font-weight:600">${esc(v)}</b><small>${esc([r.area, r.ferramenta].filter(Boolean).join(' · ') || '-')}</small>` },
       { key:'gerencia', label:'Gerência', hm:true },
       { key:'tipo', label:'Tipo', hm:true, fmt:(v, r) => `${esc(v)}${r.obrigatorio ? ' <span class="tag" title="Obrigatório por lei/regulação">obrigatório</span>' : ''}` },
       { key:'etapa', label:'Etapa', fmt:v => etapaPill(v), sortVal:r => M.etapa(r.etapa).ordem },
       ...GP.acervoColunas.filter(c => c.nivel <= GP.nivel()).map(c => c.coluna),
-      { key:'responsavel', label:'Responsável', hm:true, fmt:v => esc(v || '—') },
+      { key:'responsavel', label:'Responsável', hm:true, fmt:v => esc(v || '-') },
       { key:'fimPrevisto', label:'Fim previsto', hm:true, fmt:v => fmt.data(v) },
     ];
     el.innerHTML = U.pageHead({ titulo:'Acervo de projetos', sub:'Todos os projetos cadastrados: em andamento, concluídos e os que não entraram.',
         acoes:`<button class="btn btn-ghost" data-importar-csv>${icon('upload', 16)} Importar</button><button class="btn btn-ghost" data-exportar-csv>${icon('download', 16)} Exportar para Excel</button><a class="btn btn-primary" href="#/novo">${icon('novo', 16)} Novo projeto</a>` }) +
       `<div class="chips" style="margin-bottom:12px">${GRUPOS.map(([k, l]) => `<button class="chip ${f.grupo === k ? 'on' : ''}" data-grupo="${k}">${l} <b>${filtrar(todos, {grupo:k}).length}</b></button>`).join('')}</div>
       <div class="filters">
-        <div class="search"><span class="ic">${icon('busca', 16)}</span><input class="input" data-f="q" value="${esc(f.q)}" placeholder="Buscar por código, título, área, ferramenta, pessoa…" aria-label="Buscar"></div>
+        <div class="search"><span class="ic">${icon('busca', 16)}</span><input class="input" data-f="q" value="${esc(f.q)}" placeholder="Buscar por código, título, área, sistema, modelo, ferramenta ou pessoa" aria-label="Buscar"></div>
         <select class="select" data-f="gerencia" aria-label="Gerência"><option value="">Todas as gerências</option>${M.CAT.gerencias.map(g => `<option value="${g.id}" ${f.gerencia === g.id ? 'selected' : ''}>${g.id}</option>`).join('')}</select>
         <select class="select" data-f="etapa" aria-label="Etapa"><option value="">Todas as etapas</option>${M.ETAPAS.map(e => `<option value="${e.id}" ${f.etapa === e.id ? 'selected' : ''}>${esc(e.nome)}</option>`).join('')}</select>
         <select class="select" data-f="tipo" aria-label="Tipo"><option value="">Todos os tipos</option>${M.CAT.tipos.map(t => `<option ${f.tipo === t ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>
@@ -140,12 +150,12 @@
             <div class="stack" style="gap:10px">${(p.historico || []).slice().reverse().map(h => `<div class="row" style="align-items:flex-start;flex-wrap:nowrap"><span class="ic" style="color:var(--green);margin-top:2px">${icon('relogio', 15)}</span><div><b>${esc(h.acao)}</b> <span class="dim" style="font-size:12px">${fmt.dataHora(h.data)}</span><div class="muted" style="font-size:13px">${esc(h.detalhe)}</div></div></div>`).join('') || '<span class="dim">Sem registros.</span>'}</div></div>
         </div>
         <div class="card stack" style="gap:12px">${U.secH('Dados')}
-          ${linha('Gerência', esc(g ? g.nome : p.gerencia))}${linha('Área / comunidade', esc(p.area || '—'))}${linha('Ferramenta', esc(p.ferramenta || '—'))}
-          ${linha('Demandante', esc(p.demandante || '—'))}${linha('Patrocinador', esc(p.patrocinador || '—'))}${linha('Responsável', esc(p.responsavel || '—'))}
-          ${linha('Origem', esc(p.origem || '—'))}${linha('Entrada', fmt.data(p.dataEntrada))}
-          ${linha('Esforço', p.esforcoFte != null ? fmt.n(p.esforcoFte, 1) + ' FTE' : '—')}${linha('Duração', p.duracaoMeses != null ? fmt.n(p.duracaoMeses) + ' meses' : '—')}
+          ${linha('Gerência', esc(g ? g.nome : p.gerencia))}${linha('Área / comunidade', esc(p.area || '-'))}${linha('Sistema, modelo ou ferramenta', esc(p.ferramenta || '-'))}
+          ${linha('Demandante', esc(p.demandante || '-'))}${linha('Patrocinador', esc(p.patrocinador || '-'))}${linha('Responsável', esc(p.responsavel || '-'))}
+          ${linha('Natureza', p.natureza === 'demanda' ? 'Demanda' : 'Projeto')}${linha('Avanço físico', p.etapa === 'concluido' ? '100% (concluído)' : p.progresso == null ? 'Não informado' : fmt.n(p.progresso,1) + '%')}${linha('Origem', esc(p.origem || '-'))}${linha('Entrada', fmt.data(p.dataEntrada))}
+          ${linha('Esforço', p.esforcoFte != null ? fmt.n(p.esforcoFte, 1) + ' FTE' : '-')}${linha('Duração', p.duracaoMeses != null ? fmt.n(p.duracaoMeses) + ' meses' : '-')}
           ${linha('Custo estimado', fmt.brl(p.custo))}${linha('Período previsto', `${fmt.data(p.inicioPrevisto)} a ${fmt.data(p.fimPrevisto)}`)}
-          ${linha('Link', p.link ? `<a href="${esc(p.link)}" target="_blank" rel="noopener">${esc(p.link)}</a>` : '—')}
+          ${linha('Link', p.link ? `<a href="${esc(p.link)}" target="_blank" rel="noopener">${esc(p.link)}</a>` : '-')}
           ${p.observacoes ? linha('Observações', esc(p.observacoes)) : ''}
         </div></div>`;
     secoes.forEach(s => { if(s.bind) s.bind(el.querySelector(`[data-secao="${s.id}"]`), p); });
@@ -161,7 +171,8 @@
     };
   }
 
-  GP.tela({ id:'novo', nivel:1, ordem:2, titulo:'Novo projeto', icone:'novo', render: telaForm });
-  GP.tela({ id:'acervo', nivel:1, ordem:3, titulo:'Acervo de projetos', icone:'acervo', render: telaAcervo });
+  GP.tela({ id:'novo', nivel:1, ordem:2, titulo:'Novo cadastro', icone:'novo', render: telaForm });
+  GP.tela({ id:'acervo', nivel:1, ordem:3, titulo:'Projetos e demandas', icone:'acervo', render: telaAcervo });
   GP.tela({ id:'projeto', nivel:1, titulo:'Projeto', icone:'acervo', menu:false, render: telaFicha });
 })();
+

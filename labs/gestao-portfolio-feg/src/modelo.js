@@ -1,11 +1,11 @@
 /* =========================================================================
-   Gestão de Portfólio FEG — modelo de dados
+   Gestão de Portfólio FEG - modelo de dados
    Catálogos, estado inicial, migração, operações sobre projetos e exemplos.
    ========================================================================= */
 (function(){
   'use strict';
   const GP = window.GP, { hoje, uid } = GP.util;
-  const VERSAO = 1;
+  const VERSAO = 2;
 
   /* ------------------------------------------------------------ catálogos */
   const CAT = {
@@ -22,7 +22,7 @@
   const ETAPAS = [
     { id:'entrada',  nome:'Nova demanda',          tom:'info',    grupo:'andamento', ordem:1, desc:'Cadastrada, ainda não avaliada na entrada.' },
     { id:'triagem',  nome:'Em triagem',            tom:'warn',    grupo:'andamento', ordem:2, desc:'Passando pelo checklist de entrada; pode faltar informação.' },
-    { id:'aprovado', nome:'Aprovado · aguardando', tom:'ok',      grupo:'andamento', ordem:3, desc:'Entrou no portfólio e aguarda priorização/início.' },
+    { id:'aprovado', nome:'Admitido · aguardando', tom:'ok',      grupo:'andamento', ordem:3, desc:'Entrou no portfólio e aguarda priorização/início.' },
     { id:'execucao', nome:'Em execução',           tom:'ok',      grupo:'andamento', ordem:4, desc:'Em andamento pela equipe responsável.' },
     { id:'espera',   nome:'Em espera',             tom:'neutral', grupo:'andamento', ordem:5, desc:'Pausado por decisão; volta quando a condição mudar.' },
     { id:'concluido',nome:'Concluído',             tom:'neutral', grupo:'concluido', ordem:6, desc:'Entregue. Fica no acervo como histórico.' },
@@ -36,8 +36,8 @@
   const ENTRADA = [
     { id:'E1', tipo:'barreira', pergunta:'É um projeto (tem início, fim e uma entrega) e não uma tarefa de rotina, chamado ou incidente?',
       seNao:'É atividade de rotina/chamado: tratar no fluxo operacional (Azure DevOps, Jira ou atendimento).' },
-    { id:'E2', tipo:'barreira', pergunta:'Está no escopo da FE (ferramentas eletroenergéticas e sua governança)?',
-      seNao:'Fora do escopo da FE: encaminhar à área responsável.' },
+    { id:'E2', tipo:'barreira', pergunta:'Está no escopo do portfólio Maestro (sistemas, modelos, ferramentas ou sua governança)?',
+      seNao:'Fora do escopo do portfólio Maestro: encaminhar à área responsável.' },
     { id:'E3', tipo:'barreira', pergunta:'É uma demanda nova, que não duplica um projeto do acervo?',
       seNao:'Duplicado: juntar ao projeto que já existe.' },
     { id:'E4', tipo:'informacao', pergunta:'O objetivo e o benefício esperado estão descritos?',
@@ -65,7 +65,7 @@
   };
 
   /* ------------------------------------------------- critérios de priorização */
-  /** Escala 0–3 com âncoras. Eixo "valor" ordena o ranking; eixo "esforco" posiciona na matriz e desempata. Pesos em % (sugestão a validar pela FEG). */
+  /** Escala 0-3 com âncoras. Eixo "valor" ordena o ranking; eixo "esforco" posiciona na matriz e desempata. Pesos em % sob curadoria da FEG e sujeitos à deliberação da instância de governança. */
   const CRITERIOS_PADRAO = [
     { id:'V1', eixo:'valor', peso:25, nome:'Obrigação regulatória ou legal', pergunta:'Existe exigência regulatória ou legal que depende deste projeto?',
       niveis:['Nenhuma', 'Recomendação ou boa prática', 'Exigência futura (mais de 12 meses)', 'Exigência vigente ou com prazo próximo'] },
@@ -101,7 +101,7 @@
     if(id === 'C1'){ if(p.esforcoFte == null || p.duracaoMeses == null) return null; const pm = p.esforcoFte * p.duracaoMeses; return pm <= 1 ? 0 : pm <= 6 ? 1 : pm <= 18 ? 2 : 3; }
     return null;
   }
-  /** Nota de um eixo (0–100) = Σ (resposta/3 × peso) / Σ pesos × 100. null se faltar resposta. */
+  /** Nota de um eixo (0-100) = Σ (resposta/3 × peso) / Σ pesos × 100. null se faltar resposta. */
   function notaEixo(resp, eixo, crit = criterios()){
     const cs = crit.filter(c => c.eixo === eixo && c.peso > 0); const tot = cs.reduce((a, c) => a + c.peso, 0);
     if(!cs.length || !tot) return null;
@@ -130,7 +130,7 @@
   const CAPACIDADE_PADRAO = { periodo:'2027', fte:10, reservaPct:15, orcamento:4000000, descontarExecucao:true };
   /**
    * Monta a carteira que cabe: percorre o ranking dos aprovados e inclui enquanto houver pessoas (FTE) e orçamento.
-   * forcar: {id:'in'|'out'} — decisão manual do comitê (fixar ou excluir).
+   * forcar: {id:'in'|'out'} - decisão manual do comitê (fixar ou excluir).
    */
   function montarCarteira(lista, cap = CAPACIDADE_PADRAO, forcar = {}, crit){
     const efetiva = +cap.fte * (1 - (+cap.reservaPct || 0) / 100);
@@ -182,6 +182,8 @@
     o.gerencia = CAT.gerencias.some(g => g.id === p.gerencia) ? p.gerencia : '';
     o.etapa = ETAPAS.some(e => e.id === p.etapa) ? p.etapa : 'entrada';
     o.obrigatorio = !!p.obrigatorio; o.exemplo = !!p.exemplo;
+    o.natureza = p.natureza === 'demanda' ? 'demanda' : 'projeto';
+    o.progresso = p.progresso === '' || p.progresso == null || !Number.isFinite(+p.progresso) ? null : Math.max(0,Math.min(100,+p.progresso));
     ['esforcoFte', 'duracaoMeses', 'custo'].forEach(k => o[k] = numOuNull(p[k]));
     ['inicioPrevisto', 'fimPrevisto', 'dataEntrada'].forEach(k => o[k] = dataOuVazio(p[k]));
     if(o.link && !/^https?:\/\//i.test(o.link)) o.link = '';
@@ -215,6 +217,7 @@
     S.projetos = (Array.isArray(S.projetos) ? S.projetos : []).map(limparProjeto).filter(p => p && !vistos.has(p.id) && vistos.add(p.id));
     const f = {}; Object.entries(S.forcar && typeof S.forcar === 'object' ? S.forcar : {}).forEach(([k, v]) => { if(vistos.has(k) && (v === 'in' || v === 'out')) f[k] = v; }); S.forcar = f;
     S.seq = Math.max(Math.round(+S.seq) || 0, ...S.projetos.map(p => +(String(p.codigo).match(/(\d+)$/) || [0, 0])[1] || 0));
+    S.meta = Object.assign({}, S.meta && typeof S.meta === 'object' ? S.meta : {}, {datasetId: idSeguro(S.meta?.datasetId) || uid('carteira'), revisao: Math.max(0,Math.floor(+S.meta?.revisao || 0)), salvoEm:txt(S.meta?.salvoEm,40)});
     S.v = VERSAO;
     return S;
   }
@@ -222,8 +225,8 @@
   /* ------------------------------------------------------------- projetos */
   const S = () => GP.state();
   const CAMPOS = {
-    titulo:'Título', descricao:'Descrição / problema', beneficio:'Benefício esperado', gerencia:'Gerência', area:'Área ou comunidade',
-    ferramenta:'Ferramenta', demandante:'Demandante', patrocinador:'Patrocinador', responsavel:'Responsável', tipo:'Tipo', origem:'Origem',
+    natureza:'Natureza do registro', progresso:'Avanço físico (%)', dataEntrada:'Data de entrada', titulo:'Título', descricao:'Descrição / problema', beneficio:'Benefício esperado', gerencia:'Gerência', area:'Área ou comunidade',
+    ferramenta:'Sistema, modelo ou ferramenta relacionada', demandante:'Demandante', patrocinador:'Patrocinador', responsavel:'Responsável', tipo:'Tipo', origem:'Origem',
     obrigatorio:'Obrigatório (lei/regulação)', esforcoFte:'Esforço (pessoas/FTE)', duracaoMeses:'Duração (meses)', custo:'Custo estimado (R$)',
     inicioPrevisto:'Início previsto', fimPrevisto:'Fim previsto', link:'Link (ADO/Jira)', observacoes:'Observações', etapa:'Etapa',
   };
@@ -231,6 +234,9 @@
   /** Valida um projeto. Retorna {campo: mensagem} (vazio = ok). */
   function validar(p){
     const e = {};
+    if(p.progresso !== '' && p.progresso != null && (!Number.isFinite(+p.progresso) || +p.progresso < 0 || +p.progresso > 100)) e.progresso = 'Informe um percentual entre 0 e 100.';
+    if(p.natureza && !['projeto','demanda'].includes(p.natureza)) e.natureza = 'Selecione Projeto ou Demanda.';
+    if(p.dataEntrada && (!/^\d{4}-\d{2}-\d{2}$/.test(p.dataEntrada) || p.dataEntrada < '2000-01-01' || p.dataEntrada > '2100-12-31')) e.dataEntrada = 'Informe uma data entre 2000 e 2100.';
     OBRIGATORIOS.forEach(k => { if(!String(p[k] ?? '').trim()) e[k] = 'Campo obrigatório.'; });
     if(p.titulo && p.titulo.trim().length < 5) e.titulo = 'Use pelo menos 5 caracteres.';
     if(p.titulo && p.titulo.trim().length > 140) e.titulo = 'Use no máximo 140 caracteres.';
@@ -247,6 +253,8 @@
     const o = Object.assign({}, p);
     ['esforcoFte', 'duracaoMeses', 'custo'].forEach(k => o[k] = num(o[k]));
     ['titulo', 'descricao', 'beneficio', 'area', 'ferramenta', 'demandante', 'patrocinador', 'responsavel', 'link', 'observacoes'].forEach(k => o[k] = (o[k] ?? '').toString().trim());
+    o.natureza = o.natureza === 'demanda' ? 'demanda' : 'projeto';
+    o.progresso = num(o.progresso);
     o.obrigatorio = !!o.obrigatorio;
     return o;
   }
@@ -261,7 +269,7 @@
       const p = normalizar(Object.assign({ etapa:'entrada', dataEntrada: hoje() }, dados));
       const erros = validar(p); if(Object.keys(erros).length) return { ok:false, erros };
       p.id = uid('p'); p.codigo = proximoCodigo(); p.criadoEm = new Date().toISOString(); p.historico = [];
-      registrar(p, 'Cadastro', 'Projeto cadastrado como nova demanda.');
+      registrar(p, 'Cadastro', (p.natureza === 'demanda' ? 'Demanda' : 'Projeto') + ' cadastrado na fila de entrada.');
       S().projetos.push(p); GP.save(); return { ok:true, projeto:p };
     },
     /** Atualiza campos, registrando no histórico o que mudou. */
@@ -288,7 +296,7 @@
       if(alvo && p.etapa !== alvo && ['entrada', 'triagem', 'aprovado', 'nao_entra'].includes(p.etapa)) projetos.mudarEtapa(id, alvo, r.motivos.join(' '));
       GP.save(); return { ok:true, r };
     },
-    /** Salva as respostas da priorização (0–3 por critério). */
+    /** Salva as respostas da priorização (0-3 por critério). */
     avaliar(id, respostas, obs = ''){
       const p = projetos.get(id); if(!p) return { ok:false };
       const r = {}; Object.entries(respostas || {}).forEach(([k, v]) => { if(v !== '' && v != null && !isNaN(v)) r[k] = Math.max(0, Math.min(3, +v)); });
@@ -328,7 +336,7 @@
       const [titulo, gerencia, area, ferramenta, tipo, origem, obrigatorio, et, esforcoFte, duracaoMeses, custo, inicioPrevisto, fimPrevisto, beneficio] = x;
       const r = projetos.criar({ titulo: titulo + ' (exemplo)', descricao: 'Projeto fictício para demonstrar o sistema. ' + beneficio, beneficio, gerencia, area, ferramenta, tipo, origem, obrigatorio,
         demandante: 'Área usuária de ' + area, patrocinador: i === 4 ? '' : 'Gerente ' + gerencia, responsavel: PESSOAS[i % PESSOAS.length], esforcoFte, duracaoMeses, custo, inicioPrevisto, fimPrevisto,
-        dataEntrada: `2026-0${1 + (i % 9)}-1${i % 9}`, exemplo: true });
+        dataEntrada: `2026-0${1 + (i % 9)}-1${i % 9}`, natureza:['entrada','triagem','nao_entra'].includes(et) ? 'demanda' : 'projeto', progresso:et === 'execucao' ? [65,40,80][i % 3] : et === 'concluido' ? 100 : null, exemplo: true });
       if(!r.ok) return; n++;
       const id = r.projeto.id, sim = Object.fromEntries(ENTRADA.map(q => [q.id, 'sim']));
       if(et === 'nao_entra') projetos.registrarEntrada(id, Object.assign({}, sim, { E1:'nao' }), 'Ajuste cosmético, sem entrega de projeto.');
@@ -342,3 +350,4 @@
   GP.modelo = { VERSAO, CAT, ETAPAS, etapa, CAMPOS, OBRIGATORIOS, ENTRADA, RESULTADO_ENTRADA, avaliarEntrada, CRITERIOS_PADRAO, EIXOS, CORTE, QUADRANTES, ETAPAS_PRIORIZAVEIS, criterios, sugestao, notaEixo, pontuar, ranking, CAPACIDADE_PADRAO, STATUS_CARTEIRA, montarCarteira, demandaMensal, estadoInicial, migrar, validar, carregarExemplos };
   GP.projetos = projetos;
 })();
+

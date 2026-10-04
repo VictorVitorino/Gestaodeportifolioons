@@ -12,7 +12,7 @@
     setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 400);
   }
   const nBR = v => v == null || v === '' ? '' : String(v).replace('.', ',');
-  const celula = v => { const s = String(v ?? ''); return /[;"\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  const celula = v => { let s = String(v ?? ''); if(/^\s*[=+@-]/.test(s)) s = "'" + s; return /[;"\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
   const csv = linhas => '﻿' + linhas.map(l => l.map(celula).join(';')).join('\r\n');
   /** Lê CSV com separador ; ou , (detectado na 1ª linha), aspas e quebras de linha dentro de aspas. */
   function lerCSV(txt){
@@ -35,21 +35,21 @@
     ['codigo', 'Código'], ['titulo', 'Título'], ['descricao', 'Descrição'], ['beneficio', 'Benefício esperado'], ['gerencia', 'Gerência'], ['area', 'Área ou comunidade'],
     ['ferramenta', 'Ferramenta'], ['demandante', 'Demandante'], ['patrocinador', 'Patrocinador'], ['responsavel', 'Responsável'], ['tipo', 'Tipo'], ['origem', 'Origem'],
     ['obrigatorio', 'Obrigatório'], ['esforcoFte', 'Esforço (FTE)'], ['duracaoMeses', 'Duração (meses)'], ['custo', 'Custo (R$)'], ['inicioPrevisto', 'Início previsto'],
-    ['fimPrevisto', 'Fim previsto'], ['link', 'Link'], ['observacoes', 'Observações'],
+    ['fimPrevisto', 'Fim previsto'], ['link', 'Link'], ['observacoes', 'Observações'], ['natureza','Natureza do registro'], ['progresso','Avanço físico (%)'], ['dataEntrada','Data de entrada'],
   ];
   function exportarProjetos(lista = P.todos()){
     const rk = M.ranking(lista.filter(p => p.etapa === 'aprovado')); const pos = Object.fromEntries(rk.map(x => [x.p.id, x.pos]));
-    const cab = [...COLUNAS.map(c => c[1]), 'Etapa', 'Data de entrada', 'Resultado da entrada', 'Motivo da entrada', 'Nota de valor', 'Nota de esforço', 'Quadrante', 'Posição no ranking (aprovados)', 'Exemplo'];
+    const cab = [...COLUNAS.map(c => c[1]), 'Etapa', 'Resultado da entrada', 'Motivo da entrada', 'Nota de valor', 'Nota de esforço', 'Quadrante', 'Posição no ranking (aprovados)', 'Exemplo'];
     const linhas = lista.map(p => { const s = M.pontuar(p);
-      return [...COLUNAS.map(([k]) => k === 'obrigatorio' ? (p.obrigatorio ? 'Sim' : 'Não') : ['esforcoFte', 'duracaoMeses', 'custo'].includes(k) ? nBR(p[k]) : ['inicioPrevisto', 'fimPrevisto'].includes(k) ? (p[k] ? fmt.data(p[k]) : '') : (p[k] ?? '')),
-        M.etapa(p.etapa).nome, fmt.data(p.dataEntrada), p.entrada ? M.RESULTADO_ENTRADA[p.entrada.resultado].nome : '', p.entrada ? (p.entrada.motivos || []).join(' ') : '',
+      return [...COLUNAS.map(([k]) => k === 'obrigatorio' ? (p.obrigatorio ? 'Sim' : 'Não') : ['esforcoFte', 'duracaoMeses', 'custo','progresso'].includes(k) ? nBR(p[k]) : ['inicioPrevisto', 'fimPrevisto','dataEntrada'].includes(k) ? (p[k] ? fmt.data(p[k]) : '') : (p[k] ?? '')),
+        M.etapa(p.etapa).nome, p.entrada ? M.RESULTADO_ENTRADA[p.entrada.resultado].nome : '', p.entrada ? (p.entrada.motivos || []).join(' ') : '',
         s.valor != null ? nBR(s.valor.toFixed(1)) : '', s.esforco != null ? nBR(s.esforco.toFixed(1)) : '', s.quadrante ? M.QUADRANTES[s.quadrante].nome : '', pos[p.id] || '', p.exemplo ? 'Sim' : 'Não']; });
     baixar(`portfolio-feg-${hoje()}.csv`, csv([cab, ...linhas]), 'text/csv;charset=utf-8');
     GP.toast(`${lista.length} projeto(s) exportado(s) para planilha.`);
   }
   function baixarModelo(){
     const cab = COLUNAS.filter(c => c[0] !== 'codigo').map(c => c[1]);
-    const ex = ['Automação do relatório mensal de rodadas', 'Gerar automaticamente o relatório mensal hoje feito à mão.', 'Reduzir 2 dias de trabalho por mês', 'FEN', 'Planejamento e Programação Energética', 'NEWAVE', 'Área de estudos energéticos', 'Gerente FEN', 'Nome da pessoa', 'Sustentação / melhoria', 'Operacional', 'Não', '1', '3', '150000', '01/03/2027', '31/05/2027', 'https://dev.azure.com/…', ''];
+    const ex = ['Automação do relatório mensal de rodadas', 'Gerar automaticamente o relatório mensal hoje feito à mão.', 'Reduzir 2 dias de trabalho por mês', 'FEN', 'Planejamento e Programação Energética', 'NEWAVE', 'Área de estudos energéticos', 'Gerente FEN', 'Nome da pessoa', 'Sustentação / melhoria', 'Operacional', 'Não', '1', '3', '150000', '01/03/2027', '31/05/2027', 'https://dev.azure.com/…', '', 'projeto', '', '01/02/2027'];
     baixar('modelo-importacao-projetos.csv', csv([cab, ex]), 'text/csv;charset=utf-8');
   }
 
@@ -74,7 +74,8 @@
       const tipo = M.CAT.tipos.find(t => norm(t) === norm(v('tipo'))), orig = M.CAT.origens.find(o => norm(o) === norm(v('origem')));
       const d = { titulo:v('titulo'), descricao:v('descricao'), beneficio:v('beneficio'), gerencia: ger ? ger.id : v('gerencia'), area:v('area'), ferramenta:v('ferramenta'),
         demandante:v('demandante'), patrocinador:v('patrocinador'), responsavel:v('responsavel'), tipo: tipo || v('tipo'), origem: orig || '', obrigatorio: /^(sim|s|x|1|true)$/i.test(v('obrigatorio')),
-        esforcoFte: numero(v('esforcoFte')), duracaoMeses: numero(v('duracaoMeses')), custo: numero(v('custo')), inicioPrevisto: data(v('inicioPrevisto')), fimPrevisto: data(v('fimPrevisto')), link:v('link'), observacoes:v('observacoes') };
+        esforcoFte: numero(v('esforcoFte')), duracaoMeses: numero(v('duracaoMeses')), custo: numero(v('custo')), inicioPrevisto: data(v('inicioPrevisto')), fimPrevisto: data(v('fimPrevisto')), link:v('link'), observacoes:v('observacoes'), natureza: norm(v('natureza')) === 'demanda' ? 'demanda' : 'projeto', progresso:numero(v('progresso')) };
+      if(v('dataEntrada')) d.dataEntrada = data(v('dataEntrada'));
       const et = idx.etapa != null ? M.ETAPAS.find(e => norm(e.nome) === norm(l[idx.etapa]) || e.id === String(l[idx.etapa] || '').trim()) : null;
       const erros = Object.assign({}, M.validar(d));
       if(d.gerencia && !ger) erros.gerencia = `Gerência "${d.gerencia}" não reconhecida (use FEG, FEL, FEN ou FER).`;
@@ -94,13 +95,13 @@
       const inval = res.itens.filter(i => Object.keys(i.erros).length);
       const m = GP.modal(`<h3>Importar planilha</h3><p class="muted" style="margin:0 0 12px">${esc(arquivo.name)} · ${res.itens.length} linha(s)</p>
         <div class="row" style="margin-bottom:12px">${U.pill(`${res.validos.length} prontas para importar`, 'ok')} ${inval.length ? U.pill(`${inval.length} com erro (serão ignoradas)`, 'bad') : ''}</div>
-        ${inval.length ? `<div class="tbl-wrap" style="max-height:240px;overflow:auto"><table class="tbl"><thead><tr><th>Linha</th><th>Título</th><th>Problema</th></tr></thead><tbody>${inval.map(i => `<tr><td>${i.linha}</td><td>${esc(i.d.titulo || '—')}</td><td>${Object.entries(i.erros).map(([k, e]) => `<b>${esc(M.CAMPOS[k] || k)}:</b> ${esc(e)}`).join('<br>')}</td></tr>`).join('')}</tbody></table></div>` : ''}
-        ${res.itens.some(i => i.etapa && i.etapa !== 'entrada') ? `<label class="check-row" style="margin:6px 0"><input type="checkbox" data-manter-etapa><span>Manter a etapa informada na planilha (coluna “Etapa”). Sem marcar, todos entram como <b>Nova demanda</b> e passam pelo funil.</span></label>` : `<p class="muted" style="font-size:12.5px">Os projetos importados entram como <b>Nova demanda</b> e passam pelo funil de entrada.</p>`}
+        ${inval.length ? `<div class="tbl-wrap" style="max-height:240px;overflow:auto"><table class="tbl"><thead><tr><th>Linha</th><th>Título</th><th>Problema</th></tr></thead><tbody>${inval.map(i => `<tr><td>${i.linha}</td><td>${esc(i.d.titulo || '-')}</td><td>${Object.entries(i.erros).map(([k, e]) => `<b>${esc(M.CAMPOS[k] || k)}:</b> ${esc(e)}`).join('<br>')}</td></tr>`).join('')}</tbody></table></div>` : ''}
+        ${res.itens.some(i => i.etapa && i.etapa !== 'entrada') ? `<label class="check-row" style="margin:6px 0"><input type="checkbox" data-manter-etapa><span>Manter a etapa informada na planilha (coluna “Etapa”). Sem marcar, todos entram como <b>Nova demanda</b> e passam pelo funil.</span></label>` : `<p class="muted" style="font-size:12.5px">As iniciativas importadas entram como <b>Nova demanda</b> e passam pelo funil de entrada.</p>`}
         <p class="dim" style="font-size:12px;margin:0">A planilha traz os dados do cadastro. Checklist de entrada, avaliações e pesos só voltam por <b>backup</b>.</p>
-        <div class="m-act"><button class="btn btn-ghost" data-close="1">Cancelar</button><button class="btn btn-primary" data-confirmar ${res.validos.length ? '' : 'disabled'}>Importar ${res.validos.length} projeto(s)</button></div>`, { largo:true });
+        <div class="m-act"><button class="btn btn-ghost" data-close="1">Cancelar</button><button class="btn btn-primary" data-confirmar ${res.validos.length ? '' : 'disabled'}>Importar ${res.validos.length} iniciativa(s)</button></div>`, { largo:true });
       m.querySelector('[data-confirmar]').onclick = () => { const manter = !!(m.querySelector('[data-manter-etapa]') || {}).checked; let n = 0;
         res.validos.forEach(i => { const x = P.criar(i.d); if(x.ok){ n++; P.registrar(x.projeto, 'Importação', `Importado da planilha ${arquivo.name} (linha ${i.linha}).`); if(manter && i.etapa && i.etapa !== 'entrada') P.mudarEtapa(x.projeto.id, i.etapa, 'Etapa trazida da planilha.'); } });
-        GP.save(); GP.closeModal(); GP.toast(`${n} projeto(s) importado(s).`); GP.go('#/acervo'); };
+        GP.save(); GP.closeModal(); GP.toast(`${n} iniciativa(s) importada(s).`); GP.go('#/acervo'); };
     };
     r.readAsArrayBuffer(arquivo);
   }
@@ -120,7 +121,7 @@
       let est; try { est = M.migrar(JSON.parse(JSON.stringify(j.estado))); } catch(e){ GP.toast('Backup corrompido: não foi possível ler os dados.'); return; }
       const descartados = j.estado.projetos.length - est.projetos.length;
       const quando = fmt.dataHora(j.exportadoEm);
-      GP.confirmar('Restaurar backup?', `<p>Backup ${quando !== '—' ? 'de ' + quando : 'sem data'} com <b>${est.projetos.length} projeto(s) válido(s)</b>${descartados ? ` (${descartados} registro(s) inválido(s) serão descartados)` : ''}. Os dados atuais deste navegador serão substituídos.</p>`, 'Restaurar', () => {
+      GP.confirmar('Restaurar backup?', `<p>Backup ${quando !== '-' ? 'de ' + quando : 'sem data'} com <b>${est.projetos.length} projeto(s) válido(s)</b>${descartados ? ` (${descartados} registro(s) inválido(s) serão descartados)` : ''}. Os dados atuais deste navegador serão substituídos.</p>`, 'Restaurar', () => {
         const ui = GP.state().ui; est.ui = Object.assign({}, est.ui, { nivel: ui.nivel, menuMini: ui.menuMini }); GP.resetState(est); GP.toast('Backup restaurado.'); GP.go('#/painel'); }); };
     r.readAsText(arquivo, 'utf-8');
   }
@@ -173,5 +174,6 @@
   GP.configCartoes.push({ ordem:20, render: el => { el.innerHTML = `${U.secH('Backup', 'Cópia completa: projetos, avaliações, pesos e capacidade.')}
       <div class="row"><button class="btn btn-primary" data-backup>${icon('download', 16)} Baixar backup</button><button class="btn btn-ghost" data-restaurar-backup>${icon('upload', 16)} Restaurar backup</button></div>
       <p class="muted" style="margin:0;font-size:12.5px">Recomendado semanalmente. Os dados ficam só neste navegador.</p>`; } });
-  GP.exportar = { lerCSV, prepararImportacao, exportarProjetos, exportarPDF };
+  GP.exportar = { lerCSV, prepararImportacao, exportarProjetos, exportarPDF, baixar, csv, exportarBackup, restaurarBackup, escolherArquivo };
 })();
+

@@ -1,6 +1,6 @@
 /* =========================================================================
    Dados e configurações (rodapé do menu)
-   Extensão: GP.configCartoes — {ordem, render(el)} para cartões extras (ex.: importar/exportar)
+   Extensão: GP.configCartoes - {ordem, render(el)} para cartões extras (ex.: importar/exportar)
    ========================================================================= */
 (function(){
   'use strict';
@@ -26,3 +26,4 @@
   }
   GP.tela({ id:'config', nivel:1, ordem:90, rodape:true, titulo:'Dados e configurações', icone:'config', render: tela });
 })();
+

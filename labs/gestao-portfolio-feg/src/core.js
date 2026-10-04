@@ -1,5 +1,5 @@
 /* =========================================================================
-   Gestão de Portfólio FEG — núcleo (estado, rotas, layout, componentes)
+   Gestão de Portfólio FEG - núcleo (estado, rotas, layout, componentes)
    Telas se registram com GP.tela({id, nivel, titulo, icone, menu, render(el, rota)})
    ========================================================================= */
 (function(){
@@ -12,12 +12,12 @@
   const clone = o => JSON.parse(JSON.stringify(o));
   const nf = d => new Intl.NumberFormat('pt-BR', {minimumFractionDigits:d, maximumFractionDigits:d});
   const fmt = {
-    n: (v, d=0) => v == null || isNaN(v) ? '—' : nf(d).format(v),
-    pct: (v, d=0) => v == null || isNaN(v) ? '—' : nf(d).format(v * 100) + '%',
-    brl: v => v == null || v === '' || isNaN(v) ? '—' : 'R$ ' + nf(0).format(v),
-    mi: v => v == null || v === '' || isNaN(v) ? '—' : 'R$ ' + nf(2).format(v / 1e6) + ' mi',
-    data: v => { if(!v) return '—'; const [y,m,d] = String(v).slice(0,10).split('-'); return d && m && y ? `${esc(d)}/${esc(m)}/${esc(y)}` : esc(v); },
-    dataHora: v => { const d = v ? new Date(v) : null; return d && !isNaN(d) ? d.toLocaleString('pt-BR', {dateStyle:'short', timeStyle:'short'}) : '—'; },
+    n: (v, d=0) => v == null || isNaN(v) ? '-' : nf(d).format(v),
+    pct: (v, d=0) => v == null || isNaN(v) ? '-' : nf(d).format(v * 100) + '%',
+    brl: v => v == null || v === '' || isNaN(v) ? '-' : 'R$ ' + nf(0).format(v),
+    mi: v => v == null || v === '' || isNaN(v) ? '-' : 'R$ ' + nf(2).format(v / 1e6) + ' mi',
+    data: v => { if(!v) return '-'; const [y,m,d] = String(v).slice(0,10).split('-'); return d && m && y ? `${esc(d)}/${esc(m)}/${esc(y)}` : esc(v); },
+    dataHora: v => { const d = v ? new Date(v) : null; return d && !isNaN(d) ? d.toLocaleString('pt-BR', {dateStyle:'short', timeStyle:'short'}) : '-'; },
     /** número para campo de texto no formato brasileiro (sem separador de milhar) */
     campo: v => v == null || v === '' || isNaN(v) ? '' : String(v).replace('.', ','),
   };
@@ -78,34 +78,105 @@
   GP.logoFEG = (s = 36) => `<svg class="feg" width="${s}" height="${s}" viewBox="0 0 40 40" role="img" aria-label="FEG"><rect width="40" height="40" rx="9" fill="#3E6801"/><text x="20" y="25.5" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="13.5" font-weight="800" letter-spacing=".5" fill="#fff">FEG</text></svg>`;
 
   /* ------------------------------------------------------------------ estado */
-  let S = null;
+  /* Estado local com recuperação e cópia portátil do HTML. Mantém a chave v1. */
+  let S = null, ultimoDisco = null, ultimaBase = '', avisoFalha = false;
   GP.state = () => S;
-  GP.save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} };
-  GP.resetState = estado => { S = estado; GP.save(); };
+  GP.storageKey = KEY;
+  GP.storage = { ok:true, conflito:false, salvoEm:null, recuperado:false };
+  const assinaturaDados = s => JSON.stringify({projetos:s.projetos,riscos:s.riscos,criterios:s.criterios,capacidade:s.capacidade,forcar:s.forcar});
+  const estadoValido = raw => { try { const j = JSON.parse(raw); return j && j.v && Array.isArray(j.projetos) ? j : null; } catch(e){ return null; } };
+  const pintarSalvamento = () => {
+    const b = document.querySelector('[data-storage-status]'); if(!b) return;
+    const st = GP.storage, txt = st.conflito ? 'Outra aba atualizou' : st.ok ? 'Salvo no navegador' : 'Salvar cópia agora';
+    b.classList.toggle('error', !st.ok || st.conflito);
+    b.innerHTML = `<i></i><span>${txt}</span>`;
+    b.setAttribute('aria-label',txt + '. Abrir dados e configurações');
+    b.title = st.conflito ? 'Exporte uma cópia das alterações desta sessão ou carregue a versão da outra aba.' : st.ok ? 'Último salvamento: ' + fmt.dataHora(st.salvoEm) + '. Clique para ver as opções de backup.' : 'O navegador não conseguiu salvar. Baixe o backup ou o HTML atualizado para guardar as alterações.';
+  };
+  GP.pintarSalvamento = pintarSalvamento;
+  GP.save = () => {
+    if(!S) return false;
+    try {
+      const disco = localStorage.getItem(KEY);
+      if(disco !== ultimoDisco){
+        GP.storage.ok = false; GP.storage.conflito = true; pintarSalvamento();
+        if(!avisoFalha){ avisoFalha = true; setTimeout(() => GP.toast('Outra aba atualizou a carteira. Guarde suas alterações em uma cópia ou carregue a versão mais recente em Dados e configurações.'),0); }
+        return false;
+      }
+      const base = assinaturaDados(S);
+      if(JSON.stringify(S) === ultimoDisco){ GP.storage.ok = true; pintarSalvamento(); return true; }
+      if(ultimoDisco && base !== ultimaBase) localStorage.setItem(KEY + '-anterior', ultimoDisco);
+      S.meta = Object.assign({},S.meta,{revisao:(+S.meta?.revisao || 0)+1,salvoEm:new Date().toISOString()});
+      const bruto = JSON.stringify(S); localStorage.setItem(KEY, bruto);
+      ultimoDisco = bruto; ultimaBase = base; avisoFalha = false;
+      GP.storage = {ok:true,conflito:false,salvoEm:S.meta.salvoEm,recuperado:GP.storage.recuperado};
+      pintarSalvamento(); window.dispatchEvent(new CustomEvent('gp:saved'));
+      return true;
+    } catch(e){
+      GP.storage.ok = false; GP.storage.conflito = false; pintarSalvamento();
+      if(!avisoFalha){ avisoFalha = true; setTimeout(() => GP.toast('O navegador não conseguiu guardar os dados. Baixe um backup ou o HTML atualizado em Dados e configurações.'),0); }
+      return false;
+    }
+  };
+  GP.resetState = estado => { S = GP.modelo.migrar(estado); return GP.save(); };
+  GP.loadLatest = () => {
+    try {
+      const raw = localStorage.getItem(KEY), est = estadoValido(raw);
+      if(!est){ GP.toast('A versão do navegador não está disponível. Restaure um backup.'); return false; }
+      S = GP.modelo.migrar(est); ultimoDisco = raw; ultimaBase = assinaturaDados(S); avisoFalha = false;
+      GP.storage = {ok:true,conflito:false,salvoEm:S.meta.salvoEm,recuperado:false};
+      GP.refresh(); GP.toast('Versão mais recente carregada.'); return true;
+    } catch(e){ GP.toast('Não foi possível acessar o armazenamento do navegador.'); return false; }
+  };
   function load(){
-    try { S = JSON.parse(localStorage.getItem(KEY)); } catch(e) { S = null; }
-    if(!S || !S.v) S = GP.modelo.estadoInicial();
-    S = GP.modelo.migrar(S);
-    GP.save();
+    const snap = document.getElementById('gp-snapshot');
+    GP.snapshot = snap ? estadoValido(snap.textContent) : null;
+    let bruto = null, atual = null, anterior = null;
+    try {
+      bruto = localStorage.getItem(KEY); atual = estadoValido(bruto);
+      if(bruto && !atual){
+        localStorage.setItem(KEY + '-corrompido', bruto);
+        anterior = estadoValido(localStorage.getItem(KEY + '-anterior'));
+        GP.storage.recuperado = !!anterior;
+      }
+    } catch(e){ GP.storage.ok = false; }
+    ultimoDisco = bruto;
+    const arquivo = GP.snapshot;
+    if(arquivo && (!atual || (arquivo.meta?.datasetId === atual.meta?.datasetId && +arquivo.meta?.revisao > +atual.meta?.revisao))){
+      if(atual){ try { localStorage.setItem(KEY + '-anterior',bruto); } catch(e){} }
+      S = GP.util.clone(arquivo);
+    } else S = atual || anterior || GP.modelo.estadoInicial();
+    GP.snapshotDisponivel = !!(arquivo && atual && (arquivo.meta?.datasetId !== atual.meta?.datasetId || assinaturaDados(arquivo) !== assinaturaDados(atual)));
+    S = GP.modelo.migrar(S); ultimaBase = assinaturaDados(S);
+    GP.storage.salvoEm = S.meta.salvoEm || null; GP.save();
+    if(GP.storage.recuperado) setTimeout(() => GP.toast('O último salvamento estava ilegível. A cópia anterior foi recuperada automaticamente.'),0);
+    if(GP.snapshotDisponivel) setTimeout(() => GP.toast('Este HTML contém uma cópia da carteira. Consulte Dados e configurações para carregar os dados do arquivo quando precisar.'),0);
   }
+  window.addEventListener('storage',e => {
+    if(e.key !== KEY || e.newValue === ultimoDisco || !S) return;
+    GP.storage.conflito = true; GP.storage.ok = false; pintarSalvamento();
+    GP.toast('A carteira mudou em outra aba. Consulte Dados e configurações para carregar a nova versão.');
+  });
+  document.addEventListener('visibilitychange',() => { if(document.visibilityState === 'hidden') GP.save(); });
+  window.addEventListener('beforeunload',e => { if(!GP.save()){ e.preventDefault(); e.returnValue = ''; } });
 
   /* ------------------------------------------------------------------- telas */
   const TELAS = [];
   GP.tela = t => { const i = TELAS.findIndex(x => x.id === t.id); if(i >= 0) TELAS[i] = t; else TELAS.push(t); TELAS.sort((a, b) => (a.ordem || 50) - (b.ordem || 50)); };
   GP.telas = () => TELAS;
   GP.NIVEIS = [
-    { n:1, nome:'Cadastro e entrada', curto:'Cadastro',
-      resumo:'Registrar todos os projetos num só lugar e decidir o que entra no portfólio.',
-      faz:['Cadastrar projetos e demandas', 'Consultar o acervo (ativos, concluídos, recusados)', 'Passar cada demanda pelo checklist de entrada: entra, não entra ou falta informação'],
-      quando:'Sempre. É a base de tudo: sem cadastro não há portfólio.' },
-    { n:2, nome:'Priorização', curto:'Priorização',
-      resumo:'Responder algumas perguntas por projeto. O sistema calcula uma nota de 0 a 100 com os pesos combinados e monta o ranking.',
-      faz:['Avaliar cada projeto com perguntas simples (nota 0 a 3)', 'Definir o peso (%) de cada pergunta', 'Ver o ranking e a matriz valor × esforço'],
+    { n:1, nome:'Operação do portfólio', curto:'Operação',
+      resumo:'Cadastrar ou importar iniciativas, salvar o trabalho e conduzir a entrada no portfólio.',
+      faz:['Cadastrar ou importar projetos e demandas', 'Salvar automaticamente e continuar por backup', 'Consultar o acervo e conduzir o checklist de entrada'],
+      quando:'Para começar a operar o sistema com segurança e manter a base atualizada.' },
+    { n:2, nome:'Análise e priorização', curto:'Priorizar',
+      resumo:'Avaliar valor e esforço, acompanhar riscos e organizar a ordem de prioridade da carteira.',
+      faz:['Avaliar iniciativas com critérios de valor e esforço', 'Acompanhar indicadores de qualidade e riscos', 'Consultar ranking e matriz de priorização'],
       quando:'Quando há mais projetos aprovados do que a equipe consegue fazer.' },
-    { n:3, nome:'Capacidade e planejamento', curto:'Capacidade',
-      resumo:'Informar quantas pessoas (FTE) e quanto orçamento existem. O sistema mostra quais projetos do ranking cabem e quando acontecem.',
-      faz:['Simular a carteira que cabe na capacidade e no orçamento', 'Ver o roadmap por trimestre', 'Preparar a pauta do comitê'],
-      quando:'No planejamento do ano ou do trimestre e antes do comitê de portfólio.' },
+    { n:3, nome:'Capacidade e cenários', curto:'Planejar',
+      resumo:'Simular capacidade, orçamento e sequência de execução a partir da carteira priorizada.',
+      faz:['Simular a carteira que cabe na capacidade e no orçamento', 'Comparar decisões e restrições da carteira', 'Construir roadmap e pauta de deliberação'],
+      quando:'No planejamento anual ou trimestral e antes das decisões de carteira.' },
   ];
   GP.nivel = () => S.ui.nivel || 1;
   GP.setNivel = n => { n = Math.max(1, Math.min(3, +n || 1)); S.ui.nivel = n; GP.save(); fecharMenuMovel(); render(); toast(`Nível ${n} · ${GP.NIVEIS[n-1].nome}`); };
@@ -148,7 +219,7 @@
     const f = d.querySelector('input, select, textarea, .btn-primary'); if(f) f.focus(); return d.querySelector('.modal'); }
   function closeModal(){ const tinha = document.querySelector('.modal-bg'); document.querySelectorAll('.modal-bg').forEach(m => m.remove());
     if(tinha && focoAntes && document.contains(focoAntes)) try { focoAntes.focus(); } catch(e){} focoAntes = null; }
-  function toast(msg){ let t = document.querySelector('.toast'); if(!t){ t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
+  function toast(msg){ if(GP.storage && !GP.storage.ok && /salv[ao]|cadastrad|importad|restaurad|atualizad/i.test(String(msg))) msg += '<br>As alterações estão nesta sessão. Baixe uma cópia para guardá-las.'; let t = document.querySelector('.toast'); if(!t){ t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
     t.innerHTML = msg; t.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('on'), 3200); }
   function busy(on, msg = 'Processando…'){ document.querySelectorAll('.busy').forEach(b => b.remove()); if(!on) return;
     const d = document.createElement('div'); d.className = 'busy'; d.innerHTML = `<div><i></i>${esc(msg)}</div>`; document.body.appendChild(d); }
@@ -240,9 +311,11 @@
       <aside class="side ${aberto ? 'open' : ''}" aria-label="Menu">${menu(r, tela, nivel)}</aside>
       <div class="main">
         <header class="topbar">
+          <button class="desktop-menu" data-recolher aria-label="${mini ? 'Expandir menu' : 'Recolher menu'}" title="${mini ? 'Expandir menu' : 'Recolher menu'}" aria-expanded="${!mini}">${icon(mini ? 'expandir' : 'recolher')}</button>
           <button class="menu-btn" data-menu aria-label="Abrir menu">${icon('menu')}</button>
           <div class="ttl"><small>Gestão de Portfólio · FEG</small><b>${esc(tela ? tela.titulo : '')}</b></div>
           <div class="right">
+            <button class="storage-btn" data-storage-status title="Dados e configurações"><i></i><span>Salvo no navegador</span></button>
             <div class="levels"><div class="seg" role="group" aria-label="Nível do sistema">${GP.NIVEIS.map(L => `<button class="${L.n === nivel ? 'on' : ''}" data-nivel="${L.n}" title="Nível ${L.n} · ${esc(L.nome)}"><b>${L.n}</b><span>${esc(L.curto)}</span></button>`).join('')}</div>
               <button class="icon-btn" data-ajuda-nivel title="O que cada nível faz" aria-label="O que cada nível faz">${icon('ajuda', 16)}</button></div>
             <img class="ons" src="${GP.LOGO_ONS || ''}" alt="ONS">
@@ -259,15 +332,19 @@
     const chave = r.id + '/' + (r.arg || '');
     if(!manterScroll || chave !== ultimaChave) window.scrollTo({top:0});
     ultimaChave = chave;
+    GP.pintarSalvamento();
+    if(GP.afterRender) GP.afterRender(el,r);
   }
   function menu(r, tela, nivel){
     const item = t => `<a class="nav-item ${tela && tela.id === t.id ? 'on' : ''}" href="#/${t.id}" data-tip="${esc(t.titulo)}" aria-label="${esc(t.titulo)}"><span class="ic">${icon(t.icone)}</span><span class="lbl">${esc(t.titulo)}</span></a>`;
-    let h = `<a class="brand" href="#/painel" data-tip="Gestão de Portfólio FEG">${GP.logoFEG(36)}<span class="txt"><b>Gestão de Portfólio</b><span>Gerência FEG · ONS</span></span></a>`;
-    GP.NIVEIS.forEach(L => { if(L.n > nivel) return; const ts = TELAS.filter(t => t.menu !== false && t.nivel === L.n && !t.rodape); if(!ts.length) return;
+    let h = `<a class="brand" href="#/painel" data-tip="Gestão de Portfólio FEG">${GP.logoFEG(36)}<span class="txt"><b>Gestão de Portfólio</b><span>FEG · ONS · Maestro</span></span></a>
+      <div class="nav-heading"><span>Navegação</span><button class="nav-toggle" data-recolher data-tip="${S.ui.menuMini ? 'Expandir menu' : 'Recolher menu'}" aria-label="${S.ui.menuMini ? 'Expandir menu' : 'Recolher menu'}" aria-expanded="${!S.ui.menuMini}">${icon(S.ui.menuMini ? 'expandir' : 'recolher',16)}</button></div>
+      <nav class="side-nav" aria-label="Áreas do portfólio"><div class="nav-sec">Visão gerencial</div>${TELAS.filter(t => t.gerencial).map(item).join('')}`;
+    GP.NIVEIS.forEach(L => { if(L.n > nivel) return; const ts = TELAS.filter(t => t.menu !== false && t.nivel === L.n && !t.rodape && !t.gerencial); if(!ts.length) return;
       h += `<div class="nav-sec" title="Nível ${L.n} · ${esc(L.nome)}">Nível ${L.n} · ${esc(L.curto)}</div>` + ts.map(item).join(''); });
     if(nivel < 3) h += `<div class="nav-sec">Mais recursos</div><button class="nav-item" data-nivel="${nivel + 1}" data-tip="Ativar nível ${nivel + 1}" aria-label="Ativar nível ${nivel + 1}"><span class="ic">${icon('estrela')}</span><span class="lbl">Ativar nível ${nivel + 1}</span></button>`;
-    h += `<div class="side-foot">${TELAS.filter(t => t.rodape).map(item).join('')}
-      <button class="collapse-btn" data-recolher data-tip="${S.ui.menuMini ? 'Expandir menu' : 'Recolher menu'}" aria-label="${S.ui.menuMini ? 'Expandir menu' : 'Recolher menu'}">${icon(S.ui.menuMini ? 'expandir' : 'recolher')}<span class="lbl">Recolher menu</span></button></div>`;
+    h += `</nav><div class="side-foot">${TELAS.filter(t => t.rodape).map(item).join('')}
+      <div class="side-note">PORTFÓLIO FEG / MAESTRO</div></div>`;
     return h;
   }
   function telaBloqueada(el, tela){
@@ -286,6 +363,7 @@
   };
   document.addEventListener('click', e => {
     const nv = e.target.closest('[data-nivel]'); if(nv){ closeModal(); GP.setNivel(+nv.dataset.nivel); return; }
+    if(e.target.closest('[data-storage-status]')){ GP.go('#/config'); return; }
     if(e.target.closest('[data-ajuda-nivel]')){ GP.explicarNiveis(); return; }
     if(e.target.closest('[data-recolher]')){ S.ui.menuMini = !S.ui.menuMini; GP.save(); hideTip(); render(true); return; }
     if(e.target.closest('[data-menu]')){ const s = document.querySelector('.side'); if(s.classList.contains('open')) fecharMenuMovel(); else { s.classList.add('open'); const b = document.createElement('div'); b.className = 'side-backdrop'; b.addEventListener('click', fecharMenuMovel); document.body.appendChild(b); const f = s.querySelector('.nav-item'); if(f) f.focus(); } return; }
@@ -294,3 +372,4 @@
 
   GP.start = () => { load(); render(); };
 })();
+

@@ -1,5 +1,5 @@
 /* =========================================================================
-   Nível 1 — Funil de entrada: checklist "entra / não entra" e quadro por etapa
+   Nível 1 - Funil de entrada: checklist "entra / não entra" e quadro por etapa
    ========================================================================= */
 (function(){
   'use strict';
@@ -59,14 +59,14 @@
     const corpoFila = fila.length ? `<div class="stack" style="gap:10px">${fila.map(p => { const d = dias(p.dataEntrada);
         return `<div class="card row" style="padding:14px 16px;align-items:center">
           <div style="flex:1;min-width:200px;max-width:100%"><div style="overflow-wrap:anywhere"><span class="code" style="color:var(--green-700);font-weight:600">${esc(p.codigo)}</span> · <b>${esc(p.titulo)}</b></div>
-            <div class="muted" style="font-size:12.5px">${esc(p.gerencia)} · ${esc(p.tipo)} · ${esc(p.demandante || '—')}${d != null ? ` · aguardando há <b>${d} dia(s)</b>` : ''}</div></div>
+            <div class="muted" style="font-size:12.5px">${esc(p.gerencia)} · ${esc(p.tipo)} · ${esc(p.demandante || '-')}${d != null ? ` · aguardando há <b>${d} dia(s)</b>` : ''}</div></div>
           ${GP.etapaPill(p.etapa)} ${p.entrada ? resPill(p.entrada.resultado) : ''}
           <button class="btn btn-primary btn-sm" data-entrada="${p.id}">${icon('funil', 15)} ${p.entrada ? 'Reavaliar entrada' : 'Avaliar entrada'}</button>
           <a class="btn btn-ghost btn-sm" href="#/projeto/${p.id}">Abrir</a></div>`; }).join('')}</div>`
       : U.vazio('Fila de entrada vazia', todos.length ? 'Não há novas demandas nem projetos em triagem.' : 'Cadastre projetos para que eles apareçam aqui.', `<a class="btn btn-primary" href="#/novo">${icon('novo', 16)} Novo projeto</a>`);
     const quadro = `<div class="quadro">${[...ORDEM_FUNIL, ...SAIDAS].map(id => { const e = M.etapa(id), ps = todos.filter(p => p.etapa === id);
         return `<div class="col"><div class="col-h">${U.pill(e.nome, e.tom)}<b class="num">${ps.length}</b></div>
-          ${ps.map(p => `<a class="kcard" href="#/projeto/${p.id}"><span class="code">${esc(p.codigo)}</span><span>${esc(p.titulo)}</span><small>${esc(p.gerencia)} · ${esc(p.tipo)}</small></a>`).join('') || '<div class="dim" style="font-size:12.5px;padding:6px">—</div>'}</div>`; }).join('')}</div>`;
+          ${ps.map(p => `<a class="kcard" href="#/projeto/${p.id}"><span class="code">${esc(p.codigo)}</span><span>${esc(p.titulo)}</span><small>${esc(p.gerencia)} · ${esc(p.tipo)}</small></a>`).join('') || '<div class="dim" style="font-size:12.5px;padding:6px">-</div>'}</div>`; }).join('')}</div>`;
     el.innerHTML = U.pageHead({ titulo:'Funil de entrada', sub:'Toda demanda passa por um checklist simples antes de entrar no portfólio. Assim fica claro o que entra, o que não entra e por quê.',
         acoes:`<a class="btn btn-primary" href="#/novo">${icon('novo', 16)} Novo projeto</a>` }) +
       `<div class="stack">${resumo}
@@ -88,3 +88,4 @@
 
   GP.tela({ id:'funil', nivel:1, ordem:4, titulo:'Funil de entrada', icone:'funil', render: tela });
 })();
+

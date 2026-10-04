@@ -8,11 +8,11 @@ import vm from 'node:vm';
 function carregar(){
   const store = {};
   const noop = () => {};
-  const ctx = { console, Intl, Date, Math, JSON, URL, setTimeout, clearTimeout,
+  const ctx = { console, Intl, Date, Math, JSON, URL, setTimeout, clearTimeout, CustomEvent: class { constructor(t){ this.type = t; } },
     localStorage: { getItem: k => store[k] ?? null, setItem: (k, v) => { store[k] = String(v); }, clear: () => {} },
     document: { addEventListener: noop, getElementById: () => null, querySelector: () => null, querySelectorAll: () => [] },
     location: { hash: '' } };
-  ctx.window = ctx; ctx.window.addEventListener = noop;
+  ctx.window = ctx; ctx.window.addEventListener = noop; ctx.window.dispatchEvent = noop;
   vm.createContext(ctx);
   const base = new URL('../../labs/gestao-portfolio-feg/src/', import.meta.url);
   for(const f of ['core.js', 'modelo.js']) vm.runInContext(readFileSync(new URL(f, base), 'utf8'), ctx, { filename: f });
