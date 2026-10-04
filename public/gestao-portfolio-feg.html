@@ -444,6 +444,153 @@ svg{flex-shrink:0}
 @media(max-width:1100px){.operation-flow{grid-template-columns:repeat(3,minmax(0,1fr))}.governance-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.admin-actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){.operation-flow,.governance-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-actions{grid-template-columns:1fr}.work-session .actions{width:100%}.work-session .actions .btn{flex:1 1 145px}}
 @media(max-width:420px){.operation-flow,.governance-metrics{grid-template-columns:1fr}}
+/* =========================================================================
+   Design system "Atlas ONS" (camada final de estilo)
+   Carregada depois de styles.css. Mantém a paleta (verde ONS, floresta,
+   petróleo, ouro, ardósia, cobre) e troca a linguagem visual por um canvas
+   ambiente com superfícies de vidro, cantos generosos e tipografia editorial.
+   ========================================================================= */
+
+/* ---------- 1. tokens ---------- */
+:root{
+  /* paleta (inalterada) */
+  --ons:#3E6801; --ons-700:#2E4F00; --ons-600:#4C7A0B; --ons-50:#F1F6EA; --ons-100:#E1EDCF; --ons-200:#C6DCA4;
+  --forest:#19352f; --forest-2:#254e47; --forest-3:#193a3d;
+  --olive:#6b8f2a; --teal:#188787; --gold:#d5a32d; --slate:#477b91; --copper:#ac7044;
+  /* séries de gráfico: mesmas famílias, passos validados para daltonismo (oliva, ardósia, ouro, petróleo, cobre) */
+  --c1:#6b8f2a; --c2:#3a74a8; --c3:#d5a32d; --c4:#00908f; --c5:#b8642c;
+  /* superfícies */
+  --canvas:#ECF1EB;
+  --glass:rgba(255,255,255,.70); --glass-2:rgba(255,255,255,.86); --glass-line:rgba(255,255,255,.92);
+  --hair:rgba(25,53,47,.09); --hair-2:rgba(25,53,47,.14);
+  --bg:#fff; --soft:#F3F7F1; --line:#DFE7E2; --line-2:#C9D6CF;
+  /* texto */
+  --text:#17302b; --muted:#566b64; --dim:#71857e;
+  /* estados (mesmos tons, fundos mais leves) */
+  --ok:#3E6801; --warn:#A8701A; --bad:#AB5728; --info:#3A6E96;
+  --ok-bg:#EEF5E4; --warn-bg:#FCF4E3; --bad-bg:#FBEEE6; --info-bg:#EAF2F7; --neutral-bg:#F1F4F2;
+  /* forma */
+  --r-xl:28px; --r-lg:22px; --r-md:16px; --r-sm:12px; --radius:var(--r-lg);
+  --sh-1:0 1px 2px rgba(23,48,43,.04),0 10px 28px -16px rgba(23,48,43,.26);
+  --sh-2:0 2px 8px rgba(23,48,43,.06),0 28px 60px -24px rgba(23,48,43,.34);
+  --shadow:var(--sh-1); --shadow-lg:var(--sh-2);
+  --blur:blur(18px) saturate(150%);
+  --ring:0 0 0 4px rgba(62,104,1,.16);
+  --font:"Segoe UI Variable Text","Segoe UI",Inter,system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --font-display:"Segoe UI Variable Display","Segoe UI",Inter,system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
+
+/* ---------- 2. canvas ambiente ---------- */
+html{background:var(--canvas)}
+body{background:var(--canvas);color:var(--text);font-family:var(--font);letter-spacing:-.003em;text-rendering:optimizeLegibility}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(48vw 38vw at 4% -6%,rgba(166,198,90,.30),transparent 62%),
+    radial-gradient(42vw 34vw at 102% 2%,rgba(24,135,135,.16),transparent 64%),
+    radial-gradient(46vw 30vw at 70% 108%,rgba(213,163,45,.10),transparent 60%),
+    linear-gradient(180deg,#F1F5EF 0%,#EAF0E9 100%)}
+::selection{background:rgba(107,143,42,.22)}
+h1,h2,h3,h4{font-family:var(--font-display);color:var(--text);letter-spacing:-.02em}
+a{color:var(--ons)}
+:focus-visible{outline:none;box-shadow:var(--ring);border-radius:10px}
+.muted{color:var(--muted)} .dim{color:var(--dim)}
+*{scrollbar-width:thin;scrollbar-color:rgba(23,48,43,.22) transparent}
+
+/* ---------- 3. superfícies de vidro ---------- */
+.card,.fieldset,.metric,.filter-panel,.work-session,.tbl-wrap,.report-card,.user-item,.kpi,.setting-card,.risk-alert-card{
+  background:var(--glass);border:1px solid var(--glass-line);border-radius:var(--r-lg);box-shadow:var(--sh-1);
+  -webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.card{padding:24px}
+.card .card{background:var(--glass-2);box-shadow:none;border-color:var(--hair)}
+.fieldset legend{background:var(--glass-2);border:1px solid var(--ons-100);color:var(--ons-700);border-radius:999px;padding:4px 12px;font-weight:600}
+
+/* ---------- 4. tipografia de página ---------- */
+.page-h{margin-bottom:26px;gap:18px}
+.page-h h1{font-size:clamp(1.55rem,2.3vw,2.1rem);font-weight:650;line-height:1.15;letter-spacing:-.035em}
+.page-h p{color:var(--muted);font-size:.9rem;line-height:1.65;max-width:72ch}
+.sec-h h3,.card .sec-h h3,.chart-head h3{font-size:1rem;font-weight:650;letter-spacing:-.015em}
+.sec-h p,.card .sec-h p,.chart-head p{color:var(--muted)}
+.code{font-family:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace;font-size:.86em;color:var(--ons-700);font-weight:600}
+
+/* ---------- 5. botões ---------- */
+.btn{border-radius:999px;min-height:40px;padding:9px 16px;font-weight:600;letter-spacing:-.005em;transition:transform .15s var(--ease),box-shadow .2s var(--ease),background .2s}
+.btn:active{transform:translateY(1px) scale(.99)}
+.btn-primary{background:var(--ons);color:#fff;border:1px solid var(--ons);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 6px 16px -8px rgba(62,104,1,.7)}
+.btn-primary:hover{background:var(--ons-700);border-color:var(--ons-700)}
+.btn-ghost{background:var(--glass-2);border:1px solid var(--hair-2);color:var(--text);box-shadow:0 1px 2px rgba(23,48,43,.04)}
+.btn-ghost:hover{background:#fff;border-color:var(--ons-200);color:var(--ons-700)}
+.btn-danger{border-radius:999px}
+.btn-sm{min-height:34px;padding:6px 13px}
+.btn[disabled]{opacity:.55;cursor:not-allowed;transform:none}
+.icon-btn{width:40px;height:40px;border-radius:50%;background:var(--glass-2);border:1px solid var(--glass-line);box-shadow:var(--sh-1);color:var(--muted);transition:.2s var(--ease)}
+.icon-btn:hover{color:var(--ons);background:#fff;transform:translateY(-1px)}
+.link{font-weight:600}
+
+/* ---------- 6. pills, tags, chips ---------- */
+.pill{border-radius:999px;padding:3px 10px 3px 8px;font-weight:600;border:1px solid transparent}
+.pill.t-ok{background:var(--ok-bg);color:var(--ons-700);border-color:rgba(62,104,1,.12)}
+.pill.t-warn{background:var(--warn-bg);color:#8a5a12;border-color:rgba(168,112,26,.14)}
+.pill.t-bad{background:var(--bad-bg);color:#93461d;border-color:rgba(171,87,40,.14)}
+.pill.t-info{background:var(--info-bg);color:#2f5f84;border-color:rgba(58,110,150,.14)}
+.pill.t-neutral{background:var(--neutral-bg);color:var(--muted);border-color:var(--hair)}
+.tag{border-radius:999px}
+.chips{gap:8px}
+.chip{border-radius:999px;background:var(--glass-2);border:1px solid var(--hair-2);padding:7px 14px;font-weight:550;transition:.2s var(--ease)}
+.chip:hover{border-color:var(--ons-200);background:#fff}
+.chip.on{background:var(--forest);color:#fff;border-color:var(--forest);box-shadow:0 6px 16px -8px rgba(23,48,43,.6)}
+
+/* ---------- 7. avisos ---------- */
+.callout{border-radius:var(--r-md);background:var(--glass-2);border:1px solid var(--hair);box-shadow:none}
+.callout.warn{background:var(--warn-bg);border-color:rgba(168,112,26,.18)}
+.sample-banner{border-radius:999px;background:rgba(255,248,227,.85);border:1px solid rgba(213,163,45,.28);padding:9px 16px}
+.scope-note{border-radius:var(--r-md);border-left-width:0;background:rgba(255,248,231,.85);box-shadow:inset 4px 0 0 var(--gold)}
+
+/* ---------- 8. formulários ---------- */
+.input,.select,textarea.input{background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:var(--r-sm);min-height:42px;transition:border-color .2s,box-shadow .2s}
+.input:hover,.select:hover{border-color:var(--line-2)}
+.input:focus,.select:focus,textarea.input:focus{outline:none;border-color:var(--ons-600);box-shadow:var(--ring)}
+.field{color:var(--text);font-weight:550}
+.field small,.hint{color:var(--muted);font-weight:400}
+.search .input{border-radius:999px;padding-left:40px}
+input[type=checkbox],input[type=radio]{accent-color:var(--ons)}
+
+/* ---------- 9. tabelas ---------- */
+.tbl-wrap{padding:6px;overflow:auto}
+.tbl{border-collapse:separate;border-spacing:0}
+.tbl th{background:transparent;color:var(--dim);font-size:.7rem;font-weight:650;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--hair);padding:12px 14px}
+.tbl td{border-bottom:1px solid var(--hair);padding:14px}
+.tbl tbody tr:last-child td{border-bottom:0}
+.tbl tbody tr{transition:background .15s}
+.tbl tbody tr:hover td{background:rgba(241,246,234,.75)}
+.tbl tbody tr.click{cursor:pointer}
+.tbl tbody tr td:first-child{border-radius:14px 0 0 14px}
+.tbl tbody tr td:last-child{border-radius:0 14px 14px 0}
+.tbl th.sort:hover{color:var(--ons)}
+
+/* ---------- 10. abas ---------- */
+.tabs,.analysis-tabs{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--glass-line);border-bottom:1px solid var(--glass-line);border-radius:999px;background:var(--glass);box-shadow:var(--sh-1);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);max-width:100%;overflow-x:auto}
+.tab,.analysis-tabs button{border:0;border-radius:999px;padding:8px 16px;color:var(--muted);font-weight:600;white-space:nowrap;margin:0}
+.tab.on,.analysis-tabs button.on{background:var(--forest);color:#fff;border:0;box-shadow:0 6px 14px -8px rgba(23,48,43,.65)}
+.tab:hover:not(.on),.analysis-tabs button:hover:not(.on){color:var(--text);background:rgba(255,255,255,.7)}
+.settings-tabs button{border-radius:999px;background:var(--glass-2)}
+.settings-tabs button.on{background:var(--forest);border-color:var(--forest);color:#fff}
+
+/* ---------- 11. modal, toast, tooltip ---------- */
+.modal-bg{background:rgba(18,38,34,.32);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.modal{border-radius:var(--r-xl);background:rgba(255,255,255,.94);border:1px solid var(--glass-line);box-shadow:var(--sh-2);animation:sobe .28s var(--ease) both}
+@keyframes sobe{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:none}}
+.toast{border-radius:999px;background:rgba(23,48,43,.92);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--sh-2);padding:12px 20px}
+.tip{background:rgba(23,48,43,.9);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);border-radius:12px;padding:8px 13px;font-size:13px;font-weight:550;box-shadow:var(--sh-2);letter-spacing:-.005em}
+.tip::before{content:"";position:absolute;left:-5px;top:50%;width:10px;height:10px;background:inherit;transform:translateY(-50%) rotate(45deg);border-radius:2px;z-index:-1}
+
+/* ---------- 12. estados vazios e listas ---------- */
+.empty .ic,.guardian-mark{border-radius:50%}
+.attention-item,.att{border-radius:var(--r-md);background:rgba(255,255,255,.78);border:1px solid var(--hair);transition:.2s var(--ease)}
+.attention-item:hover,.att:hover{background:#fff;transform:translateX(2px);box-shadow:var(--sh-1)}
+
+@media(prefers-reduced-motion:reduce){.modal,.btn,.attention-item{animation:none!important;transition:none!important}}
+@media print{body::before{display:none}.card,.metric,.tbl-wrap,.filter-panel{background:#fff!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;border-color:#dfe7e2!important}}
 </style>
 </head>
 <body>

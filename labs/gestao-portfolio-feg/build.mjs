@@ -19,6 +19,7 @@ const html = `<!doctype html>
 <meta name="description" content="Sistema de cadastro, entrada e priorização de projetos do portfólio da FEG/ONS.">
 <style>
 ${read('src/styles.css').replace(/\s+$/, '')}
+${read('src/design.css').replace(/\s+$/, '')}
 </style>
 </head>
 <body>
