@@ -145,3 +145,83 @@ input[type=checkbox],input[type=radio]{accent-color:var(--ons)}
 
 @media(prefers-reduced-motion:reduce){.modal,.btn,.attention-item{animation:none!important;transition:none!important}}
 @media print{body::before{display:none}.card,.metric,.tbl-wrap,.filter-panel{background:#fff!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;border-color:#dfe7e2!important}}
+
+/* ---------- 13. shell: trilho flutuante + cabeçalho de saudação ---------- */
+.shell{padding:16px;gap:18px}
+.main{background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;min-height:0}
+.content{padding:22px clamp(2px,.6vw,10px) 64px;max-width:1560px}
+
+/* trilho (menu lateral) */
+.shell .side{background:linear-gradient(165deg,rgba(37,78,71,.97) 0%,rgba(25,58,61,.98) 70%,rgba(21,49,52,.98) 100%);
+  border:1px solid rgba(255,255,255,.12);border-radius:28px;padding:18px 12px 14px;gap:6px;
+  box-shadow:0 28px 56px -28px rgba(18,40,36,.7),inset 0 1px 0 rgba(255,255,255,.08);transition:width .25s var(--ease),border-radius .25s var(--ease)}
+.shell .side .brand{padding:2px 6px 12px;gap:11px}
+.shell .side .brand svg.feg{border-radius:14px;box-shadow:0 6px 14px -6px rgba(0,0,0,.45)}
+.shell .side .brand .txt b{color:#fff;font-size:.92rem;letter-spacing:-.01em}
+.shell .side .brand .txt span{color:#a9c4bd}
+.nav-heading{color:#8fb0a8}
+.nav-toggle{border-radius:50%;width:34px;height:34px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);transition:.2s var(--ease)}
+.nav-toggle:hover{background:rgba(255,255,255,.16);transform:scale(1.04)}
+.shell .side .nav-sec{color:#8fb0a8;font-weight:650;letter-spacing:.12em}
+.shell .side .nav-item{border-radius:14px;min-height:44px;margin:2px 0;color:#d9e8e2;font-weight:500;transition:background .18s,color .18s,transform .18s var(--ease)}
+.shell .side .nav-item .ic{color:#9dbdb5;transition:color .18s}
+.shell .side .nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
+.shell .side .nav-item:hover .ic{color:#fff}
+.shell .side .nav-item.on{background:#fff;color:var(--forest);font-weight:650;box-shadow:0 10px 22px -12px rgba(0,0,0,.55)}
+.shell .side .nav-item.on .ic{color:var(--ons)}
+.shell .side .nav-item.on::before{display:none}
+.side-foot{border-top:1px solid rgba(255,255,255,.1)!important}
+.side-note{color:#7f9f97;opacity:.85}
+
+/* modo recolhido: pílula de ícones em círculos, como um dock vertical */
+.shell.mini{grid-template-columns:84px minmax(0,1fr)}
+.shell.mini .side{border-radius:44px;padding:16px 10px 14px;align-items:center}
+.shell.mini .side .brand{padding:0 0 8px;justify-content:center}
+.shell.mini .side .brand svg.feg{border-radius:50%}
+.shell.mini .nav-heading{justify-content:center;padding:0 0 4px;min-height:36px}
+.shell.mini .side-nav{width:100%;display:flex;flex-direction:column;align-items:center;padding:0 0 6px}
+.shell.mini .side .nav-item{width:48px;height:48px;min-height:48px;padding:0;margin:3px 0;border-radius:50%;justify-content:center;flex:none}
+.shell.mini .side .nav-item .ic{width:auto}
+.shell.mini .side .nav-sec{width:22px;height:1px;margin:10px auto;padding:0;background:rgba(255,255,255,.2);font-size:0;overflow:hidden}
+.shell.mini .side-foot{width:100%;align-items:center}
+
+/* cabeçalho: saudação + comandos em vidro */
+.topbar{position:sticky;top:16px;z-index:15;min-height:74px;padding:12px 14px 12px 24px;border-radius:24px!important;margin-bottom:4px;
+  background:rgba(255,255,255,.62)!important;border:1px solid var(--glass-line)!important;box-shadow:var(--sh-1)!important;-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.topbar .ttl{gap:2px}
+.topbar .ttl b{font-family:var(--font-display);font-size:clamp(1.15rem,1.7vw,1.45rem)!important;font-weight:650;letter-spacing:-.03em;line-height:1.2!important;color:var(--text)}
+.topbar .ttl small{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:.74rem!important;letter-spacing:0!important;color:var(--muted)!important;text-transform:none}
+.topbar .ttl .crumb{color:var(--ons-700);font-weight:650}
+.topbar .ttl .when::before{content:"";display:inline-block;width:4px;height:4px;border-radius:50%;background:var(--line-2);vertical-align:middle;margin-right:10px}
+.topbar .right{gap:10px}
+.topbar .levels .seg{background:rgba(255,255,255,.7);border:1px solid var(--hair);border-radius:999px;padding:4px}
+.topbar .levels .seg button{border-radius:999px;padding:7px 13px;color:var(--muted);font-weight:550}
+.topbar .levels .seg button.on{background:var(--forest);color:#fff;box-shadow:0 6px 14px -8px rgba(23,48,43,.7)}
+.topbar .levels .seg button.on b{color:#cfe3a6}
+.storage-btn{border-radius:999px;min-height:36px;padding:6px 12px;background:rgba(238,245,228,.9);border:1px solid rgba(62,104,1,.12)}
+.profile-btn{background:rgba(255,255,255,.8);border-color:var(--hair);min-height:40px}
+.topbar .ons{height:30px}
+.menu-btn{border-radius:50%;width:40px;height:40px;background:rgba(255,255,255,.85);border:1px solid var(--hair)}
+
+/* dock do celular */
+.dock{display:none}
+@media(max-width:900px){
+  .shell,.shell.mini{padding:10px}
+  .shell .side{border-radius:26px}
+  .topbar{top:10px;padding:10px 10px 10px 14px;min-height:64px}
+  .content{padding-bottom:120px}
+  .dock{display:flex;position:fixed;z-index:30;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom));gap:2px;padding:6px;border-radius:999px;
+    background:rgba(23,48,43,.9);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);border:1px solid rgba(255,255,255,.12);box-shadow:0 18px 40px -16px rgba(18,40,36,.75)}
+  .dock-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:62px;height:54px;border-radius:999px;color:#cfe0da;text-decoration:none;font-size:10.5px;font-weight:600;letter-spacing:.01em}
+  .dock-item.on{background:#fff;color:var(--forest)}
+  .dock-item.on svg{color:var(--ons)}
+  .dock-item.add{background:var(--ons);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.2)}
+  .dock-item:active{transform:scale(.96)}
+  .toast{bottom:96px!important}
+}
+@media(max-width:480px){
+  .shell,.shell.mini{padding:8px}
+  .topbar .ttl .when{display:none}
+  .dock-item{width:56px}
+}
+@media print{.dock,.topbar,.side{display:none!important}}

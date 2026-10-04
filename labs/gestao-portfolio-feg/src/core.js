@@ -311,9 +311,8 @@
       <aside class="side ${aberto ? 'open' : ''}" aria-label="Menu">${menu(r, tela, nivel)}</aside>
       <div class="main">
         <header class="topbar">
-          <button class="desktop-menu" data-recolher aria-label="${mini ? 'Expandir menu' : 'Recolher menu'}" title="${mini ? 'Expandir menu' : 'Recolher menu'}" aria-expanded="${!mini}">${icon(mini ? 'expandir' : 'recolher')}</button>
           <button class="menu-btn" data-menu aria-label="Abrir menu">${icon('menu')}</button>
-          <div class="ttl"><small>Gestão de Portfólio · FEG</small><b>${esc(tela ? tela.titulo : '')}</b></div>
+          <div class="ttl"><small><span class="crumb">${esc(tela ? tela.titulo : '')}</span><span class="when">${esc(dataLonga())}</span></small><b>${esc(saudacao())}</b></div>
           <div class="right">
             <button class="storage-btn" data-storage-status title="Dados e configurações"><i></i><span>Salvo no navegador</span></button>
             <div class="levels"><div class="seg" role="group" aria-label="Nível do sistema">${GP.NIVEIS.map(L => `<button class="${L.n === nivel ? 'on' : ''}" data-nivel="${L.n}" title="Nível ${L.n} · ${esc(L.nome)}"><b>${L.n}</b><span>${esc(L.curto)}</span></button>`).join('')}</div>
@@ -322,7 +321,7 @@
           </div>
         </header>
         <main class="content" id="conteudo"></main>
-      </div></div>`;
+      </div>${dock(tela)}</div>`;
     const el = document.getElementById('conteudo');
     try {
       if(!tela) el.innerHTML = vazio('Tela não encontrada', 'Volte ao painel.');
@@ -334,6 +333,18 @@
     ultimaChave = chave;
     GP.pintarSalvamento();
     if(GP.afterRender) GP.afterRender(el,r);
+  }
+  /* Saudação e data do cabeçalho */
+  function saudacao(){
+    const h = new Date().getHours(), oi = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+    let nome = ''; try { const u = GP.auth && GP.auth.usuario && GP.auth.usuario(); nome = u && u.nome ? String(u.nome).trim().split(/\s+/)[0] : ''; } catch(e) {}
+    return nome ? `${oi}, ${nome}` : oi;
+  }
+  function dataLonga(){ const t = new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' }); return t.charAt(0).toUpperCase() + t.slice(1); }
+  /** Dock inferior do celular: atalhos para as tarefas mais frequentes */
+  function dock(tela){
+    const id = tela ? tela.id : '', it = (href, ic, lbl, cls = '') => `<a class="dock-item ${cls} ${id === href.slice(2) ? 'on' : ''}" href="${href}" aria-label="${lbl}">${icon(ic, 19)}<span>${lbl}</span></a>`;
+    return `<nav class="dock" aria-label="Atalhos">${it('#/painel', 'painel', 'Painel')}${it('#/acervo', 'acervo', 'Projetos')}${it('#/novo', 'novo', 'Novo', 'add')}${it('#/funil', 'funil', 'Funil')}<button class="dock-item" data-menu aria-label="Abrir menu completo">${icon('menu', 19)}<span>Menu</span></button></nav>`;
   }
   function menu(r, tela, nivel){
     const item = t => `<a class="nav-item ${tela && tela.id === t.id ? 'on' : ''}" href="#/${t.id}" data-tip="${esc(t.titulo)}" aria-label="${esc(t.titulo)}"><span class="ic">${icon(t.icone)}</span><span class="lbl">${esc(t.titulo)}</span></a>`;

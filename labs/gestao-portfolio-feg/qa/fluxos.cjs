@@ -401,4 +401,17 @@ module.exports = {
     const [dl] = await Promise.all([p.waitForEvent('download', { timeout:60000 }), p.click('[data-pdf]')]);
     check(/\.pdf$/.test(dl.suggestedFilename()), 'PDF da carteira não gerado');
   },
+  /* Redesenho R2 - cabeçalho com saudação e dock do celular */
+  async 'r2: saudação no cabeçalho e dock só no celular'({ p, ir, check }){
+    check(/^(Bom dia|Boa tarde|Boa noite)/.test((await p.textContent('.topbar .ttl b')).trim()), 'cabeçalho deveria trazer a saudação');
+    check(!(await p.locator('.dock').isVisible()), 'dock não deveria aparecer no computador');
+    await p.setViewportSize({ width:390, height:844 }); await ir('#/painel');
+    check(await p.locator('.dock').isVisible(), 'dock deveria aparecer no celular');
+    await p.click('.dock .dock-item.add'); await p.waitForTimeout(200);
+    check(/#\/novo$/.test(p.url()) && await p.locator('.dock .dock-item.on.add').count() === 1, 'atalho Novo do dock deveria abrir o cadastro');
+    await p.click('.dock button[data-menu]'); await p.waitForTimeout(150);
+    check(await p.locator('.side.open').count() === 1, 'Menu do dock deveria abrir o menu completo');
+    await p.keyboard.press('Escape');
+    await p.setViewportSize({ width:1440, height:900 });
+  },
 };
