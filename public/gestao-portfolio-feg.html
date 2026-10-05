@@ -915,6 +915,16 @@ button.legend-line:hover{background:rgba(241,246,234,.8)}
 .figures{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
 .figure-num{border-left:0;padding-left:0}
 .topbar .ttl .when{overflow:hidden;text-overflow:ellipsis;min-width:0}
+/* src/telas/operacao.css */
+/* Pacote operacao: estilos próprios das telas deste pacote (carregado depois de design.css). */
+/* src/telas/priorizacao.css */
+/* Pacote priorizacao: estilos próprios das telas deste pacote (carregado depois de design.css). */
+/* src/telas/planejamento.css */
+/* Pacote planejamento: estilos próprios das telas deste pacote (carregado depois de design.css). */
+/* src/telas/gerencial.css */
+/* Pacote gerencial: estilos próprios das telas deste pacote (carregado depois de design.css). */
+/* src/telas/inovacao.css */
+/* Pacote inovacao: estilos próprios das telas deste pacote (carregado depois de design.css). */
 </style>
 </head>
 <body>
@@ -962,7 +972,9 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
   /** Texto para busca/comparação sem acento e sem caixa */
   const normTxt = s => String(s ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   const uid = p => p + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  GP.util = { esc, clone, fmt, sum, hoje, uid, numBR, normTxt };
+  /** Plural em português: plural(1,'dia','dias') → '1 dia'; plural(3,'dia','dias') → '3 dias' */
+  const plural = (n, sing, plur) => `${fmt.n(n)} ${Math.abs(+n) === 1 ? sing : plur}`;
+  GP.util = { esc, clone, fmt, sum, hoje, uid, numBR, normTxt, plural };
 
   /* ------------------------------------------------------------------ ícones */
   const I = {
@@ -3615,6 +3627,12 @@ window.GP_PPT_TEMPLATES={"visao":{"base64":"UEsDBBQAAAAIAEGQQ12drdcvNQEAAFMCAAAR
   const previous=GP.afterRender;GP.afterRender=(el,r)=>{if(previous)previous(el,r);applyScale();};
   document.addEventListener('change',e=>{if(e.target.matches('[data-ui-scale]')){GP.state().ui.escalaInterface=e.target.value;GP.save();applyScale();GP.refresh();}});
   if(globalThis.ResizeObserver){const observer=new ResizeObserver(entries=>{for(const entry of entries){const el=entry.target;if(el.scrollWidth>el.clientWidth+2&&getComputedStyle(el).overflowX==='visible')el.classList.add('layout-overflow');else el.classList.remove('layout-overflow');}});document.addEventListener('DOMContentLoaded',()=>observer.observe(document.body));}
+})();
+</script>
+<script>/* src/extras.js */
+/* Extras transversais (pacote inovação): paleta de comandos, atalhos, cadastro rápido e modo comitê. */
+(function(){
+  'use strict';
 })();
 </script>
 <script>GP.start();</script>

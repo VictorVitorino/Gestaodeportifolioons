@@ -36,7 +36,9 @@
   /** Texto para busca/comparação sem acento e sem caixa */
   const normTxt = s => String(s ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   const uid = p => p + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  GP.util = { esc, clone, fmt, sum, hoje, uid, numBR, normTxt };
+  /** Plural em português: plural(1,'dia','dias') → '1 dia'; plural(3,'dia','dias') → '3 dias' */
+  const plural = (n, sing, plur) => `${fmt.n(n)} ${Math.abs(+n) === 1 ? sing : plur}`;
+  GP.util = { esc, clone, fmt, sum, hoje, uid, numBR, normTxt, plural };
 
   /* ------------------------------------------------------------------ ícones */
   const I = {
