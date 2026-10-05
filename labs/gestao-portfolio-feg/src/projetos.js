@@ -241,7 +241,7 @@
         ${algum ? `<button class="btn btn-ghost btn-sm op-f-limpar" data-limpar>Limpar filtros</button>` : ''}
       </div>
       ${ativos.length ? `<div class="op-acervo-info"><span class="dim">Filtros:</span>${ativos.map(k => `<button class="op-fchip" data-rm-filtro="${k}" aria-label="Remover filtro ${esc(rotuloFiltro(k, f[k]))}">${esc(rotuloFiltro(k, f[k]))} ${icon('x', 12)}</button>`).join('')}</div>` : ''}
-      ${lista.length ? `<div class="op-acervo-tbl">${U.table({ id:'acervo', cols, rows:lista, rowAttr:r => `class="click" data-abrir="${r.id}" tabindex="0"`, vazioTxt:'Nenhum projeto com estes filtros.' })}</div>`
+      ${lista.length ? `<div class="op-acervo-tbl">${U.table({ id:'acervo', cartoes:'sm', cols, rows:lista, rowAttr:r => `class="click" data-abrir="${r.id}" tabindex="0"`, vazioTxt:'Nenhum projeto com estes filtros.' })}</div>`
         : OP.vazio('Nenhum projeto encontrado', algum ? 'Nenhum projeto combina com a busca e os filtros. Tente outro termo ou limpe os filtros.' : 'Não há projetos nesta situação.', algum ? `<div class="row" style="justify-content:center;margin-top:12px"><button class="btn btn-ghost" data-limpar>${icon('x', 15)} Limpar filtros</button></div>` : '', algum ? 'busca' : 'acervo')}</div>`;
     el.querySelectorAll('[data-grupo]').forEach(b => b.onclick = () => { f.grupo = b.dataset.grupo; GP.save(); GP.refresh(); });
     el.querySelectorAll('[data-f]').forEach(i => { const ev = i.tagName === 'INPUT' ? 'input' : 'change';

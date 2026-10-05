@@ -242,7 +242,7 @@
   /* hideBelow 'lg' (ou ≥1200) some abaixo de 1360px de área útil; 'md', abaixo de 1100px. Colunas hm (secundárias) seguem 'md' salvo hideBelow:false. */
   const classeOculta = c => c.hideBelow === false ? '' : c.hideBelow ? (c.hideBelow === 'md' || (+c.hideBelow && +c.hideBelow < 1200) ? 'hm-md' : 'hm-lg') : c.hm ? 'hm-md' : '';
   /** Tabela ordenável: cols [{key, label, align, fmt(v,row), sortVal(row), sort:false, hm, hideBelow, main}], rows, id (para lembrar ordenação), rowAttr(row) */
-  const table = ({cols, rows, id, rowAttr, vazioTxt = 'Nenhum registro.'}) => {
+  const table = ({cols, rows, id, rowAttr, vazioTxt = 'Nenhum registro.', cartoes}) => {
     const sk = id ? S.ui['sort:' + id] : null; let rs = rows.slice();
     if(sk){ const c = cols.find(c => c.key === sk.key); if(c){ const g = c.sortVal || (r => r[c.key]);
       rs.sort((a, b) => { const x = g(a), y = g(b); const r = (typeof x === 'number' || typeof y === 'number') ? (x ?? -Infinity) - (y ?? -Infinity) : String(x ?? '').localeCompare(String(y ?? ''), 'pt-BR', { sensitivity:'base', numeric:true }); return r * sk.dir; }); } }
@@ -250,7 +250,7 @@
     const ordenaveis = id ? cols.filter(c => c.sort !== false && c.label) : [];
     // No modo cartão (área estreita) o cabeçalho some; a ordenação passa para este seletor, com a mesma chave
     const barra = ordenaveis.length ? `<div class="tbl-sortbar" data-noprint><label>Ordenar por<select class="select" data-sort-select="${esc(id)}" aria-label="Ordenar por"><option value="">Ordem padrão</option>${ordenaveis.map(c => ['1', '-1'].map(d => `<option value="${esc(c.key)}|${d}" ${sk && sk.key === c.key && String(sk.dir) === d ? 'selected' : ''}>${esc(c.label)} (${d === '1' ? 'crescente' : 'decrescente'})</option>`).join('')).join('')}</select></label></div>` : '';
-    return `${barra}<div class="tbl-wrap scroll-fade"><table class="tbl tbl-cards"><thead><tr>${cols.map(c => { const s = id && c.sort !== false; const on = sk && sk.key === c.key;
+    return `${barra}<div class="tbl-wrap scroll-fade"><table class="tbl tbl-cards${cartoes === 'sm' ? ' tbl-sm' : ''}"><thead><tr>${cols.map(c => { const s = id && c.sort !== false; const on = sk && sk.key === c.key;
         return `<th class="${cls(c)} ${s ? 'sort' : ''}" ${s ? `data-sort="${esc(id)}|${esc(c.key)}" tabindex="-1" aria-sort="${on ? (sk.dir > 0 ? 'ascending' : 'descending') : 'none'}"` : ''}>${s ? `<span class="th-sort" role="button" tabindex="0">${esc(c.label)}</span>` : esc(c.label)}</th>`; }).join('')}</tr></thead>
       <tbody>${rs.length ? rs.map(r => `<tr ${rowAttr ? rowAttr(r) : ''}>${cols.map(c => `<td class="${cls(c)}" data-label="${esc(c.label)}">${c.fmt ? c.fmt(r[c.key], r) : esc(r[c.key])}</td>`).join('')}</tr>`).join('') : `<tr class="vazio"><td colspan="${cols.length}" class="dim" style="text-align:center;padding:28px">${esc(vazioTxt)}</td></tr>`}</tbody></table></div>`;
   };

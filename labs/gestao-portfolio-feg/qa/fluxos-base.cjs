@@ -75,7 +75,7 @@ module.exports = {
     check(/^(Bom dia|Boa tarde|Boa noite)/.test((await p.textContent('.topbar .ttl b')).trim()), 'B4: saudação no painel');
     await ir('#/acervo', 200);
     const b = (await p.textContent('.topbar .ttl b')).trim();
-    check(b === 'Projetos e demandas' && !/Bom dia|Boa tarde|Boa noite/.test(b), 'B4: fora do painel o cabeçalho deveria mostrar o título da tela (veio ' + b + ')');
+    check(b === 'Acervo' && !/Bom dia|Boa tarde|Boa noite/.test(b), 'B4: fora do painel o cabeçalho deveria mostrar o título da tela (veio ' + b + ')');
     check(await p.locator('.topbar .seg [aria-label="Nível 1, Operação do portfólio"]').count() === 1, 'B4: botão de nível com nome acessível "Nível 1, Operação do portfólio"');
     check(await p.getAttribute('.side .brand', 'aria-label') === 'Gestão de Portfólio FEG, ir para o painel', 'B4: link da marca com nome acessível');
     await p.evaluate(() => window.scrollTo(0, 600)); await p.waitForTimeout(250);
@@ -113,17 +113,18 @@ module.exports = {
     const alt = await p.evaluate(() => Math.max(...[...document.querySelectorAll('#conteudo .tbl tbody tr')].map(t => t.getBoundingClientRect().height)));
     check(alt <= 140, 'B6: em 1280 nenhuma linha do acervo deveria passar de 140px (veio ' + Math.round(alt) + ')');
     await p.setViewportSize({ width:1440, height:900 }); await ir('#/acervo', 250);
-    check(await p.locator('th[data-sort="acervo|codigo"] .th-sort[role="button"]').count() === 1 && await p.getAttribute('th[data-sort="acervo|codigo"]', 'aria-sort') === 'none', 'B6: cabeçalho ordenável como botão com aria-sort');
-    await p.click('th[data-sort="acervo|codigo"] .th-sort'); await p.waitForTimeout(150);
-    check(await p.getAttribute('th[data-sort="acervo|codigo"]', 'aria-sort') === 'ascending', 'B6: clicar no cabeçalho deveria ordenar (aria-sort ascending)');
-    check(await p.evaluate(() => document.activeElement && document.activeElement.matches('th[data-sort="acervo|codigo"] .th-sort')), 'B6: foco deveria continuar no cabeçalho ordenado');
+    check(await p.locator('th[data-sort="acervo|titulo"] .th-sort[role="button"]').count() === 1 && await p.getAttribute('th[data-sort="acervo|titulo"]', 'aria-sort') === 'none', 'B6: cabeçalho ordenável como botão com aria-sort');
+    await p.click('th[data-sort="acervo|titulo"] .th-sort'); await p.waitForTimeout(150);
+    check(await p.getAttribute('th[data-sort="acervo|titulo"]', 'aria-sort') === 'ascending', 'B6: clicar no cabeçalho deveria ordenar (aria-sort ascending)');
+    check(await p.evaluate(() => document.activeElement && document.activeElement.matches('th[data-sort="acervo|titulo"] .th-sort')), 'B6: foco deveria continuar no cabeçalho ordenado');
     await p.setViewportSize({ width:390, height:844 }); await ir('#/acervo', 250);
     check(await p.locator('[data-sort-select="acervo"]').isVisible(), 'B6: celular deveria mostrar "Ordenar por"');
     check(await p.evaluate(() => { const t = document.querySelector('.tbl-cards thead'); const r = t.getBoundingClientRect(); return r.width <= 1 && r.height <= 1 && getComputedStyle(t).display !== 'none'; }), 'B6: cabeçalho da tabela deveria ficar só para leitor de tela no modo cartão');
-    await p.selectOption('[data-sort-select="acervo"]', 'codigo|-1'); await p.waitForTimeout(200);
-    check(/PRJ-014/.test(await p.locator('tbody tr').first().textContent()), 'B6: "Ordenar por" deveria ordenar');
+    await p.selectOption('[data-sort-select="acervo"]', 'titulo|-1'); await p.waitForTimeout(200);
+    const ultimo = await p.evaluate(() => GP.projetos.todos().map(x => x.titulo).sort((a, b) => b.localeCompare(a, 'pt-BR', { sensitivity:'base', numeric:true }))[0]);
+    check((await p.locator('tbody tr').first().textContent()).includes(ultimo), 'B6: "Ordenar por" deveria ordenar');
     await recarregar(); await ir('#/acervo', 250);
-    check(/PRJ-014/.test(await p.locator('tbody tr').first().textContent()) && await p.inputValue('[data-sort-select="acervo"]') === 'codigo|-1', 'B6: ordenação do celular deveria persistir');
+    check((await p.locator('tbody tr').first().textContent()).includes(ultimo) && await p.inputValue('[data-sort-select="acervo"]') === 'titulo|-1', 'B6: ordenação do celular deveria persistir');
     await p.setViewportSize({ width:1440, height:900 });
   },
   async 'base B7: modais com rodapé visível, nome acessível, fundo inerte e foco seguro'({ p, ir, check, recarregar }){
@@ -144,6 +145,7 @@ module.exports = {
     check(await p.evaluate(() => !!document.querySelector('.modal').getAttribute('aria-describedby')), 'B7: diálogo deveria ter descrição');
     await p.keyboard.press('Escape');
     const id = await p.evaluate(() => GP.projetos.todos()[0].id); await ir('#/projeto/' + id, 250);
+    if(await p.locator('.op-mais-btn').count()) { await p.click('.op-mais-btn'); await p.waitForTimeout(120); }
     await p.click('[data-excluir]'); await p.waitForTimeout(200);
     const a = await ativo(p);
     check(a && a.dentroModal && a.txt === 'Cancelar', 'B7: em "Excluir projeto" o foco inicial deveria ser Cancelar (veio ' + JSON.stringify(a) + ')');

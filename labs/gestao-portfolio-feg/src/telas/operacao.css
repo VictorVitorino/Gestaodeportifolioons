@@ -447,3 +447,6 @@
 .op-legenda i{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:6px}
 .op-top{flex-wrap:nowrap;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);text-decoration:none;color:inherit}
 .op-prox-nivel{margin-top:18px;justify-content:space-between}
+
+/* integração com o base: linhas do acervo mais compactas na vertical */
+.op-acervo .tbl:not(.tbl-cards) td,.op-acervo .tbl-wrap .tbl td{padding-top:10px;padding-bottom:10px}

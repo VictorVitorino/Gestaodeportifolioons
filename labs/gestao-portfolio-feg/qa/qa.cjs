@@ -49,7 +49,10 @@ const check = (cond, msg) => { if(cond) ok++; else falhas.push(msg); };
   // Fluxos: fluxos.cjs + qa/fluxos-*.cjs (um arquivo por pacote de trabalho, para evitar conflitos)
   const fsq = require('fs'), pathq = require('path');
   const fluxos = Object.assign({}, require('./fluxos.cjs'), ...fsq.readdirSync(__dirname).filter(f => /^fluxos-.+\.cjs$/.test(f)).sort().map(f => require(pathq.join(__dirname, f))));
+  // QA_FLUXOS=<regex> roda só os fluxos cujo nome casa (útil para iterar); sem ele, roda todos
+  const filtro = process.env.QA_FLUXOS ? new RegExp(process.env.QA_FLUXOS) : null;
   for(const [nome, fn] of Object.entries(fluxos)){
+    if(filtro && !filtro.test(nome)) continue;
     try { await reset(); await fn({ p, ir, check, APP, recarregar }); }
     catch(e){ falhas.push(`fluxo "${nome}" lançou: ${e.message.split('\n')[0]}`); }
   }

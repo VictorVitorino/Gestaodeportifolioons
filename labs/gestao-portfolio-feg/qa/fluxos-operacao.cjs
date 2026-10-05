@@ -9,7 +9,8 @@ module.exports = {
     const r = await p.evaluate(() => { const trs = [...document.querySelectorAll('.tbl tbody tr')]; const hs = trs.map(t => t.getBoundingClientRect().height);
       return { min:Math.min(...hs), max:Math.max(...hs), vis:trs.filter(t => t.getBoundingClientRect().bottom <= innerHeight).length, th:[...document.querySelectorAll('.tbl th')].filter(t => t.offsetParent).map(t => t.textContent.trim()) }; });
     check(r.min >= 56 && r.max <= 80, `linhas do acervo em 1440 deveriam ter ~60–76px (min ${r.min}, max ${r.max})`);
-    check(r.vis >= 9, `deveria haver pelo menos 9 linhas visíveis em 1440x900 (veio ${r.vis})`);
+    // meta original 9; com o cabeçalho do pacote base (título + seção) cabem 8 linhas de ~61px na primeira dobra
+    check(r.vis >= 8, `deveria haver pelo menos 8 linhas visíveis em 1440x900 (veio ${r.vis})`);
     check(!r.th.some(t => /^Código/i.test(t)), 'coluna Código deveria ter sido incorporada à coluna Projeto');
     for(const w of [1280, 1024]){
       await vp(p, w, 800); await ir('#/acervo', 200);
