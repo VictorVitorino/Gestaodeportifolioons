@@ -448,7 +448,7 @@
     const forcar=GP.state().forcar||{},rk=M.ranking(m.lista.filter(p=>p.etapa==='aprovado')),pend=rk.filter(x=>!forcar[x.p.id]),sem=m.capacidade.semNota.length;
     return `<div class="card b-4 gx-dec">${chartHead('Decisões pendentes','Priorizadas pelo ranking e ainda sem decisão do comitê.','avaliar')}
       ${pend.length?`<ol class="gx-dec-list">${pend.slice(0,3).map(x=>`<li><a href="#/projeto/${x.p.id}"><span class="gx-pos">${x.pos}</span><span class="gx-dec-t"><span class="code">${esc(x.p.codigo)}</span>${esc(semExemplo(x.p.titulo))}</span><b class="gx-num" data-tt="Valor ${fmt.n(x.s.valor)} · esforço ${fmt.n(x.s.esforco)}">${fmt.n(x.s.valor)}</b></a></li>`).join('')}</ol>`:`<div class="info-empty">${icon('check',20)}<p>Nenhuma iniciativa avaliada aguarda decisão.</p></div>`}
-      <div class="gx-card-foot">${sem?`<a class="link" href="#/avaliar">${plural(sem,'aprovado aguarda avaliação','aprovados aguardam avaliação')}</a>`:''}<a class="link" href="#/ranking">Abrir o ranking${pend.length>3?` (${pend.length})`:''}</a></div></div>`;
+      <div class="gx-card-foot">${sem?`<a class="link" href="#/avaliar">${plural(sem,'aprovado aguarda avaliação','aprovados aguardam avaliação')}</a>`:''}<a class="link" href="#/ranking">Abrir o ranking${pend.length>3?` (${pend.length})`:''}</a>${GP.comite&&pend.length?`<button type="button" class="link" data-comite="painel">Modo comitê</button>`:''}</div></div>`;
   }
   function cartaoRiscos(){
     if(!GP.riscos||!GP.riscos.medir)return '';
@@ -472,7 +472,7 @@
   function etapaFluxo(href,rot,n,sub,extra=''){return `<a class="gx-step" href="${href}"><span class="gx-step-lbl">${esc(rot)}</span><strong>${fmt.n(n)}</strong><small>${sub}</small>${extra}</a>`;}
   const etapaBloqueada=(rot,nv)=>`<div class="gx-step locked"><span class="gx-step-lbl">${esc(rot)}</span><span class="gx-lock">${ico('cadeado',16)} Disponível no nível ${nv}</span><button type="button" class="link gx-ativar" data-nivel="${nv}">Ativar nível ${nv}</button></div>`;
   function fluxo(m){
-    const nivel=GP.nivel(),todos=m.lista,avaliar=todos.filter(p=>p.etapa==='aprovado'&&!M.pontuar(p).completo).length,prontos=todos.filter(p=>p.etapa==='aprovado'&&M.pontuar(p).completo).length;
+    const nivel=GP.nivel(),todos=m.lista,avaliar=(M.pendentesAvaliacao?M.pendentesAvaliacao(todos):todos.filter(p=>p.etapa==='aprovado'&&!M.pontuar(p).completo)).length,prontos=todos.filter(p=>p.etapa==='aprovado'&&M.pontuar(p).completo).length;
     const dl=deltaChip(m.tendencia.fila);
     const chip=`<span class="gx-delta ${dl.tom?'gx-delta-'+dl.tom:''}">${esc(dl.texto)}</span>`;
     return `<section class="b-full operation-flow gx-flow" aria-label="Fluxo do portfólio">
@@ -576,7 +576,7 @@
   function custos(m){
     const c=m.capacidade,cap=GP.state().capacidade,custosGer=m.gerencias.map(g=>({...g,value:sum(m.lista.filter(p=>(p.gerencia||'')===g.key&&p.custo!=null),p=>p.custo)}));
     const ratio=c.efetiva?m.fteExecucao/c.efetiva:null,acima=ratio!=null&&ratio>1;
-    const sim=['cabe','fixado','fixado_estoura','nao_cabe','excluido','sem_estimativa'].map(k=>({key:null,label:M.STATUS_CARTEIRA[k].nome,value:c.itens.filter(it=>it.status===k).length,color:{cabe:'#6b8f2a',fixado:'#00908f',fixado_estoura:'#b8642c',nao_cabe:'#d5a32d',excluido:'#a3b2ac',sem_estimativa:'#a3b2ac'}[k]})).filter(x=>x.value);
+    const sim=['cabe','fixado','cabe_a_partir','nao_cabe','fixado_estoura','obrigatorio_deslocado','excluido','sem_estimativa','fora_periodo'].filter(k=>M.STATUS_CARTEIRA[k]).map(k=>({key:null,label:M.STATUS_CARTEIRA[k].nome,value:c.itens.filter(it=>it.status===k).length,color:{cabe:'#6b8f2a',fixado:'#00908f',cabe_a_partir:'#3a74a8',nao_cabe:'#d5a32d',fixado_estoura:'#b8642c',obrigatorio_deslocado:'#ac7044',excluido:'#a3b2ac',sem_estimativa:'#a3b2ac',fora_periodo:'#c3cdc9'}[k]})).filter(x=>x.value);
     return `<div class="metric-grid gx-kpis scroll-fade">
       ${metric({label:'Custo estimado total',valor:m.comCusto?fmt.mi(m.custo):'-',sub:`${m.comCusto} de ${plural(m.n,'registro','registros')} com estimativa`,icone:'moeda'})}
       ${metric({label:'FTE em execução',valor:fmt.n(m.fteExecucao,1),sub:`${m.comFteExecucao} de ${fmt.n(m.execucao)} com FTE informado`,icone:'pessoas',tom:'#188787'})}
@@ -750,7 +750,7 @@
       vals['RANK_TITLE_'+(i+1)]=rank[i]?`${i+1}. ${rank[i].p.codigo} / ${trunc(rank[i].p.titulo,43)}`:i===0?'Nenhum aprovado com avaliação completa no recorte.':'';
       vals['RANK_SCORE_'+(i+1)]=rank[i]?`Valor ${fmt.n(rank[i].s.valor)} / esforço ${fmt.n(rank[i].s.esforco)}${rank[i].p.obrigatorio?' / obrigatório':''}`:'';
     }
-    const pend=c.itens.filter(i=>['nao_cabe','fixado_estoura','sem_estimativa'].includes(i.status));
+    const pend=c.itens.filter(i=>['obrigatorio_deslocado','fixado_estoura','nao_cabe','cabe_a_partir','sem_estimativa'].includes(i.status));
     for(let i=0;i<5;i++)vals['DECISION_'+(i+1)]=pend[i]?`${pend[i].p.codigo} / ${trunc(pend[i].p.titulo,92)}\n${M.STATUS_CARTEIRA[pend[i].status].nome}${pend[i].falta?' / falta '+(pend[i].falta.tipo==='FTE'?fmt.n(pend[i].falta.valor,1)+' FTE':fmt.brl(pend[i].falta.valor)):''}`:i===0?'Nenhum candidato exige ajuste por capacidade segundo os dados disponíveis.':'';
     if(pend.length>5)vals.DECISION_NOTE=`Primeiros 5 de ${pend.length} candidatos com restrição, na ordem do ranking. Consulte a carteira para a lista completa.`;
     const agendas=[
