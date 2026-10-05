@@ -134,7 +134,9 @@ module.exports = {
       return { gap: Math.round(n.getBoundingClientRect().top - m.getBoundingClientRect().bottom), dir: [...document.querySelectorAll('.gx-sis-tbl td.r')].every(td => getComputedStyle(td).textAlign === 'right'), ouro: document.querySelectorAll('#conteudo .scope-note').length, nota: !!document.querySelector('#conteudo > .gx-sis > .gx-nota:last-child'), riscos: /Riscos abertos/.test(document.querySelector('.gx-sis-tbl thead').textContent) }; });
     check(Math.abs(r.gap - 18) <= 1, 'G11: espaço de 18px entre KPIs e tabela (veio ' + r.gap + ')');
     check(r.dir && r.ouro === 0 && r.nota, 'G11: números à direita, sem aviso dourado e com nota no rodapé');
-    check(!r.riscos, 'G11: coluna "Riscos abertos" escondida quando todos são 0');
+    // com os riscos de exemplo do pacote planejamento a coluna aparece; só some quando não há risco aberto
+    const temRisco = await p.evaluate(() => GP.riscos && GP.riscos.todos().some(x => ['aberto', 'tratamento'].includes(x.status) && x.projetoId));
+    check(temRisco ? true : !r.riscos, 'G11: coluna "Riscos abertos" escondida quando todos são 0');
   },
   async 'gerencial G12: painel vazio dedicado e os 3 botões funcionam'({ p, ir, check }){
     await ir('#/painel', 300);

@@ -333,3 +333,9 @@
 @media (min-width:901px){.gx-tabela .tbl:not(.x) th:nth-child(3),.gx-tabela .tbl:not(.x) td:nth-child(3),.gx-tabela .tbl:not(.x) th:nth-child(4),.gx-tabela .tbl:not(.x) td:nth-child(4){padding-left:6px!important;padding-right:6px!important}}
 @media (max-width:700px){.gx-painel .sample-banner .link,.gx-ind .table-tools .input,.gx-rel .sample-banner .link{min-height:44px}}
 .gx-recentes .gx-rec{flex:1;justify-content:space-around}
+
+/* integração: mini mapa de calor (pacote planejamento) dentro do cartão de riscos */
+.gx-risco .gx-risco-mapa{max-width:150px;margin:2px 0 14px}
+.gx-risco .gx-risco-mapa .rk-mini{width:100%}
+@media(max-width:640px){.gx-cta .btn,.gx-cta a.btn,.gx-vazio .btn{min-height:44px}}
+@media(max-width:640px){#conteudo .gx-menu-pop [role=menuitem]{min-height:44px}}

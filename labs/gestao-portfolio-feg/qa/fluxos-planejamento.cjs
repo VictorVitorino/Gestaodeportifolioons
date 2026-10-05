@@ -204,7 +204,7 @@ module.exports = {
     await p.keyboard.press('Escape');
     // painel nível 2 com mini-heatmap; remover exemplos remove os riscos de exemplo
     await p.evaluate(() => GP.setNivel(2)); await ir('#/painel', 300);
-    check(await p.locator('.rk-resumo .rk-mini .rk-cel').count() === 25, 'painel deveria mostrar o mini-heatmap 5×5');
+    check(await p.locator('#conteudo .rk-mini .rk-cel').count() === 25, 'painel deveria mostrar o mini-heatmap 5×5');
     await p.evaluate(() => { GP.state().projetos = GP.projetos.todos().filter(x => !x.exemplo); GP.save(); });
     check(await p.evaluate(() => GP.riscos.todos().length) === 0, 'remover os exemplos deveria remover os riscos de exemplo');
   },

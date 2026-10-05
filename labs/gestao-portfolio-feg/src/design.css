@@ -702,3 +702,9 @@ body.has-modal .toast{z-index:55}
 [style*="left:-20000px"] .fade-r,[style*="left:-20000px"] .fade-l,[style*="left:-20000px"] .fade-l td:first-child,[style*="left:-20000px"] .fade-l th:first-child{box-shadow:none!important}
 [style*="left:-20000px"] .rola td:first-child,[style*="left:-20000px"] .rola th:first-child{position:static!important}
 [style*="left:-20000px"] th[aria-sort="none"] .th-sort::after,[style*="left:-20000px"] .tbl-sortbar,[style*="left:-20000px"] .chart-data{display:none!important}
+
+/* integração: alvos de toque de 44px no celular valem também para os botões e resumos das telas (pacotes) */
+@media(max-width:640px){
+  #conteudo .btn,#conteudo a.btn,#conteudo summary.btn{min-height:44px}
+  #conteudo .chart-data summary{min-height:44px;display:flex;align-items:center}
+}
