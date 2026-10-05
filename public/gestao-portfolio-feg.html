@@ -3662,7 +3662,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     const [dLonga, dCurta] = datas();
     document.title = `${titulo || 'Início'} · Gestão de Portfólio FEG`;
     const quando = `<span class="when"><span class="when-l">${esc(dLonga)}</span><span class="when-s" aria-hidden="true">${esc(dCurta)}</span></span>`;
-    const niveis = cls => GP.NIVEIS.map(Lv => `<button type="button" class="${Lv.n === nivel ? 'on' : ''}" data-nivel="${Lv.n}" aria-pressed="${Lv.n === nivel}" aria-label="Nível ${Lv.n}, ${esc(Lv.nome)}" title="Nível ${Lv.n} · ${esc(Lv.nome)}"><b aria-hidden="true">${Lv.n}</b><span aria-hidden="true">${esc(Lv.curto)}</span></button>`).join('');
+    const niveis = cls => GP.NIVEIS.map(Lv => `<button type="button" class="${Lv.n === nivel ? 'on' : ''}" data-nivel="${Lv.n}" data-alternar aria-pressed="${Lv.n === nivel}" aria-label="Nível ${Lv.n}, ${esc(Lv.nome)}${Lv.n === nivel && Lv.n > 1 ? ' (ativo; clique para desativar)' : ''}" title="${Lv.n === nivel && Lv.n > 1 ? `Nível ${Lv.n} ativo · clique de novo para desativar e voltar ao nível ${Lv.n - 1}` : `Nível ${Lv.n} · ${esc(Lv.nome)}`}"><b aria-hidden="true">${Lv.n}</b><span aria-hidden="true">${esc(Lv.curto)}</span></button>`).join('');
     app.innerHTML = `<a class="skip" href="#conteudo" data-pular>Ir para o conteúdo</a><div class="shell ${mini ? 'mini' : ''} ${miniAuto() ? 'mini-auto' : ''}">
       <aside class="side ${aberto ? 'open' : ''}" id="gp-side" aria-label="Menu">${menu(r, tela, nivel, niveis)}</aside>
       <div class="main">
@@ -3752,12 +3752,15 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     modal(`<h3>Níveis do sistema</h3><p class="muted" style="margin:0 0 14px">Comece pelo nível 1. Ative os próximos quando precisar de mais recursos; nada do que foi cadastrado se perde ao trocar de nível.</p>
       <div class="lvl-cards">${GP.NIVEIS.map(L => `<div class="lvl-card ${L.n === nv ? 'on' : ''}"><div class="row"><span class="n">${L.n}</span><h4>${esc(L.nome)}</h4></div><p>${esc(L.resumo)}</p>
         <ul>${L.faz.map(f => `<li>${esc(f)}</li>`).join('')}</ul><p><b>Quando usar:</b> ${esc(L.quando)}</p>
-        <button class="btn ${L.n === nv ? 'btn-ghost' : 'btn-primary'} btn-sm" data-nivel="${L.n}" ${L.n === nv ? 'disabled' : ''}>${L.n === nv ? 'Nível atual' : 'Usar nível ' + L.n}</button></div>`).join('')}</div>
+        ${L.n === nv ? (L.n > 1 ? `<button class="btn btn-ghost btn-sm" data-nivel="${L.n}" data-alternar>Desativar nível ${L.n}</button>` : '<button class="btn btn-ghost btn-sm" disabled>Nível atual (sempre ativo)</button>') : `<button class="btn btn-primary btn-sm" data-nivel="${L.n}">Usar nível ${L.n}</button>`}</div>`).join('')}</div>
       <div class="m-act"><button class="btn btn-ghost" data-close="1">Fechar</button></div>`, {largo:true});
   };
   document.addEventListener('click', e => {
     const pular = e.target.closest('[data-pular]'); if(pular){ e.preventDefault(); const c = document.getElementById('conteudo'); if(c){ const h = c.querySelector('h1'); const alvo = h || c; if(h) h.setAttribute('tabindex', '-1'); alvo.focus(); } return; }
-    const nv = e.target.closest('[data-nivel]'); if(nv){ closeModal(); GP.setNivel(+nv.dataset.nivel); return; }
+    const nv = e.target.closest('[data-nivel]'); if(nv){ closeModal(); let n = +nv.dataset.nivel;
+      // Clicar de novo no nível ativo desativa o módulo e volta ao anterior; o nível 1 (cadastro) fica sempre ativo
+      if(nv.hasAttribute('data-alternar') && n === GP.nivel() && n > 1){ n -= 1; GP.setNivel(n); GP.toast(`Nível ${n + 1} desativado. Você voltou ao nível ${n} · ${GP.NIVEIS[n - 1].nome}. Nada do que foi cadastrado se perde.`); return; }
+      GP.setNivel(n); return; }
     if(e.target.closest('[data-storage-status]')){ GP.go('#/config'); return; }
     if(e.target.closest('[data-ajuda-nivel]')){ GP.explicarNiveis(); return; }
     if(e.target.closest('[data-fechar-menu]')){ fecharMenuMovel(); return; }
