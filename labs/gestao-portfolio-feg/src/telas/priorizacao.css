@@ -4,11 +4,11 @@
 
 /* ---------- selos: nota (com classe) e quadrante (cor do token + glifo) ---------- */
 .score.nota{gap:3px;min-width:46px;padding:0 8px;font-variant-numeric:tabular-nums}
-.score.nota .nota-l{font-size:10px;font-weight:700;letter-spacing:.02em;opacity:.82}
+.score.nota .nota-l{font-size:11px;font-weight:700;letter-spacing:.02em}
 .score.nota-a{background:#3E6801;color:#fff}
 .score.nota-b{background:#E1EDCF;color:#2E4F00}
 .score.nota-c{background:#F1F4F2;color:#566b64;box-shadow:inset 0 0 0 1px rgba(25,53,47,.09)}
-.score.nota-x{background:#F1F4F2;color:#71857e}
+.score.nota-x{background:#F1F4F2;color:var(--dim)}
 .pill.qpill{gap:6px;color:#19352f;border:1px solid transparent;padding:3px 10px 3px 8px}
 .pill.qpill .qg{flex:none}
 .pill.qpill.q-nao{background:transparent;border:1px dashed #a9bab3;color:#566b64}
@@ -26,6 +26,10 @@
 .av-grupo>.sec-h{margin-bottom:10px}
 .av-data{font-variant-numeric:tabular-nums}
 .av-revisar{gap:4px}
+.av-res{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.av-res-n{display:inline-flex;align-items:center;gap:10px;white-space:nowrap}
+.av-res-e{font-size:12.5px;color:var(--muted)}
+.av-res-e b{color:#17302b;font-variant-numeric:tabular-nums}
 
 /* ---------- avaliar: formulário ---------- */
 .aval-bloco .regua{display:flex;align-items:center;gap:10px;font-size:11.5px;color:#566b64;margin-top:-4px}
@@ -33,7 +37,7 @@
 .aval-bloco .regua-esforco i{background:linear-gradient(90deg,#EEF3F6,#477b91)}
 .aval-bloco .crit-h{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
 .aval-bloco .crit-t{min-width:0}
-.aval-bloco .crit-n{display:block;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#71857e;margin-bottom:2px}
+.aval-bloco .crit-n{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:2px}
 .aval-bloco .crit-p{font-size:13px}
 .peso-chip{flex:none;white-space:nowrap;display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;line-height:16px;color:#19352f;background:#F1F6EA;border:1px solid #E1EDCF;border-radius:999px;padding:3px 10px 3px 8px}
 .peso-chip .pc-trilho{display:inline-block;width:26px;height:4px;border-radius:2px;background:#C6DCA4;overflow:hidden}
@@ -49,7 +53,7 @@
 .aval-bloco .escala button.on .es-ok{display:grid}
 .aval-bloco .escala button .es-sug{display:none}
 .aval-bloco .escala button.sug{border:1.5px dashed #6b8f2a;background:#fbfdf8;padding-top:26px}
-.aval-bloco .escala button.sug .es-sug{display:inline-block;position:absolute;top:6px;left:9px;font-style:normal;font-size:10.5px;font-weight:650;line-height:15px;color:#2E4F00;background:#E1EDCF;border-radius:999px;padding:0 7px}
+.aval-bloco .escala button.sug .es-sug{display:inline-block;position:absolute;top:6px;left:9px;font-style:normal;font-size:11px;font-weight:650;line-height:15px;color:#2E4F00;background:#E1EDCF;border-radius:999px;padding:0 7px}
 .aval-bloco[data-eixo=esforco] .escala button.on{border-color:#477b91;background:#EEF3F6;color:#477b91}
 .aval-bloco[data-eixo=esforco] .escala button.on b{color:#477b91}
 .aval-bloco[data-eixo=esforco] .escala button.on .es-ok{background:#477b91}
@@ -69,7 +73,7 @@
 .ar-l{font-size:12px;color:#566b64;font-weight:600}
 .ar-v{font-size:34px;font-weight:700;line-height:1.1;color:#3E6801;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .ar-esf .ar-v{color:#477b91}
-.ar-s{font-size:11.5px;color:#71857e;line-height:1.35}
+.ar-s{font-size:12px;color:var(--dim);line-height:1.35}
 .ar-inicio{display:flex;gap:14px;align-items:center;padding:6px 2px}
 .ar-inicio>div{display:flex;flex-direction:column;gap:4px}
 .ar-inicio b{font-size:15px}
@@ -78,7 +82,7 @@
 .ar-q p{margin:0;font-size:13px;color:#566b64}
 .ar-falta{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
 .ar-dc{border-top:1px solid rgba(25,53,47,.09);padding-top:12px;display:flex;flex-direction:column;gap:14px}
-.ar-dc-t{margin:0;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#71857e}
+.ar-dc-t{margin:0;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
 .aval-res .ar-acoes{display:flex;flex-direction:column;gap:8px}
 .aval-res .ar-acoes .btn{width:100%;justify-content:center}
 .aval-res .ar-nota{margin:0;font-size:12px;line-height:1.5}
@@ -101,18 +105,19 @@
 .dc{display:flex;flex-direction:column;gap:7px}
 .dc-h{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;font-weight:650;color:#17302b}
 .dc-h b{font-size:15px;font-variant-numeric:tabular-nums}
-.dc-h small{font-size:11px;color:#71857e;font-weight:500}
+.dc-h small{font-size:11px;color:var(--dim);font-weight:500}
+.dc-h b.dc-parcial{font-size:12px;font-weight:650;color:#8a5a12;background:#FCF4E3;border:1px solid rgba(168,112,26,.2);border-radius:999px;padding:1px 9px;line-height:18px}
 .dc-bar{display:flex;gap:2px;height:12px}
 .dc-slot{position:relative;min-width:3px;height:100%;border-radius:2px;overflow:hidden;background-color:#f2f5f1;background-image:repeating-linear-gradient(135deg,rgba(25,53,47,.14) 0 1.5px,rgba(25,53,47,0) 1.5px 5px)}
 .dc-slot:first-child{border-radius:4px 2px 2px 4px}
 .dc-slot:last-child{border-radius:2px 4px 4px 2px}
 .dc-slot.dc-sem{background-image:none;background-color:#fff;box-shadow:inset 0 0 0 1px #c9d6cf}
 .dc-slot i{display:block;height:100%}
-.dc-leg{display:flex;flex-wrap:wrap;gap:3px 12px;font-size:11.5px;color:#566b64;line-height:1.5}
+.dc-leg{display:flex;flex-wrap:wrap;gap:3px 12px;font-size:12px;color:#566b64;line-height:1.5}
 .dc-leg span{display:inline-flex;align-items:center;gap:5px}
 .dc-leg i{width:8px;height:8px;border-radius:2px;flex:none}
 .dc-leg b{color:#17302b;font-variant-numeric:tabular-nums}
-.dc-leg small{color:#71857e;font-size:11px}
+.dc-leg small{color:var(--dim);font-size:11px}
 .dc-frase{margin:0;font-size:12.5px;color:#17302b;line-height:1.5}
 .ficha-dc{display:flex;flex-direction:column;gap:12px;margin:4px 0 14px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.6);border:1px solid rgba(25,53,47,.09)}
 
@@ -122,6 +127,11 @@
 .ps-num{display:flex;flex-direction:column;gap:2px}
 .ps-num strong{font-size:2rem;font-weight:700;line-height:1;color:#17302b;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
 .ps-num span{font-size:12.5px;color:#566b64;white-space:nowrap}
+.ps-num small{font-size:12px;color:var(--dim);white-space:nowrap;margin-top:2px}
+.pz-escopo-temp{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px;padding:10px 14px;border-radius:14px;background:#EEF3F6;border:1px solid #d6e3ea;color:#19352f;font-size:13px;line-height:1.5}
+.pz-escopo-temp>svg{flex:none;color:#477b91}
+.pz-escopo-temp>span{flex:1;min-width:220px}
+.pz-escopo-temp .btn{flex:none}
 .ps-bar{display:flex;gap:3px;height:26px}
 .ps-seg{border:0;border-radius:6px;color:#fff;font-weight:700;font-size:12px;min-width:28px;cursor:pointer;padding:0;transition:opacity .15s,box-shadow .15s}
 .ps-seg:hover{box-shadow:inset 0 0 0 2px rgba(255,255,255,.55)}
@@ -145,7 +155,8 @@
 }
 @container workspace (max-width:520px){
   .pz-sintese{grid-template-columns:1fr;gap:12px;padding:16px}
-  .ps-num{flex-direction:row;align-items:baseline;gap:8px}
+  .ps-num{flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:2px 8px}
+  .ps-num small{flex-basis:100%;white-space:normal;margin-top:0}
 }
 
 /* ---------- ranking ---------- */
@@ -169,16 +180,21 @@
 .rk-val .rk-meter{width:104px;flex:none}
 .rk-esf{display:flex;flex-direction:column;gap:2px;white-space:nowrap}
 .rk-esf>span{display:inline-flex;align-items:center;gap:8px}
-.rk-mini{display:inline-block;width:40px;height:4px;border-radius:2px;background:rgba(25,53,47,.09)}
-.rk-mini i{display:block;height:100%;border-radius:2px;background:#477b91}
-.rk-esf small{font-size:11.5px;color:#566b64}
+/* Mini barra de esforço (0-100) da tabela do ranking. Nome próprio do pacote: .rk-mini é do mapa de riscos (planejamento). */
+.rk-esf-bar{display:inline-block;width:40px;height:4px;border-radius:2px;background:rgba(25,53,47,.09)}
+.rk-esf-bar i{display:block;height:100%;border-radius:2px;background:#477b91}
+.rk-esf small{font-size:12px;color:#566b64}
 .rank-cards{display:none;list-style:none;margin:0;padding:0;flex-direction:column;gap:10px}
 .rc{display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-radius:18px;text-decoration:none;color:inherit;
   background:var(--glass,rgba(255,255,255,.7));border:1px solid var(--glass-line,#fff);box-shadow:var(--sh-1)}
-.rc-h{display:flex;align-items:center;gap:8px}
+.rc-h{display:flex;align-items:center;gap:6px 8px;flex-wrap:wrap}
 .rc-pos{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#19352f;color:#fff;font-size:12px;font-weight:700;flex:none}
 .rc-t{font-size:14px;line-height:1.4;font-weight:600;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .rc-v{display:flex;align-items:center;gap:7px;font-size:12.5px;color:#566b64;flex-wrap:wrap}
+.rc-vv,.rc-ve{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.rc-ve b{color:#17302b;font-variant-numeric:tabular-nums}
+.rc-etapa{display:inline-flex;margin-left:auto}
+.rc-etapa .pill{white-space:nowrap}
 .rc-v .rk-meter{width:52px}
 .rc-v .score{height:22px}
 .rc-sep{color:#a9bab3}
@@ -200,6 +216,8 @@
   .rc-t{grid-column:1;grid-row:2}
   .rc-v{grid-column:2;grid-row:1/3}
   .rc-c{grid-column:3;grid-row:1/3;flex-direction:column;align-items:flex-start;gap:4px}
+  /* Valor e esforço em duas linhas, cada rótulo junto do seu número */
+  .rc-v{flex-direction:column;align-items:flex-start;gap:4px;flex-wrap:nowrap}
   .rc-sep{display:none}
 }
 @container workspace (max-width:640px){ .pz-podio{display:none} }
@@ -249,7 +267,7 @@ tr.destaque td:first-child{box-shadow:inset 3px 0 0 #3E6801}
 .mq-n[hidden]{display:none}
 .mq-l .code{flex:none}
 .mq-t{flex:1;min-width:0}
-.mq-v{font-size:11.5px;color:#566b64;white-space:nowrap;font-variant-numeric:tabular-nums}
+.mq-v{font-size:12px;color:#566b64;white-space:nowrap;font-variant-numeric:tabular-nums}
 .mq-vazio{font-size:12.5px}
 @container workspace (max-width:1200px){
   .mtz-layout{grid-template-columns:1fr}
@@ -274,7 +292,7 @@ tr.destaque td:first-child{box-shadow:inset 3px 0 0 #3E6801}
 .pb-falta{height:100%;border-radius:3px;border:1.5px dashed #c9d6cf;box-sizing:border-box;flex:0 1 auto}
 .pb-excesso{position:absolute;top:-3px;bottom:-3px;border-radius:3px;border:1px solid #ac7044;background-color:rgba(172,112,68,.12);background-image:repeating-linear-gradient(135deg,rgba(172,112,68,.55) 0 3px,rgba(172,112,68,0) 3px 7px)}
 .pb-100{position:absolute;top:-4px;bottom:-4px;width:2px;background:#19352f;border-radius:1px;transform:translateX(-1px)}
-.pb-esc{display:flex;justify-content:space-between;font-size:11px;color:#71857e}
+.pb-esc{display:flex;justify-content:space-between;font-size:11px;color:var(--dim)}
 .pb-x{color:#93461d}
 .pw-dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:7px;vertical-align:1px}
 .crit-salvar{padding:18px 22px;display:flex;flex-direction:column;gap:12px}
@@ -287,7 +305,7 @@ tr.destaque td:first-child{box-shadow:inset 3px 0 0 #3E6801}
 .pv-l{list-style:none;margin:0;padding:0}
 .pv-l li{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(25,53,47,.09);font-size:13px}
 .pv-pos{width:18px;flex:none;font-variant-numeric:tabular-nums}
-.pv-mov{width:30px;font-size:11.5px;font-weight:700;color:#71857e;text-align:center;flex:none;font-variant-numeric:tabular-nums}
+.pv-mov{width:30px;font-size:12px;font-weight:700;color:var(--dim);text-align:center;flex:none;font-variant-numeric:tabular-nums}
 .pv-mov.sobe{color:#3E6801}
 .pv-mov.desce{color:#ac7044}
 .pv-t{min-width:0;line-height:1.45}
@@ -304,3 +322,12 @@ tr.destaque td:first-child{box-shadow:inset 3px 0 0 #3E6801}
 .pz-toast-act{margin-left:12px;border:0;background:rgba(255,255,255,.16);color:#fff;font-weight:650;border-radius:999px;padding:4px 12px;cursor:pointer}
 .av-grupo .tbl td[data-label="Projeto"]{min-width:260px}
 [data-normalizar][hidden],.aval-res [data-salvar-proximo][hidden]{display:none!important}
+
+/* Celular: alvos de toque com pelo menos 44px de altura (síntese, selo de pesos, pendentes, "Obrigatórios no topo") */
+@media(max-width:640px){
+  .ps-bar{height:44px}
+  .ps-seg{min-height:44px;min-width:44px}
+  .pz-versao,.ps-pend{min-height:44px;padding:0 14px}
+  .pz-topo{min-height:44px;padding:0 4px}
+  .pz-escopo-temp .btn{min-height:44px}
+}

@@ -50,20 +50,24 @@
   const ARDOSIAS = ['#477b91', '#3a74a8', '#6e97a9', '#8fb0c9'];
   const coresEixo = eixo => eixo === 'esforco' ? ARDOSIAS : VERDES;
   const decompor = (p, crit = M.criterios(), eixo) => M.decompor ? M.decompor(p, crit, eixo) : [];
-  /** Barra empilhada 0-100: um trecho por pergunta (largura = pontos possíveis); a parte cheia é o que o projeto obteve, a hachura é o que faltou. */
+  /** Barra empilhada 0-100: um trecho por pergunta (largura = pontos possíveis); a parte cheia é o que o projeto obteve, a hachura é o que faltou.
+      Com pergunta sem resposta a nota do eixo ainda não existe: o cabeçalho diz "parcial" e a frase diz quantas faltam (nada de "no máximo" nem "maior oportunidade"). */
   function decompHtml(itens, eixo, { titulo = true } = {}){
     if(!itens.length) return '';
     const cores = coresEixo(eixo), tot = itens.reduce((a, x) => a + x.pontos, 0), alguma = itens.some(x => x.resp != null);
-    const aria = `${eixo === 'esforco' ? 'Esforço' : 'Valor'} ${fmt.n(tot, 0)} de 100: ` + itens.map(x => `${x.nome} ${x.resp == null ? 'sem resposta' : fmt.n(x.pontos, 0) + ' de ' + fmt.n(x.max, 0)}`).join('; ');
+    const semResp = itens.filter(x => x.resp == null).length, nomeEixo = eixo === 'esforco' ? 'Esforço' : 'Valor';
+    const aria = `${nomeEixo} ${semResp ? `parcial, ${plural(semResp, 'pergunta sem resposta', 'perguntas sem resposta')}` : fmt.n(tot, 0) + ' de 100'}: ` + itens.map(x => `${x.nome} ${x.resp == null ? 'sem resposta' : fmt.n(x.pontos, 0) + ' de ' + fmt.n(x.max, 0)}`).join('; ');
     const bar = `<div class="dc-bar" role="img" aria-label="${esc(aria)}">${itens.map((x, i) => `<span class="dc-slot${x.resp == null ? ' dc-sem' : ''}" style="flex:${x.max.toFixed(3)} 1 0" data-pontos="${x.pontos.toFixed(3)}" data-tt="${esc(x.nome)}&#10;${x.resp == null ? 'Sem resposta' : `Resposta ${x.resp} de 3`}&#10;${fmt.n(x.pontos, 1)} de ${fmt.n(x.max, 0)} pontos"><i style="width:${x.max ? Math.min(100, x.pontos / x.max * 100) : 0}%;background:${cores[i % cores.length]}"></i></span>`).join('')}</div>`;
     const leg = `<div class="dc-leg">${itens.map((x, i) => `<span><i style="background:${cores[i % cores.length]}"></i>${esc(x.nome)} <b>${x.resp == null ? '–' : (x.pontos > 0.05 ? '+' : '') + fmt.n(x.pontos, 0)}</b><small> de ${fmt.n(x.max, 0)}</small></span>`).join('')}</div>`;
     let frase = '';
-    if(alguma){
+    if(semResp) frase = `Faltam <b>${plural(semResp, 'pergunta', 'perguntas')}</b>: a nota de ${nomeEixo.toLowerCase()} sai quando todas forem respondidas.`;
+    else if(alguma){
       if(eixo === 'esforco'){ const m = itens.slice().sort((a, b) => b.pontos - a.pontos)[0]; if(m && m.pontos > 0) frase = `Mais pesa no esforço: <b>${esc(m.nome)}</b> (+${fmt.n(m.pontos, 0)}).`; }
       else { const m = itens.filter(x => x.resp != null).sort((a, b) => (b.max - b.pontos) - (a.max - a.pontos))[0];
         frase = m && m.max - m.pontos > 0.5 ? `Maior oportunidade: <b>${esc(m.nome)}</b> (faltam ${fmt.n(m.max - m.pontos, 0)} pontos).` : 'Todas as respostas no máximo.'; }
     }
-    return `<div class="dc dc-${eixo}">${titulo ? `<div class="dc-h"><span>${eixo === 'esforco' ? 'Esforço' : 'Valor'}</span><b>${alguma ? fmt.n(tot, 0) : '–'}<small> de 100</small></b></div>` : ''}${bar}${leg}${frase ? `<p class="dc-frase">${frase}</p>` : ''}</div>`;
+    const cab = !alguma ? '<b>–</b>' : semResp ? '<b class="dc-parcial">parcial</b>' : `<b>${fmt.n(tot, 0)}<small> de 100</small></b>`;
+    return `<div class="dc dc-${eixo}${semResp ? ' dc-incompleto' : ''}">${titulo ? `<div class="dc-h"><span>${nomeEixo}</span>${cab}</div>` : ''}${bar}${leg}${frase ? `<p class="dc-frase">${frase}</p>` : ''}</div>`;
   }
   /** Dica do selo no ranking: as 3 maiores contribuições do valor */
   const dicaNota = (p, s) => { const d = decompor(p, M.criterios(), 'valor').filter(x => x.pontos > 0.05).sort((a, b) => b.pontos - a.pontos).slice(0, 3);
@@ -112,9 +116,9 @@
           { key:'codigo', label:'Código', fmt:v => `<span class="code">${esc(v)}</span>` },
           { key:'titulo', label:'Projeto', main:true, fmt:(v, p) => `<b style="font-weight:600">${esc(v)}</b><small>${esc(p.gerencia)} · ${esc(p.tipo)}${p.obrigatorio ? ' · obrigatório' : ''}</small>` },
           { key:'etapa', label:'Etapa', fmt:v => GP.etapaPill(v), sortVal:p => M.etapa(p.etapa).ordem },
-          { key:'valor', label:'Valor', align:'c', fmt:(v, p) => notaHtml(M.pontuar(p).valor), sortVal:p => M.pontuar(p).valor ?? -1 },
-          { key:'esforco', label:'Esforço', align:'c', fmt:(v, p) => n1(M.pontuar(p).esforco), sortVal:p => M.pontuar(p).esforco ?? -1 },
-          { key:'situacao', label:'Quadrante', fmt:(v, p) => quadPill(M.pontuar(p).quadrante), sortVal:p => QK.indexOf(M.pontuar(p).quadrante) },
+          /* Valor, esforço e quadrante numa célula só (como no ranking): a tabela cabe na área útil de 1440 com o menu aberto e "Revisar →" fica à vista */
+          { key:'valor', label:'Valor · esforço', fmt:(v, p) => { const s = M.pontuar(p);
+              return `<div class="av-res"><span class="av-res-n">${notaHtml(s.valor)}<span class="av-res-e">Esforço <b>${n1(s.esforco)}</b></span></span>${quadPill(s.quadrante)}</div>`; }, sortVal:p => M.pontuar(p).valor ?? -1 },
           { key:'data', label:'Avaliado em', fmt:(v, p) => { const d = p.avaliacao && p.avaliacao.data, t = d ? new Date(d).getTime() : NaN, velho = !isNaN(t) && Date.now() - t > SEIS_MESES;
               return `<span class="av-data">${d ? fmt.data(String(d).slice(0, 10)) : '-'}</span>${velho ? ` <span class="pill t-warn av-revisar" title="Avaliada há mais de seis meses">${icon('relogio', 12)} revisar</span>` : ''}`; }, sortVal:p => (p.avaliacao && p.avaliacao.data) || '' },
           { key:'acao', label:'', sort:false, align:'r', fmt:() => `<span class="link">Revisar →</span>` },
@@ -226,17 +230,32 @@
   const ESCOPOS = [['aguardando', 'Aguardando início (aprovados)'], ['ativos', 'Todos os ativos'], ['todos', 'Histórico (inclui concluídos)']];
   const noEscopo = (p, e) => e === 'aguardando' ? p.etapa === 'aprovado' : e === 'ativos' ? M.ETAPAS_PRIORIZAVEIS.includes(p.etapa) : true;
   let filtroQ = null, destacar = null;
-  /** Leva ao ranking com o projeto visível: ajusta o escopo para um que contenha a etapa, limpa o filtro e destaca a linha. */
+  /* Escopo de visita: quando "Ver no ranking" precisa de outro escopo para mostrar o projeto, a troca vale só enquanto a pessoa
+     está no ranking (não é gravada) e a tela avisa, com um botão para voltar ao escopo escolhido. Sair do ranking desfaz. */
+  let escopoVisita = null;
+  window.addEventListener('hashchange', () => { if(escopoVisita && !/^#\/?ranking(\?|$)/.test(location.hash)) escopoVisita = null; });
+  const escopoAtual = () => (escopoVisita && escopoVisita.escopo) || GP.state().ui.rankEscopo || 'aguardando';
+  /** Leva ao ranking com o projeto visível: se o escopo escolhido não contém a etapa, usa outro só nesta visita; limpa o filtro e destaca a linha. */
   function verNoRanking(id){
     const p = P.get(id), ui = GP.state().ui; if(!p) return;
-    if(!noEscopo(p, ui.rankEscopo || 'aguardando')) ui.rankEscopo = M.ETAPAS_PRIORIZAVEIS.includes(p.etapa) ? 'ativos' : 'todos';
-    filtroQ = null; destacar = id; GP.save(); GP.go('#/ranking');
+    const salvo = ui.rankEscopo || 'aguardando';
+    escopoVisita = noEscopo(p, salvo) ? null : { escopo: M.ETAPAS_PRIORIZAVEIS.includes(p.etapa) ? 'ativos' : 'todos', salvo, codigo: p.codigo, etapa: p.etapa };
+    filtroQ = null; destacar = id; GP.go('#/ranking');
   }
-  /** Faixa de síntese: prontos para decisão e mistura por quadrante (cada trecho filtra) */
-  function sintese(rk, pend){
+  const avisoEscopo = () => { if(!escopoVisita) return '';
+    const nome = k => (ESCOPOS.find(e => e[0] === k) || [, k])[1];
+    return `<p class="pz-escopo-temp" role="status">${icon('info', 15)}<span>Mostrando <b>${esc(nome(escopoVisita.escopo))}</b> só agora, para incluir <b>${esc(escopoVisita.codigo)}</b> (${esc(M.etapa(escopoVisita.etapa).nome)}). O escopo escolhido continua <b>${esc(nome(escopoVisita.salvo))}</b>.</span>
+      <button type="button" class="btn btn-ghost btn-sm" data-escopo-voltar>Voltar para ${esc(nome(escopoVisita.salvo))}</button></p>`; };
+  /** Faixa de síntese: número em destaque e mistura por quadrante (cada trecho filtra).
+      "Prontos para decisão" = aprovados com avaliação completa (mesma conta do painel); nos outros escopos o número é o de avaliados no escopo. */
+  function sintese(rk, pend, escopo = 'aguardando'){
     const cont = QK.map(k => [k, rk.filter(x => x.s.quadrante === k).length]);
+    const prontos = rk.filter(x => x.p.etapa === 'aprovado').length;
+    const num = escopo === 'aguardando'
+      ? `<strong>${fmt.n(rk.length)}</strong><span>${rk.length === 1 ? 'pronto' : 'prontos'} para decisão</span>`
+      : `<strong>${fmt.n(rk.length)}</strong><span>${rk.length === 1 ? 'avaliado' : 'avaliados'} neste escopo</span><small>${prontos === 1 ? '1 pronto' : `${fmt.n(prontos)} prontos`} para decisão (aprovados)</small>`;
     return `<section class="pz-sintese" aria-label="Síntese da priorização">
-      <div class="ps-num"><strong>${fmt.n(rk.length)}</strong><span>${rk.length === 1 ? 'pronto' : 'prontos'} para decisão</span></div>
+      <div class="ps-num">${num}</div>
       <div class="ps-mix"><div class="ps-bar">${rk.length ? cont.filter(([, n]) => n).map(([k, n]) => { const Q = M.QUADRANTES[k], on = filtroQ === k;
           return `<button type="button" class="ps-seg${on ? ' on' : ''}${filtroQ && !on ? ' off' : ''}" data-filtro-q="${k}" style="flex:${n} 1 0;background:${Q.cor}" aria-pressed="${on}" aria-label="${esc(Q.nome)}: ${plural(n, 'projeto', 'projetos')}. ${on ? 'Remover filtro' : 'Filtrar por este quadrante'}" data-tt="${esc(Q.nome)}&#10;${plural(n, 'projeto', 'projetos')}&#10;${on ? 'Clique para remover o filtro' : 'Clique para filtrar'}">${n}</button>`; }).join('') : '<span class="ps-vazia"></span>'}</div>
         <div class="ps-leg">${cont.map(([k, n]) => `<span class="${filtroQ === k ? 'on' : ''}">${glifo(k, 12, M.QUADRANTES[k].cor)}${esc(M.QUADRANTES[k].nome)} <b>${n}</b></span>`).join('')}</div></div>
@@ -245,7 +264,8 @@
   const chipFiltro = () => filtroQ ? `<button type="button" class="chip on pz-fq" data-filtro-q="${filtroQ}" aria-label="Remover filtro de quadrante">${glifo(filtroQ, 12)} ${esc(M.QUADRANTES[filtroQ].nome)} ${icon('x', 13)}</button>` : '';
   const filtros = (escopo, extra = '') => `<div class="filters"><div class="chips" role="group" aria-label="Escopo">${ESCOPOS.map(([k, l]) => `<button class="chip ${escopo === k ? 'on' : ''}" data-escopo="${k}" aria-pressed="${escopo === k}">${esc(l)}</button>`).join('')}</div>${chipFiltro()}${extra}</div>`;
   const ligarFiltros = el => {
-    el.querySelectorAll('[data-escopo]').forEach(b => b.onclick = () => { GP.state().ui.rankEscopo = b.dataset.escopo; filtroQ = null; GP.save(); GP.refresh(); });
+    el.querySelectorAll('[data-escopo]').forEach(b => b.onclick = () => { escopoVisita = null; GP.state().ui.rankEscopo = b.dataset.escopo; filtroQ = null; GP.save(); GP.refresh(); });
+    el.querySelectorAll('[data-escopo-voltar]').forEach(b => b.onclick = () => { escopoVisita = null; filtroQ = null; GP.refresh(); });
     el.querySelectorAll('[data-filtro-q]').forEach(b => b.onclick = () => { filtroQ = filtroQ === b.dataset.filtroQ ? null : b.dataset.filtroQ; GP.refresh(); });
   };
   const fteTxt = p => p.esforcoFte != null ? fmt.n(p.esforcoFte, 1) + ' FTE' : 'sem FTE';
@@ -253,7 +273,7 @@
   const empateTxt = 'Empate em valor; desempate por menor esforço';
 
   function telaRanking(el){
-    const ui = GP.state().ui, escopo = ui.rankEscopo || 'aguardando', topo = ui.rankObrig !== false, hist = escopo === 'todos';
+    const ui = GP.state().ui, escopo = escopoAtual(), topo = ui.rankObrig !== false, hist = escopo === 'todos';
     const base = P.todos().filter(p => noEscopo(p, escopo)), rk = M.ranking(base, { obrigatoriosNoTopo: topo });
     rk.forEach((x, i) => { const eq = y => y && Math.abs(y.s.valor - x.s.valor) < 0.05 && (!topo || !!y.p.obrigatorio === !!x.p.obrigatorio); x.empate = eq(rk[i - 1]) || eq(rk[i + 1]); });
     if(filtroQ && !rk.some(x => x.s.quadrante === filtroQ)) filtroQ = null;
@@ -265,21 +285,21 @@
     const projCel = v => `<div class="rk-proj"><div class="rk-l1"><span class="code">${esc(v.codigo)}</span> <b>${esc(v.titulo)}</b>${v.obrigatorio ? ' <span class="tag">obrigatório</span>' : ''}</div><small>${esc(v.gerencia)} · ${esc(v.tipo)} · ${esc(M.etapa(v.etapa).nome)}</small></div>`;
     el.innerHTML = U.pageHead({ titulo:'Ranking de prioridade', sub: hist ? 'Histórico: todos os projetos avaliados, inclusive concluídos, cancelados e fora da carteira. Serve para consulta, não é a ordem de início.' : 'Ordem sugerida para a equipe começar os projetos. A decisão final é do comitê; o ranking é o ponto de partida da conversa.',
         acoes:`${GP.botaoPDF()}<a class="btn btn-ghost" href="#/criterios">${icon('pesos', 16)} Ajustar pesos</a>` }) +
-      sintese(rk, pendentes(P.todos())) +
+      sintese(rk, pendentes(P.todos()), escopo) + avisoEscopo() +
       filtros(escopo, `<label class="row pz-topo"><input type="checkbox" data-topo ${topo ? 'checked' : ''}> Obrigatórios no topo</label>`) +
       (linhas.length ? podio + `<div class="rk-tabela">${U.table({ cols:[
           { key:'pos', label:'#', sort:false, fmt:(v, x) => `<span class="rk-pos">${v}${x.empate ? `<i class="rk-eq" title="${empateTxt}" aria-label="${empateTxt}">=</i>` : ''}</span>` },
           { key:'p', label:'Projeto', main:true, fmt: projCel },
           { key:'s', label:`Valor · A ≥${M.CORTE.classeA} · B ≥${M.CORTE.classeB}`, fmt:(v, x) => `<div class="rk-val">${notaHtml(v.valor, dicaNota(x.p, v))}${medidor(v.valor)}</div>` },
-          { key:'esf', label:'Esforço · FTE', fmt:(v, x) => `<div class="rk-esf" title="Esforço de 0 a 100: menor é melhor"><span><b>${n1(x.s.esforco)}</b><span class="rk-mini" aria-hidden="true"><i style="width:${Math.max(0, Math.min(100, x.s.esforco))}%"></i></span></span><small>${fteTxt(x.p)}</small></div>` },
+          { key:'esf', label:'Esforço · FTE', fmt:(v, x) => `<div class="rk-esf" title="Esforço de 0 a 100: menor é melhor"><span><b>${n1(x.s.esforco)}</b><span class="rk-esf-bar" aria-hidden="true"><i style="width:${Math.max(0, Math.min(100, x.s.esforco))}%"></i></span></span><small>${fteTxt(x.p)}</small></div>` },
           { key:'q', label:'Quadrante', fmt:(v, x) => quadPill(x.s.quadrante) },
           ...(hist ? [{ key:'et', label:'Etapa', fmt:(v, x) => GP.etapaPill(x.p.etapa) }] : []),
         ], rows: linhas.map(x => Object.assign({}, x, { esf:'', q:'', et:'' })), rowAttr: x => `class="click${x.p.id === dest ? ' destaque' : ''}" data-abrir="${esc(x.p.id)}" data-rank-id="${esc(x.p.id)}" tabindex="0"` })}</div>
         <ol class="rank-cards" aria-label="Ranking">${linhas.map(x => `<li><a class="rc${x.p.id === dest ? ' destaque' : ''}" href="#/projeto/${esc(x.p.id)}" data-rank-id="${esc(x.p.id)}">
-          <span class="rc-h"><span class="rc-pos">${x.pos}</span><span class="code">${esc(x.p.codigo)}</span>${x.empate ? `<i class="rk-eq" title="${empateTxt}">=</i>` : ''}${x.p.obrigatorio ? '<span class="tag">obrigatório</span>' : ''}</span>
+          <span class="rc-h"><span class="rc-pos">${x.pos}</span><span class="code">${esc(x.p.codigo)}</span>${x.empate ? `<i class="rk-eq" title="${empateTxt}">=</i>` : ''}${x.p.obrigatorio ? '<span class="tag">obrigatório</span>' : ''}${hist ? `<span class="rc-etapa">${GP.etapaPill(x.p.etapa)}</span>` : ''}</span>
           <b class="rc-t">${esc(x.p.titulo)}</b>
-          <span class="rc-v">Valor ${notaHtml(x.s.valor)}${medidor(x.s.valor)}<span class="rc-sep">·</span>Esforço <b>${n1(x.s.esforco)}</b></span>
-          <span class="rc-c">${quadPill(x.s.quadrante)}<span class="rc-fte">${fteTxt(x.p)}</span>${hist ? GP.etapaPill(x.p.etapa) : ''}</span></a></li>`).join('')}</ol>`
+          <span class="rc-v"><span class="rc-vv">Valor ${notaHtml(x.s.valor)}${medidor(x.s.valor)}</span><span class="rc-sep" aria-hidden="true">·</span><span class="rc-ve">Esforço <b>${n1(x.s.esforco)}</b></span></span>
+          <span class="rc-c">${quadPill(x.s.quadrante)}<span class="rc-fte">${fteTxt(x.p)}</span></span></a></li>`).join('')}</ol>`
         : vazio(filtroQ ? 'Nenhum projeto neste quadrante' : 'Ranking vazio', filtroQ ? 'Remova o filtro de quadrante para ver os demais.' : 'Nenhum projeto avaliado neste filtro.', '<a class="btn btn-primary" href="#/avaliar">Avaliar projetos</a>', 'ranking')) +
       (semNota.length ? `<section class="card pz-pend" style="margin-top:16px">${U.secH(`Aguardando avaliação (${semNota.length})`, 'Entram no ranking quando todas as perguntas forem respondidas.')}
         <ul class="pz-pend-l">${semNota.map(q => { const f = M.pontuar(q).faltam, parcial = q.avaliacao && Object.keys(q.avaliacao.respostas || {}).length;
@@ -312,7 +332,7 @@
       return `<div class="card mtz-q">${quadPill(k)}<p class="muted mq-d">${esc(Q.desc)}</p>
         ${xs.length ? `<ul class="mq-l">${xs.map(x => `<li><a href="#/projeto/${esc(x.p.id)}" data-mtz-item="${esc(x.p.id)}" data-cod="${esc(x.p.codigo)}"><b class="mq-n" hidden></b><span class="code">${esc(x.p.codigo)}</span><span class="mq-t">${esc(x.p.titulo)}</span><span class="mq-v">${n1(x.s.valor)} / ${n1(x.s.esforco)}</span></a></li>`).join('')}</ul>` : '<span class="dim mq-vazio">Nenhum projeto</span>'}</div>`; };
     el.innerHTML = U.pageHead({ titulo:'Matriz valor × esforço', sub:'Onde cada projeto avaliado cai. Comece pelos ganhos rápidos, planeje os estratégicos e questione os do quadrante “repensar”.', acoes: GP.botaoPDF() }) +
-      sintese(rkAll, pendentes(P.todos())) + filtros(escopo) +
+      sintese(rkAll, pendentes(P.todos()), escopo) + filtros(escopo) +
       (rkAll.length ? `<div class="mtz-layout"><div class="card mtz-card"><div class="mtz-area" data-mtz></div>
           <p class="dim mtz-nota"><span class="mtz-nota-fte">Tamanho da bolha = pessoas (FTE). </span>Clique numa bolha ou num item da lista para abrir o projeto. Nas listas, ao lado de cada projeto: valor / esforço.</p></div>
         <div class="mtz-quads">${QK.map(quadCard).join('')}</div></div>`
@@ -437,10 +457,13 @@
   /* ---------------------------------------------- ficha e acervo (nível 2) */
   GP.fichaSecoes.push({ id:'priorizacao', nivel:2, ordem:20, titulo:'Priorização',
     render: p => { const s = M.pontuar(p);
-      if(!p.avaliacao) return `<p class="muted" style="margin:0 0 10px">Ainda não avaliado.</p><a class="btn btn-primary btn-sm" href="#/avaliar/${p.id}">${icon('avaliar', 15)} Avaliar</a>`;
-      const resp = p.avaliacao.respostas;
-      return `<div class="row" style="margin-bottom:10px">Valor ${notaHtml(s.valor)} Esforço <b>${n1(s.esforco)}</b> ${quadPill(s.quadrante)}<span class="spacer"></span><a class="btn btn-ghost btn-sm" href="#/avaliar/${p.id}">Revisar</a></div>
-        ${p.avaliacao.data ? `<p class="dim" style="margin:0 0 10px;font-size:12.5px">Avaliado em ${fmt.data(String(p.avaliacao.data).slice(0, 10))}.</p>` : ''}
+      const resp = (p.avaliacao && p.avaliacao.respostas) || {}, nResp = Object.keys(resp).filter(k => resp[k] != null).length;
+      if(!p.avaliacao || !nResp) return `<p class="muted" style="margin:0 0 10px">Ainda não avaliado.</p><a class="btn btn-primary btn-sm" href="#/avaliar/${p.id}">${icon('avaliar', 15)} Avaliar</a>`;
+      /* Avaliação parcial: sem quadrante e sem nota; a pílula diz quantas respostas faltam e a data é de quando foi salva, não de uma avaliação concluída */
+      const selo = s.completo ? quadPill(s.quadrante) : U.pill(`Avaliação parcial · faltam ${plural(s.faltam, 'resposta', 'respostas')}`, 'warn');
+      const dataTxt = p.avaliacao.data ? `${s.completo ? 'Avaliado em' : 'Salvo em'} ${fmt.data(String(p.avaliacao.data).slice(0, 10))}.${s.completo ? '' : ' A nota sai quando todas as perguntas forem respondidas.'}` : '';
+      return `<div class="row" style="margin-bottom:10px">Valor ${notaHtml(s.valor)} Esforço <b>${n1(s.esforco)}</b> ${selo}<span class="spacer"></span><a class="btn btn-ghost btn-sm" href="#/avaliar/${p.id}">${s.completo ? 'Revisar' : 'Continuar avaliação'}</a></div>
+        ${dataTxt ? `<p class="dim" style="margin:0 0 10px;font-size:12.5px">${dataTxt}</p>` : ''}
         <div class="ficha-dc"><p class="ar-dc-t">Por que esta nota?</p>${decompHtml(decompor(p, M.criterios(), 'valor'), 'valor')}${decompHtml(decompor(p, M.criterios(), 'esforco'), 'esforco')}</div>
         <div class="stack" style="gap:4px">${M.criterios().map(c => `<div class="row" style="flex-wrap:nowrap;font-size:13px;justify-content:space-between"><span>${esc(c.nome)} <span class="dim">(${c.peso}%)</span></span><span>${resp[c.id] != null ? `<b>${resp[c.id]}</b> · ${esc(c.niveis[resp[c.id]])}` : '<span class="dim">sem resposta</span>'}</span></div>`).join('')}</div>`;
     } });
