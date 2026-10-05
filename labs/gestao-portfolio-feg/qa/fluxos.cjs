@@ -133,9 +133,9 @@ module.exports = {
     await ir('#/avaliar');
     check(await p.locator(`[data-avaliar="${id}"]`).count() === 1, 'projeto aprovado deveria estar na lista de avaliação');
     await ir('#/avaliar/' + id);
-    check(await p.locator('.escala button.on[data-c="C1"][data-v="2"]').count() === 1, 'C1 deveria vir sugerido como 2 (12 pessoas-mês)');
+    check(await p.locator('.escala button.sug[data-c="C1"][data-v="2"]').count() === 1, 'C1 deveria vir sugerido como 2 (12 pessoas-mês)');
     check(/Faltam 8/.test(await p.textContent('[data-resultado]')), 'resultado parcial deveria indicar 8 faltando');
-    for(const [c, v] of [['V1',3],['V2',2],['V3',3],['V4',1],['V5',3],['V6',0],['C2',1],['C3',1]]) await p.click(`.escala [data-c="${c}"][data-v="${v}"]`);
+    for(const [c, v] of [['V1',3],['V2',2],['V3',3],['V4',1],['V5',3],['V6',0],['C1',2],['C2',1],['C3',1]]) await p.click(`.escala [data-c="${c}"][data-v="${v}"]`);
     const res = await p.textContent('[data-resultado]');
     check(/73/.test(res) && /47/.test(res), 'nota deveria ser valor 73 / esforço 47: ' + res.replace(/\s+/g, ' ').slice(0, 80));
     check(/Ganho rápido/.test(res), 'quadrante deveria ser "Ganho rápido"');
