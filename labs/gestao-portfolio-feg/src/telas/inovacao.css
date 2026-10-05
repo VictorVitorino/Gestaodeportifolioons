@@ -49,13 +49,13 @@ html.cmdk-on,html.comite-on{overflow:hidden}
 .cmdk-meta{flex:none;display:flex;align-items:center;gap:8px}
 .cmdk-meta .pill{font-size:.72rem}
 .cmdk-nota{display:inline-flex;align-items:baseline;gap:4px;min-width:52px;justify-content:flex-end;color:var(--forest);font-size:.9rem;font-weight:700;font-variant-numeric:tabular-nums}
-.cmdk-nota small{color:var(--dim);font-size:.64rem;font-weight:650;letter-spacing:.06em;text-transform:uppercase}
+.cmdk-nota small{color:var(--dim);font-size:.69rem;font-weight:650;letter-spacing:.06em;text-transform:uppercase}
 .cmdk-nivel{padding:3px 10px;border-radius:999px;background:var(--ons-50);border:1px solid var(--ons-100);color:var(--ons-700);font-size:.72rem;font-weight:650;white-space:nowrap}
 .cmdk-vazio{display:flex;flex-direction:column;gap:6px;padding:30px 18px;color:var(--muted);font-size:.86rem;text-align:center}
 .cmdk-vazio b{color:var(--text);font-weight:600}
 .cmdk-rodape{display:flex;align-items:center;gap:18px;padding:10px 20px;border-top:1px solid var(--hair);background:rgba(243,247,241,.72);color:var(--muted);font-size:.74rem}
 .cmdk-rodape span{display:inline-flex;align-items:center;gap:5px}
-.cmdk-rodape kbd{min-width:20px;height:20px;font-size:10.5px}
+.cmdk-rodape kbd{min-width:20px;height:20px;font-size:11px}
 .cmdk-r-dir{margin-left:auto}
 .cmdk-sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @keyframes cmdk-fade{from{opacity:0}}
@@ -64,10 +64,11 @@ html.cmdk-on,html.comite-on{overflow:hidden}
   .cmdk-bg{padding:10px 10px calc(10px + env(safe-area-inset-bottom))}
   .cmdk{max-height:calc(100dvh - 20px);border-radius:22px}
   .cmdk-campo{padding:12px 12px 12px 16px}
-  .cmdk-input{font-size:1rem}
+  .cmdk-input{font-size:1rem;min-height:44px}
   .cmdk-rodape{display:none}
   .cmdk-item{gap:10px;padding:8px 10px}
   .cmdk-meta .pill{display:none}
+  .cmdk-fechar{height:44px;min-width:44px}
 }
 
 /* ---------- cadastro rápido ---------- */
@@ -93,7 +94,8 @@ html.cmdk-on,html.comite-on{overflow:hidden}
   .modal.rapido .rapido-form{gap:12px}
   .modal.rapido .rapido-nat label{padding:10px 12px}
   .modal.rapido .rapido-nat small{display:none}
-  .modal.rapido .rapido-completo{order:3;flex-basis:100%!important;min-height:30px;margin:0;padding:4px;border:0;background:transparent;box-shadow:none;color:var(--ons-700)}
+  .modal.rapido .rapido-rasc .link{min-height:44px;padding:0 6px}
+  .modal.rapido .rapido-completo{order:3;flex-basis:100%!important;min-height:44px;margin:0;padding:4px;border:0;background:transparent;box-shadow:none;color:var(--ons-700)}
 }
 
 /* ---------- folha de atalhos e indicador da sequência G ---------- */
@@ -118,7 +120,8 @@ html.cmdk-on,html.comite-on{overflow:hidden}
 /* ---------- modo comitê ---------- */
 .comite{position:fixed;inset:0;z-index:80;display:grid;grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden;outline:none;color:#fff;font-family:var(--font);
   background:radial-gradient(70vw 52vw at -6% -10%,rgba(107,143,42,.24),transparent 62%),radial-gradient(60vw 48vw at 106% 110%,rgba(0,144,143,.16),transparent 62%),linear-gradient(160deg,#19352f 0%,#193a3d 58%,#16302b 100%)}
-.comite :focus-visible{outline:2px solid #c6dca4;outline-offset:3px;box-shadow:none}
+/* anel do teclado: --focus-dark (regra global em design.css); o contorno transparente só aparece em alto contraste */
+.comite :focus-visible{outline:2px solid transparent;outline-offset:2px}
 .comite .comite-tit:focus,.comite .comite-tit:focus-visible{outline:none;box-shadow:none}
 .comite kbd{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.22);color:rgba(255,255,255,.86)}
 .comite .code{color:#c6dca4}
@@ -132,7 +135,7 @@ html.cmdk-on,html.comite-on{overflow:hidden}
 .comite-fte-bar{height:8px;overflow:hidden;border-radius:4px;background:rgba(255,255,255,.12)}
 .comite-fte-bar i{display:block;height:100%;border-radius:0 4px 4px 0;background:#c6dca4;transition:width .35s var(--ease)}
 .comite-fte.estoura .comite-fte-bar i{background:#b8642c}
-.comite-fte small{grid-column:1/-1;color:rgba(255,255,255,.62);font-size:.72rem}
+.comite-fte small{grid-column:1/-1;color:rgba(255,255,255,.62);font-size:.75rem}
 .comite-sair{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 8px 0 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#fff;font-size:.82rem;font-weight:600}
 .comite-sair:hover{background:rgba(255,255,255,.14)}
 .comite-palco{display:flex;align-items:center;justify-content:center;overflow-y:auto;overscroll-behavior:contain;padding:clamp(20px,4vh,48px) clamp(18px,5vw,72px)}
@@ -140,6 +143,7 @@ html.cmdk-on,html.comite-on{overflow:hidden}
 @keyframes comite-in{from{opacity:0;transform:translateY(10px)}}
 .comite-pos{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;color:rgba(255,255,255,.6);font-size:.74rem;font-weight:650;letter-spacing:.09em;text-transform:uppercase}
 .comite-pos b{color:#c6dca4;font-family:var(--font-display);font-size:2.9rem;font-weight:700;line-height:.9;letter-spacing:-.04em;text-transform:none}
+.comite-pos small{font-size:inherit}
 .comite-cod{margin:0 0 8px;color:rgba(255,255,255,.72);font-size:.84rem}
 .comite-tag{display:inline-block;margin-left:6px;padding:2px 9px;border-radius:999px;border:1px solid rgba(213,163,45,.7);color:#d5a32d;font-size:.72rem;font-weight:650}
 .comite-tit{margin:0 0 12px;outline:none;color:#fff;font-family:var(--font-display);font-size:clamp(1.45rem,2.5vw,2.2rem);font-weight:650;line-height:1.14;letter-spacing:-.03em}
@@ -149,9 +153,10 @@ html.cmdk-on,html.comite-on{overflow:hidden}
 .comite-nota b{color:#c6dca4;font-size:2.1rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
 .comite-nota.alt b{color:#fff}
 .comite-nota span{display:flex;flex-direction:column;color:rgba(255,255,255,.88);font-size:.82rem;font-weight:600}
-.comite-nota small,.comite-quad small{color:rgba(255,255,255,.56);font-size:.7rem;font-weight:500}
+.comite-nota small{color:rgba(255,255,255,.62);font-size:.7rem;font-weight:500}
+.comite-quad small{color:rgba(255,255,255,.68);font-size:.75rem;font-weight:500}
 .comite-quad{display:flex;flex-direction:column;justify-content:center;max-width:300px;padding:10px 16px;border-radius:18px;border:1px dashed rgba(255,255,255,.2)}
-.comite-quad span{color:rgba(255,255,255,.58);font-size:.68rem;font-weight:650;letter-spacing:.08em;text-transform:uppercase}
+.comite-quad span{color:rgba(255,255,255,.62);font-size:.69rem;font-weight:650;letter-spacing:.08em;text-transform:uppercase}
 .comite-quad b{font-size:.95rem;font-weight:650}
 .comite-decomp{padding:16px 20px 14px;border-radius:20px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10)}
 .comite-decomp h3{margin:0 0 10px;color:rgba(255,255,255,.62);font-size:.72rem;font-weight:650;letter-spacing:.09em;text-transform:uppercase}
@@ -160,15 +165,15 @@ html.cmdk-on,html.comite-on{overflow:hidden}
 .comite-dl-t{display:block;min-width:10px;height:10px;border-radius:0 4px 4px 0;background:rgba(255,255,255,.11)}
 .comite-dl-t i{display:block;height:100%;border-radius:0 4px 4px 0;background:#c6dca4}
 .comite-dl-v{min-width:70px;color:#fff;font-weight:650;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
-.comite-dl-v small{color:rgba(255,255,255,.56);font-weight:500}
+.comite-dl-v small{color:rgba(255,255,255,.62);font-size:.72rem;font-weight:500}
 .comite-dir{display:flex;flex-direction:column;gap:14px}
 .comite-fatos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0}
 .comite-fatos>div{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.06)}
 .comite-fatos>div:last-child{grid-column:1/-1}
-.comite-fatos dt{color:rgba(255,255,255,.58);font-size:.68rem;font-weight:650;letter-spacing:.08em;text-transform:uppercase}
+.comite-fatos dt{color:rgba(255,255,255,.62);font-size:.69rem;font-weight:650;letter-spacing:.08em;text-transform:uppercase}
 .comite-fatos dd{margin:3px 0 0;color:#fff;font-size:1.02rem;font-weight:650;font-variant-numeric:tabular-nums}
 .comite-cap{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
-.comite-cap-r{color:rgba(255,255,255,.58);font-size:.68rem;font-weight:650;letter-spacing:.08em;text-transform:uppercase}
+.comite-cap-r{color:rgba(255,255,255,.62);font-size:.69rem;font-weight:650;letter-spacing:.08em;text-transform:uppercase}
 .comite-cap b{display:flex;align-items:center;gap:8px;font-size:1.04rem;font-weight:650}
 .comite-cap b i{flex:none;width:10px;height:10px;border-radius:50%;background:#c6dca4}
 .comite-cap.cap-warn b i{background:#d5a32d}
@@ -191,6 +196,19 @@ html.cmdk-on,html.comite-on{overflow:hidden}
 .comite-db[aria-pressed="true"].dec-warn .comite-db-ic{background:#d5a32d;color:#19352f}
 .comite-db[aria-pressed="true"].dec-bad{background:rgba(184,100,44,.24);border-color:#b8642c}
 .comite-db[aria-pressed="true"].dec-bad .comite-db-ic{background:#b8642c;color:#fff}
+/* Seguir o ranking (automático): tom neutro, sem sugerir adiamento */
+.comite-db.dec-auto .comite-db-ic{color:#fff}
+.comite-db[aria-pressed="true"].dec-auto{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.62)}
+.comite-db[aria-pressed="true"].dec-auto .comite-db-ic{background:#fff;color:#19352f}
+/* confirmação do impacto de 'Aprovar início' (mesma regra da carteira), dentro do modo comitê */
+.comite-conf{display:flex;flex-direction:column;gap:8px;padding:14px 16px;border-radius:16px;background:rgba(184,100,44,.16);border:1px solid #b8642c}
+.comite-conf-t{margin:0;outline:none;color:#fff;font-size:1rem;font-weight:650;letter-spacing:-.01em}
+.comite-conf p{margin:0;color:rgba(255,255,255,.84);font-size:.86rem;line-height:1.45}
+.comite-conf-l{display:flex;flex-direction:column;gap:4px;margin:0;padding-left:18px;color:#fff;font-size:.86rem;line-height:1.45}
+.comite-conf-obr{color:#d5a32d}
+.comite-conf .comite-conf-n{color:rgba(255,255,255,.72);font-size:.8rem}
+.comite-conf-acoes{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+.comite-conf-acoes .comite-btn{height:44px}
 .comite-msg{min-height:1.4em;margin:0;color:#c6dca4;font-size:.84rem}
 .comite-nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px clamp(18px,3vw,40px) calc(14px + env(safe-area-inset-bottom));border-top:1px solid rgba(255,255,255,.08)}
 .comite-seta{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 18px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#fff;font-size:.88rem;font-weight:600}
@@ -213,6 +231,7 @@ html.cmdk-on,html.comite-on{overflow:hidden}
 .comite-res-kpis>div.dec-ok{border-top-color:#6b8f2a}
 .comite-res-kpis>div.dec-warn{border-top-color:#d5a32d}
 .comite-res-kpis>div.dec-bad{border-top-color:#b8642c}
+.comite-res-kpis>div.dec-auto{border-top-color:rgba(255,255,255,.62)}
 .comite-res-kpis b{font-size:2rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
 .comite-res-kpis b small{color:rgba(255,255,255,.56);font-size:1rem;font-weight:600}
 .comite-res-kpis span{color:rgba(255,255,255,.72);font-size:.8rem}
@@ -224,6 +243,9 @@ html.cmdk-on,html.comite-on{overflow:hidden}
 .comite-res-d i{width:8px;height:8px;border-radius:50%;background:#6b8f2a}
 .comite-res-d.dec-warn i{background:#d5a32d}
 .comite-res-d.dec-bad i{background:#b8642c}
+.comite-res-d.dec-auto i{background:rgba(255,255,255,.7)}
+.comite-res-alerta{display:flex;align-items:flex-start;gap:10px;margin:0;padding:12px 16px;border-radius:14px;background:rgba(184,100,44,.18);border:1px solid #b8642c;color:#fff;font-size:.9rem;line-height:1.45}
+.comite-res-alerta i{flex:none;width:10px;height:10px;margin-top:6px;border-radius:50%;background:#b8642c}
 .comite-res-vazio{margin:0;color:rgba(255,255,255,.7)}
 .comite-res-vazio:empty{display:none}
 .comite-res-acoes{display:flex;flex-wrap:wrap;gap:12px}
@@ -242,7 +264,7 @@ html.cmdk-on,html.comite-on{overflow:hidden}
   .comite-topo{flex-wrap:wrap;gap:10px 12px;padding:12px 14px}
   .comite-marca span{display:none}
   .comite-fte{order:3;grid-template-columns:auto minmax(0,1fr);width:100%;margin:0}
-  .comite-sair{width:40px;margin-left:auto;padding:0;justify-content:center}
+  .comite-sair{width:44px;height:44px;margin-left:auto;padding:0;justify-content:center}
   .comite-sair span,.comite-sair kbd{display:none}
   .comite-palco{padding:18px 16px}
   .comite-pos b{font-size:2.5rem}

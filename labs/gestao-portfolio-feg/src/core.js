@@ -289,7 +289,18 @@
     return m; }
   function closeModal(){ const tinha = document.querySelector('.modal-bg'); document.querySelectorAll('.modal-bg').forEach(m => m.remove());
     if(tinha){ appInerte(false); document.body.classList.remove('has-modal'); posicionarToast(); }
-    if(tinha && focoAntes && document.contains(focoAntes)) try { focoAntes.focus(); } catch(e){} focoAntes = null; }
+    if(tinha && focoAntes && document.contains(focoAntes)) try { focoVisivel(focoAntes).focus(); } catch(e){} focoAntes = null; }
+  /** O gatilho pode ter ficado escondido (item de um menu suspenso que fechou ao ser escolhido): o foco volta ao botão
+      que abre esse menu (aria-haspopup/aria-expanded ou summary), procurando nos ancestrais mais próximos. */
+  const visivel = x => !!(x && x.getClientRects && x.getClientRects().length);
+  function focoVisivel(el){
+    if(visivel(el)) return el;
+    for(let a = el.parentElement; a && a !== document.body; a = a.parentElement){
+      const g = [...a.querySelectorAll(':scope > summary, :scope > [aria-haspopup], :scope > [aria-expanded], :scope > * > [aria-haspopup]')].find(visivel);
+      if(g) return g;
+    }
+    return el;
+  }
 
   /* Avisos: região viva criada no início (o leitor de tela lê o 1º aviso); erro fica até fechar e usa role=alert */
   let toastEl = null, erroEl = null, toastT = null, toastRest = 0, toastFim = 0;
@@ -401,8 +412,15 @@
   const marcarRolagem = box => { const max = box.scrollWidth - box.clientWidth; box.classList.toggle('rola', max > 2); box.classList.toggle('fade-l', max > 2 && box.scrollLeft > 2); box.classList.toggle('fade-r', max > 2 && box.scrollLeft < max - 2); };
   const marcarRolagens = (raiz = document) => raiz.querySelectorAll('.scroll-fade, .tbl-wrap, .chart-scroll, .chips').forEach(marcarRolagem);
   document.addEventListener('scroll', e => { const t = e.target; if(t && t.classList && (t.matches('.scroll-fade, .tbl-wrap, .chart-scroll, .chips'))) marcarRolagem(t); }, { capture:true, passive:true });
+  /* No modo cartão o cabeçalho da tabela fica só para leitor de tela (1px, recortado): os botões de ordenação dele saem da
+     ordem do Tab (a ordenação passa para o seletor "Ordenar por") e voltam quando o cabeçalho reaparece. */
+  const sincronizarOrdenacao = (raiz = document) => raiz.querySelectorAll('thead').forEach(h => { const b = h.querySelectorAll('.th-sort'); if(!b.length) return;
+    const r = h.getBoundingClientRect(), oculto = r.width <= 1 || r.height <= 1, t = oculto ? '-1' : '0';
+    b.forEach(x => { if(x.getAttribute('tabindex') !== t) x.setAttribute('tabindex', t); }); });
+  // Antes de o navegador mover o foco: cobre telas que repintam só um trecho e mudanças de largura da área útil
+  document.addEventListener('keydown', e => { if(e.key === 'Tab') sincronizarOrdenacao(); }, true);
   let rsT = null;
-  window.addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(() => { marcarRolagens(); aplicarMini(); marcarGaveta(); if(!ehMovel() && document.querySelector('.side.open')) fecharMenuMovel(false); }, 120); }, { passive:true });
+  window.addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(() => { marcarRolagens(); sincronizarOrdenacao(); aplicarMini(); marcarGaveta(); if(!ehMovel() && document.querySelector('.side.open')) fecharMenuMovel(false); }, 120); }, { passive:true });
 
   /* ------------------------------------------------------------- gráficos */
   const PAL = ['#6b8f2a', '#3a74a8', '#d5a32d', '#00908f', '#b8642c', '#859c98', '#a06137', '#899b67'];
@@ -591,6 +609,7 @@
       else if(base > nav.scrollTop + nav.clientHeight - m) nav.scrollTop = base - nav.clientHeight + m; }
     GP.pintarSalvamento(); marcarGaveta(); topoRolado(); marcarRolagens(el);
     if(GP.afterRender) GP.afterRender(el,r);
+    sincronizarOrdenacao(el);
     if(mudouRota){
       anunciar('Página: ' + (titulo || 'Início'));
       // Na troca de rota o foco vai para o título da tela nova (não na 1ª carga: o 1º Tab mostra 'Ir para o conteúdo')
