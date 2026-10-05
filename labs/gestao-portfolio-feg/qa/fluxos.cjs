@@ -255,7 +255,7 @@ module.exports = {
     await ir('#/config');
     const [dl] = await Promise.all([p.waitForEvent('download'), p.click('[data-backup]')]);
     const arq = require('path').join(require('os').tmpdir(), 'qa-backup.json'); await dl.saveAs(arq);
-    await p.click('[data-apagar]'); await p.click('.modal [data-ok]'); await p.waitForTimeout(200);
+    await p.click('[data-apagar]'); await p.fill('.modal [data-confirma-texto]', 'APAGAR'); await p.click('.modal [data-ok]'); await p.waitForTimeout(200);
     check(await p.evaluate(() => GP.projetos.todos().length) === 0, 'apagar tudo deveria zerar');
     const [fc] = await Promise.all([p.waitForEvent('filechooser'), p.click('[data-restaurar-backup]')]);
     await fc.setFiles(arq); await p.waitForTimeout(200); await p.click('.modal [data-ok]'); await p.waitForTimeout(250);
@@ -279,7 +279,7 @@ module.exports = {
     const [fc] = await Promise.all([p.waitForEvent('filechooser'), p.click('[data-restaurar-backup]')]);
     await fc.setFiles(arq); await p.waitForTimeout(200);
     const t = await p.textContent('.modal');
-    check(/sem data/.test(t) && /1 projeto\(s\) válido/.test(t) && /2 registro\(s\) inválido/.test(t), 'confirmação deveria explicar validos/descartados e data ausente: ' + t.slice(0, 160));
+    check(/sem data/.test(t) && /1 projeto válido/.test(t) && /2 registros inválidos/.test(t), 'confirmação deveria explicar validos/descartados e data ausente: ' + t.slice(0, 160));
     await p.click('.modal [data-ok]'); await p.waitForTimeout(250);
     for(const r of ['#/painel', '#/acervo', '#/config', '#/funil']){ await ir(r); check(!/Erro ao montar/.test(await p.textContent('#conteudo')), 'tela quebrou após backup ruim: ' + r); }
     const pr = await p.evaluate(() => GP.projetos.todos()[0]);
@@ -419,9 +419,10 @@ module.exports = {
   async 'r3: painel em bento, medidores e dica ao passar o mouse'({ p, ir, check, recarregar }){
     await p.evaluate(() => { GP.modelo.carregarExemplos(); GP.state().ui.nivel = 2; GP.save(); });
     await recarregar(); await ir('#/painel', 250);
-    check(await p.locator('.bento .b-hero h1').count() === 1 && await p.locator('.bento .level-tile').count() === 1, 'painel deveria estar em bento com herói e bloco do nível');
-    check(await p.locator('.metric .ring').count() >= 4, 'KPIs com proporção deveriam ter medidor radial');
-    check(await p.locator('.donut-layout .arc').count() === 2, 'rosca deveria ter 2 arcos (projetos e demandas)');
+    check(await p.locator('.bento .b-hero h1').count() === 1 && await p.locator('.bento .gx-next').count() === 1, 'painel deveria estar em bento com manchete e próximo passo');
+    check(await p.locator('.metric .ring').count() >= 2, 'KPIs com proporção deveriam ter medidor radial');
+    check(await p.locator('.donut-layout .arc').count() === 0, 'painel não deveria repetir a rosca de 2 fatias');
+    await ir('#/indicadores', 250);
     await p.locator('.percent-row >> nth=0').scrollIntoViewIfNeeded(); await p.waitForTimeout(120);
     await p.hover('.percent-row >> nth=0', { position:{ x:30, y:10 } }); await p.waitForTimeout(80);
     check(/Nova demanda/.test(await p.locator('.gp-tt').textContent().catch(() => '')), 'dica da barra deveria mostrar a etapa');
