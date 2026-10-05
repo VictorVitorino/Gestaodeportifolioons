@@ -25,7 +25,8 @@ module.exports = {
     await exemplos(p, recarregar, 3);
     await p.setViewportSize({ width:1440, height:900 });
     const vistos = new Set(), sem = [];
-    for(const [rota, n] of [['#/acervo', 32], ['#/painel', 36], ['#/ranking', 44], ['#/carteira', 30]]){
+    // os grupos recolhíveis do menu (4) e o botão ⋯ de cada linha do acervo acrescentam paradas de Tab
+    for(const [rota, n] of [['#/acervo', 70], ['#/painel', 60], ['#/ranking', 70], ['#/carteira', 50]]){
       await ir(rota, 250); await recarregar(300); await semTransicao(p);
       for(let i = 0; i < n; i++){
         await p.keyboard.press('Tab');

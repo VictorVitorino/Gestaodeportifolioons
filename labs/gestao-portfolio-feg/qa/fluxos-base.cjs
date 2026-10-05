@@ -60,6 +60,7 @@ module.exports = {
       return [...n.querySelectorAll('.nav-item')].map(i => { const r = i.getBoundingClientRect(); return { t:i.textContent.trim(), dentro: r.top >= nr.top - 1 && r.bottom <= nr.bottom + 1, fora: r.bottom <= nr.top || r.top >= nr.bottom }; }); });
     check(vis.filter(v => /Carteira|Roadmap|Riscos/.test(v.t)).every(v => v.dentro), 'B3: Carteira, Roadmap e Riscos deveriam estar à vista em 1440x900');
     check(vis.every(v => v.dentro || v.fora), 'B3: nenhum item do trilho deveria aparecer cortado ao meio');
+    await p.mouse.move(800, 450); await p.waitForTimeout(80);
     check(await p.evaluate(() => getComputedStyle(document.querySelector('.side .nav-sec')).color) === 'rgb(179, 203, 196)', 'B3: rótulo de seção do trilho com contraste ≥4,5:1 (#b3cbc4)');
     await p.setViewportSize({ width:1024, height:768 }); await ir('#/acervo', 250);
     check(await p.locator('.shell.mini').count() === 1 && await p.evaluate(() => !GP.state().ui.menuMini), 'B3: em 1024 o trilho deveria abrir em modo mini sem gravar a preferência');
