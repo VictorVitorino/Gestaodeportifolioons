@@ -437,7 +437,7 @@ module.exports = {
   async 'r4: celular mostra tabela em cartões e modal em folha inferior'({ p, ir, check, recarregar }){
     await p.evaluate(() => { GP.modelo.carregarExemplos(); GP.save(); });
     await recarregar(); await p.setViewportSize({ width:390, height:844 }); await ir('#/acervo', 250);
-    check(!(await p.locator('.tbl-cards thead').isVisible()), 'cabeçalho da tabela deveria sumir no celular');
+    check(await p.locator('.tbl-cards thead').evaluate(t => { const r = t.getBoundingClientRect(); return r.width <= 1 && r.height <= 1; }), 'cabeçalho da tabela deveria sumir no celular (fica só para leitor de tela)');
     const tr = await p.locator('.tbl-cards tbody tr').first().evaluate(e => getComputedStyle(e).display);
     check(tr === 'grid', 'linha da tabela deveria virar cartão (grid), veio ' + tr);
     check(await p.locator('.tbl-cards td[data-label="Etapa"]').count() === 14, 'células deveriam ter rótulo da coluna');
