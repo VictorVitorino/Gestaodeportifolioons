@@ -12,7 +12,7 @@ module.exports = {
     check(await p.locator('.shell.mini').count() === 1, 'menu não recolheu');
     await p.hover('.nav-item[href="#/acervo"]'); await p.waitForTimeout(100);
     const tip = await p.locator('.tip').textContent().catch(() => '');
-    check(/Projetos e demandas/.test(tip), 'tooltip não apareceu no menu recolhido');
+    check(/Acervo/.test(tip), 'tooltip não apareceu no menu recolhido');
     await recarregar();
     check(await p.locator('.shell.mini').count() === 1, 'estado recolhido não persistiu após recarregar');
     await p.click('[data-recolher]'); await p.waitForTimeout(100);
@@ -41,6 +41,7 @@ module.exports = {
     await p.selectOption('[name=gerencia]', 'FEN');
     await p.fill('[name=demandante]', 'Área QA');
     await p.selectOption('[name=tipo]', 'Projeto');
+    await p.click('[data-opcional] > summary');
     await p.fill('[name=link]', 'link-invalido');
     await p.click('[data-form] button[type=submit]'); await p.waitForTimeout(150);
     check(/endereço/.test(await p.textContent('[data-err="link"]')), 'link inválido deveria ser recusado');
@@ -66,7 +67,7 @@ module.exports = {
     await p.fill('.modal [name=motivo]', 'Fora do escopo da FE'); await p.click('.modal [data-ok]'); await p.waitForTimeout(150);
     check(await p.evaluate(i => GP.projetos.get(i).etapa, id) === 'nao_entra', 'mudança de etapa não aplicada');
     check(/Fora do escopo da FE/.test(await p.textContent('#conteudo')), 'motivo não aparece no histórico');
-    await p.click('[data-excluir]'); await p.click('.modal [data-ok]'); await p.waitForTimeout(200);
+    await p.click('.op-mais-btn'); await p.click('[data-excluir]'); await p.click('.modal [data-ok]'); await p.waitForTimeout(200);
     check(await p.evaluate(() => GP.projetos.todos().length) === 0, 'exclusão não removeu o projeto');
   },
   async 'passo2: acervo com exemplos, grupos, busca, filtro e ordenação'({ p, ir, check }){
@@ -86,8 +87,8 @@ module.exports = {
     await p.selectOption('[data-f="gerencia"]', 'FEL'); await p.waitForTimeout(150);
     check(await p.locator('tbody tr').count() === 2, 'filtro FEL deveria achar 2');
     await p.click('[data-limpar]'); await p.waitForTimeout(150);
-    await p.click('th[data-sort="acervo|codigo"]'); await p.click('th[data-sort="acervo|codigo"]'); await p.waitForTimeout(150);
-    check(/PRJ-014/.test(await p.locator('tbody tr').first().textContent()), 'ordenação decrescente por código falhou');
+    await p.click('th[data-sort="acervo|titulo"]'); await p.click('th[data-sort="acervo|titulo"]'); await p.waitForTimeout(150);
+    check(/Relatórios gerenciais/.test(await p.locator('tbody tr').first().textContent()), 'ordenação decrescente por título falhou');
     await ir('#/config'); await p.click('[data-exemplos]'); await p.waitForTimeout(150);
     check(await p.evaluate(() => GP.projetos.todos().length) === 14, 'carregar exemplos duas vezes não pode duplicar');
   },
@@ -289,6 +290,7 @@ module.exports = {
     await ir('#/novo');
     await p.fill('[name=titulo]', 'Projeto números BR'); await p.fill('[name=descricao]', 'd'); await p.selectOption('[name=gerencia]', 'FEG');
     await p.fill('[name=demandante]', 'x'); await p.selectOption('[name=tipo]', 'Projeto');
+    await p.click('[data-opcional] > summary');
     await p.fill('[name=custo]', '150.000'); await p.fill('[name=esforcoFte]', '1,5'); await p.fill('[name=duracaoMeses]', '6');
     check(/R\$ 150\.000/.test(await p.textContent('[data-hint="custo"]')), 'dica deveria mostrar R$ 150.000');
     await p.click('[data-form] button[type=submit]'); await p.waitForTimeout(250);
@@ -349,8 +351,8 @@ module.exports = {
   async 'qa8-08: teclado — ordenar, foco na carteira e modal'({ p, ir, check }){
     await p.evaluate(() => { GP.modelo.carregarExemplos(); GP.state().ui.nivel = 3; GP.save(); });
     await ir('#/acervo');
-    await p.focus('th[data-sort="acervo|codigo"]'); await p.keyboard.press('Enter'); await p.keyboard.press('Enter'); await p.waitForTimeout(150);
-    check(/PRJ-014/.test(await p.locator('tbody tr').first().textContent()), 'ordenar pelo teclado falhou');
+    await p.focus('th[data-sort="acervo|titulo"]'); await p.keyboard.press('Enter'); await p.keyboard.press('Enter'); await p.waitForTimeout(150);
+    check(/Relatórios gerenciais/.test(await p.locator('tbody tr').first().textContent()), 'ordenar pelo teclado falhou');
     await ir('#/carteira');
     await p.fill('[data-cap="fte"]', '12'); await p.press('[data-cap="fte"]', 'Tab'); await p.waitForTimeout(200);
     check(await p.evaluate(() => document.activeElement && document.activeElement.dataset && !!document.activeElement.dataset.cap), 'foco deveria continuar nos campos da carteira');
@@ -380,7 +382,7 @@ module.exports = {
     check(await p.locator('tbody tr').count() === 1, 'busca "arvore" deveria achar "Árvore"');
     await p.fill('[data-f="q"]', ''); await p.waitForTimeout(400);
     await p.click('th[data-sort="acervo|titulo"]'); await p.waitForTimeout(150);
-    const ord = await p.$$eval('tbody tr td:nth-child(2) b', bs => bs.map(b => b.textContent.split(' ')[0]));
+    const ord = await p.$$eval('tbody tr td:nth-child(1) b', bs => bs.map(b => b.textContent.split(' ')[0]));
     check(ord.join(',') === 'abacaxi,Árvore,Bravo,Égua', 'ordenação deveria seguir o português: ' + ord.join(','));
   },
   async 'qa8-13: planilha ANSI (Excel) e manter etapa'({ p, ir, check }){
