@@ -135,6 +135,8 @@ test('carteira: reserva, execução no período, encaixe mês a mês pelo rankin
   // fixado que estoura: pico acima da capacidade efetiva
   const e = M.montarCarteira(GP.projetos.todos(), { ...cap, fte: 6 }, { [id('PRJ-013')]: 'in', [id('PRJ-014')]: 'in' });
   assert.equal(e.itens.find(i => i.p.codigo === 'PRJ-014').status, 'fixado_estoura'); assert.ok(e.sobraFte < 0);
+  // fixado que estoura está na carteira, mas não conta como "cabe"
+  assert.equal(e.cabem, 1); assert.equal(e.estouram, 1); assert.equal(e.dentro.length, 2);
   // orçamento como restrição
   const o = M.montarCarteira(GP.projetos.todos(), { ...cap, descontarExecucao: false, orcamento: 1000000 });
   assert.deepEqual([...o.dentro.map(i => i.p.codigo)], ['PRJ-002', 'PRJ-004']);   // 650 mil + 250 mil
@@ -142,6 +144,33 @@ test('carteira: reserva, execução no período, encaixe mês a mês pelo rankin
   // projeto inteiramente fora do período não ocupa capacidade
   const y = M.montarCarteira(GP.projetos.todos(), { ...cap, periodoIni: '2029-01', periodoFim: '2029-12' });
   assert.equal(y.cabem, 0); assert.ok(y.itens.every(i => i.status === 'fora_periodo'));
+});
+
+test('carteira: uma só base para pico, livre, quem aguarda e demanda planejada', () => {
+  const GP = carregar(), M = GP.modelo; M.carregarExemplos();
+  const cap = { periodoIni: '2027-01', periodoFim: '2027-12', fte: 10, reservaPct: 15, orcamento: 4000000, descontarExecucao: true };
+  const c = M.montarCarteira(GP.projetos.todos(), cap);
+  // livre e comprometido são do mesmo mês do pico da carteira selecionada: livre − usado = sobra
+  assert.equal(c.pico.mes, '2027-03'); assert.equal(c.comprometido, c.pico.execucao); assert.equal(c.livre - c.usadoFte, c.sobraFte);
+  // "se todos começarem como planejado": PRJ-014 (aguardando) levaria abr/2027 a 10,5; a carteira selecionada fica em 8,5
+  assert.equal(c.picoPlanejado.mes, '2027-04'); assert.equal(c.picoPlanejado.total, 10.5);
+  const abr = c.demanda.find(d => d.mes === '2027-04'); assert.equal(abr.total, 8.5); assert.equal(abr.aguardando, 2); assert.equal(abr.planejada, 10.5);
+  // roadmap/painel: dentro do período, os mesmos números; fora dele, as datas dos mesmos projetos
+  const dm = M.demandaCarteira(GP.projetos.todos(), c, '2026-11', '2027-04');
+  assert.deepEqual([...dm.map(x => x.total)], [6.5, 6.5, 6, 7.5, 8.5, 8.5]);
+  assert.equal(dm[5].planejada, 10.5); assert.equal(dm[0].noPeriodo, false); assert.equal(dm[5].noPeriodo, true);
+  // período jul/2026 a jun/2027: o KPI de pessoas livres usa o mês de pico (mar/2027), com o mês mais apertado como ressalva
+  const j = M.montarCarteira(GP.projetos.todos(), { ...cap, periodoIni: '2026-07', periodoFim: '2027-06' });
+  assert.equal(j.pico.mes, '2027-03'); assert.equal(j.livre, 7); assert.equal(j.usadoFte, 7);
+  assert.equal(j.execucaoMax, 6.5); assert.equal(j.folgaMin.valor, 2); assert.equal(j.folgaMin.de, '2026-07'); assert.equal(j.folgaMin.ate, '2026-12');
+  // projeto em execução sem datas: o pulado (PRJ-003) é medido contra a carteira final e o acumulado de quem entra só cresce
+  GP.projetos.criar({ ...base, titulo: 'Projeto X', esforcoFte: 1.5 }); GP.projetos.todos().find(p => p.titulo === 'Projeto X').etapa = 'execucao';
+  const x = M.montarCarteira(GP.projetos.todos(), cap);
+  assert.deepEqual([...x.dentro.map(i => i.p.codigo)], ['PRJ-002', 'PRJ-013', 'PRJ-004']);
+  const ac = x.dentro.map(i => i.acumFte); assert.ok(ac.every((v, i) => !i || v >= ac[i - 1]));
+  const p3 = x.itens.find(i => i.p.codigo === 'PRJ-003');
+  assert.equal(p3.status, 'cabe_a_partir'); assert.equal(p3.acumFte, 10); assert.equal(p3.falta.valor, 1.5); assert.equal(p3.falta.mes, '2027-03'); assert.equal(p3.aPartir, '2027-05');
+  assert.equal(x.semDatas.length, 1);
 });
 
 test('capacidade: período antigo em texto migra sem erro', () => {

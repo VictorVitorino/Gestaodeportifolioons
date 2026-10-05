@@ -8,7 +8,7 @@
   const plural = GP.util.plural || ((n, s, p) => n + ' ' + (n === 1 ? s : p));
   const r1 = v => Math.round((+v || 0) * 10) / 10 + 0;
   const f1 = v => fmt.n(r1(v), 1);
-  const ST = M.STATUS_CARTEIRA, DENTRO = ['cabe', 'fixado', 'fixado_estoura'];
+  const ST = M.STATUS_CARTEIRA, DENTRO = ['cabe', 'fixado', 'fixado_estoura'], CABE = ['cabe', 'fixado'];   // DENTRO: na carteira; CABE: na carteira sem estourar
   const fora = s => !!(ST[s] && ST[s].fora);
 
   /* ------------------------------------------------------------- meses */
@@ -183,16 +183,19 @@
     el.querySelector('[data-cart-avisos]').innerHTML =
       (obrig.length ? `<div class="callout bad" role="alert"><span class="ic">${icon('alerta', 16)}</span><div><p><b>As fixações deixaram ${plural0(obrig.length, 'projeto obrigatório', 'projetos obrigatórios')} fora (${obrig.map(i => esc(i.p.codigo)).join(', ')}).</b> Revise as decisões do comitê ou aumente a capacidade.</p></div></div>` : '') +
       (estouram.length ? `<div class="callout bad"><span class="ic">${icon('alerta', 16)}</span><div><p><b>${plural0(estouram.length, 'projeto fixado estoura', 'projetos fixados estouram')} a capacidade</b> (${estouram.map(i => esc(i.p.codigo)).join(', ')}): o pico chega a ${f1(c.pico.total)} FTE para ${f1(c.efetiva)} FTE efetivos.</p></div></div>` : '') +
-      (c.excesso > 0 ? U.callout(`<p><b>Atenção:</b> os projetos em execução já ocupam ${f1(c.comprometido)} FTE no mês mais carregado, ${f1(c.excesso)} a mais do que a capacidade disponível (${f1(c.efetiva)} FTE após a reserva). Não há espaço para novos projetos nesses meses.</p>`, 'warn') : '');
+      (c.excesso > 0 ? U.callout(`<p><b>Atenção:</b> os projetos em execução já ocupam ${f1(c.execucaoMax)} FTE em ${esc(intervalo(c.folgaMin.de, c.folgaMin.ate))}, ${f1(c.excesso)} a mais do que a capacidade disponível (${f1(c.efetiva)} FTE após a reserva). Não há espaço para novos projetos nesses meses.</p>`, 'warn') : '');
     // simulação
     el.querySelector('[data-cart-sim]').innerHTML = extra ? `<div class="cart-sim-faixa" role="status"><b>Simulação:</b> ${f1(cs.fte)} FTE (+${f1(extra)} sobre os ${f1(cap.fte)} salvos). Nada foi gravado.</div>` : '';
     // KPIs
     const deficit = c.sobraFte < -0.05, cobre = '#93461d', aPartir = c.itens.filter(i => i.status === 'cabe_a_partir').length;
+    // mesma base do medidor: tudo no mês de pico da carteira selecionada; o mês mais apertado da execução vem como ressalva
+    const folga = c.folgaMin.valor < c.livre - 0.05 ? ` · mín. ${f1(c.folgaMin.valor)} em ${esc(intervalo(c.folgaMin.de, c.folgaMin.ate))}` : '';
     el.querySelector('[data-cart-kpis]').innerHTML =
-      U.kpi({ rotulo:'Pessoas para novos projetos', valor:f1(c.livre), unidade:'FTE', sub:`${f1(cs.fte)} − ${fmt.n(cs.reservaPct)}% reserva − ${f1(c.comprometido)} em execução` }) +
+      U.kpi({ rotulo:'Pessoas para novos projetos', valor:f1(c.livre), unidade:'FTE', sub:`em ${esc(rotMes(c.pico.mes))} (pico): ${f1(cs.fte)} − ${fmt.n(cs.reservaPct)}% reserva − ${f1(c.comprometido)} em execução${folga}` }) +
       U.kpi({ rotulo:'Usadas pela carteira', valor:f1(c.usadoFte), unidade:'FTE', cor: deficit ? cobre : '', sub: deficit ? `<b style="color:${cobre}">excede em ${f1(-c.sobraFte)} FTE</b> em ${esc(rotMes(c.pico.mes))}` : `sobram ${f1(c.sobraFte)} FTE no pico (${esc(rotMes(c.pico.mes))})` }) +
       U.kpi({ rotulo:'Orçamento usado', valor: fmt.n(c.usadoCusto / 1e6, 2), unidade:'R$ mi', cor: c.orcamento && c.sobraOrc < 0 ? cobre : '', sub: c.orcamento ? (c.sobraOrc < 0 ? `<b style="color:${cobre}">excede em ${fmt.mi(-c.sobraOrc)}</b>` : `de ${fmt.mi(c.orcamento)}`) : 'sem limite de orçamento' }) +
-      U.kpi({ rotulo:'Projetos que cabem', valor:`${c.cabem}<small>/ ${c.candidatos}</small>`, sub: aPartir ? `aprovados e avaliados · ${plural0(aPartir, 'cabe', 'cabem')} mais tarde` : 'aprovados e avaliados' });
+      U.kpi({ rotulo:'Projetos que cabem', valor:`${c.cabem}<small>/ ${c.candidatos}</small>`, cor: c.estouram ? cobre : '',
+        sub: ['aprovados e avaliados', c.estouram ? `<b style="color:${cobre}">+ ${plural0(c.estouram, 'fixado estoura', 'fixados estouram')}</b>` : '', aPartir ? `${plural0(aPartir, 'cabe', 'cabem')} mais tarde` : ''].filter(Boolean).join(' · ') });
     // medidor
     const res = (+cs.fte || 0) * (+cs.reservaPct || 0) / 100, formula = `${f1(cs.fte)} − ${f1(res)} (reserva ${fmt.n(cs.reservaPct)}%) − ${f1(c.pico.execucao)} (execução) − ${f1(c.pico.carteira)} (nova carteira) = ${deficit ? `<b class="cart-exc">excede em ${f1(-c.sobraFte)} FTE</b>` : `<b>${f1(Math.max(0, c.sobraFte))} FTE livres</b>`}`;
     el.querySelector('[data-cart-medidor]').innerHTML = `${U.secH('Uso da capacidade no mês mais carregado', `Período ${esc(c.periodo.rotulo)}. A carteira cabe se nenhum mês passar da capacidade.`, `<a class="link" href="#/roadmap">Ver mês a mês no roadmap →</a>`)}
@@ -206,7 +209,7 @@
   function margem(c, cs){
     const prox = c.itens.find(i => (i.status === 'nao_cabe' || i.status === 'cabe_a_partir' || i.status === 'obrigatorio_deslocado') && i.falta && i.falta.tipo === 'FTE');
     if(!prox) return null;
-    const S = GP.state(), cabeCom = d => DENTRO.includes((M.montarCarteira(P.todos(), Object.assign({}, cs, { fte: (+cs.fte || 0) + d }), S.forcar).itens.find(i => i.p.id === prox.p.id) || {}).status);
+    const S = GP.state(), cabeCom = d => CABE.includes((M.montarCarteira(P.todos(), Object.assign({}, cs, { fte: (+cs.fte || 0) + d }), S.forcar).itens.find(i => i.p.id === prox.p.id) || {}).status);
     let alto = null; for(let d = 0.5; d <= 30; d += 0.5) if(cabeCom(d)){ alto = d; break; }
     if(alto == null) return { p:prox.p };
     let d = Math.max(0.1, alto - 0.4); while(d < alto - 1e-9 && !cabeCom(d)) d = r1(d + 0.1);
@@ -214,14 +217,14 @@
   }
   function pintarCenarios(el, c, cs){
     const S = GP.state(), mg = margem(c, cs);
-    el.querySelector('[data-cen-dica]').innerHTML = mg ? (mg.d != null ? `${icon('info', 15)} <span>Com <b>+${f1(mg.d)} FTE</b>${extra ? ' além da simulação' : ''}, o <b>${esc(mg.p.codigo)}</b> caberia. É o próximo da fila por prioridade.</span>` : `${icon('info', 15)} <span>O <b>${esc(mg.p.codigo)}</b> não cabe nem com +30 FTE: revise as datas ou o orçamento.</span>`)
+    el.querySelector('[data-cen-dica]').innerHTML = mg ? (mg.d != null ? `${icon('info', 15)} <span>Com <b>+${f1(mg.d)} FTE</b>${extra ? ' além da simulação' : ''}, o <b>${esc(mg.p.codigo)}</b> caberia na sua vez do ranking. É o próximo da fila por prioridade.</span>` : `${icon('info', 15)} <span>O <b>${esc(mg.p.codigo)}</b> não cabe nem com +30 FTE: revise as datas ou o orçamento.</span>`)
       : `${icon('check', 15)} <span>Todos os candidatos com estimativa cabem${extra ? ' nesta simulação' : ''}.</span>`;
     const salvos = cenarios(), base = carteira(S.capacidade);
     const col = (nome, cc, cap, rem) => ({ nome, cc, cap, rem });
     const cols = [col('Dados atuais', base, S.capacidade), ...(extra ? [col(`Simulação +${f1(extra)}`, c, cs)] : []), ...salvos.map((x, i) => col(x.nome, M.montarCarteira(P.todos(), x.capacidade, x.forcar), x.capacidade, i))];
     el.querySelector('[data-cen-comp]').innerHTML = cols.length > 1 ? `<div class="cart-comp" role="table" aria-label="Comparação de cenários" style="--cols:${cols.length}">
       <div class="cart-comp-row cart-comp-head" role="row"><span role="columnheader">Indicador</span>${cols.map(k => `<span role="columnheader">${esc(k.nome)}${k.rem != null ? ` <button type="button" class="cart-comp-x" data-cen-remover="${k.rem}" aria-label="Remover cenário ${esc(k.nome)}">${icon('x', 12)}</button>` : ''}</span>`).join('')}</div>
-      ${[['Pessoas (FTE)', k => f1(k.cap.fte)], ['FTE livre para novos', k => f1(k.cc.livre)], ['Projetos que cabem', k => `${k.cc.cabem} / ${k.cc.candidatos}`], ['Orçamento usado', k => fmt.mi(k.cc.usadoCusto)], ['Pico mensal', k => `${f1(k.cc.pico.total)} de ${f1(k.cc.efetiva)}`]]
+      ${[['Pessoas (FTE)', k => f1(k.cap.fte)], ['FTE livre para novos', k => f1(k.cc.livre)], ['Projetos que cabem', k => `${k.cc.cabem} / ${k.cc.candidatos}${k.cc.estouram ? ` (+${k.cc.estouram} estoura)` : ''}`], ['Orçamento usado', k => fmt.mi(k.cc.usadoCusto)], ['Pico mensal', k => `${f1(k.cc.pico.total)} de ${f1(k.cc.efetiva)}`]]
         .map(([n, fn]) => `<div class="cart-comp-row" role="row"><span role="rowheader">${n}</span>${cols.map(k => `<span role="cell">${fn(k)}</span>`).join('')}</div>`).join('')}</div>`
       : `<p class="cart-cen-vazio dim">Salve até 3 cenários para compará-los lado a lado.</p>`;
     const bs = el.querySelector('[data-cen-salvar]'); if(bs) bs.disabled = salvos.length >= 3;
@@ -248,9 +251,9 @@
     const maxAc = Math.max(c.efetiva, ...c.itens.map(i => i.acumFte || 0), 1e-9);
     const acum = i => { if(i.acumFte == null) return '<span class="dim">-</span>';
       const dentro = DENTRO.includes(i.status), ok = Math.min(i.acumFte, c.efetiva) / maxAc * 100, ex = Math.max(0, i.acumFte - c.efetiva) / maxAc * 100;
-      return `<div class="cart-ac ${dentro ? '' : 'hip'}" data-tt="${dentro ? 'Pico mensal com' : 'Pico mensal se incluir'} ${esc(i.p.codigo)}&#10;${f1(i.acumFte)} FTE em ${esc(rotMes(i.picoMes))}&#10;Capacidade efetiva: ${f1(c.efetiva)} FTE"><span class="cart-ac-t"><i style="width:${ok}%"></i>${ex > 0.01 ? `<i class="ex" style="left:${ok}%;width:${ex}%"></i>` : ''}<b style="left:${c.efetiva / maxAc * 100}%"></b></span><small>${f1(i.acumFte)} de ${f1(c.efetiva)}</small></div>`; };
+      return `<div class="cart-ac ${dentro ? '' : 'hip'}" data-tt="${dentro ? `Pico mensal da carteira até ${esc(i.p.codigo)}` : `Pico mensal se ${esc(i.p.codigo)} entrasse na carteira selecionada`}&#10;${f1(i.acumFte)} FTE em ${esc(rotMes(i.picoMes))}&#10;Capacidade efetiva: ${f1(c.efetiva)} FTE"><span class="cart-ac-t"><i style="width:${ok}%"></i>${ex > 0.01 ? `<i class="ex" style="left:${ok}%;width:${ex}%"></i>` : ''}<b style="left:${c.efetiva / maxAc * 100}%"></b></span><small>${f1(i.acumFte)} de ${f1(c.efetiva)}</small></div>`; };
     const sit = i => { const s = ST[i.status]; const nome = i.status === 'cabe_a_partir' ? `Cabe a partir de ${rotMes(i.aPartir)}` : s.nome;
-      const det = i.falta ? (i.falta.tipo === 'FTE' ? `faltam ${f1(i.falta.valor)} FTE${i.picoMes ? ` em ${rotMes(i.picoMes)}` : ''}` : `faltam ${fmt.mi(i.falta.valor)} de orçamento`) : i.status === 'fora_periodo' ? 'datas fora do período' : '';
+      const det = i.falta ? (i.falta.tipo === 'FTE' ? `faltam ${f1(i.falta.valor)} FTE${i.falta.mes ? ` em ${rotMes(i.falta.mes)}` : ''}` : `faltam ${fmt.mi(i.falta.valor)} de orçamento`) : i.status === 'fora_periodo' ? 'datas fora do período' : '';
       return U.pill(nome, s.tom) + (det ? `<small>${esc(det)}</small>` : ''); };
     const linha = (i, k) => `<tr data-id="${esc(i.p.id)}" class="${fora(i.status) ? 'is-fora' : ''}">
         <td class="c-ord" data-label="Ordem"><b>${k + 1}</b></td>
@@ -262,14 +265,22 @@
         <td class="c-ac" data-label="Acumulado">${acum(i)}</td>
         <td class="c-sit" data-label="Situação">${sit(i)}</td>
         <td class="c-dec" data-label="Decisão do comitê">${decisao(i.p)}</td></tr>`;
+    // linhas por grupo: fixados → pelo ranking quem entrou → linha de corte → quem aguarda → fora da conta (excluídos, sem estimativa, fora do período).
+    // Acima da linha o Acumulado é o pico real da carteira e só cresce; abaixo, é o pico se o projeto entrasse na carteira selecionada.
     const fixados = c.itens.filter(i => i.fixado), rank = c.itens.filter(i => !i.fixado), grupos = fixados.length > 0;
+    const entram = rank.filter(i => DENTRO.includes(i.status)), aguardam = rank.filter(i => fora(i.status)), foraConta = rank.filter(i => !DENTRO.includes(i.status) && !fora(i.status));
+    const grp = (txt, ic) => `<tr class="cart-grp"><th colspan="9" scope="rowgroup">${ic ? svg(IC.pino, 13) + ' ' : ''}${txt}</th></tr>`;
     let k = 0, corpo = '';
-    if(grupos){ corpo += `<tr class="cart-grp"><th colspan="9" scope="rowgroup">${svg(IC.pino, 13)} Fixados pelo comitê · ${fixados.length}</th></tr>`; fixados.forEach(i => { corpo += linha(i, k++); }); corpo += `<tr class="cart-grp"><th colspan="9" scope="rowgroup">Pelo ranking · ${rank.length}</th></tr>`; }
-    let ult = -1; rank.forEach((i, j) => { if(DENTRO.includes(i.status)) ult = j; });
-    const algumFora = rank.some(i => fora(i.status));
-    const corte = `<tr class="cart-corte"><td colspan="9"><div class="cart-corte-l"><span>▲ Cabem na capacidade${c.pico.mes ? ` · ${c.sobraFte < -0.05 ? `pico excede em ${f1(-c.sobraFte)} FTE` : `sobram ${f1(Math.max(0, c.sobraFte))} FTE no pico (${rotMes(c.pico.mes)})`}` : ''}</span><span>▼ Aguardam capacidade</span></div></td></tr>`;
-    rank.forEach((i, j) => { if(j === 0 && ult < 0 && algumFora) corpo += corte.replace(/<span>▲[^<]*<\/span>/, ''); corpo += linha(i, k++); if(j === ult && j < rank.length - 1 && algumFora) corpo += corte; });
-    box.innerHTML = `<div class="card cart-tbl-card"><div class="cart-tbl-h">${U.secH('Candidatos aprovados', 'Ordem de entrada: fixados pelo comitê → ranking de prioridade (obrigatórios primeiro). Quem não cabe é pulado e o próximo é testado. Sem estimativa de pessoas não entra na conta.')}</div>
+    if(grupos){ corpo += grp(`Fixados pelo comitê · ${fixados.length}`, true); fixados.forEach(i => { corpo += linha(i, k++); }); corpo += grp(`Pelo ranking · ${rank.length}`); }
+    entram.forEach(i => { corpo += linha(i, k++); });
+    if(aguardam.length){
+      const excede = c.sobraFte < -0.05, temCima = entram.length || fixados.length;
+      const cima = !temCima ? '' : `<span>▲ ${c.estouram ? 'Na carteira' : 'Cabem na capacidade'}${c.pico.mes ? ` · ${excede ? `pico excede em ${f1(-c.sobraFte)} FTE (${rotMes(c.pico.mes)})` : `sobram ${f1(Math.max(0, c.sobraFte))} FTE no pico (${rotMes(c.pico.mes)})`}` : ''}</span>`;
+      corpo += `<tr class="cart-corte"><td colspan="9"><div class="cart-corte-l">${cima}<span>▼ Aguardam capacidade · acumulado se entrasse</span></div></td></tr>`;
+      aguardam.forEach(i => { corpo += linha(i, k++); });
+    }
+    if(foraConta.length){ corpo += grp(`Fora da conta · ${foraConta.length}`); foraConta.forEach(i => { corpo += linha(i, k++); }); }
+    box.innerHTML = `<div class="card cart-tbl-card"><div class="cart-tbl-h">${U.secH('Candidatos aprovados', 'Ordem de entrada: fixados pelo comitê → ranking de prioridade (obrigatórios primeiro). Quem não cabe é pulado, o próximo é testado e o pulado desce para abaixo da linha de corte. Sem estimativa de pessoas não entra na conta.')}</div>
       <div class="cart-tbl-wrap"><table class="cart-tbl"><thead><tr><th class="c-ord" scope="col">Ordem</th><th class="c-rank" scope="col">Rank</th><th scope="col">Projeto</th><th class="c-val" scope="col">Valor</th><th class="c-num" scope="col">FTE</th><th class="c-num" scope="col">Custo</th><th scope="col">Acumulado</th><th scope="col">Situação</th><th class="c-dec" scope="col">Decisão do comitê</th></tr></thead>
       <tbody>${corpo}</tbody></table></div></div>${semNota(c)}`;
   }
@@ -306,9 +317,11 @@
     const obr = i => i.p.obrigatorio ? ' [OBRIGATÓRIO]' : '';
     const sitTxt = i => i.status === 'cabe_a_partir' ? `cabe a partir de ${rotMes(i.aPartir)}` : i.falta ? (i.falta.tipo === 'FTE' ? `faltam ${f1(i.falta.valor)} FTE` : `faltam ${fmt.mi(i.falta.valor)}`) : ST[i.status].nome.toLowerCase();
     const fila = P.todos().filter(p => p.etapa === 'entrada' || p.etapa === 'triagem'), at = GP.painelAtencao ? GP.painelAtencao(3) : [];
-    const resumoCap = `${f1(cap.fte)} FTE, reserva de ${fmt.n(cap.reservaPct)}%, ${f1(c.comprometido)} FTE em execução no pico → ${f1(c.livre)} FTE para novos projetos.`;
-    const proposta = `${plural(c.cabem, 'projeto cabe', 'projetos cabem')}, com pico de ${f1(c.pico.total)} de ${f1(c.efetiva)} FTE (${rotMes(c.pico.mes)}) e ${fmt.mi(c.usadoCusto)}.`;
-    const cenTxt = sim ? `Cenário em análise (não salvo): com +${f1(extra)} FTE (${f1(capSim().fte)} no total), ${plural(sim.cabem, 'projeto cabe', 'projetos cabem')} de ${sim.candidatos}; pico de ${f1(sim.pico.total)} de ${f1(sim.efetiva)} FTE.` : '';
+    // mesmos números da tela: tudo no mês de pico da carteira selecionada; fixado que estoura não conta como "cabe"
+    const resumoCap = `${f1(cap.fte)} FTE, reserva de ${fmt.n(cap.reservaPct)}%, ${f1(c.comprometido)} FTE em execução no mês de pico (${rotMes(c.pico.mes)}) → ${f1(c.livre)} FTE para novos projetos nesse mês${c.folgaMin.valor < c.livre - 0.05 ? ` (no mês mais carregado pela execução, ${intervalo(c.folgaMin.de, c.folgaMin.ate)}, sobram ${f1(c.folgaMin.valor)})` : ''}.`;
+    const quantos = cc => cc.estouram ? `${plural(cc.cabem, 'projeto cabe', 'projetos cabem')} e ${plural(cc.estouram, 'fixado estoura', 'fixados estouram')} a capacidade` : plural(cc.cabem, 'projeto cabe', 'projetos cabem');
+    const proposta = `${quantos(c)}, com pico de ${f1(c.pico.total)} de ${f1(c.efetiva)} FTE (${rotMes(c.pico.mes)})${c.sobraFte < -0.05 ? `, ${f1(-c.sobraFte)} acima da capacidade` : ''} e ${fmt.mi(c.usadoCusto)}.`;
+    const cenTxt = sim ? `Cenário em análise (não salvo): com +${f1(extra)} FTE (${f1(capSim().fte)} no total), ${quantos(sim)} de ${sim.candidatos}; pico de ${f1(sim.pico.total)} de ${f1(sim.efetiva)} FTE.` : '';
     // texto
     const L = [];
     L.push(`PAUTA DO COMITÊ DE PORTFÓLIO · FEG · período ${c.periodo.rotulo}`, `Gerada em ${fmt.data(hoje())}`, '');
@@ -373,13 +386,15 @@
       if(!it) return { cls:'aprov', nome:'Aprovado · sem avaliação completa', tom:'neutral' };
       const s = it.status, fixado = s === 'fixado' || s === 'fixado_estoura';
       if(s === 'cabe' || s === 'fixado') return { cls:'cabe', nome: fixado ? 'Fixado pelo comitê · cabe na capacidade' : 'Aprovado · cabe na capacidade', tom:'ok', fixado };
-      if(fora(s)) return { cls:'fora', nome: s === 'cabe_a_partir' ? `Aguarda capacidade · cabe a partir de ${rotMes(it.aPartir)}` : s === 'fixado_estoura' ? 'Fixado, mas estoura a capacidade' : s === 'obrigatorio_deslocado' ? 'Obrigatório fora pelas fixações' : 'Aguarda capacidade', tom: ST[s].tom, fora:true, fixado };
+      // fixado que estoura está NA carteira (soma no histograma); não é "aguarda capacidade"
+      if(s === 'fixado_estoura') return { cls:'estoura', nome:'Fixado, mas estoura a capacidade', tom:'bad', fixado };
+      if(fora(s)) return { cls:'fora', nome: s === 'cabe_a_partir' ? `Aguarda capacidade · cabe a partir de ${rotMes(it.aPartir)}` : s === 'obrigatorio_deslocado' ? 'Obrigatório fora pelas fixações' : 'Aguarda capacidade', tom: ST[s].tom, fora:true, fixado };
       if(s === 'excluido') return { cls:'excl', nome:'Excluído pelo comitê', tom:'neutral' };
       return { cls:'aprov', nome:`Aprovado · ${ST[s].nome.toLowerCase()}`, tom:'neutral' };
     }
     return { cls:'outro', nome: M.etapa(p.etapa).nome, tom:'neutral' };
   }
-  const LEGENDA = { exec:'Em execução (parte escura = concluída)', cabe:'Aprovado e cabe', fora:'Aguarda capacidade', aprov:'Aprovado sem avaliação', espera:'Em espera', excl:'Excluído pelo comitê', concl:'Concluído', outro:'Outras etapas' };
+  const LEGENDA = { exec:'Em execução (parte escura = concluída)', cabe:'Aprovado e cabe', estoura:'Fixado, mas estoura a capacidade', fora:'Aguarda capacidade', aprov:'Aprovado sem avaliação', espera:'Em espera', excl:'Excluído pelo comitê', concl:'Concluído', outro:'Outras etapas' };
   function telaRoadmap(el, r){
     const S = GP.state(), mostrar = r.query.ver === 'todos' ? 'todos' : 'ativos', soCabe = r.query.cabe === '1';
     const c = carteira(), porId = {}; c.itens.forEach(i => { porId[i.p.id] = i; });
@@ -399,9 +414,11 @@
     const n = mesIdx(fim) - mesIdx(ini) + 1;
     const visiveis = com.filter(p => !(p.fimPrevisto.slice(0, 7) < ini || p.inicioPrevisto.slice(0, 7) > fim));
     const cortados = com.filter(p => p.inicioPrevisto.slice(0, 7) < ini || p.fimPrevisto.slice(0, 7) > fim);
-    const dm = M.demandaMensal(com.filter(p => !['concluido', 'cancelado', 'nao_entra'].includes(p.etapa)), ini, fim, JANELA);
+    // histograma: a mesma conta da carteira (execução + carteira selecionada), mês a mês; quem aguarda aparece hachurado por cima,
+    // rotulado como "se começar como planejado" (outra pergunta). Sem "Só o que cabe", a parte hachurada some junto com as barras.
+    const dm = M.demandaCarteira(P.todos(), c, ini, fim, JANELA), mostraAg = !soCabe, ag = x => mostraAg ? x.aguardando : 0;
     const pos = d => { const dia = +d.slice(8, 10) || 1; return (mesIdx(d) - mesIdx(ini) + (dia - 1) / 31) / n * 100; };
-    const capMes = (+S.capacidade.fte || 0) * (1 - (+S.capacidade.reservaPct || 0) / 100), maxDem = Math.max(0, ...dm.map(x => x.fte));
+    const capMes = c.efetiva, maxDem = Math.max(0, ...dm.map(x => x.total + ag(x)));
     const tk = Math.max(capMes, maxDem) <= 6 ? 2 : Math.max(capMes, maxDem) <= 15 ? 5 : Math.max(capMes, maxDem) <= 40 ? 10 : 20;
     const maxF = Math.max(Math.ceil(Math.max(capMes, maxDem, 1) * 1.1 / tk) * tk, Math.max(capMes, maxDem, 1) * 1.1);
     const mesHoje = hoje().slice(0, 7), hojeIdx = mesHoje >= ini && mesHoje <= fim ? mesIdx(mesHoje) - mesIdx(ini) : null, hojePos = hojeIdx != null ? pos(hoje()) : null;
@@ -416,24 +433,33 @@
       const txt = s.cls === 'fora' ? `aguarda capacidade${p.esforcoFte != null ? ' · ' + f1(p.esforcoFte) + ' FTE' : ''}` : p.esforcoFte != null ? f1(p.esforcoFte) + ' FTE' : '';
       return `<span class="g-bar gb-${s.cls}" style="left:${l}%;width:${w}%" data-tt="${ttAttr(p, s)}">${feito}<span class="gb-t">${s.fixado ? svg(IC.pino, 11) : ''}${esc(txt)}</span></span>`; };
     const linhas = visiveis.map(p => `<a class="g-row rm-row" href="#/projeto/${esc(p.id)}"><div class="g-lbl" data-tt="${ttAttr(p, sitDe[p.id])}"><span class="code">${esc(p.codigo)}</span> ${esc(p.titulo)}</div><div class="g-track">${barra(p)}</div></a>`).join('');
-    const vals = new Set(); const pk = dm.reduce((a, x, i) => x.fte > dm[a].fte ? i : a, 0); if(dm[pk] && dm[pk].fte > 0) vals.add(pk); dm.forEach((x, i) => { if(x.fte > capMes + 1e-9) vals.add(i); });
-    const cols = dm.map((x, i) => { const over = x.fte > capMes + 1e-9, h = x.fte / maxF * 100;
-      return `<span class="g-col ${over ? 'over' : ''}" style="left:${i / n * 100}%;width:${100 / n}%" data-tt="${rotMes(x.mes)} · ${f1(x.fte)} FTE&#10;${over ? `${f1(x.fte - capMes)} acima da capacidade (${f1(capMes)} FTE)` : `${f1(capMes - x.fte)} abaixo da capacidade (${f1(capMes)} FTE)`}"><i style="height:${h}%"></i>${vals.has(i) ? `<b style="bottom:${h}%">${f1(x.fte)}</b>` : ''}</span>`; }).join('');
+    const vals = new Set(); const pk = dm.reduce((a, x, i) => x.total > dm[a].total + 1e-9 ? i : a, 0); if(dm[pk] && dm[pk].total > 0) vals.add(pk); dm.forEach((x, i) => { if(x.total > capMes + 1e-9) vals.add(i); });
+    const difCap = v => v > capMes + 1e-9 ? `${f1(v - capMes)} acima da capacidade` : `${f1(capMes - v)} abaixo da capacidade`;
+    const cols = dm.map((x, i) => { const over = x.total > capMes + 1e-9, a = ag(x), h = x.total / maxF * 100, ha = a / maxF * 100, agOver = x.total + a > capMes + 1e-9;
+      const dica = `${rotMes(x.mes)}${x.noPeriodo ? '' : ' · fora do período da capacidade'}&#10;Execução + carteira selecionada: ${f1(x.total)} FTE (${difCap(x.total)})${a > 0 ? `&#10;Se os que aguardam começarem como planejado: ${f1(x.total + a)} FTE (${difCap(x.total + a)})` : ''}&#10;Capacidade efetiva: ${f1(capMes)} FTE`;
+      return `<span class="g-col ${over ? 'over' : ''}" style="left:${i / n * 100}%;width:${100 / n}%" data-tt="${dica}">${a > 0 ? `<i class="ag${agOver ? ' ag-over' : ''}" style="height:${ha}%"></i>` : ''}<i class="b" style="height:${h}%"></i>${vals.has(i) ? `<b style="bottom:${h + ha}%">${f1(x.total)}</b>` : ''}</span>`; }).join('');
+    // faixa do período da capacidade (onde a carteira é decidida)
+    const pi = dm.findIndex(x => x.noPeriodo), pf = dm.length - 1 - [...dm].reverse().findIndex(x => x.noPeriodo);
+    const faixaPer = pi >= 0 ? `<i class="rm-per" style="left:${pi / n * 100}%;width:${(pf - pi + 1) / n * 100}%" data-tt="Período da capacidade: ${esc(c.periodo.rotulo)}"></i>` : '';
     const ticks = []; for(let t = 0; t <= maxF * 0.92; t += tk) ticks.push(t);
     const capPct = capMes / maxF * 100;
     // meses acima da capacidade agrupados em faixas
-    const faixas = []; dm.forEach((x, i) => { if(x.fte > capMes + 1e-9){ const u = faixas[faixas.length - 1]; if(u && u.b === i - 1){ u.b = i; u.max = Math.max(u.max, x.fte); } else faixas.push({ a:i, b:i, max:x.fte }); } });
+    const agrupar = v => { const fx = []; dm.forEach((x, i) => { const y = v(x); if(y > capMes + 1e-9){ const u = fx[fx.length - 1]; if(u && u.b === i - 1){ u.b = i; u.max = Math.max(u.max, y); } else fx.push({ a:i, b:i, max:y }); } }); return fx; };
+    const faixas = agrupar(x => x.total), faixasAg = mostraAg ? agrupar(x => x.aguardando > 0 ? x.total + x.aguardando : 0) : [];
     const faixaTxt = f => `${intervalo(dm[f.a].mes, dm[f.b].mes)} (pico ${f1(f.max)} FTE)`;
-    const presentes = [...new Set(visiveis.map(p => sitDe[p.id].cls))], ordemLeg = ['exec', 'cabe', 'fora', 'aprov', 'espera', 'excl', 'concl', 'outro'];
+    const notaAg = faixasAg.length ? `<p class="rm-lista-dem rm-dem-ag">${icon('info', 15)} <span><b>Se os que aguardam capacidade começarem como planejado</b> (barras hachuradas, fora da carteira): ${faixasAg.map(faixaTxt).join('; ')} passaria da capacidade.</span></p>` : '';
+    const notas = [!c.descontarExecucao ? 'A carteira não desconta as pessoas em execução (premissa da carteira), então o histograma também não as soma.' : '',
+      c.semDatas.length ? `${plural(c.semDatas.length, 'projeto sem datas entra', 'projetos sem datas entram')} na conta ocupando o período inteiro (${c.semDatas.map(p => esc(p.codigo)).join(', ')}).` : ''].filter(Boolean);
+    const temAg = dm.some(x => ag(x) > 0), presentes = [...new Set(visiveis.map(p => sitDe[p.id].cls))], ordemLeg = ['exec', 'cabe', 'estoura', 'fora', 'aprov', 'espera', 'excl', 'concl', 'outro'];
     html += `<div class="card rm-card">
       <div class="rm-gantt"><div class="rm-scroll-box"><div class="gantt-wrap rm-scroll" data-rm-scroll><div class="gantt rm-g" style="min-width:calc(var(--lbl) + var(--gap) + ${n * 40}px)">
         <div class="rm-grade" aria-hidden="true">${grade}</div>
         <div class="g-head rm-head"><div class="g-lbl"><span class="dim">Projeto</span></div><div class="g-track rm-anos">${anos.map(a => `<span class="${a.i0 ? 'vira' : ''}" style="left:${a.i0 / n * 100}%;width:${a.k / n * 100}%"><b class="rm-ano-t">${a.y}</b></span>`).join('')}</div></div>
         <div class="g-head rm-head rm-head2"><div class="g-lbl"></div><div class="g-track rm-meses">${dm.map((x, i) => `<span class="${x.mes.endsWith('-01') && i ? 'vira' : ''} ${x.mes === mesHoje ? 'hoje' : ''}" style="left:${i / n * 100}%;width:${100 / n}%"><span class="mf">${MESES[+x.mes.slice(5) - 1]}</span><span class="mi" aria-hidden="true">${MESES[+x.mes.slice(5) - 1][0].toUpperCase()}</span></span>`).join('')}</div></div>
         ${linhas}
-        <div class="g-row g-dem rm-dem"><div class="g-lbl rm-dem-lbl"><b>Pessoas por mês</b><span class="dim">capacidade ${f1(capMes)} FTE</span><span class="rm-ticks" aria-hidden="true">${ticks.map(t => `<i style="bottom:${t / maxF * 100}%">${fmt.n(t)}</i>`).join('')}</span></div>
-          <div class="g-track rm-dem-track" role="img" aria-label="Pessoas por mês: ${esc(dm.map(x => `${rotMes(x.mes)} ${f1(x.fte)}`).join(', '))}. Capacidade ${f1(capMes)} FTE.">
-            <i class="rm-acima" style="bottom:${capPct}%"></i>${ticks.map(t => `<i class="rm-tick" style="bottom:${t / maxF * 100}%"></i>`).join('')}
+        <div class="g-row g-dem rm-dem"><div class="g-lbl rm-dem-lbl"><b>Pessoas por mês</b><span class="dim">execução + carteira selecionada · capacidade ${f1(capMes)} FTE</span><span class="rm-ticks" aria-hidden="true">${ticks.map(t => `<i style="bottom:${t / maxF * 100}%">${fmt.n(t)}</i>`).join('')}</span></div>
+          <div class="g-track rm-dem-track" role="img" aria-label="Pessoas por mês, execução mais carteira selecionada: ${esc(dm.map(x => `${rotMes(x.mes)} ${f1(x.total)}${ag(x) > 0 ? ` (${f1(x.total + ag(x))} se os que aguardam começarem como planejado)` : ''}`).join(', '))}. Capacidade ${f1(capMes)} FTE.">
+            ${faixaPer}<i class="rm-acima" style="bottom:${capPct}%"></i>${ticks.map(t => `<i class="rm-tick" style="bottom:${t / maxF * 100}%"></i>`).join('')}
             ${cols}<i class="g-cap" style="bottom:${capPct}%"><span>${f1(capMes)} FTE</span></i></div></div>
         ${hojePos != null ? `<i class="rm-hoje" style="left:${X(hojePos)}" aria-hidden="true"><b>Hoje</b></i>` : ''}
       </div></div></div><p class="rm-dica" aria-hidden="true">arraste para ver mais →</p></div>
@@ -441,10 +467,12 @@
         return `<a class="rm-item" href="#/projeto/${esc(p.id)}"><div class="rm-item-t"><span class="code">${esc(p.codigo)}</span> <b>${esc(p.titulo)}</b></div>
           <div class="rm-item-m"><span>${esc(intervalo(p.inicioPrevisto, p.fimPrevisto))}</span><span>${p.esforcoFte != null ? f1(p.esforcoFte) + ' FTE' : 'FTE não informado'}</span>${U.pill(s.fixado ? s.nome.replace(/^Fixado pelo comitê · /, 'Fixado · ') : s.nome, s.tom)}</div>
           <div class="rm-mini" aria-hidden="true"><i class="rm-mb gb-${s.cls}" style="left:${l}%;width:${w}%"></i>${hojePos != null ? `<i class="rm-mini-hoje" style="left:${hojePos}%"></i>` : ''}</div></a>`; }).join('')}
-        <p class="rm-lista-dem">${faixas.length ? `${icon('alerta', 15)} <span><b>Acima da capacidade (${f1(capMes)} FTE):</b> ${faixas.map(faixaTxt).join('; ')}.</span>` : `${icon('check', 15)} <span>Pessoas por mês dentro da capacidade (${f1(capMes)} FTE) em toda a janela.</span>`}</p></div>
+        </div>
+      <p class="rm-lista-dem ${faixas.length ? 'acima' : ''}">${faixas.length ? `${icon('alerta', 15)} <span><b>Execução + carteira selecionada acima da capacidade (${f1(capMes)} FTE):</b> ${faixas.map(faixaTxt).join('; ')}.</span>` : `${icon('check', 15)} <span>Execução + carteira selecionada dentro da capacidade (${f1(capMes)} FTE) em todos os meses.</span>`}</p>${notaAg}
+      ${notas.map(t => `<p class="rm-nota">${t}</p>`).join('')}
       ${cortados.length ? `<p class="rm-nota">Mostrando ${n} meses (${esc(rotMes(ini))} a ${esc(rotMes(fim))}). ${plural(cortados.length, 'projeto passa', 'projetos passam')} dessa janela e ${cortados.length === 1 ? 'aparece cortado' : 'aparecem cortados'}: ${cortados.map(p => `${esc(p.codigo)} (${esc(intervalo(p.inicioPrevisto, p.fimPrevisto))})`).join(', ')}.</p>` : ''}
       ${soCabe && ocultos ? `<p class="rm-nota">${plural(ocultos, 'projeto que aguarda', 'projetos que aguardam')} capacidade ${ocultos === 1 ? 'está oculto' : 'estão ocultos'}. <a class="link" href="${q(mostrar, false)}">Mostrar todos</a></p>` : ''}
-      <div class="legend rm-leg">${ordemLeg.filter(k => presentes.includes(k)).map(k => `<span><i class="rm-sw gb-${k}">${k === 'exec' ? '<i class="gb-feito" style="width:50%"></i>' : ''}</i>${LEGENDA[k]}</span>`).join('')}${visiveis.some(p => sitDe[p.id].fixado) ? `<span>${svg(IC.pino, 13)} Fixado pelo comitê</span>` : ''}<span><i class="rm-sw rm-sw-over"></i>Mês acima da capacidade</span>${hojePos != null ? '<span><i class="rm-sw rm-sw-hoje"></i>Hoje</span>' : ''}</div></div>`;
+      <div class="legend rm-leg">${ordemLeg.filter(k => presentes.includes(k)).map(k => `<span><i class="rm-sw gb-${k}">${k === 'exec' ? '<i class="gb-feito" style="width:50%"></i>' : ''}</i>${LEGENDA[k]}${k === 'fora' && temAg ? ' (no histograma: se começar como planejado)' : ''}</span>`).join('')}${visiveis.some(p => sitDe[p.id].fixado) ? `<span>${svg(IC.pino, 13)} Fixado pelo comitê</span>` : ''}${temAg && !presentes.includes('fora') ? '<span><i class="rm-sw rm-sw-ag"></i>Aguarda capacidade, se começar como planejado</span>' : ''}<span><i class="rm-sw rm-sw-over"></i>Carteira acima da capacidade</span>${pi >= 0 ? `<span><i class="rm-sw rm-sw-per"></i>Período da capacidade (${esc(c.periodo.rotulo)})</span>` : ''}${hojePos != null ? '<span><i class="rm-sw rm-sw-hoje"></i>Hoje</span>' : ''}</div></div>`;
     html += semDatas(sem);
     el.innerHTML = html;
     // rolagem: começa 2 meses antes de hoje, máscara na borda direita enquanto houver conteúdo à direita
@@ -460,23 +488,35 @@
   /* ----------------------------------------- resumo de capacidade (painel nível 3) */
   /** Cartão de vidro com o medidor compacto, a demanda de 12 meses contra a capacidade e o alerta de pico. O pacote do painel o insere no nível 3. */
   GP.capacidadeResumo = () => {
+    // mesma fonte da Carteira (montarCarteira): a pergunta principal é "a carteira selecionada cabe?"; a demanda de quem aguarda
+    // aparece separada, rotulada como "se começar como planejado".
     const S = GP.state(), cap = S.capacidade, c = carteira();
-    const ativos = P.todos().filter(p => ['aprovado', 'execucao'].includes(p.etapa));
     const ate = deIdx(Math.min(mesIdx(c.periodo.fim), mesIdx(c.periodo.ini) + 11));
-    const dm = M.demandaMensal(ativos, c.periodo.ini, ate, 12), capMes = c.efetiva, max = Math.max(capMes, ...dm.map(x => x.fte), 1) * 1.12;
+    const dm = M.demandaCarteira(P.todos(), c, c.periodo.ini, ate, 12), capMes = c.efetiva, max = Math.max(capMes, ...dm.map(x => x.planejada), 1) * 1.12;
     const W = 240, H = 56, bw = W / dm.length, y = v => H - v / max * H;
-    const pk = dm.reduce((a, x) => x.fte > a.fte ? x : a, { fte:0, mes:'' });
-    const barras = dm.map((x, i) => { const h = x.fte / max * H, over = x.fte > capMes + 1e-9, w = Math.min(14, bw - 4), xx = i * bw + (bw - w) / 2, rr = Math.min(3, h, w / 2);
-      return h > 0 ? `<path d="M${xx.toFixed(1)} ${H}V${(H - h + rr).toFixed(1)}Q${xx.toFixed(1)} ${(H - h).toFixed(1)} ${(xx + rr).toFixed(1)} ${(H - h).toFixed(1)}H${(xx + w - rr).toFixed(1)}Q${(xx + w).toFixed(1)} ${(H - h).toFixed(1)} ${(xx + w).toFixed(1)} ${(H - h + rr).toFixed(1)}V${H}Z" fill="${over ? '#b8642c' : '#6b8f2a'}" data-tt="${rotMes(x.mes)} · ${f1(x.fte)} FTE&#10;capacidade ${f1(capMes)} FTE"/>` : ''; }).join('');
-    const acima = pk.fte > capMes + 1e-9;
+    const coluna = (xx, w, y0, h, r) => `M${xx.toFixed(1)} ${(y0 + h).toFixed(1)}V${(y0 + r).toFixed(1)}Q${xx.toFixed(1)} ${y0.toFixed(1)} ${(xx + r).toFixed(1)} ${y0.toFixed(1)}H${(xx + w - r).toFixed(1)}Q${(xx + w).toFixed(1)} ${y0.toFixed(1)} ${(xx + w).toFixed(1)} ${(y0 + r).toFixed(1)}V${(y0 + h).toFixed(1)}Z`;
+    const barras = dm.map((x, i) => { const h = x.total / max * H, ha = x.aguardando / max * H, over = x.total > capMes + 1e-9, w = Math.min(14, bw - 4), xx = i * bw + (bw - w) / 2;
+      const dica = `${rotMes(x.mes)}&#10;Execução + carteira selecionada: ${f1(x.total)} FTE${x.aguardando > 0 ? `&#10;Se os que aguardam começarem como planejado: ${f1(x.planejada)} FTE` : ''}&#10;Capacidade: ${f1(capMes)} FTE`;
+      return (ha > 0 ? `<path d="${coluna(xx, w, H - h - ha, ha, h > 0 ? 0 : Math.min(3, ha, w / 2))}" fill="#fbeee6" stroke="#b8642c" stroke-width="1" stroke-dasharray="2 2" data-tt="${dica}"/>` : '')
+        + (h > 0 ? `<path d="${coluna(xx, w, H - h, h, ha > 0 ? 0 : Math.min(3, h, w / 2))}" fill="${over ? '#b8642c' : '#6b8f2a'}" data-tt="${dica}"/>` : ''); }).join('');
+    const acima = c.sobraFte < -0.05, agOver = c.picoPlanejado.total > capMes + 1e-9 && c.picoPlanejado.total > c.pico.total + 1e-9;
+    const aguardam = c.itens.filter(i => ['nao_cabe', 'cabe_a_partir', 'obrigatorio_deslocado'].includes(i.status));
+    const quem = aguardam.length === 1 ? `o ${esc(aguardam[0].p.codigo)}, que aguarda capacidade,` : `os ${aguardam.length} que aguardam capacidade`;
+    const principal = c.pico.total > 0
+      ? (acima ? `A carteira selecionada passa da capacidade: pico de <b>${f1(c.pico.total)} FTE</b> em ${esc(rotMes(c.pico.mes))}, ${f1(-c.sobraFte)} acima de ${f1(capMes)} FTE${c.estouram ? ` (${plural(c.estouram, 'fixado estoura', 'fixados estouram')})` : ''}.`
+        : `A carteira selecionada cabe: pico de <b>${f1(c.pico.total)} de ${f1(capMes)} FTE</b> em ${esc(rotMes(c.pico.mes))}.`)
+      : 'Sem demanda de pessoas no período.';
+    const hipotese = agOver && aguardam.length ? `<p class="cap-resumo-alerta cap-resumo-se">${icon('info', 15)} <span>Se ${quem} começar${aguardam.length === 1 ? '' : 'em'} como planejado, ${esc(rotMes(c.picoPlanejado.mes))} chegaria a ${f1(c.picoPlanejado.total)} FTE (barras tracejadas).</span></p>` : '';
+    const rot = (m, a) => `<span${a ? ' class="fim"' : ''}>${esc(rotMes(m))}</span>`;
+    const cabemTxt = `${c.cabem} de ${c.candidatos} aprovados cabem na carteira${c.estouram ? ` · ${plural(c.estouram, 'fixado estoura', 'fixados estouram')}` : ''}.`;
     return `<section class="card cap-resumo" aria-label="Capacidade do período">
-      ${U.secH(`Capacidade · ${esc(c.periodo.rotulo)}`, `${c.cabem} de ${c.candidatos} aprovados cabem na carteira.`, '<a class="link" href="#/carteira">Carteira →</a>')}
+      ${U.secH(`Capacidade · ${esc(c.periodo.rotulo)}`, cabemTxt, '<a class="link" href="#/carteira">Carteira →</a>')}
       ${graficoCapacidade(dadosGrafico(c, cap, { compacto:true, orcamento:null }))}
-      <div class="cap-resumo-dem"><span class="dim">Pessoas por mês (aprovados e em execução)</span>
-        <svg class="cap-spark" viewBox="0 0 ${W} ${H + 12}" role="img" aria-label="Demanda mensal: ${esc(dm.map(x => `${rotMes(x.mes)} ${f1(x.fte)}`).join(', '))}; capacidade ${f1(capMes)} FTE">
-          <line x1="0" y1="${H}" x2="${W}" y2="${H}" stroke="#dfe7e2"/>${barras}<line x1="0" y1="${y(capMes).toFixed(1)}" x2="${W}" y2="${y(capMes).toFixed(1)}" stroke="#254e47" stroke-width="1.2" stroke-dasharray="4 3"/>
-          <text x="0" y="${H + 11}" font-size="9" fill="#566b64">${esc(rotMes(dm[0] ? dm[0].mes : c.periodo.ini))}</text><text x="${W}" y="${H + 11}" font-size="9" fill="#566b64" text-anchor="end">${esc(rotMes(dm.length ? dm[dm.length - 1].mes : ate))}</text></svg></div>
-      <p class="cap-resumo-alerta ${acima ? 'acima' : ''}">${icon(acima ? 'alerta' : 'check', 15)} <span>${pk.fte > 0 ? `${acima ? '' : 'Dentro da capacidade. '}Pico de <b>${f1(pk.fte)} FTE</b> em ${esc(rotMes(pk.mes))}${acima ? `, ${f1(pk.fte - capMes)} acima da capacidade (${f1(capMes)} FTE)` : ` para ${f1(capMes)} FTE`}.` : 'Sem demanda com datas no período.'} <a class="link" href="#/roadmap">Ver roadmap →</a></span></p>
+      <div class="cap-resumo-dem"><span class="dim">Pessoas por mês: execução + carteira selecionada${dm.some(x => x.aguardando > 0) ? ' · tracejado: quem aguarda' : ''}</span>
+        <svg class="cap-spark" viewBox="0 0 ${W} ${H + 2}" role="img" aria-label="Execução mais carteira selecionada por mês: ${esc(dm.map(x => `${rotMes(x.mes)} ${f1(x.total)}`).join(', '))}; capacidade ${f1(capMes)} FTE">
+          <line x1="0" y1="${H}" x2="${W}" y2="${H}" stroke="#dfe7e2"/>${barras}<line x1="0" y1="${y(capMes).toFixed(1)}" x2="${W}" y2="${y(capMes).toFixed(1)}" stroke="#254e47" stroke-width="1.2" stroke-dasharray="4 3"/></svg>
+        <div class="cap-spark-x" aria-hidden="true">${rot(dm[0] ? dm[0].mes : c.periodo.ini)}${rot(dm.length ? dm[dm.length - 1].mes : ate, true)}</div></div>
+      <p class="cap-resumo-alerta ${acima ? 'acima' : ''}">${icon(acima ? 'alerta' : 'check', 15)} <span>${principal} <a class="link" href="#/roadmap">Ver roadmap →</a></span></p>${hipotese}
     </section>`;
   };
 

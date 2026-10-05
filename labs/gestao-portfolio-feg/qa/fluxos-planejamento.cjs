@@ -136,7 +136,8 @@ module.exports = {
     check(await p.$$eval('.g-col', c => c.filter(x => x.hasAttribute('title')).length) === 0, 'nenhum title nativo em .g-col');
     const abr = await p.$$eval('.g-col', c => c.findIndex(x => /^abr\/2027/.test(x.dataset.tt)));
     await p.locator('.g-col').nth(abr).hover(); await p.waitForTimeout(120);
-    check(/10,5 FTE/.test(await p.textContent('.gp-tt')), 'dica de abr/2027 deveria mostrar 10,5 FTE');
+    const dicaAbr = await p.textContent('.gp-tt');
+    check(/carteira selecionada: 8,5 FTE/.test(dicaAbr) && /como planejado: 10,5 FTE/.test(dicaAbr), 'dica de abr/2027 deveria mostrar 8,5 FTE da carteira e 10,5 FTE se o aguardando começar como planejado: ' + dicaAbr);
     check(/8,5 FTE/.test(await p.textContent('.g-cap')), 'linha de capacidade deveria ter rótulo');
     const linha = await p.evaluate(() => { const h = document.querySelector('.rm-hoje').getBoundingClientRect(), c = document.querySelector('.rm-head').getBoundingClientRect(), d = document.querySelector('.rm-dem-track').getBoundingClientRect(); return document.querySelectorAll('.rm-hoje').length === 1 && h.top <= c.top + 1 && h.bottom >= d.bottom - 1; });
     check(linha, 'linha Hoje deveria ser única e contínua do cabeçalho ao histograma');
@@ -172,8 +173,9 @@ module.exports = {
     check(m.n === 6 && m.crit === 1 && m.altos === 3 && m.venc === 1 && m.semResp === 1, 'exemplos deveriam criar 6 riscos (1 crítico, 2 altos, 1 vencido, 1 sem responsável): ' + JSON.stringify(m));
     await ir('#/riscos', 300);
     const t = await p.textContent('#conteudo');
-    check(/abr–jun\/2027 acima da capacidade/.test(t) && /10,5 de 8,5 FTE/.test(t) && /Aprovados aguardando capacidade/.test(t), 'sinais deveriam listar meses acima da capacidade e aprovados aguardando');
-    check(await p.locator('[data-risk-signal][data-risk-category="capacidade"]').count() >= 2, 'sinais de capacidade deveriam permitir registrar avaliação');
+    // a carteira selecionada cabe (pico 8,5 de 8,5 em mar/2027): nada "acima da capacidade"; o excesso de abr–jun/2027 é hipótese de quem aguarda
+    check(!/acima da capacidade/.test(t) && /Aprovados aguardando capacidade/.test(t) && /Se começarem como planejado, abr–jun\/2027 chegaria a 10,5 de 8,5 FTE/.test(t), 'sinais deveriam tratar o excesso de abr–jun/2027 como hipótese dos aguardando, não como carteira acima da capacidade');
+    check(await p.locator('[data-risk-signal][data-risk-category="capacidade"]').count() >= 1, 'sinais de capacidade deveriam permitir registrar avaliação');
     const mtz = await p.textContent('.rk-mtz');
     check(!/·/.test(mtz) && !/P\d × I\d/.test(mtz), 'matriz não deveria mostrar "·" nem "P5 × I1" visíveis');
     check(await p.locator('.rk-overview .rk-leg .rk-leg-i').count() === 4, 'legenda deveria ter 4 faixas');
@@ -217,7 +219,8 @@ module.exports = {
   async 'planejamento L15: resumo de capacidade e atalho na entrada'({ p, ir, check, recarregar }){
     await exemplos(p, recarregar);
     const html = await p.evaluate(() => GP.capacidadeResumo());
-    check(/cap-resumo/.test(html) && /capm-bar/.test(html) && /Pico de <b>10,5 FTE<\/b> em abr\/2027/.test(html), 'GP.capacidadeResumo() deveria trazer medidor, demanda e alerta de pico');
+    // mesmo pico da Carteira (mar/2027, 8,5 de 8,5); os 10,5 de abr/2027 só como hipótese rotulada do PRJ-014 aguardando
+    check(/cap-resumo/.test(html) && /capm-bar/.test(html) && /A carteira selecionada cabe: pico de <b>8,5 de 8,5 FTE<\/b> em mar\/2027/.test(html) && /Se o PRJ-014, que aguarda capacidade, começar como planejado, abr\/2027 chegaria a 10,5 FTE/.test(html), 'GP.capacidadeResumo() deveria trazer medidor, demanda e o pico da carteira, com o excesso de quem aguarda rotulado como hipótese');
     check(await p.evaluate(h => { const d = document.createElement('div'); d.innerHTML = h; return d.querySelectorAll('section.cap-resumo').length === 1 && d.innerHTML.length > 500; }, html), 'HTML do resumo deveria ser válido');
     check(typeof await p.evaluate(() => typeof GP.charts.capacidade) === 'string' && await p.evaluate(() => typeof GP.charts.capacidade) === 'function', 'GP.charts.capacidade deveria existir');
     await ir('#/entrada-resumo', 250);
