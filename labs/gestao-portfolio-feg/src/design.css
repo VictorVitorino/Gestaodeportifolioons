@@ -51,7 +51,12 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 h1,h2,h3,h4{font-family:var(--font-display);color:var(--text);letter-spacing:-.02em}
 a{color:var(--ons)}
 :focus-visible{outline:2px solid transparent;outline-offset:2px;box-shadow:var(--focus)}
-.shell .side :focus-visible,.dock :focus-visible,.level-tile :focus-visible{box-shadow:var(--focus-dark)}
+/* O anel do teclado vence as sombras dos componentes (botões, chips, cartões, item ativo do trilho, nível ativo, busca),
+   que também usam box-shadow e vêm depois na cascata. Ficam de fora os campos de texto e de seleção (têm borda verde e halo
+   próprios) e os alvos de foco programático (tabindex=-1: título da tela, título do modal, conteúdo). */
+:focus-visible:not([tabindex="-1"]):not(select,textarea,input:not([type=checkbox],[type=radio],[type=range],[type=file],[type=button],[type=submit],[type=reset])){box-shadow:var(--focus)!important}
+/* superfícies escuras (trilho, dock, bloco de nível, modo comitê): anel claro por fora */
+:is(.shell .side,.dock,.level-tile,.comite) :focus-visible:not([tabindex="-1"]):not(select,textarea,input:not([type=checkbox],[type=radio],[type=range],[type=file],[type=button],[type=submit],[type=reset])){box-shadow:var(--focus-dark)!important}
 .input:focus-visible,.select:focus-visible{outline:2px solid transparent}
 /* alvos de foco programático (título da tela, título do modal, conteúdo) não ganham anel */
 #conteudo:focus,#conteudo h1[tabindex="-1"]:focus,.modal [data-foco-inicial]:focus{outline:none;box-shadow:none}
@@ -588,9 +593,10 @@ button.legend-line:hover{background:rgba(241,246,234,.8)}
 
 /* tabelas: cabeçalho ordenável como botão, colunas que saem em áreas menores, rolagem sinalizada */
 .th-sort{display:inline-flex;align-items:center;gap:6px;cursor:pointer;border-radius:6px;padding:2px 4px;margin:-2px -4px;color:inherit;text-transform:inherit;letter-spacing:inherit}
-.th-sort::after{content:"↕";font-size:.95em;opacity:.4;letter-spacing:0}
-th[aria-sort="ascending"] .th-sort::after{content:"↑";opacity:1}
-th[aria-sort="descending"] .th-sort::after{content:"↓";opacity:1}
+/* a seta é decorativa: texto alternativo vazio (o estado vem de aria-sort no th) */
+.th-sort::after{content:"↕";content:"↕"/"";font-size:.95em;opacity:.4;letter-spacing:0}
+th[aria-sort="ascending"] .th-sort::after{content:"↑";content:"↑"/"";opacity:1}
+th[aria-sort="descending"] .th-sort::after{content:"↓";content:"↓"/"";opacity:1}
 th[aria-sort="ascending"],th[aria-sort="descending"]{color:var(--ons-700)!important}
 .th-sort:hover{color:var(--ons)}
 .tbl td.col-main,.tbl th.col-main{min-width:280px}

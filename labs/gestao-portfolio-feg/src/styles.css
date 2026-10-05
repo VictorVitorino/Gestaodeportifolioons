@@ -4,9 +4,9 @@
    ========================================================================= */
 :root{
   --bg:#FFFFFF; --soft:#F7F8F5; --line:#E4E3E4; --line-2:#D5D4D5;
-  --text:#1E2420; --muted:#5E655F; --dim:#8A908B;
+  --text:#1E2420; --muted:#5E655F; --dim:#5a6e67;
   --green:#3E6801; --green-700:#2E4F00; --green-600:#4C7A0B; --green-50:#F1F6EA; --green-100:#E1EDCF; --green-200:#C6DCA4;
-  --ok:#3E6801; --warn:#B7791F; --bad:#B9381F; --info:#2F6FA3; --neutral:#8A908B;
+  --ok:#3E6801; --warn:#B7791F; --bad:#B9381F; --info:#2F6FA3; --neutral:#5a6e67;
   --ok-bg:#EDF5E3; --warn-bg:#FDF5E6; --bad-bg:#FBEDEA; --info-bg:#EAF2F9; --neutral-bg:#F3F3F2;
   --radius:12px; --shadow:0 1px 2px rgba(16,24,16,.05), 0 4px 16px rgba(16,24,16,.06);
   --shadow-lg:0 12px 40px rgba(16,24,16,.16);
@@ -292,7 +292,7 @@ details summary::before{content:"▸";display:inline-block;margin-right:8px;colo
 @media print{ .side,.topbar,.toast{display:none!important} .shell{grid-template-columns:1fr} }
 
 /* ONS + Maestro: navegação, leitura gerencial e análise do portfólio. */
-:root{--bg:#fff;--soft:#f2f6f5;--line:#dfe7e4;--line-2:#cad7d2;--text:#19352f;--muted:#59716b;--dim:#788e86;--radius:15px;--side:256px;--side-mini:76px;--shadow:0 4px 18px rgba(25,53,47,.05);--navy:#153b4b;--teal:#188787;--gold:#d5a32d;--orange:#c37e22;--bad:#ab5728;--bad-bg:#fff0e5}
+:root{--bg:#fff;--soft:#f2f6f5;--line:#dfe7e4;--line-2:#cad7d2;--text:#19352f;--muted:#59716b;--dim:#5a6e67;--radius:15px;--side:256px;--side-mini:76px;--shadow:0 4px 18px rgba(25,53,47,.05);--navy:#153b4b;--teal:#188787;--gold:#d5a32d;--orange:#c37e22;--bad:#ab5728;--bad-bg:#fff0e5}
 body{background:#f2f6f5}
 .main{background:radial-gradient(ellipse at 95% 0,rgba(161,195,75,.12),transparent 45%),#f2f6f5}
 .side{background:linear-gradient(170deg,#173e49 0%,#112e38 78%);color:#eaf4ef;border:0;padding:20px 12px 12px;gap:4px}

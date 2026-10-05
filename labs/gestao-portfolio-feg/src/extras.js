@@ -357,11 +357,26 @@
      ===================================================================== */
   const DEC = {
     in:  { nome:'Aprovar início', sub:'Fixa na carteira deste período', icone:'check', tom:'ok' },
-    '':  { nome:'Aguardar', sub:'Volta ao automático: ranking e capacidade', icone:'relogio', tom:'warn' },
+    '':  { nome:'Seguir o ranking', sub:'Automático: entra se couber na capacidade', icone:'ranking', tom:'auto' },
     out: { nome:'Não priorizar', sub:'Fica fora da carteira deste período', icone:'x', tom:'bad' },
   };
-  const TOM_STATUS = { cabe:'ok', fixado:'ok', fixado_estoura:'bad', nao_cabe:'warn', excluido:'neutral', sem_estimativa:'warn' };
-  let com = null; // { el, ids, i, origem, log, foco, inicio, msg, fs }
+  /* Situação na carteira: a mesma semântica de GP.modelo.montarCarteira/STATUS_CARTEIRA usada na tela Carteira
+     (capacidade mês a mês; o pico inclui os projetos em execução e é comparado com a capacidade efetiva). */
+  const DENTRO = ['cabe', 'fixado', 'fixado_estoura'];
+  /** Aguardam capacidade: fora da carteira por falta de pessoas/orçamento (nao_cabe, cabe_a_partir, obrigatorio_deslocado) */
+  const aguardaCap = s => !!(M.STATUS_CARTEIRA[s] && M.STATUS_CARTEIRA[s].fora) && !DENTRO.includes(s);
+  const tomStatus = s => (M.STATUS_CARTEIRA[s] && M.STATUS_CARTEIRA[s].tom) || 'neutral';
+  const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+  const rotMes = s => s ? `${MESES[+String(s).slice(5, 7) - 1]}/${String(s).slice(0, 4)}` : '';
+  const nomeStatus = it => !it ? 'Sem situação' : it.status === 'cabe_a_partir' && it.aPartir ? `Cabe a partir de ${rotMes(it.aPartir)}` : (M.STATUS_CARTEIRA[it.status] || {}).nome || 'Sem situação';
+  /** Quanto falta (texto curto, igual ao da tabela da carteira) */
+  const faltaTxt = it => !it || !it.falta ? '' : it.falta.tipo === 'FTE' ? `faltam ${f1(it.falta.valor)} FTE${it.picoMes ? ` em ${rotMes(it.picoMes)}` : ''}` : `faltam ${fmt.mi(it.falta.valor)} de orçamento`;
+  /** Situação para a ata, com a redação da pauta do comitê da carteira */
+  const sitAta = it => it.status === 'cabe_a_partir' ? `cabe a partir de ${rotMes(it.aPartir)}${it.falta ? ` (${faltaTxt(it)} nas datas previstas)` : ''}`
+    : it.status === 'obrigatorio_deslocado' ? `fora da carteira por causa das fixações do comitê${it.falta ? `, ${faltaTxt(it)}` : ''} (decisão necessária)`
+    : it.falta ? faltaTxt(it) : ((M.STATUS_CARTEIRA[it.status] || {}).nome || '').toLowerCase();
+  const obrTxt = p => p && p.obrigatorio ? ' [OBRIGATÓRIO]' : '';
+  let com = null; // { el, ids, i, origem, log, foco, inicio, msg, fs, conf }
 
   function abrirComite(origem = 'paleta'){
     if(com || bloqueado()) return;
@@ -417,10 +432,30 @@
     if(focar === 'titulo'){ const h = com.el.querySelector('.comite-tit'); if(h) try { h.focus({ preventScroll:true }); } catch(e){} }
     else if(focar){ const b = com.el.querySelector(focar); if(b && !b.disabled) b.focus({ preventScroll:true }); else { const h = com.el.querySelector('.comite-tit'); if(h) h.focus({ preventScroll:true }); } }
   }
+  /** Situação na capacidade com a mesma base da tabela da carteira: pico mensal (execução + carteira) contra a capacidade efetiva. */
+  function situacaoTxt(c, it){
+    if(!it) return 'Fora da lista de candidatos (etapa ou avaliação mudou).';
+    const exec = it.picoMes ? (((c.demanda || []).find(d => d.mes === it.picoMes) || {}).execucao || 0) : 0;
+    const pico = entrou => it.acumFte == null ? '' : `${entrou ? 'Pico mensal com este projeto' : 'Pico mensal se entrar'}: ${f1(it.acumFte)} de ${f1(c.efetiva)} FTE efetivos${it.picoMes ? ` (${rotMes(it.picoMes)})` : ''}${exec > 0 ? `, contando ${f1(exec)} FTE em execução` : ''}.`;
+    const falta = faltaTxt(it);
+    switch(it.status){
+      case 'cabe': case 'fixado': return pico(true);
+      case 'fixado_estoura': return it.acumFte != null && it.acumFte > c.efetiva + 1e-9
+        ? `Fixado pelo comitê, mas o pico chega a ${f1(it.acumFte)} de ${f1(c.efetiva)} FTE efetivos${it.picoMes ? ` em ${rotMes(it.picoMes)}` : ''}: excede em ${f1(it.acumFte - c.efetiva)} FTE.`
+        : `Fixado pelo comitê, mas o custo acumulado passa o orçamento em ${fmt.mi(Math.max(0, (it.acumCusto || 0) - (c.orcamento || 0)))}.`;
+      case 'nao_cabe': return `Não cabe nas datas previstas${falta ? `: ${falta}` : ''}. ${pico(false)}`.trim();
+      case 'cabe_a_partir': return `${falta ? falta[0].toUpperCase() + falta.slice(1) + ' nas datas previstas' : 'Não cabe nas datas previstas'} · cabe se começar em ${rotMes(it.aPartir)}.`;
+      case 'obrigatorio_deslocado': return `Obrigatório que caberia sem as fixações do comitê${falta ? ` (${falta})` : ''}. Revise as decisões ou aumente a capacidade.`;
+      case 'sem_estimativa': return 'Sem estimativa de pessoas: não entra na conta.';
+      case 'excluido': return 'Não ocupa capacidade.';
+      case 'fora_periodo': return `Datas previstas fora do período${c.periodo ? ' ' + c.periodo.rotulo : ''}: não entra na conta.`;
+      default: return pico(DENTRO.includes(it.status));
+    }
+  }
   function laminaProjeto(c, id){
     const p = P.get(id); if(!p) return `<article class="comite-lamina"><h2 class="comite-tit" tabindex="-1">Registro removido</h2></article>`;
     const it = c.itens.find(x => x.p.id === id), s = M.pontuar(p), q = s.quadrante && M.QUADRANTES[s.quadrante];
-    const st = it && M.STATUS_CARTEIRA[it.status], dec = decisaoAtual(id), ger = M.CAT.gerencias.find(g => g.id === p.gerencia);
+    const dec = decisaoAtual(id), ger = M.CAT.gerencias.find(g => g.id === p.gerencia);
     let decomp = '';
     if(typeof M.decompor === 'function'){
       try {
@@ -432,11 +467,7 @@
       } catch(e){ decomp = ''; }
     }
     const fato = (r, v) => `<div><dt>${r}</dt><dd>${v}</dd></div>`;
-    const capTxt = !it ? 'Fora da lista de candidatos (etapa ou avaliação mudou).'
-      : it.status === 'nao_cabe' && it.falta ? `Faltam ${it.falta.tipo === 'FTE' ? f1(it.falta.valor) + ' FTE' : fmt.mi(it.falta.valor)} para caber.`
-      : it.status === 'sem_estimativa' ? 'Sem estimativa de pessoas: não entra na conta.'
-      : it.status === 'excluido' ? 'Não ocupa capacidade.'
-      : `Acumulado da carteira até aqui: ${f1(it.acumFte)} de ${f1(c.livre)} FTE.`;
+    const capTxt = situacaoTxt(c, it);
     return `<article class="comite-lamina" aria-roledescription="lâmina" aria-label="Projeto ${com.i + 1} de ${com.ids.length}">
       <div class="comite-esq">
         <div class="comite-pos"><span>Posição</span><b>${it ? it.pos : '–'}</b><small>no ranking</small></div>
@@ -452,13 +483,26 @@
       </div>
       <div class="comite-dir">
         <dl class="comite-fatos">${fato('Pessoas (FTE)', p.esforcoFte != null ? f1(p.esforcoFte) : 'Sem estimativa')}${fato('Custo estimado', fmt.mi(p.custo))}${fato('Duração', p.duracaoMeses != null ? plural(p.duracaoMeses, 'mês', 'meses') : '-')}${fato('Período previsto', p.inicioPrevisto ? `${fmt.data(p.inicioPrevisto)} a ${fmt.data(p.fimPrevisto)}` : 'Sem datas')}${fato('Responsável', esc(p.responsavel || '-'))}</dl>
-        <div class="comite-cap cap-${it ? TOM_STATUS[it.status] || 'neutral' : 'neutral'}"><span class="comite-cap-r">Situação na capacidade</span><b><i aria-hidden="true"></i>${esc(st ? st.nome : 'Sem situação')}</b><small>${esc(capTxt)}</small></div>
-        <div class="comite-dec" role="group" aria-label="Decisão do comitê para ${esc(p.codigo)}">
+        <div class="comite-cap cap-${it ? tomStatus(it.status) : 'neutral'}"><span class="comite-cap-r">Situação na capacidade</span><b><i aria-hidden="true"></i>${esc(nomeStatus(it))}</b><small>${esc(capTxt)}</small></div>
+        ${com.conf && com.conf.id === id ? painelConfirmacao(com.conf) : `<div class="comite-dec" role="group" aria-label="Decisão do comitê para ${esc(p.codigo)}">
           ${['in', '', 'out'].map(v => `<button type="button" class="comite-db dec-${DEC[v].tom}" data-decidir="${v}" aria-pressed="${dec === (v || 'aguardar') ? 'true' : 'false'}"><span class="comite-db-ic" aria-hidden="true">${icon(DEC[v].icone, 18)}</span><span><b>${DEC[v].nome}</b><small>${DEC[v].sub}</small></span></button>`).join('')}
-        </div>
+        </div>`}
         <p class="comite-msg" role="status">${esc(com.msg || (dec ? '' : 'Sem decisão registrada: segue o ranking e a capacidade.'))}</p>
       </div>
     </article>`;
+  }
+  /** Confirmação do impacto dentro do próprio modo comitê (em tela cheia o modal da página não aparece) */
+  function painelConfirmacao(cf){
+    return `<section class="comite-conf" role="alertdialog" aria-modal="false" aria-labelledby="comite-conf-t" aria-describedby="comite-conf-d">
+        <h3 id="comite-conf-t" class="comite-conf-t" tabindex="-1">Aprovar início de ${esc(cf.codigo)} mesmo assim?</h3>
+        <p id="comite-conf-d">Fixar este projeto muda a carteira de ${esc(cf.periodo)}:</p>
+        <ul class="comite-conf-l">
+          ${cf.saem.map(i => `<li><b>${esc(i.codigo)}</b>${i.obrigatorio ? ' <b class="comite-conf-obr">[OBRIGATÓRIO]</b>' : ''} sai da carteira · ${esc(i.titulo)}</li>`).join('')}
+          ${cf.estoura ? `<li>O pico passa a <b>${f1(cf.estoura.total)} FTE</b> em ${esc(rotMes(cf.estoura.mes))}, para ${f1(cf.estoura.efetiva)} FTE efetivos: excede em ${f1(cf.estoura.excede)} FTE.</li>` : ''}
+        </ul>
+        <p class="comite-conf-n">Para desfazer, escolha “Seguir o ranking” nesta lâmina.</p>
+        <div class="comite-conf-acoes"><button type="button" class="comite-btn prim" data-comite-conf-ok>Aprovar mesmo assim</button><button type="button" class="comite-btn" data-comite-conf-nao>Cancelar</button></div>
+      </section>`;
   }
   function laminaResumo(c){
     const cont = { in:0, aguardar:0, out:0 }; com.log.forEach(l => { cont[l.v] = (cont[l.v] || 0) + 1; });
@@ -468,40 +512,78 @@
       <div class="comite-res-cab"><p class="comite-cod">Fim da pauta</p><h2 class="comite-tit" tabindex="-1">${semCand ? 'Nenhum projeto para deliberar' : 'Resumo da sessão'}</h2>
         <p class="comite-desc">${semCand ? 'O modo comitê usa os projetos admitidos (aguardando início) com avaliação de prioridade completa. Avalie os projetos e volte aqui.' : `${plural(com.log.length, 'decisão registrada', 'decisões registradas')} em ${plural(com.ids.length, 'projeto apresentado', 'projetos apresentados')}. Cada decisão ficou no histórico do projeto.`}</p></div>
       <div class="comite-res-kpis">
-        <div class="dec-ok"><b>${cont.in}</b><span>Aprovar início</span></div><div class="dec-warn"><b>${cont.aguardar}</b><span>Aguardar</span></div><div class="dec-bad"><b>${cont.out}</b><span>Não priorizar</span></div>
+        <div class="dec-ok"><b>${cont.in}</b><span>${DEC.in.nome}</span></div><div class="dec-auto"><b>${cont.aguardar}</b><span>${DEC[''].nome}</span></div><div class="dec-bad"><b>${cont.out}</b><span>${DEC.out.nome}</span></div>
         <div class="dec-fte"><b>${f1(c.usadoFte)}<small> / ${f1(c.livre)}</small></b><span>FTE na carteira</span></div></div>
+      ${alertasCarteira(c).map(a => `<p class="comite-res-alerta"><i aria-hidden="true"></i>${esc(a)}</p>`).join('')}
       ${com.log.length ? `<ol class="comite-res-lista">${com.log.map(l => `<li><span class="code">${esc(l.codigo)}</span><span class="t">${esc(l.titulo)}</span><span class="comite-res-d dec-${DEC[l.v === 'aguardar' ? '' : l.v].tom}"><i aria-hidden="true"></i>${esc(nomeDec(l.v))}</span></li>`).join('')}</ol>` : `<p class="comite-res-vazio">${semCand ? '' : 'Nenhuma decisão registrada nesta sessão.'}</p>`}
       <div class="comite-res-acoes">${semCand ? `<button type="button" class="comite-btn prim" data-comite-ir="#/avaliar">Avaliar projetos</button>` : `<button type="button" class="comite-btn prim" data-comite-ata>${icon('check', 16)} Copiar ata</button>`}<button type="button" class="comite-btn" data-comite-sair>Encerrar sessão</button></div>
       <p class="comite-msg" role="status">${esc(com.msg || '')}</p>
       <textarea class="comite-ata-txt" readonly hidden aria-label="Texto da ata"></textarea>
     </article>`;
   }
-  function decidir(v){
+  /** Avisos da carteira que pedem decisão (os mesmos da tela Carteira): obrigatório deslocado e fixado que estoura */
+  function alertasCarteira(c){
+    const a = [], desl = c.itens.filter(i => i.status === 'obrigatorio_deslocado'), est = c.itens.filter(i => i.status === 'fixado_estoura');
+    if(desl.length) a.push(`As fixações deixaram ${plural(desl.length, 'projeto obrigatório', 'projetos obrigatórios')} fora (${desl.map(i => i.p.codigo).join(', ')}). Revise as decisões ou aumente a capacidade.`);
+    if(est.length) a.push(`${plural(est.length, 'projeto fixado estoura', 'projetos fixados estouram')} a capacidade (${est.map(i => i.p.codigo).join(', ')}).`);
+    return a;
+  }
+  /**
+   * Grava a decisão pelo mesmo caminho do controle data-forcar da carteira (capacidade.js): 'Aprovar início' que tira
+   * alguém da carteira ou estoura a capacidade pede confirmação com o impacto, aqui dentro do modo comitê.
+   */
+  function decidir(v, confirmado = false){
     if(!com) return; const id = com.ids[com.i], p = P.get(id); if(!p) return;
     const chave = v || 'aguardar', T = S();
+    com.conf = null;
     if(com.log.some(l => l.id === id && l.v === chave)){ com.msg = 'Esta decisão já foi registrada.'; pintarComite(`[data-decidir="${v}"]`); return; }
-    // Mesmo caminho do controle data-forcar da carteira
+    const antes = carteira(), dentroAntes = new Set(antes.dentro.map(i => i.p.id));
+    if(v === 'in' && T.forcar[id] !== 'in' && !confirmado){
+      const depois = M.montarCarteira(P.todos(), T.capacidade, Object.assign({}, T.forcar, { [id]:'in' }));
+      const estAntes = new Set(antes.itens.filter(i => i.status === 'fixado_estoura').map(i => i.p.id));
+      const saem = depois.itens.filter(i => i.p.id !== id && dentroAntes.has(i.p.id) && aguardaCap(i.status));
+      const estoura = depois.itens.some(i => i.status === 'fixado_estoura' && !estAntes.has(i.p.id));
+      if(saem.length || estoura){
+        com.conf = { id, codigo:p.codigo, periodo: depois.periodo ? depois.periodo.rotulo : T.capacidade.periodo,
+          saem: saem.map(i => ({ codigo:i.p.codigo, titulo:i.p.titulo, obrigatorio:!!i.p.obrigatorio })),
+          estoura: estoura ? { total:depois.pico.total, mes:depois.pico.mes, efetiva:depois.efetiva, excede:Math.max(0, -depois.sobraFte) } : null };
+        com.msg = '';
+        pintarComite('.comite-conf-t');
+        const cx = com.el.querySelector('.comite-conf'); if(cx && cx.scrollIntoView) cx.scrollIntoView({ block:'nearest' });
+        return;
+      }
+    }
     if(v) T.forcar[id] = v; else delete T.forcar[id];
-    const c = carteira(), it = c.itens.find(x => x.p.id === id), s = M.pontuar(p), st = it && M.STATUS_CARTEIRA[it.status];
-    const det = `${DEC[v].nome}. Posição ${it ? it.pos : '-'} no ranking${s.valor != null ? ` · valor ${fmt.n(s.valor)}` : ''}${p.esforcoFte != null ? ` · ${f1(p.esforcoFte)} FTE` : ''}${st ? ` · situação: ${st.nome}` : ''}. Período ${T.capacidade.periodo}.`;
+    const c = carteira(), it = c.itens.find(x => x.p.id === id), s = M.pontuar(p);
+    const saiu = c.itens.filter(i => i.p.id !== id && dentroAntes.has(i.p.id) && aguardaCap(i.status)).map(i => i.p.codigo);
+    const det = `${DEC[v].nome}. Posição ${it ? it.pos : '-'} no ranking${s.valor != null ? ` · valor ${fmt.n(s.valor)}` : ''}${p.esforcoFte != null ? ` · ${f1(p.esforcoFte)} FTE` : ''}${it ? ` · situação: ${nomeStatus(it)}` : ''}${saiu.length ? ` · saem da carteira: ${saiu.join(', ')}` : ''}. Período ${T.capacidade.periodo}.`;
     if(typeof P.registrar === 'function') P.registrar(p, 'Decisão do comitê', det); else (p.historico || (p.historico = [])).push({ data: new Date().toISOString(), acao:'Decisão do comitê', detalhe: det });
     p.atualizadoEm = new Date().toISOString();
     GP.save();
-    com.log = com.log.filter(l => l.id !== id).concat({ id, codigo:p.codigo, titulo:p.titulo, v:chave, data:new Date() });
-    com.msg = `Decisão registrada: ${DEC[v].nome}.`;
+    com.log = com.log.filter(l => l.id !== id).concat({ id, codigo:p.codigo, titulo:p.titulo, v:chave, saem:saiu, data:new Date() });
+    com.msg = `Decisão registrada: ${DEC[v].nome}${it ? ` (situação: ${nomeStatus(it)})` : ''}.${saiu.length ? ` ${plural(saiu.length, 'projeto saiu', 'projetos saíram')} da carteira: ${saiu.join(', ')}.` : ''}`;
     pintarComite(`[data-decidir="${v}"]`);
   }
+  function cancelarConfirmacao(){ if(!com || !com.conf) return; com.conf = null; com.msg = 'Decisão não registrada.'; pintarComite('[data-decidir="in"]'); }
   function ataTexto(){
     const c = carteira(), T = S(), cap = T.capacidade, agora = new Date(), L = [];
     L.push('ATA · COMITÊ DE PORTFÓLIO FEG', `Data: ${agora.toLocaleDateString('pt-BR')} · ${agora.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' })} · Período: ${cap.periodo}`, '');
     L.push(`Capacidade: ${f1(cap.fte)} FTE, reserva de ${fmt.n(cap.reservaPct)}%, ${f1(c.comprometido)} FTE em execução → ${f1(c.livre)} FTE para novos projetos.`);
-    L.push(`Carteira após as decisões: ${plural(c.cabem, 'projeto', 'projetos')}, ${f1(c.usadoFte)} FTE e ${fmt.mi(c.usadoCusto)}.`, '');
+    L.push(`Carteira após as decisões: ${plural(c.cabem, 'projeto', 'projetos')}, ${f1(c.usadoFte)} de ${f1(c.livre)} FTE para novos projetos e ${fmt.mi(c.usadoCusto)}${c.pico && c.pico.mes ? `; pico de ${f1(c.pico.total)} de ${f1(c.efetiva)} FTE efetivos em ${rotMes(c.pico.mes)}, com a execução` : ''}.`);
+    alertasCarteira(c).forEach(a => L.push('ATENÇÃO: ' + a));
+    L.push('');
+    const item = id => c.itens.find(i => i.p.id === id);
     L.push(`1. Decisões registradas nesta sessão (${com.log.length}):`);
-    if(com.log.length) com.log.forEach(l => { const p = P.get(l.id), s = p ? M.pontuar(p) : null; L.push(`   - ${l.codigo} · ${l.titulo} · ${DEC[l.v === 'aguardar' ? '' : l.v].nome}${s && s.valor != null ? ` · valor ${fmt.n(s.valor)}` : ''}${p && p.esforcoFte != null ? ` · ${f1(p.esforcoFte)} FTE` : ''}`); });
+    if(com.log.length) com.log.forEach(l => { const p = P.get(l.id), s = p ? M.pontuar(p) : null, it = item(l.id);
+      L.push(`   - ${l.codigo} · ${l.titulo} · ${DEC[l.v === 'aguardar' ? '' : l.v].nome}${s && s.valor != null ? ` · valor ${fmt.n(s.valor)}` : ''}${p && p.esforcoFte != null ? ` · ${f1(p.esforcoFte)} FTE` : ''}${it ? ` → situação após as decisões: ${nomeStatus(it)}` : ''}${l.saem && l.saem.length ? ` · tirou da carteira: ${l.saem.join(', ')}` : ''}`); });
     else L.push('   - nenhuma');
-    L.push('', '2. Na carteira do período:'); c.dentro.forEach(i => L.push(`   - ${i.p.codigo} · ${i.p.titulo} · ${f1(i.p.esforcoFte)} FTE${i.status === 'fixado_estoura' ? ' · ATENÇÃO: estoura a capacidade' : ''}`)); if(!c.dentro.length) L.push('   - nenhum');
-    const fora = c.itens.filter(i => i.status === 'nao_cabe'); L.push('', '3. Aguardam capacidade:'); fora.forEach(i => L.push(`   - ${i.p.codigo} · ${i.p.titulo} · ${f1(i.p.esforcoFte)} FTE`)); if(!fora.length) L.push('   - nenhum');
-    const exc = c.itens.filter(i => i.status === 'excluido'); if(exc.length){ L.push('', '4. Não priorizados neste período:'); exc.forEach(i => L.push(`   - ${i.p.codigo} · ${i.p.titulo}`)); }
+    L.push('', '2. Na carteira do período:'); c.dentro.forEach(i => L.push(`   - ${i.p.codigo} · ${i.p.titulo} · ${f1(i.p.esforcoFte)} FTE${i.status === 'fixado' ? ' · fixado pelo comitê' : ''}${i.status === 'fixado_estoura' ? ' · ATENÇÃO: estoura a capacidade' : ''}${obrTxt(i.p)}`)); if(!c.dentro.length) L.push('   - nenhum');
+    // Mesmo critério da pauta: não cabe agora, cabe mais tarde e obrigatório deslocado pelas fixações
+    const aguardam = c.itens.filter(i => aguardaCap(i.status)); L.push('', '3. Aguardam capacidade (ordem de prioridade):');
+    aguardam.forEach(i => L.push(`   - ${i.p.codigo} · ${i.p.titulo}${i.s && i.s.valor != null ? ` · valor ${fmt.n(i.s.valor)}` : ''} · ${f1(i.p.esforcoFte)} FTE · ${sitAta(i)}${obrTxt(i.p)}`)); if(!aguardam.length) L.push('   - nenhum');
+    const exc = c.itens.filter(i => i.status === 'excluido'); if(exc.length){ L.push('', '4. Não priorizados neste período:'); exc.forEach(i => L.push(`   - ${i.p.codigo} · ${i.p.titulo}${obrTxt(i.p)}`)); }
+    const semConta = c.itens.filter(i => i.status === 'sem_estimativa' || i.status === 'fora_periodo');
+    if(semConta.length){ L.push('', `${exc.length ? 5 : 4}. Fora da conta da capacidade:`); semConta.forEach(i => L.push(`   - ${i.p.codigo} · ${i.p.titulo} · ${i.status === 'sem_estimativa' ? 'sem estimativa de pessoas' : 'datas previstas fora do período'}${obrTxt(i.p)}`)); }
     return L.join('\n');
   }
   async function copiarAta(){
@@ -514,19 +596,21 @@
     pintarComite('[data-comite-ata]');
     if(!ok){ const ta = com.el.querySelector('.comite-ata-txt'); if(ta){ ta.hidden = false; ta.value = txt; ta.focus(); ta.select(); } }
   }
-  function ir(delta, focar){ if(!com) return; const total = com.ids.length + 1, j = Math.max(0, Math.min(total - 1, com.i + delta)); if(j === com.i) return; com.i = j; com.msg = ''; pintarComite(focar); }
+  function ir(delta, focar){ if(!com) return; const total = com.ids.length + 1, j = Math.max(0, Math.min(total - 1, com.i + delta)); if(j === com.i) return; com.i = j; com.msg = ''; com.conf = null; pintarComite(focar); }
   function cliqueComite(e){
     const b = e.target.closest('button'); if(!b || !com) return;
     if(b.hasAttribute('data-comite-sair')){ fecharComite(); return; }
     if(b.hasAttribute('data-comite-ant')){ ir(-1, com.i - 1 === 0 ? 'titulo' : '[data-comite-ant]'); return; }
     if(b.hasAttribute('data-comite-prox')){ ir(1, com.i + 1 >= com.ids.length ? 'titulo' : '[data-comite-prox]'); return; }
     if(b.hasAttribute('data-decidir')){ decidir(b.dataset.decidir); return; }
+    if(b.hasAttribute('data-comite-conf-ok')){ if(com.conf) decidir('in', true); return; }
+    if(b.hasAttribute('data-comite-conf-nao')){ cancelarConfirmacao(); return; }
     if(b.hasAttribute('data-comite-ata')){ copiarAta(); return; }
     if(b.dataset.comiteIr){ const h = b.dataset.comiteIr; fecharComite(); GP.go(h); }
   }
   function teclaComite(e){
     const k = e.key, t = e.target, campo = t && t.tagName === 'TEXTAREA';
-    if(k === 'Escape'){ e.preventDefault(); e.stopPropagation(); fecharComite(); return; }
+    if(k === 'Escape'){ e.preventDefault(); e.stopPropagation(); if(com.conf) cancelarConfirmacao(); else fecharComite(); return; }
     if(k === 'Tab'){ const f = [...com.el.querySelectorAll('button:not([disabled]), textarea:not([hidden]), [tabindex="0"]')].filter(x => x.offsetParent !== null || x === document.activeElement);
       if(!f.length){ e.preventDefault(); return; } const a = f[0], z = f[f.length - 1];
       if(!com.el.contains(document.activeElement) || (e.shiftKey && document.activeElement === a)){ e.preventDefault(); (e.shiftKey ? z : a).focus(); }
