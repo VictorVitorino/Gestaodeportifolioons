@@ -7,3 +7,4 @@ echo "== sintaxe"; for f in labs/gestao-portfolio-feg/src/*.js; do node --check 
 echo "== npm test"; npm test 2>&1 | grep -E "^# (pass|fail)"
 echo "== npm run check"; npm run check >/dev/null && echo "check ok"
 echo "== navegador"; node labs/gestao-portfolio-feg/qa/qa.cjs
+echo "== manual interativo"; node labs/manual-portfolio-feg/build.mjs && node labs/manual-portfolio-feg/qa.cjs

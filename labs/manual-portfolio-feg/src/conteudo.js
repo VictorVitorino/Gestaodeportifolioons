@@ -1,0 +1,41 @@
+/* Conteúdo pedagógico do manual: método, trilhas por perfil e verificação de aprendizado por módulo.
+   As cenas (texto, imagens e coordenadas) vêm de cenas.json, gerado por capturar.cjs. */
+window.MANUAL_CONTEUDO = {
+  metodo: [
+    { n: '1', titulo: 'Ver', texto: 'Um clipe curto mostra o passo a passo na tela real, com zoom, setas e legendas.', tempo: '1 a 2 min' },
+    { n: '2', titulo: 'Fazer', texto: 'O botão Experimente abre o sistema exatamente na tela do passo, para repetir com as próprias mãos.', tempo: '2 a 5 min' },
+    { n: '3', titulo: 'Confirmar', texto: 'Uma pergunta rápida no fim do módulo confirma o que ficou. O progresso fica salvo neste navegador.', tempo: '30 s' },
+  ],
+  trilhas: [
+    { id: 'essencial', titulo: 'Trilha essencial', publico: 'Para quem cadastra e acompanha demandas', nivel: 1,
+      modulos: ['m0', 'm1', 'm2', 'm3', 'm10'] },
+    { id: 'priorizacao', titulo: 'Trilha de priorização', publico: 'Para quem avalia e define a ordem dos projetos', nivel: 2,
+      modulos: ['m4', 'm5', 'm7'] },
+    { id: 'gestao', titulo: 'Trilha de gestão e comitê', publico: 'Para quem planeja a capacidade e conduz a decisão', nivel: 3,
+      modulos: ['m6', 'm8', 'm9'] },
+  ],
+  quiz: {
+    m0: { p: 'O que acontece quando você clica num nível que já está ligado, como o nível 3?', o: ['O nível é desligado e os módulos dele saem do menu', 'Nada: os níveis só podem ser ligados', 'O sistema apaga os dados daquele nível'], c: 0,
+      e: 'Os níveis funcionam como interruptores. Desligar só esconde os módulos; nenhum dado é apagado.' },
+    m1: { p: 'Como um projeto recém-cadastrado entra no portfólio?', o: ['Já entra como em execução', 'Entra como Nova demanda e vai para a fila do funil de entrada', 'Precisa ser aprovado por e-mail antes de aparecer'], c: 1,
+      e: 'Todo cadastro começa como Nova demanda e aguarda a decisão no funil de entrada.' },
+    m2: { p: 'Nas seis perguntas do checklist, o que significa um Não numa das três primeiras?', o: ['Falta informação e a demanda volta ao demandante', 'Nada, a decisão é pela maioria', 'É uma barreira: a demanda não entra no portfólio'], c: 2,
+      e: 'As três primeiras são barreiras. As três últimas verificam se a informação mínima está completa.' },
+    m3: { p: 'Onde você vê os indicadores de um projeto sem sair do acervo?', o: ['No botão ⋯ da linha, em Resumo rápido', 'Só na tela de Indicadores', 'Exportando a planilha'], c: 0,
+      e: 'O botão ⋯ no fim de cada linha reúne resumo, edição, etapa, avaliação, riscos e exclusão.' },
+    m4: { p: 'No ranking, como se resolve um empate na nota de valor?', o: ['Vence o projeto mais antigo', 'Vence o de menor esforço', 'O comitê sorteia'], c: 1,
+      e: 'Em caso de empate, o projeto de menor esforço fica na frente: entrega o mesmo valor com menos recurso.' },
+    m5: { p: 'O que faz o botão Ajustar para 100%?', o: ['Zera todos os pesos', 'Coloca todos os pesos iguais', 'Redistribui os pesos mantendo a proporção entre eles'], c: 2,
+      e: 'A proporção entre os pesos é mantida; só a escala muda para fechar cem por cento.' },
+    m6: { p: 'O que representa a linha de corte na carteira?', o: ['Os projetos acima dela cabem na capacidade do período', 'Os projetos acima dela estão atrasados', 'O limite de projetos por gerência'], c: 0,
+      e: 'Acima da linha, o que cabe. Abaixo, o que aguarda, com quanto falta e quando passaria a caber.' },
+    m7: { p: 'Como um risco é posicionado na matriz?', o: ['Pela data de registro', 'Pela probabilidade e pelo impacto', 'Pela gerência do projeto'], c: 1,
+      e: 'Cada célula combina probabilidade e impacto. Clicar numa célula lista os riscos daquela exposição.' },
+    m8: { p: 'O que acontece ao clicar numa barra de um gráfico em Indicadores?', o: ['O gráfico é exportado', 'A análise é filtrada por aquele item', 'A barra é removida'], c: 1,
+      e: 'Os gráficos são filtros: clicar numa barra recalcula toda a análise para aquele item.' },
+    m9: { p: 'O que o sistema gera ao final do modo comitê?', o: ['Uma planilha de custos', 'A ata da reunião com as decisões', 'Um novo ranking aleatório'], c: 1,
+      e: 'Cada decisão é registrada com o motivo e, no fim, o sistema monta a ata da reunião.' },
+    m10: { p: 'Onde os dados ficam guardados?', o: ['Num servidor da internet', 'Neste navegador; por isso o backup é importante', 'Em lugar nenhum: precisam ser salvos à mão a cada tela'], c: 1,
+      e: 'O sistema salva sozinho no navegador. O backup leva tudo para um arquivo que pode ser restaurado em outro lugar.' },
+  },
+};

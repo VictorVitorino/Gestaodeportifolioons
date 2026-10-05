@@ -85,6 +85,15 @@ Sistema de cadastro, entrada e priorização de projetos para a própria equipe 
 - Celular: dock inferior com atalhos, tabelas em cartões (`data-label` nas células) e modais em folha inferior.
 - Componentes compartilhados (`src/core.js`, assinaturas no topo do arquivo): `GP.ui.metric`, `GP.ui.vazio(titulo, texto, acao, icone)`, `GP.ui.table` (colunas com `hideBelow` e ordenação também no modo cartão), `GP.toast(msg, {tipo, acao, onAcao, ms})`, `GP.charts.hbar/donut/matriz/dados` e `GP.util.plural`. As tabelas viram cartões quando a área útil fica abaixo de 900px. Acessibilidade do shell: link "Ir para o conteúdo", foco no título a cada troca de tela, gaveta do celular como diálogo e modais com o fundo inerte.
 
+## Manual interativo da Gestão de Portfólio FEG (labs/manual-portfolio-feg)
+
+Treinamento em clipes guiados, um por módulo, gravados na tela real do sistema. Arquivo único e offline: abra `public/manual-gestao-portfolio-feg.html` no Chrome ou Edge, na mesma pasta de `gestao-portfolio-feg.html` (os botões "Experimente" abrem o sistema na tela do passo).
+
+- Modelo de treinamento: microaprendizagem em três tempos (Ver o clipe, Fazer no sistema, Confirmar com uma pergunta), organizada em trilhas por nível: essencial (nível 1), priorização (nível 2) e gestão e comitê (nível 3). O progresso fica no `localStorage`.
+- Player: play, pause, stop, reiniciar, passo anterior e próximo, linha do tempo por passo, velocidade, legendas, narração em voz (pt-BR, quando o navegador tem voz), tela cheia, zoom in e zoom out (arraste para mover), e fundo escurecido, desfocado, transparente ou normal. A câmera aproxima o alvo, uma seta com texto aponta onde clicar, o cursor demonstra o clique e as dicas numeradas abrem tooltips. Atalhos: espaço, S, R, ←/→, 1–9, + − 0, B, C, N, F.
+- Roteiro: `cenas.cjs` (texto, rota, alvo, zoom, seta, cursor e dicas de cada passo). `node labs/manual-portfolio-feg/capturar.cjs [filtro]` captura as telas do sistema já construído e mede as coordenadas (gera `frames/*.webp` e `cenas.json`); `node labs/manual-portfolio-feg/build.mjs` gera o arquivo único; `node labs/manual-portfolio-feg/qa.cjs` testa os controles em desktop e celular.
+- Ao mudar telas do sistema, recapture só os passos afetados, por exemplo `node labs/manual-portfolio-feg/capturar.cjs 'm3-'`.
+
 ## Portfólio FEG — trilha didática (labs/portfolio-feg)
 
 App de aprendizagem de gestão de portfólio para as analistas da FEG, em 3 níveis progressivos. É um **arquivo HTML único e offline**, em pt-BR, com a paleta Maestro/ONS. Ele não usa o Supabase nem os dados do Portfólio FE.
