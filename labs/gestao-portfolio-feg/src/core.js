@@ -246,7 +246,7 @@
   // Tooltip do menu recolhido
   let tipEl = null;
   const showTip = el => { if(!document.querySelector('.shell.mini') || window.innerWidth <= 900) return; hideTip(); const r = el.getBoundingClientRect();
-    tipEl = document.createElement('div'); tipEl.className = 'tip'; tipEl.textContent = el.dataset.tip; tipEl.style.left = (r.right + 10) + 'px'; tipEl.style.top = (r.top + r.height / 2) + 'px'; document.body.appendChild(tipEl); };
+    tipEl = document.createElement('div'); tipEl.className = 'tip'; tipEl.textContent = el.dataset.tip; const side = el.closest('.side'); tipEl.style.left = ((side ? side.getBoundingClientRect().right : r.right) + 12) + 'px'; tipEl.style.top = (r.top + r.height / 2) + 'px'; document.body.appendChild(tipEl); };
   const hideTip = () => { if(tipEl){ tipEl.remove(); tipEl = null; } };
   document.addEventListener('mouseover', e => { const el = e.target.closest('[data-tip]'); if(el) showTip(el); else hideTip(); });
   document.addEventListener('focusin', e => { const el = e.target.closest('[data-tip]'); if(el) showTip(el); });
@@ -281,7 +281,7 @@
         const x0 = c + r * Math.cos(a0), y0 = c + r * Math.sin(a0), x1 = c + r * Math.cos(a1 - 1e-6), y1 = c + r * Math.sin(a1 - 1e-6);
         g += `<path d="M${x0} ${y0} A${r} ${r} 0 ${lg} 1 ${x1} ${y1}" stroke="${it.color || PAL[i % PAL.length]}" stroke-width="18" fill="none"><title>${esc(it.label)}: ${it.value}</title></path>`; a0 = a1; });
       g += `<text x="${c}" y="${c + 2}" text-anchor="middle" font-size="24" font-weight="700" fill="#1E2420">${esc(centro)}</text><text x="${c}" y="${c + 20}" text-anchor="middle" font-size="11" fill="#5E655F">${esc(rotulo)}</text>`;
-      return `<div class="row" style="gap:18px;flex-wrap:nowrap;align-items:center"><svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="flex:none" role="img">${g}</svg>
+      return `<div class="row" style="gap:18px;flex-wrap:nowrap;align-items:center"><svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="flex:none" role="img" aria-label="${esc(items.map(i => i.label + ': ' + i.value).join(', '))}">${g}</svg>
         <div class="legend" style="flex-direction:column;align-items:flex-start;gap:6px">${items.map((it, i) => `<span><i style="background:${it.color || PAL[i % PAL.length]}"></i>${esc(it.label)} <b style="color:#1E2420">${fmt.n(it.value)}</b></span>`).join('')}</div></div>`;
     },
     /** Matriz/dispersão: pontos [{x, y, r, label, color, id}], eixos 0..xMax/yMax, linhas de corte qx/qy, rótulos de quadrante [tl,tr,bl,br] */
@@ -297,7 +297,7 @@
       if(o.xLabel) g += `<text x="${L + pw / 2}" y="${H - 6}" font-size="12" fill="#5E655F" text-anchor="middle">${esc(o.xLabel)} →</text>`;
       if(o.yLabel) g += `<text x="14" y="${T + ph / 2}" font-size="12" fill="#5E655F" text-anchor="middle" transform="rotate(-90 14 ${T + ph / 2})">${esc(o.yLabel)} →</text>`;
       pts.forEach(p => { const rr = p.r || 8; g += `<g ${p.id ? `data-ponto="${esc(p.id)}" style="cursor:pointer"` : ''} data-tt="${esc(p.title || p.label)}"><circle cx="${X(p.x)}" cy="${Y(p.y)}" r="${rr + 8}" fill="transparent"/><circle cx="${X(p.x)}" cy="${Y(p.y)}" r="${rr}" fill="${p.color || PAL[0]}" stroke="#fff" stroke-width="2"/><text x="${X(p.x) + rr + 4}" y="${Y(p.y) + 4}" font-size="11.5" fill="#1E2420">${esc(p.label)}</text></g>`; });
-      return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
+      return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.aria || `${o.yLabel || 'Valor'} × ${o.xLabel || 'Esforço'}: ${pts.map(p => p.label).join(', ')}`)}">${g}</svg>`;
     },
     /** Barras verticais simples: cats, series [{name, values, color}] */
     barras(cats, series, {h = 220, fmtv = v => fmt.n(v)} = {}){
@@ -328,7 +328,7 @@
           <div class="ttl"><small><span class="crumb">${esc(tela ? tela.titulo : '')}</span><span class="when">${esc(dataLonga())}</span></small><b>${esc(saudacao())}</b></div>
           <div class="right">
             <button class="storage-btn" data-storage-status title="Dados e configurações"><i></i><span>Salvo no navegador</span></button>
-            <div class="levels"><div class="seg" role="group" aria-label="Nível do sistema">${GP.NIVEIS.map(L => `<button class="${L.n === nivel ? 'on' : ''}" data-nivel="${L.n}" title="Nível ${L.n} · ${esc(L.nome)}"><b>${L.n}</b><span>${esc(L.curto)}</span></button>`).join('')}</div>
+            <div class="levels"><div class="seg" role="group" aria-label="Nível do sistema">${GP.NIVEIS.map(L => `<button class="${L.n === nivel ? 'on' : ''}" data-nivel="${L.n}" aria-pressed="${L.n === nivel}" title="Nível ${L.n} · ${esc(L.nome)}"><b>${L.n}</b><span>${esc(L.curto)}</span></button>`).join('')}</div>
               <button class="icon-btn" data-ajuda-nivel title="O que cada nível faz" aria-label="O que cada nível faz">${icon('ajuda', 16)}</button></div>
             <img class="ons" src="${GP.LOGO_ONS || ''}" alt="ONS">
           </div>
@@ -344,6 +344,10 @@
     const chave = r.id + '/' + (r.arg || '');
     if(!manterScroll || chave !== ultimaChave) window.scrollTo({top:0});
     ultimaChave = chave;
+    el.querySelectorAll('table.tbl:not(.tbl-cards)').forEach(t => { const ths = [...t.querySelectorAll('thead th')].map(th => th.textContent.trim());
+      if(!ths.length) return; t.classList.add('tbl-cards'); t.querySelectorAll('tbody tr').forEach(tr => [...tr.children].forEach((td, i) => { if(!td.hasAttribute('data-label')) td.setAttribute('data-label', ths[i] || ''); })); });
+    const nav = app.querySelector('.side-nav'), ativo = nav && nav.querySelector('.nav-item.on');
+    if(ativo && (ativo.offsetTop + ativo.offsetHeight > nav.scrollTop + nav.clientHeight - 24 || ativo.offsetTop < nav.scrollTop)) nav.scrollTop = ativo.offsetTop - nav.clientHeight / 2 + ativo.offsetHeight / 2;
     GP.pintarSalvamento();
     if(GP.afterRender) GP.afterRender(el,r);
   }
@@ -353,7 +357,7 @@
     let nome = ''; try { const u = GP.auth && GP.auth.usuario && GP.auth.usuario(); nome = u && u.nome ? String(u.nome).trim().split(/\s+/)[0] : ''; } catch(e) {}
     return nome ? `${oi}, ${nome}` : oi;
   }
-  function dataLonga(){ const t = new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' }); return t.charAt(0).toUpperCase() + t.slice(1); }
+  function dataLonga(){ const t = new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long' }); return t.charAt(0).toUpperCase() + t.slice(1); }
   /** Dock inferior do celular: atalhos para as tarefas mais frequentes */
   function dock(tela){
     const id = tela ? tela.id : '', it = (href, ic, lbl, cls = '') => `<a class="dock-item ${cls} ${id === href.slice(2) ? 'on' : ''}" href="${href}" aria-label="${lbl}">${icon(ic, 19)}<span>${lbl}</span></a>`;

@@ -451,4 +451,28 @@ module.exports = {
     await p.setViewportSize({ width:1440, height:900 }); await ir('#/acervo', 200);
     check(await p.locator('.tbl-cards thead').isVisible(), 'no computador a tabela mantém o cabeçalho');
   },
+  /* R5 - regressões dos defeitos do QA independente do redesenho */
+  async 'r5: PDF mantém barras, capas legíveis, selos e acessibilidade'({ p, ir, check, recarregar }){
+    await p.evaluate(() => { GP.modelo.carregarExemplos(); GP.state().ui.nivel = 3; GP.save(); });
+    await recarregar(); await ir('#/indicadores', 250);
+    await p.evaluate(() => { const orig = window.html2canvas; window.__pdfBarras = -1; window.html2canvas = (w, o) => { window.__pdfBarras = w.querySelectorAll('.percent-row').length; return orig(w, o); }; });
+    const [dl] = await Promise.all([p.waitForEvent('download', { timeout:60000 }), p.click('[data-pdf]')]);
+    check(/\.pdf$/.test(dl.suggestedFilename()), 'PDF não gerado');
+    check(await p.evaluate(() => window.__pdfBarras) >= 20, 'PDF deveria manter as barras dos gráficos (veio ' + await p.evaluate(() => window.__pdfBarras) + ')');
+    await ir('#/relatorios', 200);
+    check(await p.locator('.report-cover h2').first().evaluate(e => getComputedStyle(e).color) === 'rgb(255, 255, 255)', 'título da capa do relatório deveria ser branco');
+    await ir('#/entrada-resumo', 200);
+    const w = await p.locator('.row > .score').first().evaluate(e => e.getBoundingClientRect().width);
+    check(w >= 40, 'selo da nota não deveria ser espremido (largura ' + Math.round(w) + ')');
+    check(await p.locator('.seg [data-nivel="3"][aria-pressed="true"]').count() === 1, 'nível ativo deveria ter aria-pressed');
+    await ir('#/roadmap', 200);
+    check(await p.evaluate(() => { const n = document.querySelector('.side-nav'), a = n.querySelector('.nav-item.on'); return a.offsetTop >= n.scrollTop && a.offsetTop + a.offsetHeight <= n.scrollTop + n.clientHeight; }), 'item ativo do menu deveria ficar visível');
+    await p.focus('.bento-painel, #conteudo .btn >> nth=0').catch(() => {}); await p.keyboard.press('Tab');
+    check(await p.evaluate(() => { const a = document.activeElement; return a && getComputedStyle(a).outlineStyle !== 'none'; }), 'foco do teclado deveria ter contorno visível');
+    await ir('#/painel', 200);
+    check(!(await p.locator('.chart-cols text').allTextContents()).some(t => /,/.test(t)), 'eixo do gráfico de entradas deveria ter só números inteiros');
+    await p.setViewportSize({ width:390, height:844 }); await ir('#/governanca', 250);
+    check(await p.locator('.tbl-cards tbody tr').first().evaluate(e => getComputedStyle(e).display) === 'grid', 'tabela da governança deveria virar cartões no celular');
+    await p.setViewportSize({ width:1440, height:900 });
+  },
 };

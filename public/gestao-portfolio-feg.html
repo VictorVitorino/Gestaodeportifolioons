@@ -493,7 +493,9 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 ::selection{background:rgba(107,143,42,.22)}
 h1,h2,h3,h4{font-family:var(--font-display);color:var(--text);letter-spacing:-.02em}
 a{color:var(--ons)}
-:focus-visible{outline:none;box-shadow:var(--ring);border-radius:10px}
+:focus-visible{outline:2px solid var(--ons);outline-offset:3px}
+.shell .side :focus-visible,.dock :focus-visible,.level-tile :focus-visible{outline-color:#cfe3a6}
+.input:focus-visible,.select:focus-visible{outline:none}
 .muted{color:var(--muted)} .dim{color:var(--dim)}
 *{scrollbar-width:thin;scrollbar-color:rgba(23,48,43,.22) transparent}
 
@@ -784,21 +786,18 @@ button.legend-line:hover{background:rgba(241,246,234,.8)}
 /* responsivo do bento (largura útil do conteúdo) */
 @container workspace (max-width:1000px){
   .bento>.b-hero{grid-column:span 7}.bento>.b-side{grid-column:span 5}
-  .bento>.b-8,.bento>.b-7,.bento>.b-5,.bento>.b-4{grid-column:1/-1}
 }
 @container workspace (max-width:860px){
   .bento{gap:14px}
-  .bento>.b-hero,.bento>.b-side,.bento>.b-6,.bento>.b-5,.bento>.b-4{grid-column:1/-1}
+  .bento>.b-hero,.bento>.b-side,.bento>.b-8,.bento>.b-7,.bento>.b-6,.bento>.b-5,.bento>.b-4{grid-column:1/-1}
   .bento>.b-side{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto}
-  .operation-flow{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .operation-flow>*:nth-child(4)::before,.operation-flow>*:nth-child(4)::after{display:none}
   .bento .hero{min-height:0;padding:26px}
 }
 @container workspace (max-width:560px){
   .bento>.b-side{grid-template-columns:1fr}
   .operation-flow{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .operation-flow>*:nth-child(odd)::before,.operation-flow>*:nth-child(odd)::after{display:none}
-  .operation-flow>*:nth-child(4)::before,.operation-flow>*:nth-child(4)::after{display:block}
+  .operation-flow>*::before,.operation-flow>*::after{display:none!important}
+  .operation-flow>*:last-child{grid-column:1/-1}
   .figures{grid-template-columns:1fr}.figure-num{border-left:0;padding-left:0;border-top:1px solid var(--hair);padding-top:16px}
   .metric-value{font-size:1.9rem!important}
   .percent-row{grid-template-columns:minmax(84px,110px) minmax(0,1fr) auto!important;gap:10px!important}
@@ -877,6 +876,43 @@ button.legend-line:hover{background:rgba(241,246,234,.8)}
 .level-tile small{display:block!important}
 .level-tile .level-num{display:flex!important;flex-direction:row!important;align-items:flex-end!important;justify-content:space-between!important}
 .level-tile .level-steps{display:flex!important;flex-direction:row!important;flex:none!important;margin:0!important;gap:6px}
+
+
+/* ---------- 16. ajustes do QA independente ---------- */
+/* capas dos relatórios: título claro sobre fundo escuro */
+.report-cover h2,.report-cover h3{color:#fff}
+/* selos de nota e pills não encolhem dentro de linhas flexíveis */
+.row>.score,.row>.pill,.score{flex-shrink:0}
+.row>.score{min-width:42px}
+.row>.pill{white-space:nowrap}
+/* quebra só quando precisa (não no meio da palavra) */
+.page-h h1,.tbl td,.kcard,.card b,.card h3,.g-lbl,.callout,.card p,.card li,.hist{overflow-wrap:break-word}
+.tbl td .pill,.tbl td .score,.tbl td .link,.tbl td .btn{white-space:nowrap}
+/* gráfico de colunas: largura própria e teto de escala */
+.chart-scroll .chart{min-width:540px}
+.chart-scroll .chart-cols{max-width:920px;margin:0 auto}
+@container workspace (max-width:1000px){
+  .analytics-grid:has(>.card-wide){grid-template-columns:minmax(0,1fr)!important}
+}
+/* cartões do bento com conteúdo centrado na altura disponível */
+.bento>.card .donut-layout{margin-block:auto}
+.bento .hero{align-items:center}
+/* KPIs clássicos: mesma altura e sem filete superior recortado */
+.kpi{border-top:1px solid var(--glass-line)!important}
+.grid:has(>.kpi){align-items:stretch}
+.system-metrics,.governance-metrics{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))!important}
+/* trilho: itens mais compactos para caber mais níveis */
+.shell .side .nav-item{min-height:40px;margin:1px 0}
+.shell .side .nav-sec{padding-top:14px}
+.side-nav{position:relative}
+/* cabeçalho: data só quando há espaço */
+.topbar .ttl small{flex-wrap:nowrap;white-space:nowrap;overflow:hidden}
+@media(max-width:1180px){.topbar .ttl .when{display:none}}
+
+.donut-legend{width:100%;max-width:380px;justify-self:center}
+.figures{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.figure-num{border-left:0;padding-left:0}
+.topbar .ttl .when{overflow:hidden;text-overflow:ellipsis;min-width:0}
 </style>
 </head>
 <body>
@@ -1134,7 +1170,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
   // Tooltip do menu recolhido
   let tipEl = null;
   const showTip = el => { if(!document.querySelector('.shell.mini') || window.innerWidth <= 900) return; hideTip(); const r = el.getBoundingClientRect();
-    tipEl = document.createElement('div'); tipEl.className = 'tip'; tipEl.textContent = el.dataset.tip; tipEl.style.left = (r.right + 10) + 'px'; tipEl.style.top = (r.top + r.height / 2) + 'px'; document.body.appendChild(tipEl); };
+    tipEl = document.createElement('div'); tipEl.className = 'tip'; tipEl.textContent = el.dataset.tip; const side = el.closest('.side'); tipEl.style.left = ((side ? side.getBoundingClientRect().right : r.right) + 12) + 'px'; tipEl.style.top = (r.top + r.height / 2) + 'px'; document.body.appendChild(tipEl); };
   const hideTip = () => { if(tipEl){ tipEl.remove(); tipEl = null; } };
   document.addEventListener('mouseover', e => { const el = e.target.closest('[data-tip]'); if(el) showTip(el); else hideTip(); });
   document.addEventListener('focusin', e => { const el = e.target.closest('[data-tip]'); if(el) showTip(el); });
@@ -1169,7 +1205,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
         const x0 = c + r * Math.cos(a0), y0 = c + r * Math.sin(a0), x1 = c + r * Math.cos(a1 - 1e-6), y1 = c + r * Math.sin(a1 - 1e-6);
         g += `<path d="M${x0} ${y0} A${r} ${r} 0 ${lg} 1 ${x1} ${y1}" stroke="${it.color || PAL[i % PAL.length]}" stroke-width="18" fill="none"><title>${esc(it.label)}: ${it.value}</title></path>`; a0 = a1; });
       g += `<text x="${c}" y="${c + 2}" text-anchor="middle" font-size="24" font-weight="700" fill="#1E2420">${esc(centro)}</text><text x="${c}" y="${c + 20}" text-anchor="middle" font-size="11" fill="#5E655F">${esc(rotulo)}</text>`;
-      return `<div class="row" style="gap:18px;flex-wrap:nowrap;align-items:center"><svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="flex:none" role="img">${g}</svg>
+      return `<div class="row" style="gap:18px;flex-wrap:nowrap;align-items:center"><svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="flex:none" role="img" aria-label="${esc(items.map(i => i.label + ': ' + i.value).join(', '))}">${g}</svg>
         <div class="legend" style="flex-direction:column;align-items:flex-start;gap:6px">${items.map((it, i) => `<span><i style="background:${it.color || PAL[i % PAL.length]}"></i>${esc(it.label)} <b style="color:#1E2420">${fmt.n(it.value)}</b></span>`).join('')}</div></div>`;
     },
     /** Matriz/dispersão: pontos [{x, y, r, label, color, id}], eixos 0..xMax/yMax, linhas de corte qx/qy, rótulos de quadrante [tl,tr,bl,br] */
@@ -1185,7 +1221,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
       if(o.xLabel) g += `<text x="${L + pw / 2}" y="${H - 6}" font-size="12" fill="#5E655F" text-anchor="middle">${esc(o.xLabel)} →</text>`;
       if(o.yLabel) g += `<text x="14" y="${T + ph / 2}" font-size="12" fill="#5E655F" text-anchor="middle" transform="rotate(-90 14 ${T + ph / 2})">${esc(o.yLabel)} →</text>`;
       pts.forEach(p => { const rr = p.r || 8; g += `<g ${p.id ? `data-ponto="${esc(p.id)}" style="cursor:pointer"` : ''} data-tt="${esc(p.title || p.label)}"><circle cx="${X(p.x)}" cy="${Y(p.y)}" r="${rr + 8}" fill="transparent"/><circle cx="${X(p.x)}" cy="${Y(p.y)}" r="${rr}" fill="${p.color || PAL[0]}" stroke="#fff" stroke-width="2"/><text x="${X(p.x) + rr + 4}" y="${Y(p.y) + 4}" font-size="11.5" fill="#1E2420">${esc(p.label)}</text></g>`; });
-      return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
+      return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.aria || `${o.yLabel || 'Valor'} × ${o.xLabel || 'Esforço'}: ${pts.map(p => p.label).join(', ')}`)}">${g}</svg>`;
     },
     /** Barras verticais simples: cats, series [{name, values, color}] */
     barras(cats, series, {h = 220, fmtv = v => fmt.n(v)} = {}){
@@ -1216,7 +1252,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
           <div class="ttl"><small><span class="crumb">${esc(tela ? tela.titulo : '')}</span><span class="when">${esc(dataLonga())}</span></small><b>${esc(saudacao())}</b></div>
           <div class="right">
             <button class="storage-btn" data-storage-status title="Dados e configurações"><i></i><span>Salvo no navegador</span></button>
-            <div class="levels"><div class="seg" role="group" aria-label="Nível do sistema">${GP.NIVEIS.map(L => `<button class="${L.n === nivel ? 'on' : ''}" data-nivel="${L.n}" title="Nível ${L.n} · ${esc(L.nome)}"><b>${L.n}</b><span>${esc(L.curto)}</span></button>`).join('')}</div>
+            <div class="levels"><div class="seg" role="group" aria-label="Nível do sistema">${GP.NIVEIS.map(L => `<button class="${L.n === nivel ? 'on' : ''}" data-nivel="${L.n}" aria-pressed="${L.n === nivel}" title="Nível ${L.n} · ${esc(L.nome)}"><b>${L.n}</b><span>${esc(L.curto)}</span></button>`).join('')}</div>
               <button class="icon-btn" data-ajuda-nivel title="O que cada nível faz" aria-label="O que cada nível faz">${icon('ajuda', 16)}</button></div>
             <img class="ons" src="${GP.LOGO_ONS || ''}" alt="ONS">
           </div>
@@ -1232,6 +1268,10 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     const chave = r.id + '/' + (r.arg || '');
     if(!manterScroll || chave !== ultimaChave) window.scrollTo({top:0});
     ultimaChave = chave;
+    el.querySelectorAll('table.tbl:not(.tbl-cards)').forEach(t => { const ths = [...t.querySelectorAll('thead th')].map(th => th.textContent.trim());
+      if(!ths.length) return; t.classList.add('tbl-cards'); t.querySelectorAll('tbody tr').forEach(tr => [...tr.children].forEach((td, i) => { if(!td.hasAttribute('data-label')) td.setAttribute('data-label', ths[i] || ''); })); });
+    const nav = app.querySelector('.side-nav'), ativo = nav && nav.querySelector('.nav-item.on');
+    if(ativo && (ativo.offsetTop + ativo.offsetHeight > nav.scrollTop + nav.clientHeight - 24 || ativo.offsetTop < nav.scrollTop)) nav.scrollTop = ativo.offsetTop - nav.clientHeight / 2 + ativo.offsetHeight / 2;
     GP.pintarSalvamento();
     if(GP.afterRender) GP.afterRender(el,r);
   }
@@ -1241,7 +1281,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     let nome = ''; try { const u = GP.auth && GP.auth.usuario && GP.auth.usuario(); nome = u && u.nome ? String(u.nome).trim().split(/\s+/)[0] : ''; } catch(e) {}
     return nome ? `${oi}, ${nome}` : oi;
   }
-  function dataLonga(){ const t = new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' }); return t.charAt(0).toUpperCase() + t.slice(1); }
+  function dataLonga(){ const t = new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long' }); return t.charAt(0).toUpperCase() + t.slice(1); }
   /** Dock inferior do celular: atalhos para as tarefas mais frequentes */
   function dock(tela){
     const id = tela ? tela.id : '', it = (href, ic, lbl, cls = '') => `<a class="dock-item ${cls} ${id === href.slice(2) ? 'on' : ''}" href="${href}" aria-label="${lbl}">${icon(ic, 19)}<span>${lbl}</span></a>`;
@@ -2439,6 +2479,8 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
       const c = el.cloneNode(true);
       c.querySelectorAll('select').forEach((s, i) => { const o = el.querySelectorAll('select')[i]; const t = document.createElement('span'); t.textContent = o && o.selectedOptions[0] ? o.selectedOptions[0].textContent : ''; s.replaceWith(t); });
       c.querySelectorAll('input:not([type=checkbox]):not([type=radio]):not([type=range])').forEach((x, i) => { const t = document.createElement('div'); t.className = 'input'; t.textContent = x.value; x.replaceWith(t); });
+      // Botões que carregam dados (barras e legendas clicáveis, etapas do fluxo) viram blocos estáticos; os demais saem
+      c.querySelectorAll('button.percent-row, button.legend-line, .operation-flow > button').forEach(b => { const d = document.createElement('div'); d.className = b.className; d.innerHTML = b.innerHTML; b.replaceWith(d); });
       c.querySelectorAll('.actions, button, input[type=range], [data-noprint]').forEach(x => x.remove()); w.appendChild(c); document.body.appendChild(w);
       const escala = 1.6, topo = w.getBoundingClientRect().top;
       const cortes = [...w.querySelectorAll('tr, .card, .page-h, .g-row, .callout, .kpi')].map(x => Math.round((x.getBoundingClientRect().bottom - topo) * escala)).sort((a, b) => a - b);
@@ -3007,9 +3049,9 @@ window.GP_PPT_TEMPLATES={"visao":{"base64":"UEsDBBQAAAAIAEGQQ12drdcvNQEAAFMCAAAR
   function graficoEntradas(serie){
     /* Colunas agrupadas: ≤24px, ponta arredondada de 4px e base reta, 2px de respiro entre o par, grade fina e dica por período. */
     const pts=serie.pontos,W=800,H=260,L=40,R=12,T=18,B=44,pw=W-L-R,ph=H-T-B,max=Math.max(2,...pts.map(p=>Math.max(p.projetos,p.demandas))),step=pw/Math.max(1,pts.length),bw=Math.max(4,Math.min(24,(step-14)/2));
-    const yMax=max<=4?max:Math.ceil(max/4)*4,cores={projetos:PALETTE[0],demandas:PALETTE[1]};
+    const passoY=max<=4?1:Math.ceil(max/4),nY=max<=4?max:4,yMax=passoY*nY,cores={projetos:PALETTE[0],demandas:PALETTE[1]};
     const col=(x,v,cor)=>{if(!v)return '';const h=v/yMax*ph,y=T+ph-h,rr=Math.min(4,h,bw/2);return `<path d="M${x} ${T+ph}V${y+rr}Q${x} ${y} ${x+rr} ${y}H${x+bw-rr}Q${x+bw} ${y} ${x+bw} ${y+rr}V${T+ph}Z" fill="${cor}"/>`;};
-    let g=''; [0,.25,.5,.75,1].forEach(t=>{const y=T+ph*(1-t),v=yMax*t;g+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="${t?'#e3eae6':'#c9d6cf'}" stroke-width="1"/><text x="${L-10}" y="${y+5}" text-anchor="end" font-size="14" fill="#71857e">${fmt.n(v,v%1?1:0)}</text>`;});
+    let g=''; for(let k=0;k<=nY;k++){const t=k/nY,y=T+ph*(1-t),v=k*passoY;g+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="${k?'#e3eae6':'#c9d6cf'}" stroke-width="1"/><text x="${L-10}" y="${y+5}" text-anchor="end" font-size="14" fill="#71857e">${fmt.n(v)}</text>`;}
     const rotulos=pts.length<=10?1:Math.ceil(pts.length/10);
     pts.forEach((p,i)=>{const cx=L+step*(i+.5);g+=col(cx-bw-1,p.projetos,cores.projetos)+col(cx+1,p.demandas,cores.demandas);
       g+=`<rect class="hit" x="${L+step*i}" y="${T}" width="${step}" height="${ph}" fill="transparent" data-tt="${esc(p.label)}&#10;Projetos: ${p.projetos}&#10;Demandas: ${p.demandas}"/>`;
@@ -3069,7 +3111,7 @@ window.GP_PPT_TEMPLATES={"visao":{"base64":"UEsDBBQAAAAIAEGQQ12drdcvNQEAAFMCAAAR
       ${!m.n?`<div class="callout b-full"><span class="ic">${icon('info',17)}</span><div><p><b>Seu portfólio começa aqui.</b> Cadastre o primeiro projeto, importe uma planilha ou <button class="link" data-exemplos>carregue exemplos fictícios</button> para conhecer os gráficos. Os indicadores usam somente registros cadastrados.</p></div></div>`:''}
       <div class="card b-7">${chartHead('Distribuição por etapa','Todos os registros, incluindo concluídos e saídas. Clique para filtrar.','funil')}${hbars(m.etapas,m.n,{key:'etapa'})}${legendaEtapas()}</div>
       <div class="card b-5">${chartHead('Projetos e demandas','Natureza informada no cadastro.','carteira')}${donut([{key:'projeto',label:'Projetos',value:m.projetos,color:PALETTE[0]},{key:'demanda',label:'Demandas',value:m.demandas,color:PALETTE[1]}],m.n,'registros',{key:'natureza'})}<p class="chart-footnote">A natureza do registro é independente da etapa. Cadastros anteriores a esta versão recebem a classificação Projeto, que pode ser alterada na ficha.</p></div>
-      <div class="card b-8">${chartHead('Entrada de projetos e demandas','Histórico dos cadastros a partir da data de entrada.','roadmap')}${graficoEntradas(m.serie)}</div>
+      <div class="card b-8 card-wide">${chartHead('Entrada de projetos e demandas','Histórico dos cadastros a partir da data de entrada.','roadmap')}${graficoEntradas(m.serie)}</div>
       <div class="card b-4">${chartHead('Pontos para acompanhamento','Pendências calculadas a partir dos registros.','alerta')}${atencoes(m)}<div style="margin-top:15px"><a class="link" href="#/indicadores">Abrir análise completa</a></div></div>
       <div class="card b-6">${chartHead('Registros por gerência','Participação no total cadastrado.','acervo')}${hbars(m.gerencias,m.n,{key:'gerencia'})}</div>
       <div class="card b-6">${chartHead('Avanço e estimativas','Valores informados nos cadastros.','ranking')}<div class="figures"><div class="figure-ring">${ring(m.progresso==null?null:m.progresso/100,'var(--c4)',108,m.progresso==null?'-':fmt.n(m.progresso)+'%')}<div><span class="fig-lbl">Avanço médio em execução</span><span class="fig-sub">${m.comProgresso} de ${m.execucao} com avanço informado</span></div></div><div class="figure-num"><span class="fig-lbl">Custo estimado total</span><strong>${m.comCusto?fmt.mi(m.custo):'-'}</strong><span class="fig-sub">${m.comCusto} de ${m.n} com custo informado</span></div></div><p class="chart-footnote">O custo é uma estimativa dos registros e inclui todas as etapas. O avanço é a média simples dos percentuais informados para os itens em execução.</p></div>
@@ -3093,7 +3135,7 @@ window.GP_PPT_TEMPLATES={"visao":{"base64":"UEsDBBQAAAAIAEGQQ12drdcvNQEAAFMCAAAR
       <div class="analysis-tabs" data-noprint>${[['visao','Visão geral'],['qualidade','Qualidade dos dados'],...(nivel>=3?[['custos','Custos e capacidade']]:[])].map(([k,l])=>`<button class="${k===aba?'on':''}" data-analysis-tab="${k}">${l}</button>`).join('')}${nivel<3?`<button data-nivel="3">Ativar análise de capacidade</button>`:''}</div>`;
     if(aba==='custos')html+=custos(m);
     else if(aba==='qualidade')html+=qualidade(m);
-    else html+=kpis(m)+`<div class="analytics-grid"><div class="card">${chartHead('Projetos e demandas por período','Entradas do recorte, conforme o período selecionado.','roadmap')}${graficoEntradas(m.serie)}</div><div class="card">${chartHead('Composição da base','Comparação entre projetos e demandas.','carteira')}${donut([{key:'projeto',label:'Projetos',value:m.projetos,color:PALETTE[0]},{key:'demanda',label:'Demandas',value:m.demandas,color:PALETTE[1]}],m.n,'registros',{key:'natureza'})}</div></div>
+    else html+=kpis(m)+`<div class="analytics-grid"><div class="card card-wide">${chartHead('Projetos e demandas por período','Entradas do recorte, conforme o período selecionado.','roadmap')}${graficoEntradas(m.serie)}</div><div class="card">${chartHead('Composição da base','Comparação entre projetos e demandas.','carteira')}${donut([{key:'projeto',label:'Projetos',value:m.projetos,color:PALETTE[0]},{key:'demanda',label:'Demandas',value:m.demandas,color:PALETTE[1]}],m.n,'registros',{key:'natureza'})}</div></div>
       <div class="analytics-grid analytics-equal"><div class="card">${chartHead('Distribuição por etapa','Quantidade e percentual no recorte. Clique para filtrar.','funil')}${hbars(m.etapas,m.n,{key:'etapa'})}</div><div class="card">${chartHead('Distribuição por gerência','Participação no recorte. Clique para filtrar.','acervo')}${hbars(m.gerencias,m.n,{key:'gerencia'})}<div style="margin-top:24px">${chartHead('Origem das iniciativas','Quantidade por origem do cadastro.','estrela')}${hbars(m.origens.filter(i=>i.value),m.n,{key:'origem'})}</div></div></div>
       <div class="analytics-grid analytics-equal"><div class="card">${chartHead('Tipos de iniciativa','Composição do recorte por tipo.','acervo')}${hbars(m.tipos.filter(i=>i.value),m.n,{key:'tipo'})}${!m.n?'<div class="info-empty">Nenhum registro neste recorte.</div>':''}</div><div class="card">${chartHead('Resultado do checklist de entrada','Checklists completos do recorte. Não representa conversão histórica.','avaliar')}${hbars(['entra','falta_info','nao_entra'].map((k,i)=>({label:M.RESULTADO_ENTRADA[k].nome,value:lista.filter(p=>p.entrada?.resultado===k).length,color:{entra:'#6b8f2a',falta_info:'#d5a32d',nao_entra:'#b8642c'}[k]})),m.entradaAvaliada)}<p class="chart-footnote">${m.n-m.entradaAvaliada} registros sem checklist completo ficam fora desta distribuição. A admissão é a razão entre “Entra” e todos os checklists completos.</p></div></div>`;
     html+=tabela(lista,{busca:true});el.innerHTML=html;bindFilters(el);

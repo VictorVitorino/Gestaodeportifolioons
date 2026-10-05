@@ -47,7 +47,9 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 ::selection{background:rgba(107,143,42,.22)}
 h1,h2,h3,h4{font-family:var(--font-display);color:var(--text);letter-spacing:-.02em}
 a{color:var(--ons)}
-:focus-visible{outline:none;box-shadow:var(--ring);border-radius:10px}
+:focus-visible{outline:2px solid var(--ons);outline-offset:3px}
+.shell .side :focus-visible,.dock :focus-visible,.level-tile :focus-visible{outline-color:#cfe3a6}
+.input:focus-visible,.select:focus-visible{outline:none}
 .muted{color:var(--muted)} .dim{color:var(--dim)}
 *{scrollbar-width:thin;scrollbar-color:rgba(23,48,43,.22) transparent}
 
@@ -338,21 +340,18 @@ button.legend-line:hover{background:rgba(241,246,234,.8)}
 /* responsivo do bento (largura útil do conteúdo) */
 @container workspace (max-width:1000px){
   .bento>.b-hero{grid-column:span 7}.bento>.b-side{grid-column:span 5}
-  .bento>.b-8,.bento>.b-7,.bento>.b-5,.bento>.b-4{grid-column:1/-1}
 }
 @container workspace (max-width:860px){
   .bento{gap:14px}
-  .bento>.b-hero,.bento>.b-side,.bento>.b-6,.bento>.b-5,.bento>.b-4{grid-column:1/-1}
+  .bento>.b-hero,.bento>.b-side,.bento>.b-8,.bento>.b-7,.bento>.b-6,.bento>.b-5,.bento>.b-4{grid-column:1/-1}
   .bento>.b-side{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto}
-  .operation-flow{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .operation-flow>*:nth-child(4)::before,.operation-flow>*:nth-child(4)::after{display:none}
   .bento .hero{min-height:0;padding:26px}
 }
 @container workspace (max-width:560px){
   .bento>.b-side{grid-template-columns:1fr}
   .operation-flow{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .operation-flow>*:nth-child(odd)::before,.operation-flow>*:nth-child(odd)::after{display:none}
-  .operation-flow>*:nth-child(4)::before,.operation-flow>*:nth-child(4)::after{display:block}
+  .operation-flow>*::before,.operation-flow>*::after{display:none!important}
+  .operation-flow>*:last-child{grid-column:1/-1}
   .figures{grid-template-columns:1fr}.figure-num{border-left:0;padding-left:0;border-top:1px solid var(--hair);padding-top:16px}
   .metric-value{font-size:1.9rem!important}
   .percent-row{grid-template-columns:minmax(84px,110px) minmax(0,1fr) auto!important;gap:10px!important}
@@ -431,3 +430,40 @@ button.legend-line:hover{background:rgba(241,246,234,.8)}
 .level-tile small{display:block!important}
 .level-tile .level-num{display:flex!important;flex-direction:row!important;align-items:flex-end!important;justify-content:space-between!important}
 .level-tile .level-steps{display:flex!important;flex-direction:row!important;flex:none!important;margin:0!important;gap:6px}
+
+
+/* ---------- 16. ajustes do QA independente ---------- */
+/* capas dos relatórios: título claro sobre fundo escuro */
+.report-cover h2,.report-cover h3{color:#fff}
+/* selos de nota e pills não encolhem dentro de linhas flexíveis */
+.row>.score,.row>.pill,.score{flex-shrink:0}
+.row>.score{min-width:42px}
+.row>.pill{white-space:nowrap}
+/* quebra só quando precisa (não no meio da palavra) */
+.page-h h1,.tbl td,.kcard,.card b,.card h3,.g-lbl,.callout,.card p,.card li,.hist{overflow-wrap:break-word}
+.tbl td .pill,.tbl td .score,.tbl td .link,.tbl td .btn{white-space:nowrap}
+/* gráfico de colunas: largura própria e teto de escala */
+.chart-scroll .chart{min-width:540px}
+.chart-scroll .chart-cols{max-width:920px;margin:0 auto}
+@container workspace (max-width:1000px){
+  .analytics-grid:has(>.card-wide){grid-template-columns:minmax(0,1fr)!important}
+}
+/* cartões do bento com conteúdo centrado na altura disponível */
+.bento>.card .donut-layout{margin-block:auto}
+.bento .hero{align-items:center}
+/* KPIs clássicos: mesma altura e sem filete superior recortado */
+.kpi{border-top:1px solid var(--glass-line)!important}
+.grid:has(>.kpi){align-items:stretch}
+.system-metrics,.governance-metrics{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))!important}
+/* trilho: itens mais compactos para caber mais níveis */
+.shell .side .nav-item{min-height:40px;margin:1px 0}
+.shell .side .nav-sec{padding-top:14px}
+.side-nav{position:relative}
+/* cabeçalho: data só quando há espaço */
+.topbar .ttl small{flex-wrap:nowrap;white-space:nowrap;overflow:hidden}
+@media(max-width:1180px){.topbar .ttl .when{display:none}}
+
+.donut-legend{width:100%;max-width:380px;justify-self:center}
+.figures{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.figure-num{border-left:0;padding-left:0}
+.topbar .ttl .when{overflow:hidden;text-overflow:ellipsis;min-width:0}

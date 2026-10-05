@@ -141,6 +141,8 @@
       const c = el.cloneNode(true);
       c.querySelectorAll('select').forEach((s, i) => { const o = el.querySelectorAll('select')[i]; const t = document.createElement('span'); t.textContent = o && o.selectedOptions[0] ? o.selectedOptions[0].textContent : ''; s.replaceWith(t); });
       c.querySelectorAll('input:not([type=checkbox]):not([type=radio]):not([type=range])').forEach((x, i) => { const t = document.createElement('div'); t.className = 'input'; t.textContent = x.value; x.replaceWith(t); });
+      // Botões que carregam dados (barras e legendas clicáveis, etapas do fluxo) viram blocos estáticos; os demais saem
+      c.querySelectorAll('button.percent-row, button.legend-line, .operation-flow > button').forEach(b => { const d = document.createElement('div'); d.className = b.className; d.innerHTML = b.innerHTML; b.replaceWith(d); });
       c.querySelectorAll('.actions, button, input[type=range], [data-noprint]').forEach(x => x.remove()); w.appendChild(c); document.body.appendChild(w);
       const escala = 1.6, topo = w.getBoundingClientRect().top;
       const cortes = [...w.querySelectorAll('tr, .card, .page-h, .g-row, .callout, .kpi')].map(x => Math.round((x.getBoundingClientRect().bottom - topo) * escala)).sort((a, b) => a - b);
