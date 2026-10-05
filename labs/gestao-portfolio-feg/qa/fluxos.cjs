@@ -405,6 +405,7 @@ module.exports = {
   async 'r2: saudação no cabeçalho e dock só no celular'({ p, ir, check }){
     check(/^(Bom dia|Boa tarde|Boa noite)/.test((await p.textContent('.topbar .ttl b')).trim()), 'cabeçalho deveria trazer a saudação');
     check(!(await p.locator('.dock').isVisible()), 'dock não deveria aparecer no computador');
+    await ir('#/ranking'); check((await p.textContent('.topbar .ttl .crumb')).trim() === 'Ranking', 'cabeçalho deveria trazer o nome da tela (usado no título do PDF)');
     await p.setViewportSize({ width:390, height:844 }); await ir('#/painel');
     check(await p.locator('.dock').isVisible(), 'dock deveria aparecer no celular');
     await p.click('.dock .dock-item.add'); await p.waitForTimeout(200);

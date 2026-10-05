@@ -81,6 +81,8 @@ Sistema de cadastro, entrada e priorização de projetos para a própria equipe 
 - Desenvolvimento: `labs/gestao-portfolio-feg/index.html` (arquivos separados) → `node labs/gestao-portfolio-feg/build.mjs` gera o arquivo único.
 - QA de regressão: `bash labs/gestao-portfolio-feg/qa/qa.sh` (build, `npm test`, `npm run check`, apps existentes, todas as rotas em desktop/celular e fluxos de cada passo). Testes do modelo: `tests/unit/gestao-portfolio-feg.test.js`.
 - Plano e requisitos: `labs/gestao-portfolio-feg/PLANO.md`.
+- Design system "Atlas ONS": `labs/gestao-portfolio-feg/src/design.css` é a última camada de estilo (tokens, vidro, trilho de navegação, painel em bento, gráficos, responsividade). A paleta é a mesma. Nos gráficos, as cinco séries categóricas usam oliva e ouro originais e passos de petróleo, ardósia e cobre validados para daltonismo. Gráficos de uma série usam uma cor só, e todos mostram uma dica (`data-tt`) ao passar o mouse. Não use `color-mix()`: o PDF (html2canvas) não aceita essa função.
+- Celular: dock inferior com atalhos, tabelas em cartões (`data-label` nas células) e modais em folha inferior.
 
 ## Portfólio FEG — trilha didática (labs/portfolio-feg)
 

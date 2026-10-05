@@ -2433,7 +2433,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     GP.busy(true, 'Gerando PDF…');
     try {
       if(document.fonts && document.fonts.ready) await document.fonts.ready;
-      const titulo = (document.querySelector('.topbar .ttl b') || {}).textContent || 'Portfólio';
+      const titulo = (document.querySelector('.topbar .ttl .crumb') || {}).textContent || 'Portfólio';
       const w = document.createElement('div'); w.style.cssText = 'position:absolute;left:-20000px;top:0;width:1240px;background:#fff;padding:28px';
       w.innerHTML = `<div style="display:flex;align-items:center;gap:14px;border-bottom:1px solid #E4E3E4;padding-bottom:12px;margin-bottom:18px">${GP.logoFEG(34)}<div><b style="font-size:15px">Gestão de Portfólio · FEG</b><div style="font-size:12px;color:#5E655F">${esc(titulo)} · ${fmt.data(hoje())}</div></div><img src="${GP.LOGO_ONS}" style="height:30px;margin-left:auto"></div>`;
       const c = el.cloneNode(true);
