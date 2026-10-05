@@ -290,9 +290,19 @@
         faltam.length ? 'Complete os campos abaixo com o demandante e depois reavalie o checklist.' : 'Os campos pedidos no checklist já foram preenchidos. Refaça o checklist para registrar a decisão.', btnChecklist('Reavaliar'), links);
     }
     if(p.etapa === 'aprovado'){
-      const n2 = GP.nivel() >= 2;
-      return sec('ok', 'ranking', 'Aguarda priorização (nível 2)', n2 ? 'Responda as perguntas de prioridade para que o projeto entre no ranking.' : 'Entrou no portfólio. A ordem de início é definida na priorização, disponível no nível 2.',
-        n2 ? `<a class="btn btn-primary" href="#/avaliar/${p.id}">${icon('avaliar', 16)} Avaliar prioridade</a>` : `<button class="btn btn-ghost" data-ajuda-nivel>Entender os níveis</button>`);
+      const n2 = GP.nivel() >= 2, s = M.pontuar(p);
+      if(s.completo){
+        // já avaliado: informa a posição entre os admitidos (mesma ordem do ranking) em vez de pedir nova avaliação
+        const rk = M.ranking(P.todos().filter(x => x.etapa === 'aprovado'), { obrigatoriosNoTopo: GP.state().ui.rankObrig !== false }), x = rk.find(y => y.p.id === p.id);
+        const Q = M.QUADRANTES[s.quadrante], nota = `Valor ${fmt.n(s.valor, 1)} · esforço ${fmt.n(s.esforco, 1)}${Q ? ' · ' + esc(Q.nome) : ''}.`;
+        if(!n2) return sec('ok', 'relogio', 'Avaliado: aguarda início', `${nota} A ordem de início entre os admitidos aparece no ranking, disponível no nível 2.`, `<button class="btn btn-ghost" data-ajuda-nivel>Entender os níveis</button>`);
+        return sec('ok', 'ranking', x ? `Avaliado: ${x.pos}º de ${rk.length} no ranking` : 'Avaliado: aguarda início', `${nota} Aguarda a decisão de início; quando começar, mude a etapa para Em execução.`,
+          `<a class="btn btn-ghost" href="#/ranking" data-ver-ranking="${p.id}">${icon('ranking', 16)} Ver no ranking</a>`);
+      }
+      const parcial = s.faltam && Object.keys((p.avaliacao && p.avaliacao.respostas) || {}).length;
+      return sec('ok', 'ranking', parcial ? `Avaliação incompleta: ${s.faltam === 1 ? 'falta 1 resposta' : `faltam ${s.faltam} respostas`}` : 'Aguarda priorização (nível 2)',
+        n2 ? (parcial ? 'Conclua as perguntas de prioridade para que o projeto entre no ranking.' : 'Responda as perguntas de prioridade para que o projeto entre no ranking.') : 'Entrou no portfólio. A ordem de início é definida na priorização, disponível no nível 2.',
+        n2 ? `<a class="btn btn-primary" href="#/avaliar/${p.id}">${icon('avaliar', 16)} ${parcial ? 'Concluir avaliação' : 'Avaliar prioridade'}</a>` : `<button class="btn btn-ghost" data-ajuda-nivel>Entender os níveis</button>`);
     }
     if(p.etapa === 'execucao') return sec('ok', 'relogio', 'Mantenha o avanço atualizado', p.progresso == null ? 'O avanço físico ainda não foi informado.' : `Avanço físico informado: ${fmt.n(p.progresso, p.progresso % 1 ? 1 : 0)}%.`, `<a class="btn btn-ghost" href="#/novo/${p.id}?campo=progresso">${icon('editar', 16)} Atualizar avanço</a>`);
     if(p.etapa === 'espera') return sec('neutral', 'relogio', 'Pausado por decisão', 'Retome o projeto quando a condição que motivou a pausa mudar.');
@@ -366,6 +376,8 @@
         S2.projetos.splice(Math.max(0, Math.min(pos, S2.projetos.length)), 0, copia); GP.save(); GP.go('#/projeto/' + copia.id); GP.toast(`<b>${esc(copia.codigo)}</b> restaurado.`); });
     }, {perigo:true});
     el.querySelector('[data-etapa]').onclick = () => modalEtapa(p);
+    const vr = el.querySelector('[data-ver-ranking]');
+    if(vr && GP.priorizacao && GP.priorizacao.verNoRanking) vr.onclick = e => { e.preventDefault(); GP.priorizacao.verNoRanking(p.id); };
   }
 
   /* ------------------------------------------------------ mudar etapa */
@@ -389,8 +401,16 @@
       if(obrig) mot.setAttribute('aria-required', 'true'); else mot.removeAttribute('aria-required');
       if(!obrig){ err.textContent = ''; mot.classList.remove('err'); mot.removeAttribute('aria-invalid'); }
       const aviso = ['entrada', 'triagem'].includes(p.etapa) && ['aprovado', 'execucao'].includes(v) && !p.entrada;
-      m.querySelector('[data-aviso-checklist]').innerHTML = aviso ? `<div class="callout warn op-aviso-check"><span class="ic">${icon('alerta', 16)}</span><div><p><b>Sem checklist de entrada.</b> O projeto vai entrar no portfólio sem a decisão registrada (entra, falta informação ou não entra).</p><button class="btn btn-sm btn-primary" type="button" data-fazer-checklist>${icon('funil', 15)} Fazer checklist agora</button></div></div>` : '';
+      const caixa = m.querySelector('[data-aviso-checklist]'), tinha = !!caixa.firstElementChild;
+      caixa.innerHTML = aviso ? `<div class="callout warn op-aviso-check"><span class="ic">${icon('alerta', 16)}</span><div><p><b>Sem checklist de entrada.</b> O projeto vai entrar no portfólio sem a decisão registrada (entra, falta informação ou não entra).</p><button class="btn btn-sm btn-primary" type="button" data-fazer-checklist>${icon('funil', 15)} Fazer checklist agora</button></div></div>` : '';
       const b = m.querySelector('[data-fazer-checklist]'); if(b) b.onclick = () => { GP.closeModal(); if(GP.abrirEntrada) GP.abrirEntrada(p.id); };
+      // o aviso aparece abaixo das opções: rola o modal até ele ficar inteiro acima do rodapé fixo (Cancelar/Salvar)
+      if(aviso && !tinha) requestAnimationFrame(() => {
+        const c = caixa.firstElementChild, act = m.querySelector('.m-act'); if(!c || !act) return;
+        const cr = c.getBoundingClientRect(), limite = Math.min(act.getBoundingClientRect().top, m.getBoundingClientRect().bottom, innerHeight) - 12;
+        const delta = Math.min(cr.bottom - limite, cr.top - m.getBoundingClientRect().top - 12);
+        if(delta > 0) m.scrollBy({ top: delta, behavior: window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      });
     };
     m.addEventListener('change', e => { if(e.target.name === 'et') atualizar(); });
     mot.addEventListener('input', () => { if(mot.value.trim()){ err.textContent = ''; mot.classList.remove('err'); mot.removeAttribute('aria-invalid'); } });
