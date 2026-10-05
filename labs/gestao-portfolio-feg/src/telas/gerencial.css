@@ -506,6 +506,7 @@
   .cfg-q-bt{margin-left:auto}
   .cfg-listas .cfg-col:first-child .cfg-lista{grid-template-columns:minmax(0,1fr)}
   .cfg-barra{bottom:calc(env(safe-area-inset-bottom,0px) + 76px)}
+  .cfg-barra:not(.sujo){position:static}   /* sem pendências, a barra vai para o fim da página e não ocupa a tela */
   .cfg-barra-acoes{width:100%}
   .cfg-barra-acoes .btn{flex:1;white-space:nowrap;padding-inline:10px}
   .cfg-link{flex-wrap:wrap}
