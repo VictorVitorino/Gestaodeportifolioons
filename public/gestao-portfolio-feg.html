@@ -2963,8 +2963,8 @@ button.rk-cel:hover{box-shadow:inset 0 0 0 2px rgba(25,53,47,.35)}
 .cfg-mini-mtz{position:relative;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:4px;margin:4px 0 0 18px;padding-bottom:18px}
 .cfg-mq{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:#fff;box-shadow:inset 3px 0 0 var(--q);font-size:.78rem;color:var(--muted)}
 .cfg-mq b{font-size:1.05rem;color:var(--text)}
-.cfg-mq-y{position:absolute;left:-20px;top:50%;transform:translate(-50%,-50%) rotate(-90deg);transform-origin:center;font-size:.68rem;color:var(--muted);white-space:nowrap;margin-left:12px}
-.cfg-mq-x{position:absolute;left:50%;bottom:0;transform:translateX(-50%);font-size:.68rem;color:var(--muted);white-space:nowrap}
+.cfg-mq-y{position:absolute;left:-20px;top:50%;transform:translate(-50%,-50%) rotate(-90deg);transform-origin:center;font-size:.72rem;color:var(--muted);white-space:nowrap;margin-left:12px}
+.cfg-mq-x{position:absolute;left:50%;bottom:0;transform:translateX(-50%);font-size:.72rem;color:var(--muted);white-space:nowrap}
 .cfg-previa{margin:2px 0 0;font-size:.84rem;color:var(--muted)}
 .cfg-previa b{color:var(--forest)}
 .cfg-links{display:flex;flex-direction:column;gap:8px}
@@ -3007,7 +3007,14 @@ button.rk-cel:hover{box-shadow:inset 0 0 0 2px rgba(25,53,47,.35)}
 }
 @media (max-width:700px){
   .cfg-abas{width:100%;border-radius:18px}
-  .cfg-abas a{flex:1 1 auto;justify-content:center;padding:0 10px}
+  .cfg-abas a{flex:1 1 auto;justify-content:center;padding:0 10px;min-height:44px}
+  /* "?" com área de toque de 44px; o círculo visível continua pequeno */
+  .cfg-ajuda,.op-dgrupo h4 .cfg-ajuda{position:relative;width:44px;height:44px;margin:-11px -8px;border:0;background:transparent;color:#2E4F00}
+  .cfg-ajuda::before{content:"";position:absolute;left:50%;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;border:1px solid #C6DCA4;background:#F1F6EA;z-index:-1}
+  .cfg-ajuda{z-index:0}
+  .cfg-sw{min-height:44px;min-width:52px;justify-content:center}
+  .cfg-ajuda:hover,.cfg-ajuda:focus-visible{background:transparent;color:#fff}
+  .cfg-ajuda:hover::before,.cfg-ajuda:focus-visible::before{background:#3E6801;border-color:#3E6801}
   .cfg-intro{flex-wrap:wrap}
   .cfg-versao{margin-left:0}
   .cfg-listas,.cfg-campos,.cfg-q-l2{grid-template-columns:minmax(0,1fr)}
@@ -6659,12 +6666,12 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
       <div class="cfg-versoes-pe"><button type="button" class="btn btn-ghost btn-sm" data-padrao>${icon('voltar', 14)} Voltar à sugestão do sistema</button><small>Carrega a sugestão inicial no rascunho. Nada muda até você salvar.</small></div></details>`;
   }
   function barra(){
-    const ms = mudancas(), ps = ms.length ? problemas() : [], v = GP.state().config.versao;
-    return `<div class="cfg-barra ${ms.length ? 'sujo' : ''}" data-barra role="region" aria-label="Salvar as regras">
-      <div class="cfg-barra-txt" aria-live="polite">${ms.length
-        ? `<b>${plural(ms.length, 'alteração não salva', 'alterações não salvas')}</b><span class="cfg-barra-lista" title="${esc(ms.join('\n'))}">${esc(ms.slice(0, 2).join(' '))}${ms.length > 2 ? ' …' : ''}</span>${ps.length ? `<span class="cfg-erro">${icon('alerta', 14)} ${esc(ps[0])}</span>` : ''}`
+    const ms = mudancas(), ps = problemas(), v = GP.state().config.versao;
+    return `<div class="cfg-barra ${ms.length || ps.length ? 'sujo' : ''}" data-barra role="region" aria-label="Salvar as regras">
+      <div class="cfg-barra-txt" aria-live="polite">${ms.length || ps.length
+        ? `<b>${ms.length ? plural(ms.length, 'alteração não salva', 'alterações não salvas') : 'Revise antes de salvar'}</b><span class="cfg-barra-lista" title="${esc(ms.join('\n'))}">${esc(ms.slice(0, 2).join(' '))}${ms.length > 2 ? ' …' : ''}</span>${ps.length ? `<span class="cfg-erro">${icon('alerta', 14)} ${esc(ps[0])}</span>` : ''}`
         : `<span class="cfg-ok">${icon('check', 15)} Tudo salvo · versão ${v} em uso</span>`}</div>
-      <div class="cfg-barra-acoes"><button type="button" class="btn btn-ghost" data-descartar ${ms.length ? '' : 'disabled'}>Descartar</button>
+      <div class="cfg-barra-acoes"><button type="button" class="btn btn-ghost" data-descartar ${ms.length || ps.length ? '' : 'disabled'}>Descartar</button>
       <button type="button" class="btn btn-primary" data-salvar ${ms.length && !ps.length ? '' : 'disabled'}>${icon('check', 16)} Salvar e aplicar</button></div></div>`;
   }
 

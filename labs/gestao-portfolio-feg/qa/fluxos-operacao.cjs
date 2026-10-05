@@ -128,8 +128,8 @@ module.exports = {
   async 'op-O7: entrada e triagem com atenção por tom, gerências ordenadas e KPIs 2x2'({ p, ir, check, recarregar }){
     await exemplos(p, recarregar); await ir('#/entrada-resumo', 250);
     const r = await p.evaluate(() => { const its = [...document.querySelectorAll('.op-att .att')]; const t = its.map(a => a.textContent);
-      const w = document.querySelector('.op-att .att.t-warn'); return { i268:t.findIndex(x => /268 dias/.test(x)), i81:t.findIndex(x => /81 dias/.test(x)), barra:w ? getComputedStyle(w).boxShadow : '', svg:w ? getComputedStyle(w.querySelector('svg')).color : '' }; });
-    check(r.i268 >= 0 && r.i81 > r.i268, 'item com 268 dias deveria vir antes do de 81 dias');
+      const w = document.querySelector('.op-att .att.t-warn'); const dias = t.map(x => +((x.match(/há (\d+) dias/) || [])[1] || -1)).filter(n => n >= 0); return { dias, barra:w ? getComputedStyle(w).boxShadow : '', svg:w ? getComputedStyle(w.querySelector('svg')).color : '' }; });
+    check(r.dias.length >= 2 && r.dias.every((n, i) => !i || r.dias[i - 1] >= n), 'itens que esperam há mais dias deveriam vir primeiro: ' + r.dias.join(', '));   // não depende da data de hoje
     check(/213, 163, 45/.test(r.barra) && r.svg === 'rgb(168, 112, 26)', 'item de atenção deveria ter barra e ícone na cor do tom');
     const ger = await p.$$eval('.b-6:first-of-type .hb, .b-6 .percent-row', els => els.length).catch(() => 0);
     check(await p.evaluate(() => !document.querySelector('.op-painel svg circle[stroke-width="18"]')), 'gerências não deveriam usar a rosca de 4 cores');
