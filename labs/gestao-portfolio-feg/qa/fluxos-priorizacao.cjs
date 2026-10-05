@@ -11,7 +11,8 @@ module.exports = {
     await ir('#/avaliar/' + id); await responderTudo(p, TUDO);
     await p.click('[data-salvar]'); await p.waitForTimeout(900);
     check(/#\/ranking/.test(p.url()), 'avaliação completa deveria abrir o ranking');
-    check(await p.evaluate(() => GP.state().ui.rankEscopo) === 'ativos', 'escopo deveria mudar para "ativos" (triagem)');
+    // Correção 42: o escopo "ativos" (necessário para mostrar a triagem) vale só nesta visita, com aviso, e não é gravado
+    check(await p.evaluate(() => GP.state().ui.rankEscopo) == null && await p.locator('[data-escopo="ativos"].on').count() === 1 && await p.locator('.pz-escopo-temp').count() === 1, 'escopo deveria mostrar "ativos" (triagem) só nesta visita, com aviso');
     check(await p.locator(`tr.destaque[data-rank-id="${id}"]`).count() === 1, 'linha do PRJ-005 deveria estar destacada');
     check(await naTela(p, `tr[data-rank-id="${id}"]`), 'linha do PRJ-005 deveria estar visível na tela');
   },
