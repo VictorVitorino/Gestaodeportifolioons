@@ -424,11 +424,11 @@ svg{flex-shrink:0}
 @media print{html{font-size:16px!important}body,.main{background:#fff!important}.shell{display:block!important;padding:0!important}.main{border:0!important;box-shadow:none!important;container-type:normal}.topbar,.side,.profile-btn,.settings-tabs{display:none!important}.content{padding:15px}.metric-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.hero{grid-template-columns:minmax(0,1fr) 160px;break-inside:avoid;print-color-adjust:exact}.hero-stat{display:block}.card,.risk-item{break-inside:avoid}.risk-overview,.analytics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.risk-matrix-scroll,.chart-scroll{overflow:visible}.chart-scroll .chart{min-width:0}.risk-matrix{min-width:0}.btn,.filter-panel{display:none!important}}
 
 /* Governança Maestro e leitura por ativos */
-.guardian-banner{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start;padding:24px;border:1px solid color-mix(in srgb,var(--green) 32%,var(--line));border-radius:20px;background:linear-gradient(125deg,color-mix(in srgb,var(--green) 10%,var(--surface)),var(--surface));margin-bottom:18px}
+.guardian-banner{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start;padding:24px;border:1px solid #b3c899;border-radius:20px;background:linear-gradient(125deg,#eef4e6,rgba(255,255,255,.75));margin-bottom:18px}
 .guardian-mark{display:grid;place-items:center;width:48px;height:48px;border-radius:15px;background:var(--green);color:#fff}
 .guardian-banner .eyebrow{display:block;margin-bottom:5px;color:var(--green);font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
 .guardian-banner h2{margin:0 0 7px;font-size:clamp(1.15rem,2vw,1.55rem);line-height:1.2}.guardian-banner p{margin:0;max-width:920px;color:var(--muted);line-height:1.6}
-.governance-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}.role-card{position:relative;min-width:0}.role-card h3{margin:20px 0 8px;font-size:1rem}.role-card p{margin:0;color:var(--muted);font-size:.9rem;line-height:1.55}.role-num{position:absolute;top:14px;right:16px;color:color-mix(in srgb,var(--green) 45%,transparent);font-size:.78rem;font-weight:800;letter-spacing:.08em}
+.governance-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}.role-card{position:relative;min-width:0}.role-card h3{margin:20px 0 8px;font-size:1rem}.role-card p{margin:0;color:var(--muted);font-size:.9rem;line-height:1.55}.role-num{position:absolute;top:14px;right:16px;color:rgba(62,104,1,.45);font-size:.78rem;font-weight:800;letter-spacing:.08em}
 .governance-detail{margin:18px 0}.clean-list{display:grid;gap:10px;margin:0;padding:0;list-style:none}.clean-list li{position:relative;padding-left:20px;color:var(--muted);line-height:1.45}.clean-list li:before{content:' ';position:absolute;left:1px;top:.55em;width:7px;height:7px;border-radius:50%;background:var(--green)}
 .flow-steps{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}.flow-steps>div{min-width:0;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--soft)}.flow-steps b{display:grid;place-items:center;width:26px;height:26px;margin-bottom:10px;border-radius:9px;background:var(--green);color:#fff;font-size:.74rem}.flow-steps span{display:block;font-weight:750}.flow-steps small{display:block;margin-top:4px;color:var(--muted);line-height:1.35}
 .scope-note{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;margin-bottom:16px;border-left:4px solid var(--gold);border-radius:0 12px 12px 0;background:#fff8e7;font-size:.9rem}.scope-note b{white-space:nowrap}.scope-note span{color:var(--muted);line-height:1.45}.system-metrics{margin-bottom:18px}
@@ -671,6 +671,137 @@ input[type=checkbox],input[type=radio]{accent-color:var(--ons)}
   .dock-item{width:56px}
 }
 @media print{.dock,.topbar,.side{display:none!important}}
+
+/* ---------- 14. painel em bento ---------- */
+.bento{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:18px;align-items:stretch}
+.bento>*{min-width:0;margin:0!important}
+.bento>.b-hero{grid-column:span 8}
+.bento>.b-side{grid-column:span 4;display:grid;grid-template-rows:1fr auto;gap:18px}
+.bento>.b-full,.bento>.sample-banner,.bento>.metric-grid,.bento>.callout{grid-column:1/-1}
+.bento>.b-8{grid-column:span 8}.bento>.b-7{grid-column:span 7}.bento>.b-6{grid-column:span 6}.bento>.b-5{grid-column:span 5}.bento>.b-4{grid-column:span 4}
+.bento>.card{display:flex;flex-direction:column}
+
+/* herói: vidro claro com aurora sutil */
+.bento .hero{display:flex;align-items:flex-end;min-height:260px;padding:34px 36px;border-radius:var(--r-xl);color:var(--text);
+  background:radial-gradient(120% 140% at 0% 0%,rgba(207,226,166,.85),transparent 55%),radial-gradient(90% 120% at 100% 0%,rgba(168,213,216,.55),transparent 60%),rgba(255,255,255,.66);
+  border:1px solid var(--glass-line);box-shadow:var(--sh-1);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);position:relative;overflow:hidden}
+.bento .hero::after{content:"";position:absolute;right:-60px;bottom:-90px;width:320px;height:320px;border-radius:50%;border:1px solid rgba(62,104,1,.10);box-shadow:0 0 0 40px rgba(62,104,1,.035),0 0 0 80px rgba(62,104,1,.025);pointer-events:none}
+.bento .hero h1{font-size:clamp(2rem,3.4vw,3rem);font-weight:700;letter-spacing:-.045em;line-height:1.02;margin:12px 0 10px}
+.bento .hero p{color:var(--muted);font-size:.95rem;max-width:58ch}
+.bento .hero .hero-eyebrow{color:var(--ons-700);letter-spacing:.14em}
+.bento .hero .hero-eyebrow i{background:var(--gold)}
+.bento .hero .actions{margin-top:22px;gap:10px}
+
+/* bloco do nível: escuro, número protagonista */
+.level-tile{display:flex!important;flex-direction:column;justify-content:space-between;gap:10px;padding:24px 26px!important;border-radius:var(--r-xl)!important;text-align:left!important;color:#fff!important;
+  background:radial-gradient(120% 90% at 100% 0%,rgba(107,143,42,.55),transparent 60%),linear-gradient(160deg,#254e47,#17302b)!important;border:1px solid rgba(255,255,255,.12)!important;box-shadow:0 22px 44px -24px rgba(18,40,36,.75)!important}
+.level-tile small{color:#b8d0c8!important;font-size:.72rem!important;letter-spacing:.12em;text-transform:uppercase;font-weight:650;margin:0!important}
+.level-num{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.level-tile strong{font-size:clamp(3.4rem,5vw,4.6rem)!important;line-height:.9!important;letter-spacing:-.06em;font-weight:700}
+.level-steps{display:flex;gap:6px;padding-bottom:10px}
+.level-steps i{display:block;width:26px;height:6px;border-radius:999px;background:rgba(255,255,255,.18)}
+.level-steps i.on{background:#cfe3a6}
+.level-tile>span{font-size:1rem!important;font-weight:600;color:#fff!important;margin:0!important}
+.level-tile .link{color:#d9e9b4!important;align-self:flex-start;font-size:.82rem!important;margin:0!important}
+.b-side .work-session{margin:0!important;flex-direction:column;align-items:stretch;gap:12px;padding:16px 18px;border-radius:var(--r-lg)}
+.b-side .work-session .actions{display:flex;flex-wrap:wrap;gap:6px}
+.b-side .work-session .btn{flex:1 1 auto}
+.session-dot.ok{background:var(--olive)!important;box-shadow:0 0 0 4px rgba(107,143,42,.18)}
+
+/* fluxo do portfólio como esteira conectada */
+.operation-flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0!important;padding:8px;border-radius:var(--r-xl);background:var(--glass);border:1px solid var(--glass-line);box-shadow:var(--sh-1);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.operation-flow>a,.operation-flow>button{position:relative;border:0!important;background:transparent!important;border-radius:20px!important;padding:16px 20px!important;box-shadow:none!important;transition:background .2s var(--ease)}
+.operation-flow>a:hover,.operation-flow>button:hover{background:rgba(255,255,255,.85)!important}
+.operation-flow>*+*::before{content:"";position:absolute;left:0;top:22%;bottom:22%;width:1px;background:var(--hair-2)}
+.operation-flow>*+*::after{content:"";position:absolute;left:-7px;top:50%;width:12px;height:12px;border-radius:50%;background:#fff;border:1px solid var(--hair-2);transform:translateY(-50%);box-shadow:inset 0 0 0 3px #fff,inset 0 0 0 6px var(--ons-200)}
+.operation-flow span{font-size:.7rem!important;letter-spacing:.12em;text-transform:uppercase;font-weight:650;color:var(--dim)!important}
+.operation-flow strong{font-size:2.2rem!important;letter-spacing:-.05em;color:var(--text)!important;line-height:1.1!important;margin:4px 0 2px}
+.operation-flow small{color:var(--muted)!important}
+.operation-flow .locked strong{color:var(--line-2)!important}
+
+/* KPIs */
+.metric-grid{gap:18px!important;margin:0!important}
+.metric{border:1px solid var(--glass-line)!important;border-left:1px solid var(--glass-line)!important;border-top:1px solid var(--glass-line)!important;background:var(--glass)!important;border-radius:var(--r-lg)!important;padding:20px 20px 18px!important;gap:10px!important}
+.metric-head span{font-size:.8rem!important;font-weight:600;color:var(--muted)!important}
+.metric-icon{width:32px;height:32px;border-radius:50%!important;background:var(--tint,#f1f6ea)!important;color:var(--tone)!important;padding:0!important}
+.metric-body{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.metric-value{font-size:2.35rem!important;font-weight:700!important;letter-spacing:-.05em!important;line-height:1!important;font-variant-numeric:normal!important}
+.metric-sub{font-size:.76rem!important;color:var(--muted)!important;min-height:0!important}
+.ring{flex:none;overflow:visible}
+
+/* cabeçalho dos gráficos */
+.chart-head{margin-bottom:18px!important}
+.chart-mark{width:34px;height:34px;border-radius:50%!important;display:grid!important;place-items:center;background:var(--ons-50)!important;color:var(--ons)!important;padding:0!important}
+
+/* barras horizontais finas */
+.percent-bars{gap:6px!important}
+.percent-row{grid-template-columns:minmax(96px,150px) minmax(0,1fr) minmax(52px,auto)!important;gap:14px!important;padding:7px 8px!important;margin:0 -8px;border-radius:12px!important;min-height:38px}
+button.percent-row:hover{background:rgba(241,246,234,.8)!important}
+.percent-row .name{color:var(--text);font-size:.82rem}
+.percent-row .track{height:8px!important;border-radius:0 4px 4px 0!important;background:transparent!important;position:relative;overflow:visible!important}
+.percent-row .track::before{content:"";position:absolute;inset:3px 0;background:var(--hair);border-radius:2px}
+.percent-row .track i{position:relative;border-radius:0 4px 4px 0!important;min-width:0}
+.percent-row .count{font-weight:650;font-variant-numeric:tabular-nums;display:flex;align-items:baseline;justify-content:flex-end;gap:6px}
+.percent-row .count small{color:var(--dim);font-weight:500}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;color:var(--muted);font-size:.78rem}
+.legend i{width:10px;height:10px;border-radius:3px}
+.legend-mini{margin-top:14px;padding-top:12px;border-top:1px solid var(--hair)}
+
+/* rosca */
+.donut-layout svg .arc{transition:opacity .2s}
+.donut-layout svg:hover .arc{opacity:.55}
+.donut-layout svg .arc:hover{opacity:1}
+.legend-line{border-radius:12px;padding:8px 10px!important;margin:0 -10px}
+button.legend-line:hover{background:rgba(241,246,234,.8)}
+.legend-line i{border-radius:3px!important}
+
+/* colunas */
+.chart-cols .hit:hover{fill:rgba(107,143,42,.06)}
+.chart-scroll{border-radius:12px}
+
+/* figuras: avanço (medidor) e custo (número herói) */
+.figures{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px;align-items:center;flex:1}
+.figure-ring{display:flex;align-items:center;gap:16px}
+.figure-num{border-left:1px solid var(--hair);padding-left:24px;display:flex;flex-direction:column;gap:4px}
+.figure-num strong{white-space:nowrap;font-size:clamp(1.6rem,2.2vw,2.3rem);font-weight:700;letter-spacing:-.05em;line-height:1.05;color:var(--text)}
+.fig-lbl{display:block;font-size:.8rem;color:var(--muted);font-weight:600}
+.fig-sub{display:block;font-size:.74rem;color:var(--dim);margin-top:3px}
+
+/* dica flutuante dos gráficos */
+.gp-tt{position:fixed;z-index:90;pointer-events:none;display:flex;flex-direction:column;gap:2px;min-width:120px;max-width:260px;padding:10px 13px;border-radius:14px;
+  background:rgba(23,48,43,.94);color:#fff;font-size:12.5px;line-height:1.45;box-shadow:var(--sh-2);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.gp-tt b{font-weight:650;margin-bottom:2px}
+.gp-tt span{color:#cfe0da;font-variant-numeric:tabular-nums}
+
+/* matriz e roadmap */
+.hb .tr{background:var(--hair)!important;height:8px!important;border-radius:0 4px 4px 0!important}
+.hb .tr i{border-radius:0 4px 4px 0!important}
+.gantt .g-bar{border-radius:999px!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+.gantt .g-col{border-radius:4px 4px 0 0!important}
+
+/* responsivo do bento (largura útil do conteúdo) */
+@container workspace (max-width:1000px){
+  .bento>.b-hero{grid-column:span 7}.bento>.b-side{grid-column:span 5}
+  .bento>.b-8,.bento>.b-7,.bento>.b-5,.bento>.b-4{grid-column:1/-1}
+}
+@container workspace (max-width:860px){
+  .bento{gap:14px}
+  .bento>.b-hero,.bento>.b-side,.bento>.b-6,.bento>.b-5,.bento>.b-4{grid-column:1/-1}
+  .bento>.b-side{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto}
+  .operation-flow{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .operation-flow>*:nth-child(4)::before,.operation-flow>*:nth-child(4)::after{display:none}
+  .bento .hero{min-height:0;padding:26px}
+}
+@container workspace (max-width:560px){
+  .bento>.b-side{grid-template-columns:1fr}
+  .operation-flow{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .operation-flow>*:nth-child(odd)::before,.operation-flow>*:nth-child(odd)::after{display:none}
+  .operation-flow>*:nth-child(4)::before,.operation-flow>*:nth-child(4)::after{display:block}
+  .figures{grid-template-columns:1fr}.figure-num{border-left:0;padding-left:0;border-top:1px solid var(--hair);padding-top:16px}
+  .metric-value{font-size:1.9rem!important}
+  .percent-row{grid-template-columns:minmax(84px,110px) minmax(0,1fr) auto!important;gap:10px!important}
+}
+.shell .side-nav{-webkit-mask-image:linear-gradient(180deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(180deg,#000 calc(100% - 28px),transparent);padding-bottom:22px}
 </style>
 </head>
 <body>
@@ -934,15 +1065,27 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
   document.addEventListener('focusin', e => { const el = e.target.closest('[data-tip]'); if(el) showTip(el); });
   document.addEventListener('focusout', hideTip);
 
+  // Dica dos gráficos: qualquer marca com data-tt (linhas separadas por quebra) mostra o valor ao passar o mouse ou focar
+  let ttEl = null, ttSrc = null;
+  const hideTT = () => { if(ttEl){ ttEl.remove(); ttEl = null; ttSrc = null; } };
+  const placeTT = (x, y) => { const w = ttEl.offsetWidth, h = ttEl.offsetHeight, vw = window.innerWidth;
+    ttEl.style.left = Math.max(8, Math.min(vw - w - 8, x + 14)) + 'px'; ttEl.style.top = Math.max(8, y - h - 12) + 'px'; };
+  const showTT = (el, x, y) => { if(!ttEl){ ttEl = document.createElement('div'); ttEl.className = 'gp-tt'; ttEl.setAttribute('role', 'tooltip'); document.body.appendChild(ttEl); }
+    if(ttSrc !== el){ ttSrc = el; const [t, ...linhas] = el.getAttribute('data-tt').split('\n'); ttEl.innerHTML = `<b>${esc(t)}</b>${linhas.map(l => `<span>${esc(l)}</span>`).join('')}`; }
+    placeTT(x, y); };
+  document.addEventListener('mousemove', e => { const el = e.target.closest && e.target.closest('[data-tt]'); if(el) showTT(el, e.clientX, e.clientY); else if(ttEl) hideTT(); }, { passive:true });
+  document.addEventListener('focusin', e => { const el = e.target.closest && e.target.closest('[data-tt]'); if(el){ const r = el.getBoundingClientRect(); showTT(el, r.left + r.width / 2, r.top); } });
+  document.addEventListener('focusout', hideTT); window.addEventListener('scroll', hideTT, { passive:true });
+
   /* ------------------------------------------------------------- gráficos */
-  const PAL = ['#3E6801', '#8FB94B', '#2F6FA3', '#B7791F', '#7A5BA6', '#B9381F', '#5E655F', '#C6DCA4'];
+  const PAL = ['#6b8f2a', '#3a74a8', '#d5a32d', '#00908f', '#b8642c', '#859c98', '#a06137', '#899b67'];
   const niceMax = v => { if(!(v > 0)) return 1; const p = Math.pow(10, Math.floor(Math.log10(v))), n = v / p; return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p; };
   GP.charts = {
     PAL,
     /** Barras horizontais: [{label, value, color, title}] */
     hbar(items, {max, fmtv = v => fmt.n(v)} = {}){
       const m = max ?? Math.max(1e-9, ...items.map(i => i.value));
-      return `<div class="hbars">${items.map((it, i) => `<div class="hb" title="${esc(it.title || it.label)}"><span class="lb">${esc(it.label)}</span><span class="tr"><i style="width:${Math.max(0, Math.min(100, it.value / m * 100))}%;background:${it.color || PAL[0]}"></i></span><span class="v">${fmtv(it.value, it)}</span></div>`).join('')}</div>`;
+      return `<div class="hbars">${items.map(it => `<div class="hb" data-tt="${esc(it.title || it.label)}&#10;${esc(fmtv(it.value, it))}"><span class="lb">${esc(it.label)}</span><span class="tr"><i style="width:${Math.max(0, Math.min(100, it.value / m * 100))}%;background:${it.color || PAL[0]}"></i></span><span class="v">${fmtv(it.value, it)}</span></div>`).join('')}</div>`;
     },
     /** Rosca: [{label, value, color}] */
     donut(items, {size = 150, centro = '', rotulo = ''} = {}){
@@ -959,23 +1102,24 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
       const W = o.w || 640, H = o.h || 420, L = 48, R = 16, T = 16, B = 42, pw = W - L - R, ph = H - T - B;
       const xMax = o.xMax ?? niceMax(Math.max(1, ...pts.map(p => p.x))), yMax = o.yMax ?? niceMax(Math.max(1, ...pts.map(p => p.y)));
       const X = v => L + v / xMax * pw, Y = v => T + (1 - v / yMax) * ph;
-      let g = `<rect x="${L}" y="${T}" width="${pw}" height="${ph}" fill="#FFFFFF" stroke="#E4E3E4"/>`;
-      if(o.qx != null){ g += `<rect x="${L}" y="${T}" width="${X(o.qx) - L}" height="${Y(o.qy) - T}" fill="#F1F6EA"/><line x1="${X(o.qx)}" y1="${T}" x2="${X(o.qx)}" y2="${T + ph}" stroke="#C6DCA4" stroke-dasharray="4 4"/><line x1="${L}" y1="${Y(o.qy)}" x2="${L + pw}" y2="${Y(o.qy)}" stroke="#C6DCA4" stroke-dasharray="4 4"/>`;
+      let g = `<rect x="${L}" y="${T}" width="${pw}" height="${ph}" rx="14" fill="rgba(255,255,255,.75)" stroke="#dfe7e2"/>`;
+      if(o.qx != null){ g += `<path d="M${L + 14} ${T}H${X(o.qx)}V${Y(o.qy)}H${L}V${T + 14}Q${L} ${T} ${L + 14} ${T}Z" fill="#eef5e4"/><line x1="${X(o.qx)}" y1="${T}" x2="${X(o.qx)}" y2="${T + ph}" stroke="#bfd3a3" stroke-width="1.5"/><line x1="${L}" y1="${Y(o.qy)}" x2="${L + pw}" y2="${Y(o.qy)}" stroke="#bfd3a3" stroke-width="1.5"/>`;
         const q = o.quadrantes || []; const lab = (x, y, t, a) => t ? `<text x="${x}" y="${y}" font-size="11" font-weight="600" fill="#8A908B" text-anchor="${a}">${esc(t)}</text>` : '';
         g += lab(L + 8, T + 16, q[0], 'start') + lab(L + pw - 8, T + 16, q[1], 'end') + lab(L + 8, T + ph - 8, q[2], 'start') + lab(L + pw - 8, T + ph - 8, q[3], 'end'); }
       [0, .25, .5, .75, 1].forEach(t => { g += `<text x="${X(xMax * t)}" y="${T + ph + 16}" font-size="10.5" fill="#8A908B" text-anchor="middle">${fmt.n(xMax * t, xMax * t % 1 ? 1 : 0)}</text><text x="${L - 8}" y="${Y(yMax * t) + 4}" font-size="10.5" fill="#8A908B" text-anchor="end">${fmt.n(yMax * t, yMax * t % 1 ? 1 : 0)}</text>`; });
       if(o.xLabel) g += `<text x="${L + pw / 2}" y="${H - 6}" font-size="12" fill="#5E655F" text-anchor="middle">${esc(o.xLabel)} →</text>`;
       if(o.yLabel) g += `<text x="14" y="${T + ph / 2}" font-size="12" fill="#5E655F" text-anchor="middle" transform="rotate(-90 14 ${T + ph / 2})">${esc(o.yLabel)} →</text>`;
-      pts.forEach(p => { const rr = p.r || 8; g += `<g ${p.id ? `data-ponto="${esc(p.id)}" style="cursor:pointer"` : ''}><circle cx="${X(p.x)}" cy="${Y(p.y)}" r="${rr}" fill="${p.color || PAL[0]}" fill-opacity=".85" stroke="#fff" stroke-width="2"><title>${esc(p.title || p.label)}</title></circle><text x="${X(p.x) + rr + 4}" y="${Y(p.y) + 4}" font-size="11.5" fill="#1E2420">${esc(p.label)}</text></g>`; });
+      pts.forEach(p => { const rr = p.r || 8; g += `<g ${p.id ? `data-ponto="${esc(p.id)}" style="cursor:pointer"` : ''} data-tt="${esc(p.title || p.label)}"><circle cx="${X(p.x)}" cy="${Y(p.y)}" r="${rr + 8}" fill="transparent"/><circle cx="${X(p.x)}" cy="${Y(p.y)}" r="${rr}" fill="${p.color || PAL[0]}" stroke="#fff" stroke-width="2"/><text x="${X(p.x) + rr + 4}" y="${Y(p.y) + 4}" font-size="11.5" fill="#1E2420">${esc(p.label)}</text></g>`; });
       return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
     },
     /** Barras verticais simples: cats, series [{name, values, color}] */
     barras(cats, series, {h = 220, fmtv = v => fmt.n(v)} = {}){
       const W = 640, H = h, L = 40, B = 30, T = 12, pw = W - L - 8, ph = H - B - T, m = niceMax(Math.max(1e-9, ...series.flatMap(s => s.values)));
-      const gw = pw / cats.length, bw = Math.min(40, (gw - 14) / series.length); let g = '';
-      [0, .5, 1].forEach(t => { const y = T + ph * (1 - t); g += `<line x1="${L}" y1="${y}" x2="${W - 8}" y2="${y}" stroke="#EDEDED"/><text x="${L - 6}" y="${y + 4}" font-size="10.5" fill="#8A908B" text-anchor="end">${fmtv(m * t)}</text>`; });
+      const gw = pw / cats.length, bw = Math.min(26, (gw - 14) / series.length); let g = '';
+      [0, .5, 1].forEach(t => { const y = T + ph * (1 - t); g += `<line x1="${L}" y1="${y}" x2="${W - 8}" y2="${y}" stroke="${t ? '#e3eae6' : '#c9d6cf'}"/><text x="${L - 6}" y="${y + 4}" font-size="10.5" fill="#8A908B" text-anchor="end">${fmtv(m * t)}</text>`; });
       cats.forEach((c, ci) => { const x0 = L + ci * gw + (gw - bw * series.length) / 2;
-        series.forEach((s, si) => { const v = s.values[ci] || 0, hh = ph * v / m; g += `<rect x="${x0 + si * bw + 1}" y="${T + ph - hh}" width="${bw - 2}" height="${Math.max(0, hh)}" rx="3" fill="${s.color || PAL[si]}"><title>${esc(s.name)} · ${esc(c)}: ${fmtv(v)}</title></rect>`; });
+        series.forEach((s, si) => { const v = s.values[ci] || 0, hh = Math.max(0, ph * v / m), x = x0 + si * bw + 1, w = Math.max(2, bw - 2), y = T + ph - hh, rr = Math.min(4, hh, w / 2);
+          if(hh > 0) g += `<path d="M${x} ${T + ph}V${y + rr}Q${x} ${y} ${x + rr} ${y}H${x + w - rr}Q${x + w} ${y} ${x + w} ${y + rr}V${T + ph}Z" fill="${s.color || PAL[si]}" data-tt="${esc(c)}&#10;${esc(s.name)}: ${esc(fmtv(v))}"/>`; });
         g += `<text x="${L + ci * gw + gw / 2}" y="${H - 10}" font-size="11" fill="#5E655F" text-anchor="middle">${esc(c)}</text>`; });
       return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img">${g}</svg>${series.length > 1 ? `<div class="legend" style="margin-top:6px">${series.map((s, i) => `<span><i style="background:${s.color || PAL[i]}"></i>${esc(s.name)}</span>`).join('')}</div>` : ''}`;
     },
@@ -2699,7 +2843,9 @@ window.GP_PPT_TEMPLATES={"visao":{"base64":"UEsDBBQAAAAIAEGQQ12drdcvNQEAAFMCAAAR
 (function(){
   'use strict';
   const GP=window.GP,M=GP.modelo,P=GP.projetos,U=GP.ui,{esc,fmt,sum,hoje,clone}=GP.util,icon=GP.icon;
-  const PALETTE=['#6b8f2a','#188787','#d5a32d','#477b91','#899b67','#859c98','#bd812d','#a06137'];
+  /* Séries categóricas: oliva e ouro originais; petróleo, ardósia e cobre em passos validados para daltonismo (ΔE ≥ 13). */
+  const PALETTE=['#6b8f2a','#3a74a8','#d5a32d','#00908f','#b8642c','#859c98','#a06137','#899b67'];
+  const TOM_ETAPA={andamento:'#6b8f2a',concluido:'#00908f',fora:'#a3b2ac'},UNICA='#6b8f2a';
   GP.charts.PAL.splice(0,GP.charts.PAL.length,...PALETTE);
   const NATUREZAS={projeto:'Projeto',demanda:'Demanda'};
   const ENCERRADOS=['concluido','nao_entra','cancelado'];
@@ -2747,10 +2893,10 @@ window.GP_PPT_TEMPLATES={"visao":{"base64":"UEsDBBQAAAAIAEGQQ12drdcvNQEAAFMCAAAR
       aprovados:cont(p=>p.etapa==='aprovado'),espera:cont(p=>p.etapa==='espera'),carteira:carteira.length,entram,entradaAvaliada:entrada.length,taxaEntrada:divisao(entram,entrada.length),
       taxaConclusao:divisao(cont(p=>p.etapa==='concluido'),carteira.length),custo:sum(custo,p=>p.custo),comCusto:custo.length,fteExecucao:sum(ftes,p=>p.esforcoFte),comFteExecucao:ftes.length,
       progresso:av.length?sum(av,progresso)/av.length:null,comProgresso:av.length,atrasados,avaliados:avaliados.length,priorizados:priorizados.length,priorizaveis:priorizaveis.length,
-      etapas:M.ETAPAS.map((e,i)=>({key:e.id,label:e.nome,value:cont(p=>p.etapa===e.id),color:PALETTE[i]})),
-      gerencias:[...M.CAT.gerencias.map((g,i)=>({key:g.id,label:g.id,value:cont(p=>p.gerencia===g.id),color:PALETTE[i]})),...(cont(p=>!p.gerencia)?[{key:'',label:'Não informada',value:cont(p=>!p.gerencia),color:'#859c98'}]:[])],
-      tipos:[...new Set([...M.CAT.tipos,...lista.map(p=>p.tipo||'Não informado')])].map((t,i)=>({key:t,label:t,value:cont(p=>(p.tipo||'Não informado')===t),color:PALETTE[i%8]})),
-      origens:[...new Set([...M.CAT.origens,...lista.map(p=>p.origem||'Não informada')])].map((t,i)=>({key:t,label:t,value:cont(p=>(p.origem||'Não informada')===t),color:PALETTE[i%8]})),
+      etapas:M.ETAPAS.map(e=>({key:e.id,label:e.nome,value:cont(p=>p.etapa===e.id),color:TOM_ETAPA[e.grupo]||UNICA})),
+      gerencias:[...M.CAT.gerencias.map(g=>({key:g.id,label:g.id,value:cont(p=>p.gerencia===g.id),color:UNICA})),...(cont(p=>!p.gerencia)?[{key:'',label:'Não informada',value:cont(p=>!p.gerencia),color:'#859c98'}]:[])],
+      tipos:[...new Set([...M.CAT.tipos,...lista.map(p=>p.tipo||'Não informado')])].map((t,i)=>({key:t,label:t,value:cont(p=>(p.tipo||'Não informado')===t),color:UNICA})),
+      origens:[...new Set([...M.CAT.origens,...lista.map(p=>p.origem||'Não informada')])].map((t,i)=>({key:t,label:t,value:cont(p=>(p.origem||'Não informada')===t),color:UNICA})),
       serie:serieEntrada(lista,f),capacidade,qualidade:[
         {label:'Responsável definido',num:ativos.filter(p=>p.responsavel).length,den:ativos.length,desc:'Aprovados, em execução e em espera'},
         {label:'Datas previstas completas',num:ativos.filter(p=>p.inicioPrevisto&&p.fimPrevisto).length,den:ativos.length,desc:'Aprovados, em execução e em espera'},
@@ -2763,28 +2909,38 @@ window.GP_PPT_TEMPLATES={"visao":{"base64":"UEsDBBQAAAAIAEGQQ12drdcvNQEAAFMCAAAR
       ]};
   }
   GP.analytics={filtrar,medir,filtros,natureza,progresso,serieEntrada};
-  const metric=(label,value,sub,{tone='#668d27',tint='#f1f6ea',ic='painel',ratio=null}={})=>`<div class="metric" style="--tone:${tone};--tint:${tint}"><div class="metric-head"><span>${esc(label)}</span><i class="metric-icon">${icon(ic,15)}</i></div><strong class="metric-value">${value}</strong><div class="metric-sub">${sub}</div>${ratio!=null?`<div class="mini-track"><i style="width:${Math.min(100,Math.max(0,ratio*100))}%"></i></div>`:''}</div>`;
+  /** Medidor radial: trilho no mesmo tom (16%), preenchimento com ponta arredondada. ratio null = sem dado. */
+  function ring(ratio,tone='var(--c1)',size=46,centro=''){
+    const sw=size>=80?10:5,r=(size-sw)/2-1,c=size/2,L=2*Math.PI*r,f=ratio==null?0:Math.max(0,Math.min(1,ratio));
+    return `<svg class="ring" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="${ratio==null?'Sem dado':fmt.pct(f)}"><circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${tone}" stroke-opacity=".16" stroke-width="${sw}" style="stroke:${tone}"/>${f>0?`<circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${tone}" style="stroke:${tone}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${Math.max(.01,f*L-(f<1?0:0))} ${L}" transform="rotate(-90 ${c} ${c})"/>`:''}${centro?`<text x="${c}" y="${c+size*.07}" text-anchor="middle" font-size="${size*.2}" font-weight="700" fill="#17302b">${esc(centro)}</text>`:''}</svg>`;
+  }
+  const legendaEtapas=()=>`<div class="legend legend-mini"><span><i style="background:${TOM_ETAPA.andamento}"></i>Em andamento</span><span><i style="background:${TOM_ETAPA.concluido}"></i>Concluído</span><span><i style="background:${TOM_ETAPA.fora}"></i>Fora do portfólio</span></div>`;
+  const metric=(label,value,sub,{tone='#668d27',tint='#f1f6ea',ic='painel',ratio=null}={})=>`<div class="metric" style="--tone:${tone};--tint:${tint}"><div class="metric-head"><span>${esc(label)}</span><i class="metric-icon">${icon(ic,15)}</i></div><div class="metric-body"><strong class="metric-value">${value}</strong>${ratio!=null?ring(ratio,tone,46):''}</div><div class="metric-sub">${sub}</div></div>`;
   const chartHead=(title,sub='',ic='ranking')=>`<div class="chart-head"><div><h3>${esc(title)}</h3>${sub?`<p>${esc(sub)}</p>`:''}</div><span class="chart-mark">${icon(ic,17)}</span></div>`;
   const sample=m=>m.exemplos?`<div class="sample-banner"><span><b>Dados de demonstração:</b> ${m.exemplos} de ${m.n} registros são exemplos fictícios e entram nos indicadores exibidos.</span><button class="link" data-so-reais>Mostrar apenas reais</button></div>`:'';
   function hbars(items,total,{key,monetario=false}={}){
-    const max=Math.max(1,...items.map(i=>i.value));
+    const max=Math.max(1e-9,...items.map(i=>i.value));
     return `<div class="percent-bars">${items.map(it=>{const count=monetario?fmt.mi(it.value):fmt.n(it.value),percent=fmt.pct(divisao(it.value,total));
-      const attr=key&&it.key?`data-analytics-filter="${key}" data-value="${esc(it.key)}" title="Filtrar por ${esc(it.label)}"`:'';
-      return `<${attr?'button':'div'} class="percent-row" ${attr}><span class="name" title="${esc(it.label)}">${esc(it.label)}</span><span class="track"><i style="width:${it.value/max*100}%;--bar:${it.color||PALETTE[0]}"></i></span><span class="count">${count}<small>${percent}</small></span></${attr?'button':'div'}>`;}).join('')}</div>`;
+      const attr=key&&it.key?`data-analytics-filter="${key}" data-value="${esc(it.key)}" aria-label="Filtrar por ${esc(it.label)}"`:'';
+      return `<${attr?'button':'div'} class="percent-row" ${attr} data-tt="${esc(it.label)}&#10;${esc(count)} · ${esc(percent)}"><span class="name">${esc(it.label)}</span><span class="track"><i style="width:${it.value/max*100}%;--bar:${it.color||UNICA}"></i></span><span class="count">${count}<small>${percent}</small></span></${attr?'button':'div'}>`;}).join('')}</div>`;
   }
   function donut(items,total,label='registros',{key}={}){
-    const r=72,c=94,L=2*Math.PI*r; let offset=0;
-    const arcs=items.map(it=>{const length=total?it.value/total*L:0;const v=`<circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${it.color}" stroke-width="20" stroke-dasharray="${length} ${L-length}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${c} ${c})"><title>${esc(it.label)}: ${it.value} (${fmt.pct(divisao(it.value,total))})</title></circle>`;offset+=length;return v;}).join('');
-    return `<div class="donut-layout"><svg viewBox="0 0 188 188" role="img" aria-label="${esc(items.map(i=>i.label+': '+i.value).join(', '))}"><circle cx="94" cy="94" r="72" fill="none" stroke="#edf2ee" stroke-width="20"/>${arcs}<text x="94" y="95" text-anchor="middle" font-size="34" font-weight="700" fill="#19352f">${total}</text><text x="94" y="117" text-anchor="middle" font-size="11" fill="#59716b">${esc(label)}</text></svg><div class="donut-legend">${items.map(it=>`<${key?'button':'div'} class="legend-line" ${key?`data-analytics-filter="${key}" data-value="${esc(it.key)}" title="Filtrar ${esc(it.label)}"`:''}><i style="background:${it.color}"></i><span>${esc(it.label)}<small>${fmt.pct(divisao(it.value,total))} do total</small></span><b>${it.value}</b></${key?'button':'div'}>`).join('')}</div></div>`;
+    const r=72,c=94,L=2*Math.PI*r,vivos=items.filter(i=>i.value>0).length,gap=vivos>1?3:0; let offset=0;
+    const arcs=items.map(it=>{const length=total?it.value/total*L:0;if(!length)return '';const v=`<circle class="arc" cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${it.color}" stroke-width="18" stroke-dasharray="${Math.max(.01,length-gap)} ${L-length+gap}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${c} ${c})" data-tt="${esc(it.label)}&#10;${it.value} · ${fmt.pct(divisao(it.value,total))}"/>`;offset+=length;return v;}).join('');
+    return `<div class="donut-layout"><svg viewBox="0 0 188 188" role="img" aria-label="${esc(items.map(i=>i.label+': '+i.value).join(', '))}"><circle cx="94" cy="94" r="72" fill="none" stroke="#e9efeb" stroke-width="18"/>${arcs}<text x="94" y="98" text-anchor="middle" font-size="38" font-weight="700" fill="#17302b" letter-spacing="-1">${total}</text><text x="94" y="120" text-anchor="middle" font-size="11.5" fill="#566b64">${esc(label)}</text></svg><div class="donut-legend">${items.map(it=>`<${key?'button':'div'} class="legend-line" ${key?`data-analytics-filter="${key}" data-value="${esc(it.key)}" aria-label="Filtrar ${esc(it.label)}"`:''}><i style="background:${it.color}"></i><span>${esc(it.label)}<small>${fmt.pct(divisao(it.value,total))} do total</small></span><b>${it.value}</b></${key?'button':'div'}>`).join('')}</div></div>`;
   }
   function graficoEntradas(serie){
-    const pts=serie.pontos,W=800,H=250,L=35,R=14,T=15,B=46,pw=W-L-R,ph=H-T-B,max=Math.max(2,...pts.map(p=>p.total)),step=pw/Math.max(1,pts.length),bw=Math.min(32,step*.27);
-    let g=''; [0,.25,.5,.75,1].forEach(t=>{const y=T+ph*(1-t);g+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="#e4ebe6"/><text x="${L-8}" y="${y+4}" text-anchor="end" font-size="11" fill="#789087">${fmt.n(max*t,max*t%1?1:0)}</text>`;});
-    pts.forEach((p,i)=>{const x=L+step*(i+.5);['projetos','demandas'].forEach((k,j)=>{const h=p[k]/max*ph;g+=`<rect x="${x+(j?2:-bw-2)}" y="${T+ph-h}" width="${bw}" height="${h}" rx="3" fill="${j?'#188787':'#769a36'}"><title>${esc(p.label)}: ${p[k]} ${k}</title></rect>`;});
-      if(pts.length<=10||i%Math.ceil(pts.length/10)===0)g+=`<text x="${x}" y="${H-23}" text-anchor="middle" font-size="11" fill="#59716b">${esc(p.label)}</text>`;
+    /* Colunas agrupadas: ≤24px, ponta arredondada de 4px e base reta, 2px de respiro entre o par, grade fina e dica por período. */
+    const pts=serie.pontos,W=800,H=260,L=40,R=12,T=18,B=44,pw=W-L-R,ph=H-T-B,max=Math.max(2,...pts.map(p=>Math.max(p.projetos,p.demandas))),step=pw/Math.max(1,pts.length),bw=Math.max(4,Math.min(24,(step-14)/2));
+    const yMax=max<=4?max:Math.ceil(max/4)*4,cores={projetos:PALETTE[0],demandas:PALETTE[1]};
+    const col=(x,v,cor)=>{if(!v)return '';const h=v/yMax*ph,y=T+ph-h,rr=Math.min(4,h,bw/2);return `<path d="M${x} ${T+ph}V${y+rr}Q${x} ${y} ${x+rr} ${y}H${x+bw-rr}Q${x+bw} ${y} ${x+bw} ${y+rr}V${T+ph}Z" fill="${cor}"/>`;};
+    let g=''; [0,.25,.5,.75,1].forEach(t=>{const y=T+ph*(1-t),v=yMax*t;g+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="${t?'#e3eae6':'#c9d6cf'}" stroke-width="1"/><text x="${L-10}" y="${y+5}" text-anchor="end" font-size="14" fill="#71857e">${fmt.n(v,v%1?1:0)}</text>`;});
+    const rotulos=pts.length<=10?1:Math.ceil(pts.length/10);
+    pts.forEach((p,i)=>{const cx=L+step*(i+.5);g+=col(cx-bw-1,p.projetos,cores.projetos)+col(cx+1,p.demandas,cores.demandas);
+      g+=`<rect class="hit" x="${L+step*i}" y="${T}" width="${step}" height="${ph}" fill="transparent" data-tt="${esc(p.label)}&#10;Projetos: ${p.projetos}&#10;Demandas: ${p.demandas}"/>`;
+      if(i%rotulos===0)g+=`<text x="${cx}" y="${H-16}" text-anchor="middle" font-size="14" fill="#566b64">${esc(p.label)}</text>`;
     });
-    g=g.replaceAll('font-size="11"','font-size="16"');
-    return `<div class="chart-scroll" tabindex="0" aria-label="Gráfico de entradas. Use a rolagem horizontal em telas menores."><svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Entradas de projetos e demandas por ${serie.passo===1?'mês':serie.passo===3?'trimestre':'ano'}">${g}</svg></div><div class="legend"><span><i style="background:#769a36"></i>Projetos</span><span><i style="background:#188787"></i>Demandas</span></div><p class="chart-footnote">Data de entrada do cadastro. ${serie.passo===3?'Agrupado por trimestre para permitir a leitura de todo o período.':serie.passo===12?'Agrupado por ano para permitir a leitura de todo o período.':'Quantidade de novos cadastros em cada mês.'}${serie.semData?` ${serie.semData} registro(s) sem data não aparecem neste gráfico.`:''}</p>`;
+    return `<div class="chart-scroll" tabindex="0" aria-label="Gráfico de entradas. Use a rolagem horizontal em telas menores."><svg class="chart chart-cols" viewBox="0 0 ${W} ${H}" role="img" aria-label="Entradas de projetos e demandas por ${serie.passo===1?'mês':serie.passo===3?'trimestre':'ano'}">${g}</svg></div><div class="legend"><span><i style="background:${cores.projetos}"></i>Projetos</span><span><i style="background:${cores.demandas}"></i>Demandas</span></div><p class="chart-footnote">Data de entrada do cadastro. ${serie.passo===3?'Agrupado por trimestre para permitir a leitura de todo o período.':serie.passo===12?'Agrupado por ano para permitir a leitura de todo o período.':'Quantidade de novos cadastros em cada mês.'}${serie.semData?` ${serie.semData} registro(s) sem data não aparecem neste gráfico.`:''}</p>`;
   }
   function opcoes(itens,valor,vazio){return `<option value="">${esc(vazio)}</option>`+itens.map(([v,l])=>`<option value="${esc(v)}" ${v===valor?'selected':''}>${esc(l)}</option>`).join('');}
   function filterPanel(f){
@@ -2829,14 +2985,20 @@ window.GP_PPT_TEMPLATES={"visao":{"base64":"UEsDBBQAAAAIAEGQQ12drdcvNQEAAFMCAAAR
   function resumo(el){
     const todos=P.todos(),m=medir(todos),nivel=GP.nivel(),L=GP.NIVEIS[nivel-1],ultimos=todos.slice().sort((a,b)=>(b.atualizadoEm||b.criadoEm||'').localeCompare(a.atualizadoEm||a.criadoEm||''));
     const novas=todos.filter(p=>p.etapa==='entrada').length,triagem=todos.filter(p=>p.etapa==='triagem').length,avaliar=todos.filter(p=>p.etapa==='aprovado'&&!M.pontuar(p).completo).length,prontos=todos.filter(p=>p.etapa==='aprovado'&&M.pontuar(p).completo).length;
-    el.innerHTML=`<div class="hero operational-hero"><div><div class="hero-eyebrow"><i></i>Projeto Maestro / Sistema de Gestão de Portfólio</div><h1>Central do portfólio</h1><p>Cadastre, organize, priorize e acompanhe as iniciativas da FE. A FEG mantém o modelo e a consistência da carteira.</p><div class="actions"><a class="btn btn-primary" href="#/novo">${icon('novo',15)} Nova iniciativa</a><button class="btn btn-ghost" data-importar-csv>${icon('upload',15)} Importar iniciativas</button><a class="btn btn-ghost" href="#/acervo">${icon('acervo',15)} Abrir carteira</a></div></div><div class="hero-stat"><small>Nível de uso ativo</small><strong>${nivel}</strong><span>${esc(L.nome)}</span><button class="link" data-ajuda-nivel>Ver ou alterar nível</button></div></div>
-      <section class="work-session"><div class="session-state"><span class="session-dot ${GP.storage.ok?'ok':'warn'}"></span><div><b>${GP.storage.ok?'Trabalho salvo':'Atenção ao salvamento'}</b><small>${GP.storage.ok?'Salvamento automático neste navegador / '+fmt.dataHora(GP.storage.salvoEm):'Baixe uma cópia para preservar as alterações desta sessão.'}</small></div></div><div class="actions"><button class="btn btn-ghost btn-sm" data-save-now>${icon('check',14)} Salvar agora</button><button class="btn btn-ghost btn-sm" data-backup>${icon('download',14)} Baixar cópia</button><button class="btn btn-ghost btn-sm" data-restaurar-backup>${icon('upload',14)} Continuar de backup</button></div></section>
-      <section class="operation-flow"><a href="#/funil"><span>Entrada</span><strong>${novas}</strong><small>novas iniciativas</small></a><a href="#/funil"><span>Triagem</span><strong>${triagem}</strong><small>em análise</small></a>${nivel>=2?`<a href="#/avaliar"><span>Avaliação</span><strong>${avaliar}</strong><small>sem nota completa</small></a><a href="#/ranking"><span>Priorização</span><strong>${prontos}</strong><small>prontas para decisão</small></a>`:`<button data-nivel="2"><span>Próxima função</span><strong>2</strong><small>ativar priorização</small></button>`}${nivel>=3?`<a href="#/carteira"><span>Planejamento</span><strong>${m.capacidade.cabem}</strong><small>novos inícios simulados</small></a>`:`<button data-nivel="3"><span>Planejamento</span><strong>3</strong><small>ativar capacidade</small></button>`}</section>
+    el.innerHTML=`<div class="bento bento-painel">
+      <section class="b-hero hero operational-hero"><div><div class="hero-eyebrow"><i></i>Projeto Maestro / Sistema de Gestão de Portfólio</div><h1>Central do portfólio</h1><p>Cadastre, organize, priorize e acompanhe as iniciativas da FE. A FEG mantém o modelo e a consistência da carteira.</p><div class="actions"><a class="btn btn-primary" href="#/novo">${icon('novo',15)} Nova iniciativa</a><button class="btn btn-ghost" data-importar-csv>${icon('upload',15)} Importar iniciativas</button><a class="btn btn-ghost" href="#/acervo">${icon('acervo',15)} Abrir carteira</a></div></div></section>
+      <aside class="b-side"><div class="hero-stat level-tile"><small>Nível de uso ativo</small><div class="level-num"><strong>${nivel}</strong><span class="level-steps" aria-hidden="true">${[1,2,3].map(n=>`<i class="${n<=nivel?'on':''}"></i>`).join('')}</span></div><span>${esc(L.nome)}</span><button class="link" data-ajuda-nivel>Ver ou alterar nível</button></div>
+        <section class="work-session"><div class="session-state"><span class="session-dot ${GP.storage.ok?'ok':'warn'}"></span><div><b>${GP.storage.ok?'Trabalho salvo':'Atenção ao salvamento'}</b><small>${GP.storage.ok?'Salvamento automático neste navegador / '+fmt.dataHora(GP.storage.salvoEm):'Baixe uma cópia para preservar as alterações desta sessão.'}</small></div></div><div class="actions"><button class="btn btn-ghost btn-sm" data-save-now>${icon('check',14)} Salvar agora</button><button class="btn btn-ghost btn-sm" data-backup>${icon('download',14)} Baixar cópia</button><button class="btn btn-ghost btn-sm" data-restaurar-backup>${icon('upload',14)} Continuar de backup</button></div></section></aside>
+      <section class="b-full operation-flow" aria-label="Fluxo do portfólio"><a href="#/funil"><span>Entrada</span><strong>${novas}</strong><small>novas iniciativas</small></a><a href="#/funil"><span>Triagem</span><strong>${triagem}</strong><small>em análise</small></a>${nivel>=2?`<a href="#/avaliar"><span>Avaliação</span><strong>${avaliar}</strong><small>sem nota completa</small></a><a href="#/ranking"><span>Priorização</span><strong>${prontos}</strong><small>prontas para decisão</small></a>`:`<button data-nivel="2" class="locked"><span>Próxima função</span><strong>2</strong><small>ativar priorização</small></button>`}${nivel>=3?`<a href="#/carteira"><span>Planejamento</span><strong>${m.capacidade.cabem}</strong><small>novos inícios simulados</small></a>`:`<button data-nivel="3" class="locked"><span>Planejamento</span><strong>3</strong><small>ativar capacidade</small></button>`}</section>
       ${sample(m)}${kpis(m)}
-      ${!m.n?`<div class="callout"><span class="ic">${icon('info',17)}</span><div><p><b>Seu portfólio começa aqui.</b> Cadastre o primeiro projeto, importe uma planilha ou <button class="link" data-exemplos>carregue exemplos fictícios</button> para conhecer os gráficos. Os indicadores usam somente registros cadastrados.</p></div></div>`:''}
-      <div class="analytics-grid"><div class="card">${chartHead('Distribuição por etapa','Todos os registros, incluindo concluídos e saídas. Clique para filtrar.','funil')}${hbars(m.etapas,m.n,{key:'etapa'})}</div><div class="card">${chartHead('Projetos e demandas','Natureza informada no cadastro.','carteira')}${donut([{key:'projeto',label:'Projetos',value:m.projetos,color:PALETTE[0]},{key:'demanda',label:'Demandas',value:m.demandas,color:PALETTE[1]}],m.n,'registros',{key:'natureza'})}<p class="chart-footnote">A natureza do registro é independente da etapa. Cadastros anteriores a esta versão recebem a classificação Projeto, que pode ser alterada na ficha.</p></div></div>
-      <div class="analytics-grid"><div class="card">${chartHead('Entrada de projetos e demandas','Histórico dos cadastros a partir da data de entrada.','roadmap')}${graficoEntradas(m.serie)}</div><div class="card">${chartHead('Pontos para acompanhamento','Pendências calculadas a partir dos registros.','alerta')}${atencoes(m)}<div style="margin-top:15px"><a class="link" href="#/indicadores">Abrir análise completa</a></div></div></div>
-      <div class="analytics-grid analytics-equal"><div class="card">${chartHead('Registros por gerência','Participação no total cadastrado.','acervo')}${hbars(m.gerencias,m.n,{key:'gerencia'})}</div><div class="card">${chartHead('Avanço e estimativas','Valores informados nos cadastros.','ranking')}<div class="row" style="align-items:flex-start;gap:26px"><div><div class="muted" style="font-size:11px">Avanço médio em execução</div><strong style="font-size:29px;color:var(--teal)">${m.progresso==null?'-':fmt.n(m.progresso)+'%'}</strong><div class="dim" style="font-size:10.5px">${m.comProgresso} de ${m.execucao} com avanço informado</div></div><div><div class="muted" style="font-size:11px">Custo estimado total</div><strong style="font-size:29px">${m.comCusto?fmt.mi(m.custo):'-'}</strong><div class="dim" style="font-size:10.5px">${m.comCusto} de ${m.n} com custo informado</div></div></div><p class="chart-footnote">O custo é uma estimativa dos registros e inclui todas as etapas. O avanço é a média simples dos percentuais informados para os itens em execução.</p></div></div>
+      ${!m.n?`<div class="callout b-full"><span class="ic">${icon('info',17)}</span><div><p><b>Seu portfólio começa aqui.</b> Cadastre o primeiro projeto, importe uma planilha ou <button class="link" data-exemplos>carregue exemplos fictícios</button> para conhecer os gráficos. Os indicadores usam somente registros cadastrados.</p></div></div>`:''}
+      <div class="card b-7">${chartHead('Distribuição por etapa','Todos os registros, incluindo concluídos e saídas. Clique para filtrar.','funil')}${hbars(m.etapas,m.n,{key:'etapa'})}${legendaEtapas()}</div>
+      <div class="card b-5">${chartHead('Projetos e demandas','Natureza informada no cadastro.','carteira')}${donut([{key:'projeto',label:'Projetos',value:m.projetos,color:PALETTE[0]},{key:'demanda',label:'Demandas',value:m.demandas,color:PALETTE[1]}],m.n,'registros',{key:'natureza'})}<p class="chart-footnote">A natureza do registro é independente da etapa. Cadastros anteriores a esta versão recebem a classificação Projeto, que pode ser alterada na ficha.</p></div>
+      <div class="card b-8">${chartHead('Entrada de projetos e demandas','Histórico dos cadastros a partir da data de entrada.','roadmap')}${graficoEntradas(m.serie)}</div>
+      <div class="card b-4">${chartHead('Pontos para acompanhamento','Pendências calculadas a partir dos registros.','alerta')}${atencoes(m)}<div style="margin-top:15px"><a class="link" href="#/indicadores">Abrir análise completa</a></div></div>
+      <div class="card b-6">${chartHead('Registros por gerência','Participação no total cadastrado.','acervo')}${hbars(m.gerencias,m.n,{key:'gerencia'})}</div>
+      <div class="card b-6">${chartHead('Avanço e estimativas','Valores informados nos cadastros.','ranking')}<div class="figures"><div class="figure-ring">${ring(m.progresso==null?null:m.progresso/100,'var(--c4)',108,m.progresso==null?'-':fmt.n(m.progresso)+'%')}<div><span class="fig-lbl">Avanço médio em execução</span><span class="fig-sub">${m.comProgresso} de ${m.execucao} com avanço informado</span></div></div><div class="figure-num"><span class="fig-lbl">Custo estimado total</span><strong>${m.comCusto?fmt.mi(m.custo):'-'}</strong><span class="fig-sub">${m.comCusto} de ${m.n} com custo informado</span></div></div><p class="chart-footnote">O custo é uma estimativa dos registros e inclui todas as etapas. O avanço é a média simples dos percentuais informados para os itens em execução.</p></div>
+      </div>
       ${tabela(ultimos)}`;
   }
   function atencoes(m){
@@ -2858,7 +3020,7 @@ window.GP_PPT_TEMPLATES={"visao":{"base64":"UEsDBBQAAAAIAEGQQ12drdcvNQEAAFMCAAAR
     else if(aba==='qualidade')html+=qualidade(m);
     else html+=kpis(m)+`<div class="analytics-grid"><div class="card">${chartHead('Projetos e demandas por período','Entradas do recorte, conforme o período selecionado.','roadmap')}${graficoEntradas(m.serie)}</div><div class="card">${chartHead('Composição da base','Comparação entre projetos e demandas.','carteira')}${donut([{key:'projeto',label:'Projetos',value:m.projetos,color:PALETTE[0]},{key:'demanda',label:'Demandas',value:m.demandas,color:PALETTE[1]}],m.n,'registros',{key:'natureza'})}</div></div>
       <div class="analytics-grid analytics-equal"><div class="card">${chartHead('Distribuição por etapa','Quantidade e percentual no recorte. Clique para filtrar.','funil')}${hbars(m.etapas,m.n,{key:'etapa'})}</div><div class="card">${chartHead('Distribuição por gerência','Participação no recorte. Clique para filtrar.','acervo')}${hbars(m.gerencias,m.n,{key:'gerencia'})}<div style="margin-top:24px">${chartHead('Origem das iniciativas','Quantidade por origem do cadastro.','estrela')}${hbars(m.origens.filter(i=>i.value),m.n,{key:'origem'})}</div></div></div>
-      <div class="analytics-grid analytics-equal"><div class="card">${chartHead('Tipos de iniciativa','Composição do recorte por tipo.','acervo')}${hbars(m.tipos.filter(i=>i.value),m.n,{key:'tipo'})}${!m.n?'<div class="info-empty">Nenhum registro neste recorte.</div>':''}</div><div class="card">${chartHead('Resultado do checklist de entrada','Checklists completos do recorte. Não representa conversão histórica.','avaliar')}${hbars(['entra','falta_info','nao_entra'].map((k,i)=>({label:M.RESULTADO_ENTRADA[k].nome,value:lista.filter(p=>p.entrada?.resultado===k).length,color:PALETTE[i]})),m.entradaAvaliada)}<p class="chart-footnote">${m.n-m.entradaAvaliada} registros sem checklist completo ficam fora desta distribuição. A admissão é a razão entre “Entra” e todos os checklists completos.</p></div></div>`;
+      <div class="analytics-grid analytics-equal"><div class="card">${chartHead('Tipos de iniciativa','Composição do recorte por tipo.','acervo')}${hbars(m.tipos.filter(i=>i.value),m.n,{key:'tipo'})}${!m.n?'<div class="info-empty">Nenhum registro neste recorte.</div>':''}</div><div class="card">${chartHead('Resultado do checklist de entrada','Checklists completos do recorte. Não representa conversão histórica.','avaliar')}${hbars(['entra','falta_info','nao_entra'].map((k,i)=>({label:M.RESULTADO_ENTRADA[k].nome,value:lista.filter(p=>p.entrada?.resultado===k).length,color:{entra:'#6b8f2a',falta_info:'#d5a32d',nao_entra:'#b8642c'}[k]})),m.entradaAvaliada)}<p class="chart-footnote">${m.n-m.entradaAvaliada} registros sem checklist completo ficam fora desta distribuição. A admissão é a razão entre “Entra” e todos os checklists completos.</p></div></div>`;
     html+=tabela(lista,{busca:true});el.innerHTML=html;bindFilters(el);
   }
   function custos(m){
@@ -2872,12 +3034,12 @@ window.GP_PPT_TEMPLATES={"visao":{"base64":"UEsDBBQAAAAIAEGQQ12drdcvNQEAAFMCAAAR
       ${metric('Novos inícios que cabem',fmt.n(c.cabem),`${c.candidatos} candidatos aprovados e avaliados`,{ic:'avaliar'})}
       ${metric('Avanço em execução',m.progresso==null?'-':fmt.n(m.progresso)+'%',`${m.comProgresso} de ${m.execucao} com avanço informado`,{tone:'#188787',ic:'check',ratio:m.progresso==null?null:m.progresso/100})}
     </div>${U.callout(`<p><b>Simulação de capacidade:</b> período ${esc(cap.periodo)}. ${GP.state().meta.capacidadeConfirmada?'Parâmetros ajustados pelo usuário.':'Os valores iniciais são sugestões e precisam de validação.'} A capacidade é global; a simulação considera somente o recorte dos filtros. <a class="link" href="#/carteira">Ajustar capacidade</a>.</p>`)}
-    <div class="analytics-grid analytics-equal"><div class="card">${chartHead('Custo estimado por gerência','Soma dos valores informados. Não representa gasto realizado.','carteira')}${hbars(custosGer,m.custo,{monetario:true})}<p class="chart-footnote">${m.n-m.comCusto} registros sem custo ficam fora da soma. Custos de registros em todas as etapas entram na análise.</p></div><div class="card">${chartHead('Simulação de novos inícios','Aprovados com avaliação completa. Usa os critérios e a capacidade atuais.','ranking')}${hbars(['cabe','fixado','fixado_estoura','nao_cabe','excluido','sem_estimativa'].map((k,i)=>({label:M.STATUS_CARTEIRA[k].nome,value:c.itens.filter(it=>it.status===k).length,color:PALETTE[i]})).filter(x=>x.value),c.candidatos)}${!c.candidatos?'<div class="info-empty">Nenhum candidato aprovado e avaliado neste recorte.</div>':''}<p class="chart-footnote">${c.semNota.length} aprovados sem avaliação completa não participam da simulação. Orçamento de novos projetos: ${cap.orcamento?fmt.mi(cap.orcamento):'sem limite'}.</p></div></div>`;
+    <div class="analytics-grid analytics-equal"><div class="card">${chartHead('Custo estimado por gerência','Soma dos valores informados. Não representa gasto realizado.','carteira')}${hbars(custosGer,m.custo,{monetario:true})}<p class="chart-footnote">${m.n-m.comCusto} registros sem custo ficam fora da soma. Custos de registros em todas as etapas entram na análise.</p></div><div class="card">${chartHead('Simulação de novos inícios','Aprovados com avaliação completa. Usa os critérios e a capacidade atuais.','ranking')}${hbars(['cabe','fixado','fixado_estoura','nao_cabe','excluido','sem_estimativa'].map((k,i)=>({label:M.STATUS_CARTEIRA[k].nome,value:c.itens.filter(it=>it.status===k).length,color:{cabe:'#6b8f2a',fixado:'#00908f',fixado_estoura:'#b8642c',nao_cabe:'#d5a32d',excluido:'#a3b2ac',sem_estimativa:'#a3b2ac'}[k]})).filter(x=>x.value),c.candidatos)}${!c.candidatos?'<div class="info-empty">Nenhum candidato aprovado e avaliado neste recorte.</div>':''}<p class="chart-footnote">${c.semNota.length} aprovados sem avaliação completa não participam da simulação. Orçamento de novos projetos: ${cap.orcamento?fmt.mi(cap.orcamento):'sem limite'}.</p></div></div>`;
   }
   function qualidade(m){
     const q=m.qualidade;
-    return `<div class="metric-grid">${q.slice(0,6).map((x,i)=>metric(x.label,fmt.pct(divisao(x.num,x.den)),`${x.num} de ${x.den} / ${esc(x.desc)}`,{tone:PALETTE[i],ic:'avaliar',ratio:divisao(x.num,x.den)})).join('')}</div>
-      <div class="analytics-grid analytics-equal"><div class="card">${chartHead('Cobertura dos campos e avaliações','Percentual de registros com informação. A base de cada indicador varia.','avaliar')}${hbars(q.map((x,i)=>({label:x.label,value:x.den?x.num/x.den*100:0,color:PALETTE[i]})),100)}<p class="chart-footnote">Consulte a base de cada medida nas regras dos indicadores. Quando a base é vazia, o cartão exibe “-”. A barra fica vazia.</p></div><div class="card">${chartHead('Pendências para revisão','Registros do recorte que precisam de acompanhamento.','alerta')}${atencoes(m)}<p class="chart-footnote">A qualidade mede preenchimento e conclusão das avaliações. Não valida o conteúdo técnico informado.</p></div></div>`;
+    return `<div class="metric-grid">${q.slice(0,6).map((x,i)=>metric(x.label,fmt.pct(divisao(x.num,x.den)),`${x.num} de ${x.den} / ${esc(x.desc)}`,{tone:UNICA,ic:'avaliar',ratio:divisao(x.num,x.den)})).join('')}</div>
+      <div class="analytics-grid analytics-equal"><div class="card">${chartHead('Cobertura dos campos e avaliações','Percentual de registros com informação. A base de cada indicador varia.','avaliar')}${hbars(q.map((x,i)=>({label:x.label,value:x.den?x.num/x.den*100:0,color:UNICA})),100)}<p class="chart-footnote">Consulte a base de cada medida nas regras dos indicadores. Quando a base é vazia, o cartão exibe “-”. A barra fica vazia.</p></div><div class="card">${chartHead('Pendências para revisão','Registros do recorte que precisam de acompanhamento.','alerta')}${atencoes(m)}<p class="chart-footnote">A qualidade mede preenchimento e conclusão das avaliações. Não valida o conteúdo técnico informado.</p></div></div>`;
   }
   function bindFilters(el){
     el.querySelectorAll('[data-af]').forEach(i=>i.addEventListener(i.tagName==='INPUT'&&i.type!=='date'?'input':'change',()=>{

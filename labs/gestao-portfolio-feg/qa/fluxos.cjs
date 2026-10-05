@@ -414,4 +414,22 @@ module.exports = {
     await p.keyboard.press('Escape');
     await p.setViewportSize({ width:1440, height:900 });
   },
+  /* Redesenho R3 - painel em bento e dicas dos gráficos */
+  async 'r3: painel em bento, medidores e dica ao passar o mouse'({ p, ir, check, recarregar }){
+    await p.evaluate(() => { GP.modelo.carregarExemplos(); GP.state().ui.nivel = 2; GP.save(); });
+    await recarregar(); await ir('#/painel', 250);
+    check(await p.locator('.bento .b-hero h1').count() === 1 && await p.locator('.bento .level-tile').count() === 1, 'painel deveria estar em bento com herói e bloco do nível');
+    check(await p.locator('.metric .ring').count() >= 4, 'KPIs com proporção deveriam ter medidor radial');
+    check(await p.locator('.donut-layout .arc').count() === 2, 'rosca deveria ter 2 arcos (projetos e demandas)');
+    await p.locator('.percent-row >> nth=0').scrollIntoViewIfNeeded(); await p.waitForTimeout(120);
+    await p.hover('.percent-row >> nth=0', { position:{ x:30, y:10 } }); await p.waitForTimeout(80);
+    check(/Nova demanda/.test(await p.locator('.gp-tt').textContent().catch(() => '')), 'dica da barra deveria mostrar a etapa');
+    await p.locator('.chart-cols').scrollIntoViewIfNeeded(); await p.waitForTimeout(120);
+    await p.hover('.chart-cols .hit >> nth=0', { force:true }); await p.waitForTimeout(80);
+    check(/Projetos: \d+/.test(await p.locator('.gp-tt').textContent().catch(() => '')), 'dica da coluna deveria mostrar projetos e demandas');
+    await p.mouse.move(5, 5); await p.waitForTimeout(80);
+    check(await p.locator('.gp-tt').count() === 0, 'dica deveria sumir ao sair do gráfico');
+    await p.click('.percent-row[data-value="execucao"]'); await p.waitForTimeout(200);
+    check(/#\/indicadores/.test(p.url()) || await p.evaluate(() => GP.state().ui.filtroIndicadores && GP.state().ui.filtroIndicadores.etapa === 'execucao'), 'clicar na barra deveria filtrar pela etapa');
+  },
 };

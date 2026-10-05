@@ -252,15 +252,27 @@
   document.addEventListener('focusin', e => { const el = e.target.closest('[data-tip]'); if(el) showTip(el); });
   document.addEventListener('focusout', hideTip);
 
+  // Dica dos gráficos: qualquer marca com data-tt (linhas separadas por quebra) mostra o valor ao passar o mouse ou focar
+  let ttEl = null, ttSrc = null;
+  const hideTT = () => { if(ttEl){ ttEl.remove(); ttEl = null; ttSrc = null; } };
+  const placeTT = (x, y) => { const w = ttEl.offsetWidth, h = ttEl.offsetHeight, vw = window.innerWidth;
+    ttEl.style.left = Math.max(8, Math.min(vw - w - 8, x + 14)) + 'px'; ttEl.style.top = Math.max(8, y - h - 12) + 'px'; };
+  const showTT = (el, x, y) => { if(!ttEl){ ttEl = document.createElement('div'); ttEl.className = 'gp-tt'; ttEl.setAttribute('role', 'tooltip'); document.body.appendChild(ttEl); }
+    if(ttSrc !== el){ ttSrc = el; const [t, ...linhas] = el.getAttribute('data-tt').split('\n'); ttEl.innerHTML = `<b>${esc(t)}</b>${linhas.map(l => `<span>${esc(l)}</span>`).join('')}`; }
+    placeTT(x, y); };
+  document.addEventListener('mousemove', e => { const el = e.target.closest && e.target.closest('[data-tt]'); if(el) showTT(el, e.clientX, e.clientY); else if(ttEl) hideTT(); }, { passive:true });
+  document.addEventListener('focusin', e => { const el = e.target.closest && e.target.closest('[data-tt]'); if(el){ const r = el.getBoundingClientRect(); showTT(el, r.left + r.width / 2, r.top); } });
+  document.addEventListener('focusout', hideTT); window.addEventListener('scroll', hideTT, { passive:true });
+
   /* ------------------------------------------------------------- gráficos */
-  const PAL = ['#3E6801', '#8FB94B', '#2F6FA3', '#B7791F', '#7A5BA6', '#B9381F', '#5E655F', '#C6DCA4'];
+  const PAL = ['#6b8f2a', '#3a74a8', '#d5a32d', '#00908f', '#b8642c', '#859c98', '#a06137', '#899b67'];
   const niceMax = v => { if(!(v > 0)) return 1; const p = Math.pow(10, Math.floor(Math.log10(v))), n = v / p; return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p; };
   GP.charts = {
     PAL,
     /** Barras horizontais: [{label, value, color, title}] */
     hbar(items, {max, fmtv = v => fmt.n(v)} = {}){
       const m = max ?? Math.max(1e-9, ...items.map(i => i.value));
-      return `<div class="hbars">${items.map((it, i) => `<div class="hb" title="${esc(it.title || it.label)}"><span class="lb">${esc(it.label)}</span><span class="tr"><i style="width:${Math.max(0, Math.min(100, it.value / m * 100))}%;background:${it.color || PAL[0]}"></i></span><span class="v">${fmtv(it.value, it)}</span></div>`).join('')}</div>`;
+      return `<div class="hbars">${items.map(it => `<div class="hb" data-tt="${esc(it.title || it.label)}&#10;${esc(fmtv(it.value, it))}"><span class="lb">${esc(it.label)}</span><span class="tr"><i style="width:${Math.max(0, Math.min(100, it.value / m * 100))}%;background:${it.color || PAL[0]}"></i></span><span class="v">${fmtv(it.value, it)}</span></div>`).join('')}</div>`;
     },
     /** Rosca: [{label, value, color}] */
     donut(items, {size = 150, centro = '', rotulo = ''} = {}){
@@ -277,23 +289,24 @@
       const W = o.w || 640, H = o.h || 420, L = 48, R = 16, T = 16, B = 42, pw = W - L - R, ph = H - T - B;
       const xMax = o.xMax ?? niceMax(Math.max(1, ...pts.map(p => p.x))), yMax = o.yMax ?? niceMax(Math.max(1, ...pts.map(p => p.y)));
       const X = v => L + v / xMax * pw, Y = v => T + (1 - v / yMax) * ph;
-      let g = `<rect x="${L}" y="${T}" width="${pw}" height="${ph}" fill="#FFFFFF" stroke="#E4E3E4"/>`;
-      if(o.qx != null){ g += `<rect x="${L}" y="${T}" width="${X(o.qx) - L}" height="${Y(o.qy) - T}" fill="#F1F6EA"/><line x1="${X(o.qx)}" y1="${T}" x2="${X(o.qx)}" y2="${T + ph}" stroke="#C6DCA4" stroke-dasharray="4 4"/><line x1="${L}" y1="${Y(o.qy)}" x2="${L + pw}" y2="${Y(o.qy)}" stroke="#C6DCA4" stroke-dasharray="4 4"/>`;
+      let g = `<rect x="${L}" y="${T}" width="${pw}" height="${ph}" rx="14" fill="rgba(255,255,255,.75)" stroke="#dfe7e2"/>`;
+      if(o.qx != null){ g += `<path d="M${L + 14} ${T}H${X(o.qx)}V${Y(o.qy)}H${L}V${T + 14}Q${L} ${T} ${L + 14} ${T}Z" fill="#eef5e4"/><line x1="${X(o.qx)}" y1="${T}" x2="${X(o.qx)}" y2="${T + ph}" stroke="#bfd3a3" stroke-width="1.5"/><line x1="${L}" y1="${Y(o.qy)}" x2="${L + pw}" y2="${Y(o.qy)}" stroke="#bfd3a3" stroke-width="1.5"/>`;
         const q = o.quadrantes || []; const lab = (x, y, t, a) => t ? `<text x="${x}" y="${y}" font-size="11" font-weight="600" fill="#8A908B" text-anchor="${a}">${esc(t)}</text>` : '';
         g += lab(L + 8, T + 16, q[0], 'start') + lab(L + pw - 8, T + 16, q[1], 'end') + lab(L + 8, T + ph - 8, q[2], 'start') + lab(L + pw - 8, T + ph - 8, q[3], 'end'); }
       [0, .25, .5, .75, 1].forEach(t => { g += `<text x="${X(xMax * t)}" y="${T + ph + 16}" font-size="10.5" fill="#8A908B" text-anchor="middle">${fmt.n(xMax * t, xMax * t % 1 ? 1 : 0)}</text><text x="${L - 8}" y="${Y(yMax * t) + 4}" font-size="10.5" fill="#8A908B" text-anchor="end">${fmt.n(yMax * t, yMax * t % 1 ? 1 : 0)}</text>`; });
       if(o.xLabel) g += `<text x="${L + pw / 2}" y="${H - 6}" font-size="12" fill="#5E655F" text-anchor="middle">${esc(o.xLabel)} →</text>`;
       if(o.yLabel) g += `<text x="14" y="${T + ph / 2}" font-size="12" fill="#5E655F" text-anchor="middle" transform="rotate(-90 14 ${T + ph / 2})">${esc(o.yLabel)} →</text>`;
-      pts.forEach(p => { const rr = p.r || 8; g += `<g ${p.id ? `data-ponto="${esc(p.id)}" style="cursor:pointer"` : ''}><circle cx="${X(p.x)}" cy="${Y(p.y)}" r="${rr}" fill="${p.color || PAL[0]}" fill-opacity=".85" stroke="#fff" stroke-width="2"><title>${esc(p.title || p.label)}</title></circle><text x="${X(p.x) + rr + 4}" y="${Y(p.y) + 4}" font-size="11.5" fill="#1E2420">${esc(p.label)}</text></g>`; });
+      pts.forEach(p => { const rr = p.r || 8; g += `<g ${p.id ? `data-ponto="${esc(p.id)}" style="cursor:pointer"` : ''} data-tt="${esc(p.title || p.label)}"><circle cx="${X(p.x)}" cy="${Y(p.y)}" r="${rr + 8}" fill="transparent"/><circle cx="${X(p.x)}" cy="${Y(p.y)}" r="${rr}" fill="${p.color || PAL[0]}" stroke="#fff" stroke-width="2"/><text x="${X(p.x) + rr + 4}" y="${Y(p.y) + 4}" font-size="11.5" fill="#1E2420">${esc(p.label)}</text></g>`; });
       return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
     },
     /** Barras verticais simples: cats, series [{name, values, color}] */
     barras(cats, series, {h = 220, fmtv = v => fmt.n(v)} = {}){
       const W = 640, H = h, L = 40, B = 30, T = 12, pw = W - L - 8, ph = H - B - T, m = niceMax(Math.max(1e-9, ...series.flatMap(s => s.values)));
-      const gw = pw / cats.length, bw = Math.min(40, (gw - 14) / series.length); let g = '';
-      [0, .5, 1].forEach(t => { const y = T + ph * (1 - t); g += `<line x1="${L}" y1="${y}" x2="${W - 8}" y2="${y}" stroke="#EDEDED"/><text x="${L - 6}" y="${y + 4}" font-size="10.5" fill="#8A908B" text-anchor="end">${fmtv(m * t)}</text>`; });
+      const gw = pw / cats.length, bw = Math.min(26, (gw - 14) / series.length); let g = '';
+      [0, .5, 1].forEach(t => { const y = T + ph * (1 - t); g += `<line x1="${L}" y1="${y}" x2="${W - 8}" y2="${y}" stroke="${t ? '#e3eae6' : '#c9d6cf'}"/><text x="${L - 6}" y="${y + 4}" font-size="10.5" fill="#8A908B" text-anchor="end">${fmtv(m * t)}</text>`; });
       cats.forEach((c, ci) => { const x0 = L + ci * gw + (gw - bw * series.length) / 2;
-        series.forEach((s, si) => { const v = s.values[ci] || 0, hh = ph * v / m; g += `<rect x="${x0 + si * bw + 1}" y="${T + ph - hh}" width="${bw - 2}" height="${Math.max(0, hh)}" rx="3" fill="${s.color || PAL[si]}"><title>${esc(s.name)} · ${esc(c)}: ${fmtv(v)}</title></rect>`; });
+        series.forEach((s, si) => { const v = s.values[ci] || 0, hh = Math.max(0, ph * v / m), x = x0 + si * bw + 1, w = Math.max(2, bw - 2), y = T + ph - hh, rr = Math.min(4, hh, w / 2);
+          if(hh > 0) g += `<path d="M${x} ${T + ph}V${y + rr}Q${x} ${y} ${x + rr} ${y}H${x + w - rr}Q${x + w} ${y} ${x + w} ${y + rr}V${T + ph}Z" fill="${s.color || PAL[si]}" data-tt="${esc(c)}&#10;${esc(s.name)}: ${esc(fmtv(v))}"/>`; });
         g += `<text x="${L + ci * gw + gw / 2}" y="${H - 10}" font-size="11" fill="#5E655F" text-anchor="middle">${esc(c)}</text>`; });
       return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img">${g}</svg>${series.length > 1 ? `<div class="legend" style="margin-top:6px">${series.map((s, i) => `<span><i style="background:${s.color || PAL[i]}"></i>${esc(s.name)}</span>`).join('')}</div>` : ''}`;
     },
