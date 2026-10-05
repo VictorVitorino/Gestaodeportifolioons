@@ -83,6 +83,7 @@ Sistema de cadastro, entrada e priorização de projetos para a própria equipe 
 - Plano e requisitos: `labs/gestao-portfolio-feg/PLANO.md`.
 - Design system "Atlas ONS": `labs/gestao-portfolio-feg/src/design.css` é a última camada de estilo (tokens, vidro, trilho de navegação, painel em bento, gráficos, responsividade). A paleta é a mesma. Nos gráficos, as cinco séries categóricas usam oliva e ouro originais e passos de petróleo, ardósia e cobre validados para daltonismo. Gráficos de uma série usam uma cor só, e todos mostram uma dica (`data-tt`) ao passar o mouse. Não use `color-mix()`: o PDF (html2canvas) não aceita essa função.
 - Celular: dock inferior com atalhos, tabelas em cartões (`data-label` nas células) e modais em folha inferior.
+- Componentes compartilhados (`src/core.js`, assinaturas no topo do arquivo): `GP.ui.metric`, `GP.ui.vazio(titulo, texto, acao, icone)`, `GP.ui.table` (colunas com `hideBelow` e ordenação também no modo cartão), `GP.toast(msg, {tipo, acao, onAcao, ms})`, `GP.charts.hbar/donut/matriz/dados` e `GP.util.plural`. As tabelas viram cartões quando a área útil fica abaixo de 900px. Acessibilidade do shell: link "Ir para o conteúdo", foco no título a cada troca de tela, gaveta do celular como diálogo e modais com o fundo inerte.
 
 ## Portfólio FEG — trilha didática (labs/portfolio-feg)
 
