@@ -76,7 +76,7 @@ module.exports = {
     await ir('#/acervo', 200);
     const b = (await p.textContent('.topbar .ttl b')).trim();
     check(b === 'Acervo' && !/Bom dia|Boa tarde|Boa noite/.test(b), 'B4: fora do painel o cabeçalho deveria mostrar o título da tela (veio ' + b + ')');
-    check(await p.locator('.topbar .seg [aria-label="Nível 1, Operação do portfólio"]').count() === 1, 'B4: botão de nível com nome acessível "Nível 1, Operação do portfólio"');
+    check(await p.locator('.topbar .seg [aria-label^="Nível 1, Operação do portfólio"]').count() === 1, 'B4: botão de nível com nome acessível "Nível 1, Operação do portfólio"');
     check(await p.getAttribute('.side .brand', 'aria-label') === 'Gestão de Portfólio FEG, ir para o painel', 'B4: link da marca com nome acessível');
     await p.evaluate(() => window.scrollTo(0, 600)); await p.waitForTimeout(250);
     check(await p.locator('.topbar.is-scrolled').count() === 1, 'B4: cabeçalho deveria ficar sólido ao rolar');

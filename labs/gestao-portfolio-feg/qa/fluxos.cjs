@@ -27,7 +27,8 @@ module.exports = {
     check(await p.locator('.modal .lvl-card').count() === 3, 'explicação dos 3 níveis não abriu');
     await p.click('.modal [data-nivel="3"]'); await p.waitForTimeout(150);
     check(await p.locator('.nav-item[href="#/carteira"]').count() === 1, 'nível 3 deveria mostrar Carteira');
-    await p.click('.seg [data-nivel="1"]'); await ir('#/carteira', 150);
+    // com o nível 3 ligado, clicar no 2 desliga 2 e 3 (volta ao nível 1)
+    await p.click('.seg [data-nivel="2"]'); await ir('#/carteira', 150);
     check(/nível 3/i.test(await p.textContent('#conteudo')), 'tela de nível superior deveria pedir ativação do nível');
   },
   /* Passo 2 — cadastro e acervo */

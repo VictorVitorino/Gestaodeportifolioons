@@ -752,3 +752,10 @@ body::before{background:
     linear-gradient(180deg,var(--amb-top) 0%,var(--amb-bot) 100%)}
 .shell .side{background:linear-gradient(165deg,var(--rail-1) 0%,var(--rail-2) 70%,var(--rail-3) 100%)}
 @media(prefers-reduced-motion:reduce){:root{transition:none}}
+
+/* seletor de níveis como módulos: níveis ligados abaixo do atual ganham preenchimento suave (trilha de progresso) */
+.topbar .levels .seg button.ativo:not(.on){background:rgba(37,78,71,.12);color:var(--forest)}
+.topbar .levels .seg button.ativo:not(.on) b{color:var(--ons)}
+.topbar .levels .seg button:not(.ativo){opacity:.85}
+.topbar .levels .seg button:not(.ativo):hover{opacity:1;background:rgba(255,255,255,.9)}
+.side-levels button.ativo:not(.on){background:rgba(255,255,255,.22);color:#fff}
