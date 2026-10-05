@@ -569,7 +569,7 @@
     const c = carteira(), T = S(), cap = T.capacidade, agora = new Date(), L = [];
     L.push('ATA · COMITÊ DE PORTFÓLIO FEG', `Data: ${agora.toLocaleDateString('pt-BR')} · ${agora.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' })} · Período: ${cap.periodo}`, '');
     L.push(`Capacidade: ${f1(cap.fte)} FTE, reserva de ${fmt.n(cap.reservaPct)}%, ${f1(c.comprometido)} FTE em execução → ${f1(c.livre)} FTE para novos projetos.`);
-    L.push(`Carteira após as decisões: ${plural(c.cabem, 'projeto', 'projetos')}, ${f1(c.usadoFte)} de ${f1(c.livre)} FTE para novos projetos e ${fmt.mi(c.usadoCusto)}${c.pico && c.pico.mes ? `; pico de ${f1(c.pico.total)} de ${f1(c.efetiva)} FTE efetivos em ${rotMes(c.pico.mes)}, com a execução` : ''}.`);
+    L.push(`Carteira após as decisões: ${plural((c.dentro || []).length || c.cabem, 'projeto', 'projetos')}${c.estouram ? ` (${plural(c.estouram, 'fixado estoura', 'fixados estouram')} a capacidade)` : ''}, ${f1(c.usadoFte)} de ${f1(c.livre)} FTE para novos projetos e ${fmt.mi(c.usadoCusto)}${c.pico && c.pico.mes ? `; pico de ${f1(c.pico.total)} de ${f1(c.efetiva)} FTE efetivos em ${rotMes(c.pico.mes)}, com a execução` : ''}.`);
     alertasCarteira(c).forEach(a => L.push('ATENÇÃO: ' + a));
     L.push('');
     const item = id => c.itens.find(i => i.p.id === id);

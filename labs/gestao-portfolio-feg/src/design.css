@@ -423,7 +423,7 @@ button.legend-line:hover{background:rgba(241,246,234,.8)}
   .portfolio-table .tbl.tbl-cards.tbl-sm td:first-child{min-width:0!important;max-width:none!important}
 }
 @container workspace (max-width:560px){
-  .tbl.tbl-cards tbody tr{padding:14px;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .tbl.tbl-cards:not(.tbl-sm) tbody tr{padding:14px;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   .tbl.tbl-cards td.hm,.tbl.tbl-cards td.hm-lg,.tbl.tbl-cards td.hm-md{display:none}
 }
 

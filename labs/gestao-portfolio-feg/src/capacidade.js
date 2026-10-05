@@ -294,7 +294,7 @@
     if(v === 'in'){
       const cs = capSim(), antes = M.montarCarteira(P.todos(), cs, S.forcar), depois = M.montarCarteira(P.todos(), cs, Object.assign({}, S.forcar, { [id]:'in' }));
       const dentroAntes = new Set(antes.dentro.map(i => i.p.id)), estAntes = new Set(antes.itens.filter(i => i.status === 'fixado_estoura').map(i => i.p.id));
-      const saem = depois.itens.filter(i => i.p.id !== id && dentroAntes.has(i.p.id) && fora(i.status));
+      const saem = depois.itens.filter(i => i.p.id !== id && dentroAntes.has(i.p.id) && fora(i.status) && i.status !== 'fixado_estoura');
       const estoura = depois.itens.filter(i => i.status === 'fixado_estoura' && !estAntes.has(i.p.id));
       const p = P.get(id);
       if(saem.length || estoura.length){

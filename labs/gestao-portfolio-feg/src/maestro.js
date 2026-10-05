@@ -496,7 +496,7 @@
   }
   function cartaoCapacidade(m){
     if(GP.capacidadeResumo){try{return `<div class="b-4 gx-cap-host">${GP.capacidadeResumo()}</div>`;}catch(e){console.error(e);}}
-    const c=m.capacidade,cap=GP.state().capacidade,uso=c.efetiva?m.fteExecucao/c.efetiva:null,acima=uso!=null&&uso>1;
+    const c=m.capacidade,cap=GP.state().capacidade,uso=c.efetiva?((c.pico&&c.pico.total!=null)?c.pico.total:m.fteExecucao)/c.efetiva:null,acima=uso!=null&&uso>1;
     return `<div class="card b-4 gx-capf">${chartHead('Capacidade · '+String(cap.periodo||''),'Pessoas disponíveis e novos inícios que cabem.','medidor')}
       <div class="gx-capf-body">${ring(uso==null?null:Math.min(1,uso),acima?COBRE:'var(--c1)',96,uso==null?'-':fmt.pct(uso))}<div><b>${fmt.n(m.fteExecucao,1)} de ${fmt.n(c.efetiva,1)} FTE</b><span class="dim">em execução${acima?' · acima da capacidade':''}</span><b>${plural(c.cabem,'novo início cabe','novos inícios cabem')}</b><span class="dim">de ${c.candidatos} aprovados avaliados</span></div></div>
       <div class="gx-card-foot"><a class="link" href="#/carteira">Abrir carteira e capacidade</a></div></div>`;
