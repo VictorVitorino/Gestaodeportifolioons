@@ -432,4 +432,22 @@ module.exports = {
     await p.click('.percent-row[data-value="execucao"]'); await p.waitForTimeout(200);
     check(/#\/indicadores/.test(p.url()) || await p.evaluate(() => GP.state().ui.filtroIndicadores && GP.state().ui.filtroIndicadores.etapa === 'execucao'), 'clicar na barra deveria filtrar pela etapa');
   },
+  /* Redesenho R4 - tabelas em cartões e modais em folha inferior no celular */
+  async 'r4: celular mostra tabela em cartões e modal em folha inferior'({ p, ir, check, recarregar }){
+    await p.evaluate(() => { GP.modelo.carregarExemplos(); GP.save(); });
+    await recarregar(); await p.setViewportSize({ width:390, height:844 }); await ir('#/acervo', 250);
+    check(!(await p.locator('.tbl-cards thead').isVisible()), 'cabeçalho da tabela deveria sumir no celular');
+    const tr = await p.locator('.tbl-cards tbody tr').first().evaluate(e => getComputedStyle(e).display);
+    check(tr === 'grid', 'linha da tabela deveria virar cartão (grid), veio ' + tr);
+    check(await p.locator('.tbl-cards td[data-label="Etapa"]').count() === 14, 'células deveriam ter rótulo da coluna');
+    await p.locator('.tbl-cards tbody tr').first().click(); await p.waitForTimeout(200);
+    check(/#\/projeto\//.test(p.url()), 'tocar no cartão deveria abrir a ficha');
+    await p.click('.menu-btn'); await p.waitForTimeout(120); await p.keyboard.press('Escape');
+    await p.evaluate(() => GP.explicarNiveis()); await p.waitForTimeout(350);
+    const r = await p.locator('.modal').boundingBox();
+    check(r && Math.abs(r.y + r.height - 844) <= 2 && r.width >= 388, 'modal deveria abrir como folha inferior em largura total');
+    await p.keyboard.press('Escape');
+    await p.setViewportSize({ width:1440, height:900 }); await ir('#/acervo', 200);
+    check(await p.locator('.tbl-cards thead').isVisible(), 'no computador a tabela mantém o cabeçalho');
+  },
 };

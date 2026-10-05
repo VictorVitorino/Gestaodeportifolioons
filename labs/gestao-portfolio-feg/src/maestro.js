@@ -630,7 +630,7 @@
         <div class="metric"><span>Em execução</span><strong>${fmt.n(comAtivo.filter(p=>p.etapa==='execucao').length)}</strong><small>Iniciativas vinculadas em andamento</small></div>
       </div>
       <section class="card">${U.secH('Carteira por ativo relacionado','Agrupamento pelo texto informado no cadastro. Padronize os nomes para evitar duplicidades.')}
-        ${ativos.length?`<div class="portfolio-table"><table class="tbl"><thead><tr><th>Sistema, modelo ou ferramenta</th><th>Iniciativas</th><th>Abertas</th><th>Em execução</th><th>Riscos abertos</th><th>Custo estimado</th></tr></thead><tbody>${rows}</tbody></table></div>`:U.vazio('Nenhum ativo relacionado','Preencha o campo Sistema, modelo ou ferramenta relacionada nos cadastros aplicáveis.','<a class="btn btn-primary" href="#/novo">Novo cadastro</a>')}
+        ${ativos.length?`<div class="portfolio-table tbl-wrap"><table class="tbl"><thead><tr><th>Sistema, modelo ou ferramenta</th><th>Iniciativas</th><th>Abertas</th><th>Em execução</th><th>Riscos abertos</th><th>Custo estimado</th></tr></thead><tbody>${rows}</tbody></table></div>`:U.vazio('Nenhum ativo relacionado','Preencha o campo Sistema, modelo ou ferramenta relacionada nos cadastros aplicáveis.','<a class="btn btn-primary" href="#/novo">Novo cadastro</a>')}
       </section>
       <div class="grid g2 governance-detail"><section class="card">${U.secH('Para manter a visão coerente','Orientações de preenchimento.')}
         <ul class="clean-list"><li>Use o nome oficial e uma grafia única para cada ativo</li><li>Informe o ativo principal impactado pela iniciativa</li><li>Não use este campo para registrar equipe, fornecedor ou tecnologia isolada</li></ul></section>
