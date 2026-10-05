@@ -108,7 +108,9 @@
   GP.state = () => S;
   GP.storageKey = KEY;
   GP.storage = { ok:true, conflito:false, salvoEm:null, recuperado:false };
-  const assinaturaDados = s => JSON.stringify({projetos:s.projetos,riscos:s.riscos,criterios:s.criterios,capacidade:s.capacidade,forcar:s.forcar});
+  const assinaturaDados = s => JSON.stringify({projetos:s.projetos,riscos:s.riscos,criterios:s.criterios,capacidade:s.capacidade,forcar:s.forcar,config:s.config});
+  /* As regras editáveis (listas, checklist, réguas) ficam no estado e valem para todo o sistema */
+  const aplicarRegras = () => { if(S && GP.modelo && GP.modelo.aplicarConfig) GP.modelo.aplicarConfig(S.config); };
   const estadoValido = raw => { try { const j = JSON.parse(raw); return j && j.v && Array.isArray(j.projetos) ? j : null; } catch(e){ return null; } };
   /* Confirmação de salvamento: 'Salvo agora' por cerca de 1 s depois de cada gravação (gp:saved). */
   let salvoAgoraAte = 0, salvoTimer = null;
@@ -153,12 +155,12 @@
       return false;
     }
   };
-  GP.resetState = estado => { S = GP.modelo.migrar(estado); return GP.save(); };
+  GP.resetState = estado => { S = GP.modelo.migrar(estado); aplicarRegras(); return GP.save(); };
   GP.loadLatest = () => {
     try {
       const raw = localStorage.getItem(KEY), est = estadoValido(raw);
       if(!est){ GP.toast('A versão do navegador não está disponível. Restaure um backup.'); return false; }
-      S = GP.modelo.migrar(est); ultimoDisco = raw; ultimaBase = assinaturaDados(S); avisoFalha = false;
+      S = GP.modelo.migrar(est); aplicarRegras(); ultimoDisco = raw; ultimaBase = assinaturaDados(S); avisoFalha = false;
       GP.storage = {ok:true,conflito:false,salvoEm:S.meta.salvoEm,recuperado:false};
       GP.refresh(); GP.toast('Versão mais recente carregada.'); return true;
     } catch(e){ GP.toast('Não foi possível acessar o armazenamento do navegador.'); return false; }
@@ -182,7 +184,7 @@
       S = GP.util.clone(arquivo);
     } else S = atual || anterior || GP.modelo.estadoInicial();
     GP.snapshotDisponivel = !!(arquivo && atual && (arquivo.meta?.datasetId !== atual.meta?.datasetId || assinaturaDados(arquivo) !== assinaturaDados(atual)));
-    S = GP.modelo.migrar(S); ultimaBase = assinaturaDados(S);
+    S = GP.modelo.migrar(S); aplicarRegras(); ultimaBase = assinaturaDados(S);
     GP.storage.salvoEm = S.meta.salvoEm || null; GP.save();
     if(GP.storage.recuperado) setTimeout(() => GP.toast('O último salvamento estava ilegível. A cópia anterior foi recuperada automaticamente.'),0);
     if(GP.snapshotDisponivel) setTimeout(() => GP.toast('Este HTML contém uma cópia da carteira. Consulte Dados e configurações para carregar os dados do arquivo quando precisar.'),0);
@@ -565,6 +567,7 @@
     a.textContent = ''; setTimeout(() => { a.textContent = txt; }, 60); }
   function render(manterScroll){
     const app = document.getElementById('app'); if(!app) return;
+    aplicarRegras();
     const r = parse(), nivel = GP.nivel();
     const tela = TELAS.find(t => t.id === r.id) || TELAS.find(t => t.id === 'painel');
     const chave = r.id + '/' + (r.arg || ''), mudouRota = chave !== ultimaChave, primeira = !ultimaChave;
@@ -685,7 +688,7 @@
         const de = GP.nivel(); n -= 1; GP.setNivel(n);
         GP.toast(`${de > n + 1 ? `Níveis ${n + 1} a ${de} desativados` : `Nível ${n + 1} desativado`}. Você está no nível ${n} · ${GP.NIVEIS[n - 1].nome}. Nada do que foi cadastrado se perde.`); return; }
       GP.setNivel(n); return; }
-    if(e.target.closest('[data-storage-status]')){ GP.go('#/config'); return; }
+    if(e.target.closest('[data-storage-status]')){ GP.go('#/config?secao=dados'); return; }
     if(e.target.closest('[data-ajuda-nivel]')){ GP.explicarNiveis(); return; }
     if(e.target.closest('[data-fechar-menu]')){ fecharMenuMovel(); return; }
     const sg = e.target.closest('[data-secao]');

@@ -2886,6 +2886,140 @@ button.rk-cel:hover{box-shadow:inset 0 0 0 2px rgba(25,53,47,.35)}
 @media(max-width:640px){.gx-cta .btn,.gx-cta a.btn,.gx-vazio .btn{min-height:44px}}
 @media(max-width:640px){#conteudo .gx-menu-pop [role=menuitem]{min-height:44px}}
 @media(max-width:640px){.gx-check{min-height:44px;align-items:center}.gx-check input[type=checkbox]{width:22px;height:22px}}
+
+/* ===================== Dados e configurações: abas e Regras do portfólio ===================== */
+.cfg-abas{display:flex;flex-wrap:wrap;gap:6px;padding:5px;margin:2px 0 8px;width:max-content;max-width:100%;border-radius:999px;background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.9);box-shadow:var(--sh-1)}
+.cfg-abas a{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 16px;border-radius:999px;color:var(--forest);font-weight:600;font-size:.88rem;text-decoration:none;transition:background .15s}
+.cfg-abas a:hover{background:rgba(25,53,47,.06)}
+.cfg-abas a.on{background:var(--forest);color:#fff;box-shadow:0 6px 14px -8px rgba(23,48,43,.7)}
+.cfg-aba-desc{margin:0 0 18px;color:var(--muted);font-size:.86rem}
+.cfg-regras{display:flex;flex-direction:column;gap:16px;padding-bottom:8px}
+.cfg-intro{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:18px;background:linear-gradient(135deg,rgba(241,246,234,.95),rgba(255,255,255,.75));border:1px solid rgba(198,220,164,.7)}
+.cfg-intro-ic{flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:13px;background:#3E6801;color:#fff}
+.cfg-intro b{font-size:.95rem}
+.cfg-intro p{margin:2px 0 0;color:var(--muted);font-size:.84rem;line-height:1.55}
+.cfg-versao{flex:none;margin-left:auto;padding:6px 14px;border-radius:999px;background:#fff;border:1px solid var(--line);font-size:.82rem;color:var(--muted);white-space:nowrap}
+.cfg-versao b{color:var(--forest);font-size:.95rem}
+.cfg-card{display:flex;flex-direction:column;gap:14px}
+.cfg-cab{display:flex;gap:12px;align-items:flex-start}
+.cfg-n{flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:10px;background:var(--forest);color:#fff;font-weight:700;font-size:.85rem}
+.cfg-cab h3{display:flex;align-items:center;gap:8px;margin:0;font-size:1.02rem}
+.cfg-cab p{margin:2px 0 0;color:var(--muted);font-size:.84rem}
+.cfg-ajuda{display:inline-grid;place-items:center;flex:none;width:22px;height:22px;padding:0;border-radius:50%;border:1px solid #C6DCA4;background:#F1F6EA;color:#2E4F00;font:700 12px/1 var(--font);cursor:help;vertical-align:middle}
+.cfg-ajuda:hover,.cfg-ajuda:focus-visible{background:#3E6801;color:#fff;border-color:#3E6801}
+.cfg-listas{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.cfg-listas .cfg-col:first-child{grid-column:1/-1}
+.cfg-listas .cfg-col:first-child .cfg-lista{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 14px}
+.cfg-col{display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:16px;background:rgba(255,255,255,.66);border:1px solid var(--line)}
+.cfg-col h4{display:flex;align-items:center;gap:7px;margin:0;font-size:.88rem}
+.cfg-lista{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.cfg-it{display:flex;align-items:center;gap:6px}
+.cfg-it .input{flex:1;min-width:0;min-height:38px;padding:7px 10px;font-size:.86rem}
+.cfg-sigla{flex:none;display:grid;place-items:center;min-width:46px;height:30px;padding:0 6px;border-radius:9px;background:var(--forest);color:#fff;font-weight:700;font-size:.76rem;letter-spacing:.02em}
+.cfg-sigla-in{flex:0 0 72px!important;text-transform:uppercase;font-weight:700}
+.cfg-uso{flex:none;font-size:.72rem;color:var(--muted);white-space:nowrap;min-width:62px;text-align:right}
+.cfg-rem{flex:none;width:32px;height:32px}
+.cfg-rem:disabled{opacity:.3;cursor:not-allowed}
+.cfg-add{display:flex;gap:6px;margin-top:auto;padding-top:6px;border-top:1px dashed var(--line)}
+.cfg-add .input{flex:1;min-width:0;min-height:38px;padding:7px 10px;font-size:.86rem}
+.cfg-add .btn{flex:none}
+.cfg-nota{display:flex;gap:8px;align-items:flex-start;margin:0;padding:10px 12px;border-radius:12px;background:rgba(255,248,231,.9);box-shadow:inset 3px 0 0 var(--gold);font-size:.82rem;line-height:1.5;color:#5b4512}
+.cfg-nota svg{flex:none;margin-top:2px}
+.cfg-qs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.cfg-q{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.7);border:1px solid var(--line);transition:opacity .2s}
+.cfg-q.ed{align-items:flex-start;background:#fff;border-color:#C6DCA4;box-shadow:0 10px 24px -16px rgba(23,48,43,.4)}
+.cfg-q.off{background:rgba(243,247,241,.6)}
+.cfg-q.off .cfg-q-b,.cfg-q.off .cfg-qn{opacity:.5}
+.cfg-qn{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:8px;background:rgba(25,53,47,.07);font-weight:700;font-size:.8rem}
+.cfg-q-b{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.cfg-q-p{font-size:.88rem;font-weight:600;line-height:1.4}
+.cfg-q-m{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;font-size:.78rem;color:var(--muted)}
+.cfg-ef{padding:1px 8px;border-radius:999px;font-weight:650;font-size:.72rem}
+.cfg-ef.bad{background:#F8E6DD;color:#8f3f1c}.cfg-ef.warn{background:#FFF4DC;color:#7a5410}
+.cfg-q-bt{flex:none}
+.cfg-q-l2{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(200px,1fr);gap:8px}
+.cfg-l{display:flex;flex-direction:column;gap:4px;font-size:.78rem;font-weight:600;color:var(--muted)}
+.cfg-l>span{display:flex;align-items:center;gap:6px}
+.cfg-l textarea{resize:vertical;min-height:52px;font-weight:500;color:var(--text);font-size:.88rem;line-height:1.45}
+.cfg-l .input,.cfg-l .select{font-weight:500;color:var(--text);font-size:.86rem}
+.cfg-sw{flex:none;display:flex;align-items:center;cursor:pointer}
+.cfg-sw input{position:absolute;opacity:0;width:1px;height:1px}
+.cfg-sw-t{position:relative;width:42px;height:24px;border-radius:999px;background:#C9D6CF;transition:background .15s}
+.cfg-sw-t::after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .15s}
+.cfg-sw input:checked+.cfg-sw-t{background:#3E6801}
+.cfg-sw input:checked+.cfg-sw-t::after{transform:translateX(18px)}
+.cfg-sw input:focus-visible+.cfg-sw-t{outline:3px solid var(--gold);outline-offset:2px}
+.cfg-reguas{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:18px;align-items:start}
+.cfg-campos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.cfg-num .input{max-width:140px;font-size:1rem;font-weight:700;color:var(--forest)}
+.cfg-reguas-vis{display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:16px;background:rgba(255,255,255,.66);border:1px solid var(--line)}
+.cfg-regua{display:flex;height:28px;border-radius:9px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(25,53,47,.08)}
+.cfg-regua i{display:grid;place-items:center;min-width:0;font-style:normal;font-weight:800;font-size:.78rem;transition:width .25s}
+.cfg-regua .c{background:#EFE6DA;color:#7a4a22}.cfg-regua .b{background:#DDE9C9;color:#2E4F00}.cfg-regua .a{background:#3E6801;color:#fff}
+.cfg-regua-esc{position:relative;height:16px;font-size:.7rem;color:var(--muted)}
+.cfg-regua-esc span{position:absolute;transform:translateX(-50%)}
+.cfg-regua-esc span:first-child{transform:none}
+.cfg-regua-esc span:last-child{transform:translateX(-100%)}
+.cfg-mini-mtz{position:relative;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:4px;margin:4px 0 0 18px;padding-bottom:18px}
+.cfg-mq{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:#fff;box-shadow:inset 3px 0 0 var(--q);font-size:.78rem;color:var(--muted)}
+.cfg-mq b{font-size:1.05rem;color:var(--text)}
+.cfg-mq-y{position:absolute;left:-20px;top:50%;transform:translate(-50%,-50%) rotate(-90deg);transform-origin:center;font-size:.68rem;color:var(--muted);white-space:nowrap;margin-left:12px}
+.cfg-mq-x{position:absolute;left:50%;bottom:0;transform:translateX(-50%);font-size:.68rem;color:var(--muted);white-space:nowrap}
+.cfg-previa{margin:2px 0 0;font-size:.84rem;color:var(--muted)}
+.cfg-previa b{color:var(--forest)}
+.cfg-links{display:flex;flex-direction:column;gap:8px}
+.cfg-link{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.66);border:1px solid var(--line)}
+.cfg-link-ic{flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:11px;background:#F1F6EA;color:#3E6801}
+.cfg-link>div{flex:1;min-width:0}
+.cfg-link b{display:flex;align-items:center;gap:7px;font-size:.9rem}
+.cfg-link p{margin:2px 0 0;color:var(--muted);font-size:.82rem}
+.cfg-nivel{flex:none;font-size:.78rem;color:var(--muted);padding:4px 10px;border-radius:999px;background:rgba(25,53,47,.06)}
+.cfg-versoes{padding:0!important;overflow:hidden}
+.cfg-versoes summary{display:flex;align-items:center;gap:8px;padding:14px 18px;cursor:pointer;font-weight:650;font-size:.9rem;list-style:none}
+.cfg-versoes summary::-webkit-details-marker{display:none}
+.cfg-versoes summary::marker{content:''}
+.cfg-versoes summary::after{content:"";margin-left:auto;width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .2s}
+.cfg-versoes[open] summary::after{transform:rotate(-135deg)}
+.cfg-cont{padding:1px 8px;border-radius:999px;background:rgba(25,53,47,.08);font-size:.75rem}
+.cfg-versoes ol{list-style:none;margin:0;padding:0 18px;max-height:320px;overflow:auto}
+.cfg-versoes ol>li{display:flex;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.cfg-vn{flex:none;display:grid;place-items:center;min-width:36px;height:26px;border-radius:8px;background:#F1F6EA;color:#2E4F00;font-weight:700;font-size:.8rem}
+.cfg-versoes time{font-size:.78rem;color:var(--muted)}
+.cfg-versoes ul{margin:2px 0 0;padding-left:16px;font-size:.84rem;line-height:1.5}
+.cfg-versoes-pe{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:12px 18px;border-top:1px solid var(--line);background:rgba(243,247,241,.6)}
+.cfg-versoes-pe small{color:var(--muted)}
+.cfg-barra{position:sticky;bottom:12px;z-index:5;display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:12px 14px 12px 18px;border-radius:18px;background:rgba(255,255,255,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);box-shadow:0 18px 40px -18px rgba(23,48,43,.45)}
+.cfg-barra.sujo{background:rgba(25,53,47,.96);border-color:rgba(25,53,47,.96);color:#fff}
+.cfg-barra-txt{flex:1;min-width:220px;display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;font-size:.86rem}
+.cfg-barra-lista{color:#cfe0d8;font-size:.8rem;max-width:520px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cfg-ok{display:inline-flex;align-items:center;gap:6px;color:var(--muted)}
+.cfg-ok svg{color:#3E6801}
+.cfg-erro{display:inline-flex;align-items:center;gap:6px;color:#f3c48a;font-weight:600;font-size:.8rem}
+.cfg-barra-acoes{display:flex;gap:8px}
+.cfg-barra.sujo .btn-ghost{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.25)}
+.cfg-barra.sujo .btn-primary{background:#fff;color:#2E4F00}
+.cfg-barra.sujo .btn-primary:disabled{opacity:.5}
+.cfg-conf{margin:0 0 10px;padding-left:18px;line-height:1.6}
+.op-ctx-aviso{display:inline-block;margin-left:4px;padding:1px 8px;border-radius:999px;background:#FFF4DC;color:#7a5410;font-size:.72rem;font-weight:600;cursor:help}
+.op-dgrupo h4 .cfg-ajuda{width:18px;height:18px;font-size:11px;margin-left:4px}
+@media (max-width:1100px){
+  .cfg-reguas{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:700px){
+  .cfg-abas{width:100%;border-radius:18px}
+  .cfg-abas a{flex:1 1 auto;justify-content:center;padding:0 10px}
+  .cfg-intro{flex-wrap:wrap}
+  .cfg-versao{margin-left:0}
+  .cfg-listas,.cfg-campos,.cfg-q-l2{grid-template-columns:minmax(0,1fr)}
+  .cfg-q{flex-wrap:wrap;gap:8px}
+  .cfg-q-b{flex-basis:100%;order:3}
+  .cfg-q-bt{margin-left:auto}
+  .cfg-listas .cfg-col:first-child .cfg-lista{grid-template-columns:minmax(0,1fr)}
+  .cfg-barra{bottom:calc(env(safe-area-inset-bottom,0px) + 76px)}
+  .cfg-barra-acoes{width:100%}
+  .cfg-barra-acoes .btn{flex:1;white-space:nowrap;padding-inline:10px}
+  .cfg-link{flex-wrap:wrap}
+}
 /* src/telas/inovacao.css */
 /* Pacote inovacao: estilos próprios das telas deste pacote (carregado depois de design.css).
    Paleta de comandos (.cmdk*), cadastro rápido (.rapido*), atalhos (.atalho*) e modo comitê (.comite*).
@@ -3289,7 +3423,9 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
   GP.state = () => S;
   GP.storageKey = KEY;
   GP.storage = { ok:true, conflito:false, salvoEm:null, recuperado:false };
-  const assinaturaDados = s => JSON.stringify({projetos:s.projetos,riscos:s.riscos,criterios:s.criterios,capacidade:s.capacidade,forcar:s.forcar});
+  const assinaturaDados = s => JSON.stringify({projetos:s.projetos,riscos:s.riscos,criterios:s.criterios,capacidade:s.capacidade,forcar:s.forcar,config:s.config});
+  /* As regras editáveis (listas, checklist, réguas) ficam no estado e valem para todo o sistema */
+  const aplicarRegras = () => { if(S && GP.modelo && GP.modelo.aplicarConfig) GP.modelo.aplicarConfig(S.config); };
   const estadoValido = raw => { try { const j = JSON.parse(raw); return j && j.v && Array.isArray(j.projetos) ? j : null; } catch(e){ return null; } };
   /* Confirmação de salvamento: 'Salvo agora' por cerca de 1 s depois de cada gravação (gp:saved). */
   let salvoAgoraAte = 0, salvoTimer = null;
@@ -3334,12 +3470,12 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
       return false;
     }
   };
-  GP.resetState = estado => { S = GP.modelo.migrar(estado); return GP.save(); };
+  GP.resetState = estado => { S = GP.modelo.migrar(estado); aplicarRegras(); return GP.save(); };
   GP.loadLatest = () => {
     try {
       const raw = localStorage.getItem(KEY), est = estadoValido(raw);
       if(!est){ GP.toast('A versão do navegador não está disponível. Restaure um backup.'); return false; }
-      S = GP.modelo.migrar(est); ultimoDisco = raw; ultimaBase = assinaturaDados(S); avisoFalha = false;
+      S = GP.modelo.migrar(est); aplicarRegras(); ultimoDisco = raw; ultimaBase = assinaturaDados(S); avisoFalha = false;
       GP.storage = {ok:true,conflito:false,salvoEm:S.meta.salvoEm,recuperado:false};
       GP.refresh(); GP.toast('Versão mais recente carregada.'); return true;
     } catch(e){ GP.toast('Não foi possível acessar o armazenamento do navegador.'); return false; }
@@ -3363,7 +3499,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
       S = GP.util.clone(arquivo);
     } else S = atual || anterior || GP.modelo.estadoInicial();
     GP.snapshotDisponivel = !!(arquivo && atual && (arquivo.meta?.datasetId !== atual.meta?.datasetId || assinaturaDados(arquivo) !== assinaturaDados(atual)));
-    S = GP.modelo.migrar(S); ultimaBase = assinaturaDados(S);
+    S = GP.modelo.migrar(S); aplicarRegras(); ultimaBase = assinaturaDados(S);
     GP.storage.salvoEm = S.meta.salvoEm || null; GP.save();
     if(GP.storage.recuperado) setTimeout(() => GP.toast('O último salvamento estava ilegível. A cópia anterior foi recuperada automaticamente.'),0);
     if(GP.snapshotDisponivel) setTimeout(() => GP.toast('Este HTML contém uma cópia da carteira. Consulte Dados e configurações para carregar os dados do arquivo quando precisar.'),0);
@@ -3746,6 +3882,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     a.textContent = ''; setTimeout(() => { a.textContent = txt; }, 60); }
   function render(manterScroll){
     const app = document.getElementById('app'); if(!app) return;
+    aplicarRegras();
     const r = parse(), nivel = GP.nivel();
     const tela = TELAS.find(t => t.id === r.id) || TELAS.find(t => t.id === 'painel');
     const chave = r.id + '/' + (r.arg || ''), mudouRota = chave !== ultimaChave, primeira = !ultimaChave;
@@ -3866,7 +4003,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
         const de = GP.nivel(); n -= 1; GP.setNivel(n);
         GP.toast(`${de > n + 1 ? `Níveis ${n + 1} a ${de} desativados` : `Nível ${n + 1} desativado`}. Você está no nível ${n} · ${GP.NIVEIS[n - 1].nome}. Nada do que foi cadastrado se perde.`); return; }
       GP.setNivel(n); return; }
-    if(e.target.closest('[data-storage-status]')){ GP.go('#/config'); return; }
+    if(e.target.closest('[data-storage-status]')){ GP.go('#/config?secao=dados'); return; }
     if(e.target.closest('[data-ajuda-nivel]')){ GP.explicarNiveis(); return; }
     if(e.target.closest('[data-fechar-menu]')){ fecharMenuMovel(); return; }
     const sg = e.target.closest('[data-secao]');
@@ -4195,21 +4332,121 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     return meses.map(mes => ({ mes, fte: lista.filter(p => p.inicioPrevisto && p.fimPrevisto && p.inicioPrevisto.slice(0, 7) <= mes && p.fimPrevisto.slice(0, 7) >= mes).reduce((a, p) => a + (p.esforcoFte || 0), 0) }));
   }
 
+  /* ------------------------------------------- regras editáveis (Dados e configurações → Regras do portfólio) */
+  /**
+   * S.config = {versao, listas:{gerencias:[{id,nome}], tipos:[], origens:[]}, entrada:[{id,tipo,pergunta,seNao,ativa}], corte:{valor,esforco,classeA,classeB}}
+   * S.configVersoes = [{n, data, resumo:[texto], areas:['listas'|'entrada'|'reguas']}] (até 30).
+   * aplicarConfig(c) copia as regras para CAT, ENTRADA e CORTE (os mesmos objetos que as telas já leem). As perguntas do checklist
+   * não são criadas nem apagadas: cada uma pode mudar de texto e de tipo, ou ser desligada. Cada projeto guarda a versão em uso
+   * no cadastro (p.ctx.cfg), na decisão de entrada (p.entrada.cfg) e na avaliação (p.avaliacao.cfg e .pesos).
+   */
+  const CAT_PADRAO = JSON.parse(JSON.stringify(CAT)), CORTE_PADRAO = Object.assign({}, CORTE);
+  const ENTRADA_BASE = ENTRADA.map(q => Object.assign({}, q));
+  const AREAS_CFG = { listas:'Listas do cadastro', entrada:'Checklist de entrada', reguas:'Réguas da priorização' };
+  function configPadrao(){
+    return { versao: 1, listas: JSON.parse(JSON.stringify(CAT_PADRAO)), entrada: ENTRADA_BASE.map(q => ({ id:q.id, tipo:q.tipo, pergunta:q.pergunta, seNao:q.seNao, ativa:true })), corte: Object.assign({}, CORTE_PADRAO) };
+  }
+  const inteiro = (v, a, b, pad) => { const n = Math.round(+v); return Number.isFinite(n) && v !== '' && v != null ? Math.max(a, Math.min(b, n)) : pad; };
+  const siglaOk = v => String(v ?? '').toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 12);
+  function textosUnicos(lista, max){
+    const vistos = new Set(), out = [];
+    (Array.isArray(lista) ? lista : []).forEach(v => { const t = typeof v === 'string' ? v.trim().slice(0, max) : ''; const k = t.toLowerCase(); if(t && !vistos.has(k)){ vistos.add(k); out.push(t); } });
+    return out;
+  }
+  function limparConfig(c){
+    const pad = configPadrao(); if(!c || typeof c !== 'object') return pad;
+    const L = c.listas && typeof c.listas === 'object' ? c.listas : {}, vistos = new Set();
+    const ger = (Array.isArray(L.gerencias) ? L.gerencias : []).map(g => g && typeof g === 'object' ? { id: siglaOk(g.id), nome: txt(g.nome, 120).trim() } : null)
+      .filter(g => g && g.id && !vistos.has(g.id) && vistos.add(g.id)).map(g => ({ id: g.id, nome: g.nome || g.id }));
+    const tipos = textosUnicos(L.tipos, 60), origens = textosUnicos(L.origens, 60);
+    const ent = ENTRADA_BASE.map(b => { const x = (Array.isArray(c.entrada) ? c.entrada : []).find(q => q && q.id === b.id) || {};
+      const perg = txt(x.pergunta, 240).trim(), se = txt(x.seNao, 240).trim();
+      return { id: b.id, tipo: x.tipo === 'barreira' || x.tipo === 'informacao' ? x.tipo : b.tipo, pergunta: perg || b.pergunta, seNao: se || b.seNao, ativa: x.ativa === undefined ? true : !!x.ativa }; });
+    if(!ent.some(q => q.ativa)) ent.forEach(q => { q.ativa = true; });
+    const k = c.corte && typeof c.corte === 'object' ? c.corte : {};
+    const classeA = inteiro(k.classeA, 1, 100, CORTE_PADRAO.classeA);
+    const corte = { valor: inteiro(k.valor, 5, 95, CORTE_PADRAO.valor), esforco: inteiro(k.esforco, 5, 95, CORTE_PADRAO.esforco), classeA, classeB: Math.min(classeA - 1, inteiro(k.classeB, 0, 99, CORTE_PADRAO.classeB)) };
+    return { versao: inteiro(c.versao, 1, 1e6, 1), listas: { gerencias: ger.length ? ger : pad.listas.gerencias, tipos: tipos.length ? tipos : pad.listas.tipos, origens: origens.length ? origens : pad.listas.origens }, entrada: ent, corte };
+  }
+  function limparVersoesCfg(vs, cfg){
+    const ok = (Array.isArray(vs) ? vs : []).filter(v => v && typeof v === 'object' && +v.n >= 1)
+      .map(v => ({ n: Math.floor(+v.n), data: txt(v.data, 40), resumo: (Array.isArray(v.resumo) ? v.resumo : []).map(r => txt(r, 200)).slice(0, 40), areas: (Array.isArray(v.areas) ? v.areas : []).filter(a => a in AREAS_CFG) }))
+      .filter(v => v.n <= cfg.versao).slice(-30);
+    return ok.length ? ok : [{ n: cfg.versao, data: '', resumo: ['Configuração inicial (sugestão do sistema).'], areas: [] }];
+  }
+  /** Copia as regras para os catálogos em uso. Perguntas eliminatórias primeiro, para a numeração ficar contínua. */
+  function aplicarConfig(c){
+    c = c && c.listas ? c : configPadrao();
+    CAT.gerencias.splice(0, CAT.gerencias.length, ...c.listas.gerencias.map(g => ({ id: g.id, nome: g.nome })));
+    CAT.tipos.splice(0, CAT.tipos.length, ...c.listas.tipos);
+    CAT.origens.splice(0, CAT.origens.length, ...c.listas.origens);
+    const ativas = c.entrada.filter(q => q.ativa).map(q => Object.assign({}, ENTRADA_BASE.find(b => b.id === q.id), { tipo: q.tipo, pergunta: q.pergunta, seNao: q.seNao }));
+    ENTRADA.splice(0, ENTRADA.length, ...ativas.filter(q => q.tipo === 'barreira'), ...ativas.filter(q => q.tipo !== 'barreira'));
+    Object.assign(CORTE, c.corte);
+  }
+  /** Texto das perguntas de um tipo no checklist em uso: '1 a 3', '4' ou '' (sem perguntas desse tipo). */
+  const faixaEntrada = tipo => { const ns = ENTRADA.map((q, i) => q.tipo === tipo ? i + 1 : 0).filter(Boolean); return !ns.length ? '' : ns.length === 1 ? String(ns[0]) : `${ns[0]} a ${ns[ns.length - 1]}`; };
+  const versaoCfg = () => (S() && S().config && S().config.versao) || 1;
+  /** Última versão que mexeu numa área (0 = nunca mudou desde a configuração inicial). */
+  const ultimaMudanca = area => Math.max(0, ...((S() && S().configVersoes) || []).filter(v => v.areas.includes(area)).map(v => v.n));
+  /** O que muda de a para b, em frases curtas. renomes: {tipos:{antigo:novo}, origens:{antigo:novo}}. */
+  function diffConfig(a, b, renomes = {}){
+    const resumo = [], areas = new Set(), add = (area, t) => { areas.add(area); resumo.push(t); };
+    const ga = new Map(a.listas.gerencias.map(g => [g.id, g])), gb = new Map(b.listas.gerencias.map(g => [g.id, g]));
+    gb.forEach((g, id) => { if(!ga.has(id)) add('listas', `Gerência incluída: ${id}.`); else if(ga.get(id).nome !== g.nome) add('listas', `Gerência ${id}: nome alterado.`); });
+    ga.forEach((g, id) => { if(!gb.has(id)) add('listas', `Gerência removida: ${id}.`); });
+    [['tipos', 'Tipo'], ['origens', 'Origem']].forEach(([k, rot]) => {
+      const ren = renomes[k] || {}, novos = new Set(b.listas[k]), antes = new Set(a.listas[k]);
+      Object.entries(ren).forEach(([de, para]) => { if(de !== para && antes.has(de) && novos.has(para)) add('listas', `${rot} renomeado: “${de}” → “${para}”.`); });
+      const renomeados = new Set(Object.values(ren));
+      b.listas[k].forEach(t => { if(!antes.has(t) && !renomeados.has(t)) add('listas', `${rot} incluído: “${t}”.`); });
+      a.listas[k].forEach(t => { if(!novos.has(t) && !(t in ren)) add('listas', `${rot} removido: “${t}”.`); });
+    });
+    b.entrada.forEach((q, i) => { const o = a.entrada.find(x => x.id === q.id) || {}, n = `Pergunta ${q.id.replace('E', '')}`;
+      if(o.ativa !== q.ativa) add('entrada', `${n} ${q.ativa ? 'ligada' : 'desligada'}.`);
+      if(o.pergunta !== q.pergunta) add('entrada', `${n}: texto alterado.`);
+      if(o.seNao !== q.seNao) add('entrada', `${n}: orientação para “Não” alterada.`);
+      if(o.tipo !== q.tipo) add('entrada', `${n} agora ${q.tipo === 'barreira' ? 'é eliminatória' : 'indica falta de informação'}.`); });
+    [['valor', 'Corte de valor (matriz)'], ['esforco', 'Corte de esforço (matriz)'], ['classeA', 'Classe A a partir de'], ['classeB', 'Classe B a partir de']].forEach(([k, rot]) => {
+      if(a.corte[k] !== b.corte[k]) add('reguas', `${rot}: ${a.corte[k]} → ${b.corte[k]}.`); });
+    return { resumo, areas: [...areas] };
+  }
+  /**
+   * Grava as regras como nova versão e aplica em todo o sistema. Renomear tipo ou origem atualiza os projetos que usam o nome antigo.
+   * Retorna {ok, versao, resumo} ou {ok:false, erro} (nada muda).
+   */
+  function salvarConfig(novo, renomes = {}){
+    const atual = S().config || configPadrao(), limpo = limparConfig(Object.assign({}, novo, { versao: atual.versao }));
+    const d = diffConfig(atual, limpo, renomes); if(!d.resumo.length) return { ok:false, erro:'Nenhuma alteração para salvar.' };
+    const emUso = id => S().projetos.filter(p => p.gerencia === id).length;
+    const sem = atual.listas.gerencias.find(g => !limpo.listas.gerencias.some(x => x.id === g.id) && emUso(g.id));
+    if(sem) return { ok:false, erro:`A gerência ${sem.id} está em uso por ${emUso(sem.id)} projeto(s).` };
+    ['tipos', 'origens'].forEach(k => { const ren = renomes[k] || {}, campo = k === 'tipos' ? 'tipo' : 'origem';
+      Object.entries(ren).forEach(([de, para]) => { if(de !== para && limpo.listas[k].includes(para)) S().projetos.forEach(p => { if(p[campo] === de) p[campo] = para; }); }); });
+    limpo.versao = atual.versao + 1;
+    S().config = limpo;
+    S().configVersoes = limparVersoesCfg(S().configVersoes, atual).concat({ n: limpo.versao, data: new Date().toISOString(), resumo: d.resumo, areas: d.areas }).slice(-30);
+    aplicarConfig(limpo); GP.save();
+    return { ok:true, versao: limpo.versao, resumo: d.resumo };
+  }
+
   /* --------------------------------------------------------------- estado */
   function estadoInicial(){
-    return { v: VERSAO, projetos: [], seq: 0, criterios: JSON.parse(JSON.stringify(CRITERIOS_PADRAO)), capacidade: Object.assign({}, CAPACIDADE_PADRAO), forcar: {}, ui: { nivel: 1, menuMini: false } };
+    return { v: VERSAO, projetos: [], seq: 0, criterios: JSON.parse(JSON.stringify(CRITERIOS_PADRAO)), capacidade: Object.assign({}, CAPACIDADE_PADRAO), forcar: {}, config: configPadrao(), configVersoes: [], ui: { nivel: 1, menuMini: false } };
   }
   /* Higienização: tudo o que vem do armazenamento ou de um backup passa por aqui (tipos, ids seguros, catálogos). */
   const idSeguro = v => String(v ?? '').replace(/[^\w-]/g, '').slice(0, 60);
   const txt = (v, max = 2000) => typeof v === 'string' ? v.slice(0, max) : v == null ? '' : String(v).slice(0, max);
   const numOuNull = v => v === '' || v == null || isNaN(v) ? null : Math.max(0, +v);
   const dataOuVazio = v => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : '';
-  function limparProjeto(p){
+  function limparProjeto(p, gerencias = CAT.gerencias){
     if(!p || typeof p !== 'object' || !p.id || typeof p.titulo !== 'string') return null;
     const o = {};
     ['titulo', 'descricao', 'beneficio', 'area', 'ferramenta', 'demandante', 'patrocinador', 'responsavel', 'link', 'observacoes', 'codigo', 'tipo', 'origem'].forEach(k => o[k] = txt(p[k], k === 'titulo' ? 140 : 2000));
     o.id = idSeguro(p.id); o.codigo = idSeguro(p.codigo) || o.id;
-    o.gerencia = CAT.gerencias.some(g => g.id === p.gerencia) ? p.gerencia : '';
+    o.gerencia = gerencias.some(g => g.id === p.gerencia) ? p.gerencia : '';
+    const versao = v => Number.isFinite(+v) && +v >= 1 ? Math.floor(+v) : null;
+    if(p.ctx && versao(p.ctx.cfg)) o.ctx = { cfg: versao(p.ctx.cfg) };
     o.etapa = ETAPAS.some(e => e.id === p.etapa) ? p.etapa : 'entrada';
     o.obrigatorio = !!p.obrigatorio; o.exemplo = !!p.exemplo;
     o.natureza = p.natureza === 'demanda' ? 'demanda' : 'projeto';
@@ -4220,12 +4457,15 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     ['criadoEm', 'atualizadoEm'].forEach(k => { if(p[k]) o[k] = txt(p[k], 40); });
     o.historico = Array.isArray(p.historico) ? p.historico.filter(h => h && typeof h === 'object').map(h => ({ data: txt(h.data, 40), acao: txt(h.acao, 60), detalhe: txt(h.detalhe, 1000) })) : [];
     if(p.entrada && typeof p.entrada === 'object' && RESULTADO_ENTRADA[p.entrada.resultado]){
-      const r = {}; Object.entries(p.entrada.respostas || {}).forEach(([k, v]) => { if(ENTRADA.some(q => q.id === k) && (v === 'sim' || v === 'nao')) r[k] = v; });
+      const r = {}; Object.entries(p.entrada.respostas || {}).forEach(([k, v]) => { if(ENTRADA_BASE.some(q => q.id === k) && (v === 'sim' || v === 'nao')) r[k] = v; });
       o.entrada = { respostas: r, resultado: p.entrada.resultado, motivos: Array.isArray(p.entrada.motivos) ? p.entrada.motivos.map(m => txt(m, 300)) : [], obs: txt(p.entrada.obs, 300), data: txt(p.entrada.data, 40) };
+      if(versao(p.entrada.cfg)) o.entrada.cfg = versao(p.entrada.cfg);
     }
     if(p.avaliacao && typeof p.avaliacao === 'object'){
       const r = {}; Object.entries(p.avaliacao.respostas || {}).forEach(([k, v]) => { if(/^[\w-]{1,20}$/.test(k) && v !== '' && v != null && !isNaN(v)) r[k] = Math.max(0, Math.min(3, Math.round(+v))); });
       o.avaliacao = { respostas: r, obs: txt(p.avaliacao.obs, 300), data: txt(p.avaliacao.data, 40) };
+      if(versao(p.avaliacao.cfg)) o.avaliacao.cfg = versao(p.avaliacao.cfg);
+      if(versao(p.avaliacao.pesos)) o.avaliacao.pesos = versao(p.avaliacao.pesos);
     }
     return o;
   }
@@ -4244,8 +4484,9 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     const per = periodoCap({ periodoIni: c.periodoIni, periodoFim: c.periodoFim, periodo: typeof c.periodo === 'string' || typeof c.periodo === 'number' ? txt(c.periodo, 40) : null });   // '2027' antigo vira jan a dez/2027
     S.capacidade = { periodo: per.rotulo, periodoIni: per.ini, periodoFim: per.fim, fte: numOuNull(c.fte) ?? CAPACIDADE_PADRAO.fte, reservaPct: Math.min(60, numOuNull(c.reservaPct) ?? CAPACIDADE_PADRAO.reservaPct),
       orcamento: numOuNull(c.orcamento) ?? CAPACIDADE_PADRAO.orcamento, descontarExecucao: c.descontarExecucao === undefined ? CAPACIDADE_PADRAO.descontarExecucao : !!c.descontarExecucao };
-    const vistos = new Set();
-    S.projetos = (Array.isArray(S.projetos) ? S.projetos : []).map(limparProjeto).filter(p => p && !vistos.has(p.id) && vistos.add(p.id));
+    S.config = limparConfig(S.config); S.configVersoes = limparVersoesCfg(S.configVersoes, S.config);
+    const vistos = new Set(), gers = S.config.listas.gerencias;
+    S.projetos = (Array.isArray(S.projetos) ? S.projetos : []).map(p => limparProjeto(p, gers)).filter(p => p && !vistos.has(p.id) && vistos.add(p.id));
     const f = {}; Object.entries(S.forcar && typeof S.forcar === 'object' ? S.forcar : {}).forEach(([k, v]) => { if(vistos.has(k) && (v === 'in' || v === 'out')) f[k] = v; }); S.forcar = f;
     S.seq = Math.max(Math.round(+S.seq) || 0, ...S.projetos.map(p => +(String(p.codigo).match(/(\d+)$/) || [0, 0])[1] || 0));
     S.meta = Object.assign({}, S.meta && typeof S.meta === 'object' ? S.meta : {}, {datasetId: idSeguro(S.meta?.datasetId) || uid('carteira'), revisao: Math.max(0,Math.floor(+S.meta?.revisao || 0)), salvoEm:txt(S.meta?.salvoEm,40)});
@@ -4299,7 +4540,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     criar(dados){
       const p = normalizar(Object.assign({ etapa:'entrada', dataEntrada: hoje() }, dados));
       const erros = validar(p); if(Object.keys(erros).length) return { ok:false, erros };
-      p.id = uid('p'); p.codigo = proximoCodigo(); p.criadoEm = new Date().toISOString(); p.historico = [];
+      p.id = uid('p'); p.codigo = proximoCodigo(); p.criadoEm = new Date().toISOString(); p.historico = []; p.ctx = { cfg: versaoCfg() };
       registrar(p, 'Cadastro', (p.natureza === 'demanda' ? 'Demanda' : 'Projeto') + ' cadastrado na fila de entrada.');
       S().projetos.push(p); GP.save(); return { ok:true, projeto:p };
     },
@@ -4321,7 +4562,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     registrarEntrada(id, respostas, obs = ''){
       const p = projetos.get(id); if(!p) return { ok:false };
       const r = avaliarEntrada(respostas); if(r.resultado === 'incompleto') return { ok:false, r };
-      p.entrada = { respostas: Object.assign({}, respostas), resultado: r.resultado, motivos: r.motivos, obs: (obs || '').trim(), data: new Date().toISOString() };
+      p.entrada = { respostas: Object.assign({}, respostas), resultado: r.resultado, motivos: r.motivos, obs: (obs || '').trim(), data: new Date().toISOString(), cfg: versaoCfg() };
       registrar(p, 'Entrada', `${RESULTADO_ENTRADA[r.resultado].nome}${r.motivos.length ? ': ' + r.motivos.join(' ') : ''}${p.entrada.obs ? ' Obs.: ' + p.entrada.obs : ''}`);
       const alvo = RESULTADO_ENTRADA[r.resultado].etapa;
       if(alvo && p.etapa !== alvo && ['entrada', 'triagem', 'aprovado', 'nao_entra'].includes(p.etapa)) projetos.mudarEtapa(id, alvo, r.motivos.join(' '));
@@ -4331,7 +4572,8 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     avaliar(id, respostas, obs = ''){
       const p = projetos.get(id); if(!p) return { ok:false };
       const r = {}; Object.entries(respostas || {}).forEach(([k, v]) => { if(v !== '' && v != null && !isNaN(v)) r[k] = Math.max(0, Math.min(3, +v)); });
-      p.avaliacao = { respostas: r, obs: (obs || '').trim(), data: new Date().toISOString() };
+      p.avaliacao = { respostas: r, obs: (obs || '').trim(), data: new Date().toISOString(), cfg: versaoCfg() };
+      const vp = GP.versaoPesosAtual && GP.versaoPesosAtual(); if(vp) p.avaliacao.pesos = vp;
       const s = pontuar(p);
       registrar(p, 'Priorização', s.completo ? `Valor ${GP.util.fmt.n(s.valor, 1)} · esforço ${GP.util.fmt.n(s.esforco, 1)} · ${QUADRANTES[s.quadrante].nome}` : `Avaliação parcial (faltam ${s.faltam} ${s.faltam === 1 ? 'resposta' : 'respostas'}).`);
       GP.save(); return { ok:true, s };
@@ -4378,7 +4620,8 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     GP.save(); return n;
   }
 
-  GP.modelo = { VERSAO, CAT, ETAPAS, etapa, CAMPOS, OBRIGATORIOS, ENTRADA, RESULTADO_ENTRADA, avaliarEntrada, CRITERIOS_PADRAO, EIXOS, CORTE, QUADRANTES, ETAPAS_PRIORIZAVEIS, criterios, sugestao, notaEixo, pontuar, ranking, decompor, pendentesAvaliacao, CAPACIDADE_PADRAO, STATUS_CARTEIRA, montarCarteira, demandaMensal, demandaCarteira, estadoInicial, migrar, validar, carregarExemplos };
+  GP.modelo = { VERSAO, CAT, ETAPAS, etapa, CAMPOS, OBRIGATORIOS, ENTRADA, RESULTADO_ENTRADA, avaliarEntrada, CRITERIOS_PADRAO, EIXOS, CORTE, QUADRANTES, ETAPAS_PRIORIZAVEIS, criterios, sugestao, notaEixo, pontuar, ranking, decompor, pendentesAvaliacao, CAPACIDADE_PADRAO, STATUS_CARTEIRA, montarCarteira, demandaMensal, demandaCarteira, estadoInicial, migrar, validar, carregarExemplos,
+    AREAS_CFG, faixaEntrada, configPadrao, limparConfig, aplicarConfig, diffConfig, salvarConfig, versaoCfg, ultimaMudanca };
   GP.projetos = projetos;
 })();
 </script>
@@ -4508,7 +4751,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
             <span class="op-eyebrow">Resumo do cadastro</span>
             <div class="op-prog"><div class="op-prog-n"><b data-prog-n>0 de ${M.OBRIGATORIOS.length}</b> obrigatórios preenchidos</div><div class="op-prog-tr" role="progressbar" aria-label="Campos obrigatórios preenchidos" aria-valuemin="0" aria-valuemax="${M.OBRIGATORIOS.length}" aria-valuenow="0" data-prog-tr><i data-prog-bar></i></div></div>
             <ul class="op-prog-lista">${M.OBRIGATORIOS.map(k => `<li data-req="${k}"><span class="op-prog-ok">${icon('check', 13)}</span>${esc(M.CAMPOS[k])}</li>`).join('')}</ul>
-            <p class="op-depois">${p ? 'As alterações ficam registradas no histórico do projeto.' : 'Depois: entra como <b>Nova demanda</b> → checklist de entrada (6 perguntas, cerca de 1 minuto).'}</p>
+            <p class="op-depois">${p ? 'As alterações ficam registradas no histórico do projeto.' : `Depois: entra como <b>Nova demanda</b> → checklist de entrada (${M.ENTRADA.length} perguntas, cerca de 1 minuto).`}</p>
           </div>
           <div class="op-form-acoes"><button class="btn btn-primary" type="submit">${icon('check', 16)} ${p ? 'Salvar alterações' : 'Cadastrar'}</button>
             <a class="btn btn-ghost" href="${p ? '#/projeto/' + p.id : '#/acervo'}">Cancelar</a><span class="op-obrig-nota"><span class="req" aria-hidden="true">*</span> obrigatório</span></div>
@@ -4667,7 +4910,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
   function proximoPasso(p){
     const sec = (tom, ic, titulo, texto, acoes = '', extra = '') => `<section class="op-proximo t-${tom}" aria-label="Próximo passo"><span class="op-proximo-ic">${icon(ic, 20)}</span><div class="op-proximo-txt"><span class="op-eyebrow">Próximo passo</span><b>${titulo}</b><p>${texto}</p>${extra}</div>${acoes ? `<div class="op-proximo-acoes">${acoes}</div>` : ''}</section>`;
     const btnChecklist = rot => `<button class="btn btn-primary" data-entrada="${p.id}">${icon('funil', 16)} ${rot}</button>`;
-    if(p.etapa === 'entrada') return sec('info', 'funil', 'Responda o checklist de entrada', '6 perguntas de Sim ou Não, cerca de 1 minuto. O resultado indica se entra no portfólio, se falta informação ou se não entra.', btnChecklist('Fazer o checklist'));
+    if(p.etapa === 'entrada') return sec('info', 'funil', 'Responda o checklist de entrada', `${M.ENTRADA.length} perguntas de Sim ou Não, cerca de 1 minuto. O resultado indica se entra no portfólio, se falta informação ou se não entra.`, btnChecklist('Fazer o checklist'));
     if(p.etapa === 'triagem'){
       const resp = (p.entrada && p.entrada.respostas) || {};
       const pedidas = Object.keys(CAMPOS_ENTRADA).filter(q => resp[q] === 'nao').flatMap(q => CAMPOS_ENTRADA[q]);
@@ -4711,6 +4954,15 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
       if(h.acao === 'Priorização') d = d.replace(/(\d)\.(\d)/g, '$1,$2'); return d; };
     return itens.reverse().map(h => `<li class="op-hist-item"><span class="op-hist-dot" aria-hidden="true"></span><div><div class="op-hist-h"><b>${esc(h.acao)}</b><time class="dim">${fmt.dataHora(h.data)}</time></div>${h.detalhe ? `<div class="op-hist-d">${esc(det(h))}</div>` : ''}${h.sub ? `<div class="op-hist-sub">${icon('seta', 13)} Etapa: ${esc(h.sub)}</div>` : ''}</div></li>`).join('');
   }
+  /** Versão das regras (Dados e configurações → Regras do portfólio) em que o projeto foi cadastrado, decidido e avaliado. */
+  function contexto(p){
+    const ver = n => n ? `versão ${n}` : '<span class="dim">antes das versões</span>';
+    const aviso = (txt, dica) => ` <span class="op-ctx-aviso" data-tt="${esc(dica)}" tabindex="0">${txt}</span>`;
+    const uE = M.ultimaMudanca('entrada'), uR = M.ultimaMudanca('reguas');
+    return [['Cadastro', ver(p.ctx && p.ctx.cfg)],
+      ['Decisão de entrada', p.entrada ? ver(p.entrada.cfg) + ((p.entrada.cfg || 0) < uE ? aviso('checklist mudou depois', `Checklist alterado na versão ${uE}\nA decisão continua valendo. Reavalie a entrada se quiser aplicar as perguntas atuais.`) : '') : null],
+      ['Avaliação', p.avaliacao && GP.nivel() >= 2 ? ver(p.avaliacao.cfg) + (p.avaliacao.pesos ? ` · pesos v${p.avaliacao.pesos}` : '') + ((p.avaliacao.cfg || 0) < uR ? aviso('réguas mudaram depois', `Réguas alteradas na versão ${uR}\nA nota é a mesma; a classe e o quadrante já seguem as réguas atuais.`) : '') : null]];
+  }
   function dados(p){
     const val = (k, v) => ({ k, v });
     const periodo = !p.inicioPrevisto && !p.fimPrevisto ? null : p.inicioPrevisto && p.fimPrevisto ? `${fmt.data(p.inicioPrevisto)} a ${fmt.data(p.fimPrevisto)}` : p.inicioPrevisto ? `a partir de ${fmt.data(p.inicioPrevisto)}` : `até ${fmt.data(p.fimPrevisto)}`;
@@ -4719,6 +4971,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
       ['Estimativas', [['Esforço', p.esforcoFte != null ? fmt.n(p.esforcoFte, p.esforcoFte % 1 ? 1 : 0) + (p.esforcoFte === 1 ? ' pessoa (FTE)' : ' pessoas (FTE)') : null], ['Duração', p.duracaoMeses != null ? fmt.n(p.duracaoMeses, p.duracaoMeses % 1 ? 1 : 0) + (p.duracaoMeses === 1 ? ' mês' : ' meses') : null],
         ['Custo estimado', p.custo != null && p.custo !== '' ? fmt.brl(p.custo) : null], ['Avanço físico', p.etapa === 'concluido' ? '100% (concluído)' : p.progresso != null ? fmt.n(p.progresso, p.progresso % 1 ? 1 : 0) + '%' : null]]],
       ['Datas', [['Entrada', p.dataEntrada ? fmt.data(p.dataEntrada) : null], ['Período previsto', periodo || '<span class="dim">Sem datas previstas</span>']]],
+      [`Registro <button type="button" class="cfg-ajuda" data-tt="Versão das regras&#10;Cada projeto guarda a versão das regras em uso quando foi cadastrado, decidido na entrada e avaliado.&#10;As regras ficam em Dados e configurações → Regras do portfólio." aria-label="Ajuda: versão das regras em que este projeto foi registrado">?</button>`, contexto(p)],
     ];
     const extras = [['Link', p.link ? `<a href="${esc(p.link)}" target="_blank" rel="noopener">${esc(p.link)}</a>` : null], ['Observações', p.observacoes ? esc(p.observacoes) : null]].filter(x => x[1]);
     const faltam = ['beneficio', 'area', 'ferramenta', 'origem', 'demandante', 'patrocinador', 'responsavel', 'esforcoFte', 'duracaoMeses', 'custo', 'inicioPrevisto', 'fimPrevisto'].filter(k => vazioCampo(p[k]));
@@ -4978,11 +5231,13 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
         <div class="seg op-seg" role="radiogroup" aria-labelledby="op-q-${q.id}">${['sim', 'nao'].map(v => `<button type="button" class="${r === v ? 'on' : ''} v-${v}" data-q="${q.id}" data-v="${v}" role="radio" aria-checked="${r === v}">${v === 'sim' ? 'Sim' : 'Não'}</button>`).join('')}</div></li>`;
     };
     const grupo = (tipo, titulo, cons, ic) => { const qs = M.ENTRADA.map((q, i) => [q, i]).filter(([q]) => q.tipo === tipo);
+      if(!qs.length) return '';
+      const a = qs[0][1] + 1, z = qs[qs.length - 1][1] + 1; titulo += a === z ? ` (${a})` : ` (${a} a ${z})`;   // perguntas e tipos vêm das Regras do portfólio
       return `<section class="op-qgrupo op-qg-${tipo}"><header><span class="op-qg-ic">${icon(ic, 16)}</span><div><h4>${titulo}</h4><p>${cons}</p></div></header><ol class="op-qs">${qs.map(([q, i]) => linha(q, i)).join('')}</ol></section>`; };
     const desenhar = () => {
       m.querySelector('[data-perguntas]').innerHTML =
-        grupo('barreira', 'Critérios eliminatórios (1 a 3)', 'Se alguma resposta for “Não”, a demanda <b>não entra</b> no portfólio.', 'alerta') +
-        grupo('informacao', 'Informações mínimas (4 a 6)', 'Se alguma resposta for “Não”, <b>falta informação</b> e a demanda volta ao demandante.', 'info');
+        grupo('barreira', 'Critérios eliminatórios', 'Se alguma resposta for “Não”, a demanda <b>não entra</b> no portfólio.', 'alerta') +
+        grupo('informacao', 'Informações mínimas', 'Se alguma resposta for “Não”, <b>falta informação</b> e a demanda volta ao demandante.', 'info');
       const r = M.avaliarEntrada(resp), R = M.RESULTADO_ENTRADA[r.resultado], V = VEREDITO[r.resultado];
       const total = M.ENTRADA.length, feitas = total - r.pendentes.length;
       m.querySelector('[data-resultado]').innerHTML = `<div class="op-veredito ${V.cls}" role="status"><span class="op-v-ic">${icon(V.ic, 20)}</span><div class="op-v-txt">
@@ -5008,16 +5263,17 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
   /* --------------------------------------------------------------- tela */
   const ORDEM_FUNIL = ['entrada', 'triagem', 'aprovado', 'execucao', 'concluido'];
   const SAIDAS = ['espera', 'nao_entra', 'cancelado'];
-  const REGRA = [
-    ['t-ok', 'check', 'Entra', 'Entra no portfólio\nAs 6 respostas são “Sim”.\nVai para Admitido · aguardando priorização.'],
-    ['t-warn', 'info', 'Falta informação', 'Falta informação\n“Não” em alguma das perguntas 4 a 6.\nVolta ao demandante, em triagem.'],
-    ['t-bad', 'alerta', 'Não entra', 'Não entra\n“Não” em alguma das perguntas 1 a 3.\nO motivo fica registrado no histórico.'],
+  // a regra acompanha o checklist em uso (Dados e configurações → Regras do portfólio)
+  const REGRA = () => [
+    ['t-ok', 'check', 'Entra', `Entra no portfólio\nAs ${M.ENTRADA.length} respostas são “Sim”.\nVai para Admitido · aguardando priorização.`],
+    ...(M.faixaEntrada('informacao') ? [['t-warn', 'info', 'Falta informação', `Falta informação\n“Não” em alguma das perguntas ${M.faixaEntrada('informacao')}.\nVolta ao demandante, em triagem.`]] : []),
+    ...(M.faixaEntrada('barreira') ? [['t-bad', 'alerta', 'Não entra', `Não entra\n“Não” em alguma das perguntas ${M.faixaEntrada('barreira')}.\nO motivo fica registrado no histórico.`]] : []),
   ];
   const kcard = p => `<a class="kcard op-kcard" href="#/projeto/${p.id}"><span class="code">${esc(p.codigo)}</span><span class="op-k-tit" title="${esc(p.titulo)}">${esc(p.titulo)}</span><small>${esc([p.gerencia, p.tipo].filter(Boolean).join(' · '))}</small>
     <span class="op-k-pe">${p.responsavel ? `<span class="op-ini" title="Responsável: ${esc(p.responsavel)}" aria-label="Responsável: ${esc(p.responsavel)}">${esc(OP.iniciais(p.responsavel))}</span>` : '<span class="op-ini vazio" title="Sem responsável" aria-label="Sem responsável">?</span>'}<span>${esc(OP.txtNaEtapa(p))}</span></span></a>`;
   function tela(el, r){
     const todos = P.todos(), aba = r.query.aba === 'quadro' ? 'quadro' : 'fila';
-    const head = acoes => U.pageHead({ titulo:'Funil de entrada', sub:'Toda demanda passa por um checklist de 6 perguntas antes de entrar no portfólio.', acoes });
+    const head = acoes => U.pageHead({ titulo:'Funil de entrada', sub:`Toda demanda passa por um checklist de ${M.ENTRADA.length} perguntas antes de entrar no portfólio.`, acoes });
     if(!todos.length){
       el.innerHTML = `<div class="op-funil">${head('')}` + OP.passos({ titulo:'O funil começa com o primeiro cadastro', sub:'Cada projeto ou demanda passa por três passos simples antes de entrar no portfólio.',
         passos:[['novo', 'Cadastre', 'Registre o projeto ou demanda com as informações mínimas.'], ['funil', 'Responda o checklist', 'Seis perguntas de Sim ou Não, em cerca de 1 minuto.'], ['check', 'Veja a decisão', 'Entra no portfólio, falta informação ou não entra, sempre com o motivo.']] }) + '</div>';
@@ -5046,7 +5302,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
           <div class="op-saida-cards">${ps.map(kcard).join('') || '<div class="op-col-vazia">Nenhum projeto</div>'}</div></details>`; }).join('')}</div></div></div>`;
     el.innerHTML = `<div class="op-funil">` + head(`<a class="btn btn-primary" href="#/novo">${icon('novo', 16)} Novo cadastro</a>`) +
       `<div class="op-funil-bar">${U.tabs('#/funil', [['fila', `Fila de entrada (${fila.length})`], ['quadro', 'Quadro por etapa']], aba)}
-        <div class="op-regra"><span class="op-regra-l">Regra do checklist</span>${REGRA.map(([c, ic, t, tt]) => `<span class="op-res ${c}" tabindex="0" data-tt="${esc(tt).replace(/\n/g, '&#10;')}" aria-label="${esc(tt.replace(/\n/g, '. '))}">${icon(ic, 14)}${esc(t)}</span>`).join('')}</div></div>
+        <div class="op-regra"><span class="op-regra-l">Regra do checklist</span>${REGRA().map(([c, ic, t, tt]) => `<span class="op-res ${c}" tabindex="0" data-tt="${esc(tt).replace(/\n/g, '&#10;')}" aria-label="${esc(tt.replace(/\n/g, '. '))}">${icon(ic, 14)}${esc(t)}</span>`).join('')}</div></div>
       ${fluxo}
       <div class="op-funil-corpo">${aba === 'quadro' ? quadro : corpoFila}</div></div>`;
     const fl = el.querySelector('[data-fluxo]'), pos = el.querySelector('[data-fluxo-pos]');
@@ -5160,6 +5416,8 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
   }
   /** Versão vigente: a última, se os pesos atuais forem os dela */
   const versaoAtual = () => { const vs = versoes(), u = vs[vs.length - 1]; return u && mesmosPesos(u.pesos, pesosAtuais()) ? u : null; };
+  /** Número da versão dos pesos em uso (null = sugestão inicial, nunca salva). A avaliação de cada projeto guarda esse número. */
+  GP.versaoPesosAtual = () => { const v = versaoAtual(); return v ? +v.n : null; };
   const seloVersao = () => { const v = versaoAtual(), padrao = M.CRITERIOS_PADRAO.every(c => { const a = GP.state().criterios.find(x => x.id === c.id); return a && +a.peso === +c.peso; });
     const txt = v ? `Pesos v${v.n} · ${fmt.data(String(v.data).slice(0, 10))}` : padrao ? 'Pesos sugeridos' : 'Pesos ajustados';
     return `<a class="pz-versao" href="#/criterios" title="Ver critérios e versões dos pesos">${icon('pesos', 14)}<span>${esc(txt)}</span></a>`; };
@@ -5573,7 +5831,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
   }
 
   function boasVindas(el){
-    const passos = [['novo', 'Cadastre', 'Registre cada projeto ou demanda com as informações mínimas.'], ['funil', 'Decida a entrada', 'Responda 6 perguntas simples: entra, não entra ou falta informação.'], ['ranking', 'Priorize', 'No nível 2, responda as perguntas de prioridade e veja o ranking.']];
+    const passos = [['novo', 'Cadastre', 'Registre cada projeto ou demanda com as informações mínimas.'], ['funil', 'Decida a entrada', `Responda ${GP.modelo.ENTRADA.length} perguntas simples: entra, não entra ou falta informação.`], ['ranking', 'Priorize', 'No nível 2, responda as perguntas de prioridade e veja o ranking.']];
     el.innerHTML = U.pageHead({ titulo:'Boas-vindas à Gestão de Portfólio da FEG', sub:'Um lugar único para registrar os projetos, decidir o que entra e definir prioridades.' }) +
       (OP.passos ? OP.passos({ titulo:'Comece em três passos', sub:'Quer ver como fica com dados? Carregue 14 projetos fictícios e remova depois em Dados e configurações.', passos, extra:'<button class="btn btn-ghost" data-ajuda-nivel>Entender os níveis</button>' })
         : `<div class="card"><a class="btn btn-primary" href="#/novo">Novo cadastro</a> <button class="btn btn-ghost" data-exemplos>Carregar exemplos</button></div>`);
@@ -6161,7 +6419,8 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
 <script>/* src/sistema.js */
 /* =========================================================================
    Dados e configurações (rodapé do menu)
-   Seções: Dados (cópias, importação e exemplos), Acesso, Interface, Outros e Zona de risco.
+   Três abas: Regras do portfólio (regras.js), Dados e cópias (cópias, importação, exemplos e zona de risco)
+   e Preferências (acesso, interface e outros). A aba vem de ?secao= (nomes antigos de seção continuam valendo).
    Extensão: GP.configCartoes - {ordem, secao:'dados'|'acesso'|'interface'|'outros', render(el)} para cartões extras.
    ========================================================================= */
 (function(){
@@ -6174,6 +6433,12 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     ['interface', 'Interface', 'Preferências de leitura salvas neste navegador.'],
     ['outros', 'Outros recursos', ''],
   ];
+  const ABAS = [
+    { id:'regras', nome:'Regras do portfólio', icone:'pesos', desc:'Listas do cadastro, checklist de entrada e réguas da priorização. Valem para todo o sistema.' },
+    { id:'dados', nome:'Dados e cópias', icone:'nuvem', desc:'Backup, planilhas, projetos de exemplo e zona de risco.' },
+    { id:'preferencias', nome:'Preferências', icone:'config', desc:'Acesso desta cópia e preferências de leitura.' },
+  ];
+  const ALIAS = { risco:'dados', acesso:'preferencias', interface:'preferencias', outros:'preferencias' };
   const secaoH = (id, titulo, sub) => `<div class="gx-cfg-h"><h2 id="cfg-${id}">${esc(titulo)}</h2>${sub ? `<p>${esc(sub)}</p>` : ''}</div>`;
 
   function cartaoCopias(){
@@ -6199,21 +6464,27 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
   function tela(el, rota){
     const todos = GP.projetos.todos(), n = todos.length, ex = todos.filter(p => p.exemplo).length, temDados = n || (GP.state().riscos || []).length;
     const grupos = {}; GP.configCartoes.slice().sort((a, b) => (a.ordem || 50) - (b.ordem || 50)).forEach(c => { const s = ['dados', 'acesso', 'interface'].includes(c.secao) ? c.secao : 'outros'; (grupos[s] ||= []).push(c); });
-    el.innerHTML = `<div class="gx-cfg">` + U.pageHead({ titulo:'Dados e configurações', sub:'Os dados ficam salvos neste navegador. Guarde cópias com frequência e leve a carteira para outro computador quando precisar.' }) +
-      `<section class="gx-cfg-sec" data-secao="dados" aria-labelledby="cfg-dados">${secaoH('dados', 'Dados', 'Cópias, importação e registros de exemplo.')}
+    const pedido = rota && rota.query && rota.query.secao || '', aba = ABAS.some(x => x.id === pedido) ? pedido : ALIAS[pedido] || 'regras', A = ABAS.find(x => x.id === aba);
+    const abas = `<div class="cfg-abas" role="tablist" aria-label="Partes de Dados e configurações">${ABAS.map(x => `<a role="tab" href="#/config?secao=${x.id}" class="${x.id === aba ? 'on' : ''}" aria-selected="${x.id === aba}" ${x.id === aba ? 'aria-current="page"' : ''}>${icon(x.icone, 16)}<span>${x.nome}</span></a>`).join('')}</div>
+      <p class="cfg-aba-desc">${esc(A.desc)}</p>`;
+    const corpo = aba === 'regras' ? `<div data-regras></div>`
+      : aba === 'dados' ? `<section class="gx-cfg-sec" data-secao="dados" aria-labelledby="cfg-dados">${secaoH('dados', 'Cópias e planilhas', 'Guarde cópias, leve a carteira para outro computador ou traga dados de uma planilha.')}
         <div class="card stack gx-cfg-copias">${cartaoCopias()}</div>
         <div class="card stack">${cartaoExemplos(n, ex)}</div>
         <div data-cartoes="dados" style="display:contents"></div></section>
-      ${SECOES.filter(([id]) => grupos[id] && grupos[id].length).map(([id, t, s]) => `<section class="gx-cfg-sec" data-secao="${id}" aria-labelledby="cfg-${id}">${secaoH(id, t, s)}<div data-cartoes="${id}" style="display:contents"></div></section>`).join('')}
       <section class="gx-cfg-sec gx-zona" data-secao="risco" aria-labelledby="cfg-risco">${secaoH('risco', 'Zona de risco', 'Ações que não podem ser desfeitas.')}
         <div class="card gx-zona-card"><div><b>Apagar todos os dados</b><p>Remove projetos, avaliações, riscos e configurações deste navegador e volta ao estado inicial. Baixe um backup antes.</p></div>
-        <button class="btn btn-danger" data-apagar ${temDados ? '' : 'disabled'}>${icon('lixo', 16)} Apagar tudo</button></div></section></div>`;
+        <button class="btn btn-danger" data-apagar ${temDados ? '' : 'disabled'}>${icon('lixo', 16)} Apagar tudo</button></div></section>`
+      : SECOES.filter(([id]) => grupos[id] && grupos[id].length).map(([id, t, s]) => `<section class="gx-cfg-sec" data-secao="${id}" aria-labelledby="cfg-${id}">${secaoH(id, t, s)}<div data-cartoes="${id}" style="display:contents"></div></section>`).join('');
+    el.innerHTML = `<div class="gx-cfg">` + U.pageHead({ titulo:'Dados e configurações', sub:'Ajuste as regras do portfólio, guarde cópias dos dados e escolha suas preferências.' }) + abas + `<div class="cfg-corpo" role="tabpanel">${corpo}</div></div>`;
+    if(aba === 'regras' && GP.configRegras) GP.configRegras(el.querySelector('[data-regras]'));
     Object.entries(grupos).forEach(([s, cs]) => { const host = el.querySelector(`[data-cartoes="${s}"]`); if(!host) return;
       cs.forEach(c => { const d = document.createElement('div'); d.className = 'card stack'; host.appendChild(d); try { c.render(d); } catch(e){ console.error(e); d.remove(); } }); });
-    el.querySelector('[data-remover-exemplos]').onclick = () => GP.confirmar('Remover projetos de exemplo?', `<p>${plural(ex, 'registro marcado como exemplo será removido', 'registros marcados como exemplo serão removidos')}. Seus projetos não são afetados.</p>`, 'Remover', () => {
+    const rem = el.querySelector('[data-remover-exemplos]'), apagar = el.querySelector('[data-apagar]');
+    if(rem) rem.onclick = () => GP.confirmar('Remover projetos de exemplo?', `<p>${plural(ex, 'registro marcado como exemplo será removido', 'registros marcados como exemplo serão removidos')}. Seus projetos não são afetados.</p>`, 'Remover', () => {
       GP.state().projetos = GP.projetos.todos().filter(p => !p.exemplo); GP.save(); GP.toast('Exemplos removidos.'); GP.refresh(); });
-    el.querySelector('[data-apagar]').onclick = confirmarApagar;
-    const alvo = rota && rota.query && rota.query.secao ? el.querySelector(`[data-secao="${CSS.escape(rota.query.secao)}"]`) : null;
+    if(apagar) apagar.onclick = confirmarApagar;
+    const alvo = ALIAS[pedido] ? el.querySelector(`[data-secao="${CSS.escape(pedido)}"]`) : null;
     if(alvo) setTimeout(() => alvo.scrollIntoView({ block:'start' }), 0);
   }
   /** Confirmação digitada: o botão só fica ativo depois de escrever APAGAR. */
@@ -6230,6 +6501,246 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
       const ui = GP.state().ui; const novo = GP.modelo.estadoInicial(); novo.ui.nivel = ui.nivel; novo.ui.menuMini = ui.menuMini; GP.resetState(novo); GP.toast('Dados apagados.'); GP.refresh(); });
   }
   GP.tela({ id:'config', nivel:1, ordem:90, rodape:true, titulo:'Dados e configurações', icone:'config', render: tela });
+})();
+</script>
+<script>/* src/regras.js */
+/* =========================================================================
+   Dados e configurações → Regras do portfólio
+   Um rascunho das regras (listas do cadastro, checklist de entrada e réguas da priorização) é editado na tela
+   e só vale depois de "Salvar e aplicar", que grava uma nova versão (GP.modelo.salvarConfig) e redesenha o sistema.
+   Pesos das perguntas e capacidade continuam nas próprias telas; aqui aparecem como atalhos.
+   GP.configRegras(host) desenha a aba dentro de host.
+   ========================================================================= */
+(function(){
+  'use strict';
+  const GP = window.GP, M = GP.modelo, icon = GP.icon, { esc, fmt } = GP.util;
+  const plural = GP.util.plural;
+  const clone = o => JSON.parse(JSON.stringify(o));
+  let R = null, hostAtual = null;   // rascunho em memória: sobrevive à troca de aba e de tela até salvar ou descartar
+
+  /* ---------------------------------------------------------------- rascunho */
+  function novoRascunho(c = GP.state().config){
+    return { base: GP.state().config.versao,
+      listas: { gerencias: c.listas.gerencias.map(g => ({ id: g.id, nome: g.nome, nova: !GP.state().config.listas.gerencias.some(x => x.id === g.id) })),
+        tipos: c.listas.tipos.map(t => ({ v: t, orig: GP.state().config.listas.tipos.includes(t) ? t : null })),
+        origens: c.listas.origens.map(t => ({ v: t, orig: GP.state().config.listas.origens.includes(t) ? t : null })) },
+      entrada: clone(c.entrada), corte: Object.assign({}, c.corte) };
+  }
+  const paraConfig = () => ({ listas: { gerencias: R.listas.gerencias.map(g => ({ id: String(g.id).trim().toUpperCase(), nome: String(g.nome).trim() })),
+    tipos: R.listas.tipos.map(t => t.v.trim()), origens: R.listas.origens.map(t => t.v.trim()) },
+    entrada: R.entrada.map(q => Object.assign({}, q, { pergunta: q.pergunta.trim(), seNao: q.seNao.trim() })), corte: Object.assign({}, R.corte) });
+  const renomes = () => { const r = { tipos: {}, origens: {} };
+    ['tipos', 'origens'].forEach(k => R.listas[k].forEach(t => { if(t.orig && t.v.trim() && t.v.trim() !== t.orig) r[k][t.orig] = t.v.trim(); })); return r; };
+  const mudancas = () => { if(!R) return []; const atual = GP.state().config;
+    return M.diffConfig(atual, M.limparConfig(Object.assign(paraConfig(), { versao: atual.versao })), renomes()).resumo; };
+  /** Problemas que impedem salvar, em linguagem simples. */
+  function problemas(){
+    const out = [], c = paraConfig();
+    const dup = (xs, rot) => { const vs = new Set(); xs.forEach(x => { const k = x.toLowerCase(); if(vs.has(k)) out.push(`${rot} repetido: “${x}”.`); vs.add(k); }); };
+    if(c.listas.gerencias.some(g => !g.id || !/^[A-Z0-9-]{1,12}$/.test(g.id))) out.push('Toda gerência precisa de uma sigla (letras e números, até 12).');
+    if(c.listas.gerencias.some(g => !g.nome)) out.push('Toda gerência precisa de um nome.');
+    dup(c.listas.gerencias.map(g => g.id), 'Sigla de gerência');
+    [['tipos', 'Tipo'], ['origens', 'Origem']].forEach(([k, rot]) => { if(c.listas[k].some(t => !t)) out.push(`Há um ${rot.toLowerCase()} sem nome.`); dup(c.listas[k].filter(Boolean), rot); });
+    ['gerencias', 'tipos', 'origens'].forEach(k => { if(!c.listas[k].length) out.push('Cada lista precisa de pelo menos um item.'); });
+    if(!c.entrada.some(q => q.ativa)) out.push('Deixe pelo menos uma pergunta do checklist ligada.');
+    if(c.entrada.some(q => q.ativa && q.pergunta.length < 5)) out.push('Toda pergunta ligada precisa de um texto.');
+    const k = c.corte, int = (v, a, b) => Number.isInteger(v) && v >= a && v <= b;
+    if(!int(k.valor, 5, 95) || !int(k.esforco, 5, 95)) out.push('Os cortes da matriz vão de 5 a 95.');
+    if(!int(k.classeA, 1, 100) || !int(k.classeB, 0, 99)) out.push('As classes usam números inteiros de 0 a 100.');
+    else if(k.classeB >= k.classeA) out.push('A classe B precisa começar abaixo da classe A.');
+    return [...new Set(out)];
+  }
+
+  /* ---------------------------------------------------------------- uso nos projetos */
+  const projetos = () => GP.projetos.todos();
+  const uso = (campo, v) => v == null ? 0 : projetos().filter(p => p[campo] === v).length;
+
+  /* ---------------------------------------------------------------- peças visuais */
+  /** Botão "?" com o efeito da regra e o jeito de alterar (dica do sistema: data-tt, mouse e foco). */
+  const ajuda = (titulo, efeito, como) => `<button type="button" class="cfg-ajuda" data-tt="${esc(titulo)}&#10;Efeito: ${esc(efeito)}&#10;Como alterar: ${esc(como)}" aria-label="${esc(`${titulo}. Efeito: ${efeito} Como alterar: ${como}`)}">?</button>`;
+  const cab = (n, titulo, sub, aj) => `<header class="cfg-cab"><span class="cfg-n" aria-hidden="true">${n}</span><div><h3>${titulo} ${aj}</h3><p>${sub}</p></div></header>`;
+
+  function cartaoListas(){
+    const L = R.listas;
+    const ger = L.gerencias.map((g, i) => { const n = g.nova ? 0 : uso('gerencia', g.id);
+      return `<li class="cfg-it">${g.nova ? `<input class="input cfg-sigla-in" data-ger-id="${i}" value="${esc(g.id)}" maxlength="12" placeholder="Sigla" aria-label="Sigla da nova gerência">` : `<span class="cfg-sigla" title="A sigla identifica a gerência nos projetos e não muda">${esc(g.id)}</span>`}
+        <input class="input" data-ger-nome="${i}" value="${esc(g.nome)}" maxlength="120" aria-label="Nome da gerência ${esc(g.id)}">
+        ${remover('gerencias', i, n, `a gerência ${g.id}`)}</li>`; }).join('');
+    const coluna = (k, titulo, campo, aj, ph) => `<div class="cfg-col"><h4>${titulo} ${aj}</h4><ul class="cfg-lista">${L[k].map((t, i) => `<li class="cfg-it">
+        <input class="input" data-item="${k}:${i}" value="${esc(t.v)}" maxlength="60" aria-label="${titulo}: item ${i + 1}">${remover(k, i, uso(campo, t.orig), `“${t.v}”`)}</li>`).join('')}</ul>
+      <div class="cfg-add"><input class="input" data-novo="${k}" maxlength="60" placeholder="${ph}" aria-label="${ph}"><button type="button" class="btn btn-ghost btn-sm" data-add="${k}">${icon('novo', 14)} Incluir</button></div></div>`;
+    return `<section class="card cfg-card" aria-labelledby="cfg-t-listas">${cab(1, '<span id="cfg-t-listas">Listas do cadastro</span>', 'As opções que aparecem nos formulários, nos filtros e nos indicadores.',
+        ajuda('Listas do cadastro', 'muda as opções dos campos Gerência, Tipo e Origem em todo o sistema (cadastro, filtros, planilha e indicadores).', 'edite o texto, inclua no fim da lista ou remova itens sem uso. Renomear um tipo ou origem atualiza os projetos que já usam o nome antigo.'))}
+      <div class="cfg-listas">
+        <div class="cfg-col"><h4>Gerências ${ajuda('Gerências', 'define as gerências que podem ser escolhidas e aparecem nos gráficos.', 'mude o nome à vontade. A sigla é fixa depois de salva. Só dá para remover uma gerência sem projetos.')}</h4>
+          <ul class="cfg-lista">${ger}</ul>
+          <div class="cfg-add cfg-add-ger"><input class="input cfg-sigla-in" data-novo="ger-id" maxlength="12" placeholder="Sigla" aria-label="Sigla da nova gerência"><input class="input" data-novo="ger-nome" maxlength="120" placeholder="Nome da nova gerência" aria-label="Nome da nova gerência"><button type="button" class="btn btn-ghost btn-sm" data-add="gerencias">${icon('novo', 14)} Incluir</button></div></div>
+        ${coluna('tipos', 'Tipos', 'tipo', ajuda('Tipos', 'classifica cada registro (projeto, evolução, adequação…) nos filtros e indicadores.', 'edite, inclua ou remova tipos sem uso.'), 'Novo tipo')}
+        ${coluna('origens', 'Origens', 'origem', ajuda('Origens', 'indica de onde veio a demanda e aparece nos filtros e indicadores.', 'edite, inclua ou remova origens sem uso.'), 'Nova origem')}
+      </div></section>`;
+  }
+  function remover(k, i, n, nome){
+    const so = R.listas[k].length <= 1;
+    const dica = n ? `Em uso por ${plural(n, 'projeto', 'projetos')}. Para remover, mude esses projetos antes.` : so ? 'A lista precisa de pelo menos um item.' : `Remover ${nome}`;
+    return `<span class="cfg-uso" title="${esc(dica)}">${n ? plural(n, 'projeto', 'projetos') : 'sem uso'}</span><button type="button" class="icon-btn cfg-rem" data-rem="${k}:${i}" aria-label="${esc(dica)}" title="${esc(dica)}" ${n || so ? 'disabled' : ''}>${icon('x', 15)}</button>`;
+  }
+
+  function cartaoChecklist(){
+    const ativas = R.entrada.filter(q => q.ativa), elim = ativas.filter(q => q.tipo === 'barreira').length;
+    const uE = M.ultimaMudanca('entrada'), antigas = uE ? projetos().filter(p => p.entrada && (p.entrada.cfg || 0) < uE).length : 0;
+    const efeito = q => q.tipo === 'barreira' ? '<span class="cfg-ef bad">Não → não entra</span>' : '<span class="cfg-ef warn">Não → falta informação</span>';
+    const linha = (q, i) => { const ed = R.editando === q.id;
+      return `<li class="cfg-q ${q.ativa ? '' : 'off'} ${ed ? 'ed' : ''}">
+      <label class="cfg-sw" title="${q.ativa ? 'Desligar' : 'Ligar'} a pergunta ${i + 1}"><input type="checkbox" data-q-ativa="${q.id}" ${q.ativa ? 'checked' : ''}><span class="cfg-sw-t" aria-hidden="true"></span><span class="sr-only">Pergunta ${i + 1} ${q.ativa ? 'ligada' : 'desligada'}</span></label>
+      <span class="cfg-qn" aria-hidden="true">${i + 1}</span>
+      ${ed ? `<div class="cfg-q-b">
+        <label class="cfg-l"><span>Pergunta ${i + 1}</span><textarea class="input" rows="2" maxlength="240" data-q="${q.id}:pergunta">${esc(q.pergunta)}</textarea></label>
+        <div class="cfg-q-l2">
+          <label class="cfg-l"><span>Se a resposta for “Não”, o que fazer</span><input class="input" maxlength="240" data-q="${q.id}:seNao" value="${esc(q.seNao)}"></label>
+          <label class="cfg-l"><span>Efeito do “Não”</span><select class="select" data-q="${q.id}:tipo">
+            <option value="barreira" ${q.tipo === 'barreira' ? 'selected' : ''}>Não entra no portfólio</option><option value="informacao" ${q.tipo === 'informacao' ? 'selected' : ''}>Falta informação</option></select></label>
+        </div></div>
+        <button type="button" class="btn btn-ghost btn-sm cfg-q-bt" data-editar-q="">${icon('check', 14)} Pronto</button>`
+      : `<div class="cfg-q-b"><b class="cfg-q-p">${esc(q.pergunta)}</b><span class="cfg-q-m">${efeito(q)}<span>Se “Não”: ${esc(q.seNao)}</span></span></div>
+        <button type="button" class="btn btn-ghost btn-sm cfg-q-bt" data-editar-q="${q.id}" ${q.ativa ? '' : 'disabled'} aria-label="Editar a pergunta ${i + 1}">${icon('editar', 14)} Editar</button>`}</li>`; };
+    return `<section class="card cfg-card" aria-labelledby="cfg-t-check">${cab(2, '<span id="cfg-t-check">Checklist de entrada</span>', `${ativas.length} de ${R.entrada.length} perguntas ligadas · ${plural(elim, 'eliminatória', 'eliminatórias')} · ${plural(ativas.length - elim, 'de informação mínima', 'de informação mínima')}.`,
+        ajuda('Checklist de entrada', 'muda as perguntas de Sim ou Não que decidem se uma demanda entra, não entra ou volta por falta de informação.', 'reescreva a pergunta e a orientação, escolha o efeito do “Não” ou desligue a pergunta. No funil, as eliminatórias aparecem primeiro.'))}
+      ${antigas ? `<p class="cfg-nota">${icon('info', 15)} ${plural(antigas, 'decisão de entrada foi tomada', 'decisões de entrada foram tomadas')} com uma versão anterior do checklist. Elas continuam valendo, e a ficha de cada projeto mostra a versão usada.</p>` : ''}
+      <ol class="cfg-qs">${R.entrada.map(linha).join('')}</ol></section>`;
+  }
+
+  function visReguas(){
+    const k = R.corte, ok = Number.isInteger(k.classeA) && Number.isInteger(k.classeB) && k.classeB < k.classeA;
+    const av = projetos().map(p => ({ p, s: M.pontuar(p) })).filter(x => x.s.completo);
+    const classe = v => v >= k.classeA ? 'A' : v >= k.classeB ? 'B' : 'C';
+    const quad = s => s.valor >= k.valor ? (s.esforco < k.esforco ? 'rapido' : 'estrategico') : (s.esforco < k.esforco ? 'complementar' : 'repensar');
+    const nC = { A: 0, B: 0, C: 0 }, nQ = { rapido: 0, estrategico: 0, complementar: 0, repensar: 0 };
+    av.forEach(x => { nC[classe(x.s.valor)]++; nQ[quad(x.s)]++; });
+    const a = ok ? k.classeA : 70, b = ok ? k.classeB : 40;
+    const q = id => `<div class="cfg-mq cfg-mq-${id}" style="--q:${M.QUADRANTES[id].cor}"><b>${nQ[id]}</b><span>${M.QUADRANTES[id].nome}</span></div>`;
+    return `<div class="cfg-regua" aria-hidden="true"><i class="c" style="width:${b}%"><span>C</span></i><i class="b" style="width:${a - b}%"><span>B</span></i><i class="a" style="width:${100 - a}%"><span>A</span></i></div>
+      <div class="cfg-regua-esc" aria-hidden="true"><span>0</span><span style="left:${b}%">${b}</span><span style="left:${a}%">${a}</span><span style="left:100%">100</span></div>
+      <div class="cfg-mini-mtz" role="img" aria-label="Prévia dos quadrantes com estas réguas: ${Object.keys(nQ).map(id => `${M.QUADRANTES[id].nome} ${nQ[id]}`).join(', ')}">${q('rapido')}${q('estrategico')}${q('complementar')}${q('repensar')}
+        <span class="cfg-mq-y">Valor ≥ ${esc(k.valor)}</span><span class="cfg-mq-x">Esforço ≥ ${esc(k.esforco)}</span></div>
+      <p class="cfg-previa" role="status">${av.length ? `Com estas réguas, ${plural(av.length, 'projeto avaliado fica', 'projetos avaliados ficam')}: <b>A ${nC.A}</b> · <b>B ${nC.B}</b> · <b>C ${nC.C}</b>.` : 'Ainda não há projetos avaliados para a prévia.'}</p>`;
+  }
+  function cartaoReguas(){
+    const k = R.corte, campo = (id, rot, min, max, aj) => `<label class="cfg-l cfg-num"><span>${rot} ${aj}</span><input class="input" type="number" inputmode="numeric" min="${min}" max="${max}" step="1" data-corte="${id}" value="${esc(k[id])}"></label>`;
+    return `<section class="card cfg-card" aria-labelledby="cfg-t-reguas">${cab(3, '<span id="cfg-t-reguas">Réguas da priorização</span>', 'Onde começam as classes A, B e C e os quadrantes da matriz. Nota de 0 a 100.',
+        ajuda('Réguas da priorização', 'muda a classe de prioridade (A, B, C) e o quadrante de cada projeto no ranking, na matriz, no painel e nos relatórios. As notas não mudam.', 'digite os números e veja a prévia ao lado antes de salvar.'))}
+      <div class="cfg-reguas">
+        <div class="cfg-campos">
+          ${campo('classeA', 'Classe A a partir de', 1, 100, ajuda('Classe A', 'projetos com nota de valor igual ou acima deste número são classe A, a prioridade mais alta.', 'digite um número maior que o da classe B.'))}
+          ${campo('classeB', 'Classe B a partir de', 0, 99, ajuda('Classe B', 'notas entre este número e o da classe A são classe B; abaixo dele, classe C.', 'digite um número menor que o da classe A.'))}
+          ${campo('valor', 'Valor alto a partir de', 5, 95, ajuda('Corte de valor', 'separa, na matriz, os projetos de valor alto (em cima) dos de valor baixo (embaixo).', 'digite de 5 a 95. O padrão é 50, o meio da escala.'))}
+          ${campo('esforco', 'Esforço alto a partir de', 5, 95, ajuda('Corte de esforço', 'separa, na matriz, os projetos de esforço alto (à direita) dos de esforço baixo (à esquerda).', 'digite de 5 a 95. O padrão é 50, o meio da escala.'))}
+        </div>
+        <div class="cfg-reguas-vis" data-reguas-vis>${visReguas()}</div>
+      </div></section>`;
+  }
+
+  function cartaoOutras(){
+    const S = GP.state(), cap = S.capacidade, cs = S.criterios, vp = GP.versaoPesosAtual && GP.versaoPesosAtual();
+    const nV = cs.filter(c => c.eixo === 'valor' && c.peso > 0).length, nE = cs.filter(c => c.eixo === 'esforco' && c.peso > 0).length;
+    const linha = (ic, titulo, resumo, href, nivel, aj) => `<div class="cfg-link"><span class="cfg-link-ic">${icon(ic, 18)}</span><div><b>${titulo} ${aj}</b><p>${resumo}</p></div>
+      ${GP.nivel() >= nivel ? `<a class="btn btn-ghost btn-sm" href="${href}">Abrir ${icon('seta', 14)}</a>` : `<span class="cfg-nivel">Ligue o nível ${nivel}</span>`}</div>`;
+    return `<section class="card cfg-card" aria-labelledby="cfg-t-outras">${cab(4, '<span id="cfg-t-outras">Regras com tela própria</span>', 'Estas regras têm prévia e histórico na própria tela. Os atalhos levam direto a elas.', '')}
+      <div class="cfg-links">
+        ${linha('pesos', 'Pesos das perguntas', `Valor: ${nV} perguntas · Esforço: ${nE} perguntas · ${vp ? `versão ${vp} dos pesos` : 'sugestão inicial'}.`, '#/criterios', 2,
+          ajuda('Pesos das perguntas', 'muda quanto cada pergunta vale na nota de valor e de esforço e, com isso, a ordem do ranking.', 'em Critérios e pesos, arraste ou digite os percentuais, confira a prévia e salve.'))}
+        ${linha('carteira', 'Capacidade, reserva e orçamento', `${fmt.n(cap.fte, cap.fte % 1 ? 1 : 0)} pessoas (FTE) · reserva de ${fmt.n(cap.reservaPct)}% · orçamento ${fmt.brl(cap.orcamento)} · período ${esc(cap.periodo)}.`, '#/carteira', 3,
+          ajuda('Capacidade, reserva e orçamento', 'muda quantos projetos cabem na carteira do período e quando cada um poderia começar.', 'em Carteira e capacidade, ajuste as premissas do período; o resultado aparece na hora.'))}
+      </div></section>`;
+  }
+  function versoes(){
+    const vs = (GP.state().configVersoes || []).slice().reverse();
+    return `<details class="card cfg-versoes"><summary>${icon('relogio', 16)} Histórico de versões das regras <span class="cfg-cont">${vs.length}</span></summary>
+      <ol>${vs.map(v => `<li><span class="cfg-vn">v${v.n}</span><div><time>${v.data ? fmt.dataHora(v.data) : 'início'}</time><ul>${v.resumo.map(r => `<li>${esc(r)}</li>`).join('')}</ul></div></li>`).join('')}</ol>
+      <div class="cfg-versoes-pe"><button type="button" class="btn btn-ghost btn-sm" data-padrao>${icon('voltar', 14)} Voltar à sugestão do sistema</button><small>Carrega a sugestão inicial no rascunho. Nada muda até você salvar.</small></div></details>`;
+  }
+  function barra(){
+    const ms = mudancas(), ps = ms.length ? problemas() : [], v = GP.state().config.versao;
+    return `<div class="cfg-barra ${ms.length ? 'sujo' : ''}" data-barra role="region" aria-label="Salvar as regras">
+      <div class="cfg-barra-txt" aria-live="polite">${ms.length
+        ? `<b>${plural(ms.length, 'alteração não salva', 'alterações não salvas')}</b><span class="cfg-barra-lista" title="${esc(ms.join('\n'))}">${esc(ms.slice(0, 2).join(' '))}${ms.length > 2 ? ' …' : ''}</span>${ps.length ? `<span class="cfg-erro">${icon('alerta', 14)} ${esc(ps[0])}</span>` : ''}`
+        : `<span class="cfg-ok">${icon('check', 15)} Tudo salvo · versão ${v} em uso</span>`}</div>
+      <div class="cfg-barra-acoes"><button type="button" class="btn btn-ghost" data-descartar ${ms.length ? '' : 'disabled'}>Descartar</button>
+      <button type="button" class="btn btn-primary" data-salvar ${ms.length && !ps.length ? '' : 'disabled'}>${icon('check', 16)} Salvar e aplicar</button></div></div>`;
+  }
+
+  /* ---------------------------------------------------------------- tela */
+  function desenhar(host){
+    hostAtual = host;
+    if(!R || R.base !== GP.state().config.versao) R = novoRascunho();
+    const c = GP.state().config, vs = GP.state().configVersoes || [], ult = vs[vs.length - 1];
+    host.innerHTML = `<div class="cfg-regras">
+      <div class="cfg-intro"><span class="cfg-intro-ic">${icon('pesos', 20)}</span><div><b>Estas regras valem para todo o sistema</b>
+        <p>Altere o que precisar e clique em <b>Salvar e aplicar</b>. Cada gravação vira uma versão, e cada projeto guarda a versão em que foi cadastrado, decidido na entrada e avaliado.</p></div>
+        <span class="cfg-versao" data-tt="Versão das regras em uso&#10;${esc(ult && ult.data ? 'Salva em ' + fmt.dataHora(ult.data) : 'Configuração inicial do sistema')}" tabindex="0">Versão <b>${c.versao}</b></span></div>
+      ${cartaoListas()}${cartaoChecklist()}${cartaoReguas()}${cartaoOutras()}${versoes()}${barra()}</div>`;
+    ligar(host);
+  }
+  const atualizarBarra = host => { const b = host.querySelector('[data-barra]'); if(b) b.outerHTML = barra(); };
+  function ligar(host){
+    const redesenhar = foco => { const y = scrollY; desenhar(host); scrollTo(0, y); if(foco){ const f = host.querySelector(foco); if(f) f.focus({ preventScroll: true }); } };
+    host.addEventListener('input', e => {
+      const t = e.target, d = t.dataset;
+      if(d.gerNome != null) R.listas.gerencias[+d.gerNome].nome = t.value;
+      else if(d.gerId != null) R.listas.gerencias[+d.gerId].id = t.value.toUpperCase();
+      else if(d.item){ const [k, i] = d.item.split(':'); R.listas[k][+i].v = t.value; }
+      else if(d.q){ const [id, campo] = d.q.split(':'); R.entrada.find(q => q.id === id)[campo] = t.value; }
+      else if(d.corte){ const v = t.value.trim(); R.corte[d.corte] = v === '' ? NaN : Math.round(+v);
+        const vis = host.querySelector('[data-reguas-vis]'); if(vis) vis.innerHTML = visReguas(); }
+      else return;
+      atualizarBarra(host);
+    });
+    host.addEventListener('change', e => {
+      const t = e.target;
+      if(t.dataset.qAtiva){ const q = R.entrada.find(x => x.id === t.dataset.qAtiva); q.ativa = t.checked; if(!t.checked && R.editando === q.id) R.editando = null; redesenhar(`[data-q-ativa="${t.dataset.qAtiva}"]`); }
+      else if(t.dataset.q && t.tagName === 'SELECT'){ atualizarBarra(host); }
+    });
+    const incluir = k => {
+      if(k === 'gerencias'){ const si = host.querySelector('[data-novo="ger-id"]'), no = host.querySelector('[data-novo="ger-nome"]'), id = si.value.trim().toUpperCase(), nome = no.value.trim();
+        if(!id || !nome){ GP.toast('Informe a sigla e o nome da nova gerência.'); (id ? no : si).focus(); return; }
+        if(R.listas.gerencias.some(g => String(g.id).toUpperCase() === id)){ GP.toast(`Já existe a gerência ${id}.`); si.focus(); return; }
+        R.listas.gerencias.push({ id, nome, nova: true }); redesenhar('[data-novo="ger-id"]'); return; }
+      const inp = host.querySelector(`[data-novo="${k}"]`), v = inp.value.trim();
+      if(!v){ inp.focus(); return; }
+      if(R.listas[k].some(t => t.v.trim().toLowerCase() === v.toLowerCase())){ GP.toast(`“${v}” já está na lista.`); inp.focus(); return; }
+      R.listas[k].push({ v, orig: null }); redesenhar(`[data-novo="${k}"]`);
+    };
+    host.addEventListener('keydown', e => { const n = e.target.dataset && e.target.dataset.novo; if(n && e.key === 'Enter'){ e.preventDefault(); incluir(n.startsWith('ger') ? 'gerencias' : n); } });
+    host.addEventListener('click', e => {
+      const b = e.target.closest('button'); if(!b || b.disabled) return;
+      if(b.dataset.add) incluir(b.dataset.add);
+      else if(b.dataset.editarQ != null){ const id = b.dataset.editarQ; R.editando = id || null; redesenhar(id ? `[data-q="${id}:pergunta"]` : null); }
+      else if(b.dataset.rem){ const [k, i] = b.dataset.rem.split(':'); R.listas[k].splice(+i, 1); redesenhar(); }
+      else if(b.hasAttribute('data-descartar')){ R = null; redesenhar(); GP.toast('Alterações descartadas.'); }
+      else if(b.hasAttribute('data-padrao')){ const pad = M.configPadrao(), base = R.base; R = novoRascunho(pad); R.base = base;
+        // gerências em uso que não estão na sugestão continuam, para não deixar projetos sem gerência
+        GP.state().config.listas.gerencias.forEach(g => { if(!R.listas.gerencias.some(x => x.id === g.id) && uso('gerencia', g.id)) R.listas.gerencias.push({ id: g.id, nome: g.nome, nova: false }); });
+        redesenhar(); GP.toast('Sugestão do sistema carregada no rascunho. Confira e salve para aplicar.'); }
+      else if(b.hasAttribute('data-salvar')) salvar(host);
+    });
+  }
+  function salvar(host){
+    const ms = mudancas(), ps = problemas(); if(!ms.length) return;
+    if(ps.length){ GP.toast(ps[0], { tipo: 'erro' }); return; }
+    const prox = GP.state().config.versao + 1;
+    GP.confirmar(`Salvar as regras como versão ${prox}?`, `<p>O que muda:</p><ul class="cfg-conf">${ms.map(m => `<li>${esc(m)}</li>`).join('')}</ul>
+      <p class="muted">Vale para todo o sistema a partir de agora. Os projetos já registrados continuam com a referência da versão em que foram cadastrados, decididos e avaliados.</p>`, 'Salvar e aplicar', () => {
+      const r = M.salvarConfig(paraConfig(), renomes());
+      if(!r.ok){ GP.toast(r.erro, { tipo: 'erro' }); return; }
+      R = null; GP.toast(`Regras salvas na versão ${r.versao} e aplicadas em todo o sistema.`, { tipo: 'ok' }); GP.refresh();
+    });
+  }
+  GP.configRegras = desenhar;
+
+  // rascunho pendente: avisa ao sair da tela e ao fechar a página
+  window.addEventListener('hashchange', () => {
+    if(!/^#\/?config/.test(location.hash) && mudancas().length) GP.toast('As alterações nas regras ainda não foram salvas.', { acao: 'Voltar e salvar', onAcao: () => GP.go('#/config?secao=regras'), ms: 9000 });
+  });
+  window.addEventListener('beforeunload', e => { if(mudancas().length){ e.preventDefault(); e.returnValue = ''; } });
 })();
 </script>
 <script>/* src/exportar.js */
@@ -6314,7 +6825,7 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
       if(v('dataEntrada')) d.dataEntrada = data(v('dataEntrada'));
       const et = idx.etapa != null ? M.ETAPAS.find(e => norm(e.nome) === norm(l[idx.etapa]) || e.id === String(l[idx.etapa] || '').trim()) : null;
       const erros = Object.assign({}, M.validar(d));
-      if(d.gerencia && !ger) erros.gerencia = `Gerência "${d.gerencia}" não reconhecida (use FEG, FEL, FEN ou FER).`;
+      if(d.gerencia && !ger) erros.gerencia = `Gerência "${d.gerencia}" não reconhecida (use ${M.CAT.gerencias.map(g => g.id).join(', ')}).`;
       if(d.tipo && !tipo) erros.tipo = `Tipo "${d.tipo}" não reconhecido.`;
       ['esforcoFte', 'duracaoMeses', 'custo'].forEach(k => { if(d[k] === 'inválido') erros[k] = 'Número inválido.'; });
       ['inicioPrevisto', 'fimPrevisto'].forEach(k => { if(d[k] === 'inválida') erros[k] = 'Data inválida (use dd/mm/aaaa).'; });
@@ -7569,7 +8080,7 @@ window.GP_PPT_TEMPLATES={"visao":{"base64":"UEsDBBQAAAAIAEGQQ12drdcvNQEAAFMCAAAR
       <div class="report-card"><div class="report-cover gold"><small>PowerPoint executivo / 6 slides</small><h2>Priorização e decisões<br>da carteira</h2><p>Ranking, capacidade simulada e pauta do comitê.</p></div><div class="report-body"><ol><li>Base elegível e contexto da decisão</li><li>Prioridade dos projetos aprovados</li><li>Distribuição por valor e esforço</li><li>Capacidade e novos inícios simulados</li><li>Projetos que exigem decisão</li><li>Pauta sugerida para o comitê</li></ol><button class="btn btn-primary" data-ppt="decisao">${icon('download',16)} Baixar PPT de prioridades e decisões</button></div></div></div>
       <p class="report-note">Os PPTs usam o recorte acima e os critérios do modelo sob curadoria da FEG. Textos e gráficos são editáveis. Estimativas e simulações ficam identificadas. As decisões permanecem com as instâncias de governança e exemplos fictícios recebem sinalização.</p>
       <div class="gx-rel-base"><div class="card gx-rel-card">${U.secH('Base do recorte','Cadastros e indicadores para abrir no Excel.')}<div class="row"><button class="btn btn-ghost" data-exportar-recorte>${icon('download',16)} Projetos e demandas (CSV)</button><button class="btn btn-ghost" data-exportar-indicadores>${icon('download',16)} Indicadores (CSV)</button></div></div>
-      <a class="card gx-rel-link" href="#/config"><span class="gx-rel-ic">${ico('escudo',20)}</span><span><b>Backup e cópia do sistema</b><small>Backup completo e HTML com os dados atuais ficam em Dados e configurações.</small></span>${icon('seta',16)}</a></div></div>`;
+      <a class="card gx-rel-link" href="#/config?secao=dados"><span class="gx-rel-ic">${ico('escudo',20)}</span><span><b>Backup e cópia do sistema</b><small>Backup completo e HTML com os dados atuais ficam em Dados e configurações.</small></span>${icon('seta',16)}</a></div></div>`;
     bindFilters(el);
     if(f.de&&f.ate&&f.de>f.ate){el.querySelectorAll('[data-ppt],[data-exportar-recorte],[data-exportar-indicadores]').forEach(b=>b.disabled=true);el.querySelector('.gx-rel').insertAdjacentHTML('beforeend',U.callout('<p>Ajuste o período: a data inicial deve ser anterior ou igual à data final.</p>','warn'));}
   }
@@ -8016,7 +8527,8 @@ window.GP_PPT_TEMPLATES={"visao":{"base64":"UEsDBBQAAAAIAEGQQ12drdcvNQEAAFMCAAAR
         <a class="card admin-action" href="#/criterios"><i>${icon('pesos',20)}</i><div><b>Critérios e pesos</b><span>Manter o método de priorização</span></div><small>Nível 2</small></a>
         <a class="card admin-action" href="#/carteira"><i>${icon('carteira',20)}</i><div><b>Capacidade e cenários</b><span>Revisar FTE, reserva e orçamento</span></div><small>Nível 3</small></a>
         <a class="card admin-action" href="#/indicadores"><i>${icon('ranking',20)}</i><div><b>Qualidade e indicadores</b><span>Ver cobertura e pendências da base</span></div><small>Todos</small></a>
-        <a class="card admin-action" href="#/config"><i>${icon('config',20)}</i><div><b>Dados e continuidade</b><span>Backup, restauração e usuários locais</span></div><small>Administração</small></a>
+        <a class="card admin-action" href="#/config?secao=regras"><i>${icon('pesos',20)}</i><div><b>Regras do portfólio</b><span>Listas do cadastro, checklist de entrada e réguas</span></div><small>Administração</small></a>
+        <a class="card admin-action" href="#/config?secao=dados"><i>${icon('config',20)}</i><div><b>Dados e continuidade</b><span>Backup, restauração e usuários locais</span></div><small>Administração</small></a>
       </div>
       <section class="card governance-rules">${U.secH('Responsabilidade operacional','Regras aplicadas ao uso do sistema.')}
         <div class="portfolio-table tbl-wrap"><table class="tbl"><thead><tr><th>Papel</th><th>Responsabilidade no sistema</th><th>Não substitui</th></tr></thead><tbody>

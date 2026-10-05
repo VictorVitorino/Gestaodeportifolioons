@@ -55,11 +55,13 @@
         <div class="seg op-seg" role="radiogroup" aria-labelledby="op-q-${q.id}">${['sim', 'nao'].map(v => `<button type="button" class="${r === v ? 'on' : ''} v-${v}" data-q="${q.id}" data-v="${v}" role="radio" aria-checked="${r === v}">${v === 'sim' ? 'Sim' : 'Não'}</button>`).join('')}</div></li>`;
     };
     const grupo = (tipo, titulo, cons, ic) => { const qs = M.ENTRADA.map((q, i) => [q, i]).filter(([q]) => q.tipo === tipo);
+      if(!qs.length) return '';
+      const a = qs[0][1] + 1, z = qs[qs.length - 1][1] + 1; titulo += a === z ? ` (${a})` : ` (${a} a ${z})`;   // perguntas e tipos vêm das Regras do portfólio
       return `<section class="op-qgrupo op-qg-${tipo}"><header><span class="op-qg-ic">${icon(ic, 16)}</span><div><h4>${titulo}</h4><p>${cons}</p></div></header><ol class="op-qs">${qs.map(([q, i]) => linha(q, i)).join('')}</ol></section>`; };
     const desenhar = () => {
       m.querySelector('[data-perguntas]').innerHTML =
-        grupo('barreira', 'Critérios eliminatórios (1 a 3)', 'Se alguma resposta for “Não”, a demanda <b>não entra</b> no portfólio.', 'alerta') +
-        grupo('informacao', 'Informações mínimas (4 a 6)', 'Se alguma resposta for “Não”, <b>falta informação</b> e a demanda volta ao demandante.', 'info');
+        grupo('barreira', 'Critérios eliminatórios', 'Se alguma resposta for “Não”, a demanda <b>não entra</b> no portfólio.', 'alerta') +
+        grupo('informacao', 'Informações mínimas', 'Se alguma resposta for “Não”, <b>falta informação</b> e a demanda volta ao demandante.', 'info');
       const r = M.avaliarEntrada(resp), R = M.RESULTADO_ENTRADA[r.resultado], V = VEREDITO[r.resultado];
       const total = M.ENTRADA.length, feitas = total - r.pendentes.length;
       m.querySelector('[data-resultado]').innerHTML = `<div class="op-veredito ${V.cls}" role="status"><span class="op-v-ic">${icon(V.ic, 20)}</span><div class="op-v-txt">
@@ -85,16 +87,17 @@
   /* --------------------------------------------------------------- tela */
   const ORDEM_FUNIL = ['entrada', 'triagem', 'aprovado', 'execucao', 'concluido'];
   const SAIDAS = ['espera', 'nao_entra', 'cancelado'];
-  const REGRA = [
-    ['t-ok', 'check', 'Entra', 'Entra no portfólio\nAs 6 respostas são “Sim”.\nVai para Admitido · aguardando priorização.'],
-    ['t-warn', 'info', 'Falta informação', 'Falta informação\n“Não” em alguma das perguntas 4 a 6.\nVolta ao demandante, em triagem.'],
-    ['t-bad', 'alerta', 'Não entra', 'Não entra\n“Não” em alguma das perguntas 1 a 3.\nO motivo fica registrado no histórico.'],
+  // a regra acompanha o checklist em uso (Dados e configurações → Regras do portfólio)
+  const REGRA = () => [
+    ['t-ok', 'check', 'Entra', `Entra no portfólio\nAs ${M.ENTRADA.length} respostas são “Sim”.\nVai para Admitido · aguardando priorização.`],
+    ...(M.faixaEntrada('informacao') ? [['t-warn', 'info', 'Falta informação', `Falta informação\n“Não” em alguma das perguntas ${M.faixaEntrada('informacao')}.\nVolta ao demandante, em triagem.`]] : []),
+    ...(M.faixaEntrada('barreira') ? [['t-bad', 'alerta', 'Não entra', `Não entra\n“Não” em alguma das perguntas ${M.faixaEntrada('barreira')}.\nO motivo fica registrado no histórico.`]] : []),
   ];
   const kcard = p => `<a class="kcard op-kcard" href="#/projeto/${p.id}"><span class="code">${esc(p.codigo)}</span><span class="op-k-tit" title="${esc(p.titulo)}">${esc(p.titulo)}</span><small>${esc([p.gerencia, p.tipo].filter(Boolean).join(' · '))}</small>
     <span class="op-k-pe">${p.responsavel ? `<span class="op-ini" title="Responsável: ${esc(p.responsavel)}" aria-label="Responsável: ${esc(p.responsavel)}">${esc(OP.iniciais(p.responsavel))}</span>` : '<span class="op-ini vazio" title="Sem responsável" aria-label="Sem responsável">?</span>'}<span>${esc(OP.txtNaEtapa(p))}</span></span></a>`;
   function tela(el, r){
     const todos = P.todos(), aba = r.query.aba === 'quadro' ? 'quadro' : 'fila';
-    const head = acoes => U.pageHead({ titulo:'Funil de entrada', sub:'Toda demanda passa por um checklist de 6 perguntas antes de entrar no portfólio.', acoes });
+    const head = acoes => U.pageHead({ titulo:'Funil de entrada', sub:`Toda demanda passa por um checklist de ${M.ENTRADA.length} perguntas antes de entrar no portfólio.`, acoes });
     if(!todos.length){
       el.innerHTML = `<div class="op-funil">${head('')}` + OP.passos({ titulo:'O funil começa com o primeiro cadastro', sub:'Cada projeto ou demanda passa por três passos simples antes de entrar no portfólio.',
         passos:[['novo', 'Cadastre', 'Registre o projeto ou demanda com as informações mínimas.'], ['funil', 'Responda o checklist', 'Seis perguntas de Sim ou Não, em cerca de 1 minuto.'], ['check', 'Veja a decisão', 'Entra no portfólio, falta informação ou não entra, sempre com o motivo.']] }) + '</div>';
@@ -123,7 +126,7 @@
           <div class="op-saida-cards">${ps.map(kcard).join('') || '<div class="op-col-vazia">Nenhum projeto</div>'}</div></details>`; }).join('')}</div></div></div>`;
     el.innerHTML = `<div class="op-funil">` + head(`<a class="btn btn-primary" href="#/novo">${icon('novo', 16)} Novo cadastro</a>`) +
       `<div class="op-funil-bar">${U.tabs('#/funil', [['fila', `Fila de entrada (${fila.length})`], ['quadro', 'Quadro por etapa']], aba)}
-        <div class="op-regra"><span class="op-regra-l">Regra do checklist</span>${REGRA.map(([c, ic, t, tt]) => `<span class="op-res ${c}" tabindex="0" data-tt="${esc(tt).replace(/\n/g, '&#10;')}" aria-label="${esc(tt.replace(/\n/g, '. '))}">${icon(ic, 14)}${esc(t)}</span>`).join('')}</div></div>
+        <div class="op-regra"><span class="op-regra-l">Regra do checklist</span>${REGRA().map(([c, ic, t, tt]) => `<span class="op-res ${c}" tabindex="0" data-tt="${esc(tt).replace(/\n/g, '&#10;')}" aria-label="${esc(tt.replace(/\n/g, '. '))}">${icon(ic, 14)}${esc(t)}</span>`).join('')}</div></div>
       ${fluxo}
       <div class="op-funil-corpo">${aba === 'quadro' ? quadro : corpoFila}</div></div>`;
     const fl = el.querySelector('[data-fluxo]'), pos = el.querySelector('[data-fluxo-pos]');

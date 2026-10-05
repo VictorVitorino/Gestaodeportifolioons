@@ -309,21 +309,121 @@
     return meses.map(mes => ({ mes, fte: lista.filter(p => p.inicioPrevisto && p.fimPrevisto && p.inicioPrevisto.slice(0, 7) <= mes && p.fimPrevisto.slice(0, 7) >= mes).reduce((a, p) => a + (p.esforcoFte || 0), 0) }));
   }
 
+  /* ------------------------------------------- regras editáveis (Dados e configurações → Regras do portfólio) */
+  /**
+   * S.config = {versao, listas:{gerencias:[{id,nome}], tipos:[], origens:[]}, entrada:[{id,tipo,pergunta,seNao,ativa}], corte:{valor,esforco,classeA,classeB}}
+   * S.configVersoes = [{n, data, resumo:[texto], areas:['listas'|'entrada'|'reguas']}] (até 30).
+   * aplicarConfig(c) copia as regras para CAT, ENTRADA e CORTE (os mesmos objetos que as telas já leem). As perguntas do checklist
+   * não são criadas nem apagadas: cada uma pode mudar de texto e de tipo, ou ser desligada. Cada projeto guarda a versão em uso
+   * no cadastro (p.ctx.cfg), na decisão de entrada (p.entrada.cfg) e na avaliação (p.avaliacao.cfg e .pesos).
+   */
+  const CAT_PADRAO = JSON.parse(JSON.stringify(CAT)), CORTE_PADRAO = Object.assign({}, CORTE);
+  const ENTRADA_BASE = ENTRADA.map(q => Object.assign({}, q));
+  const AREAS_CFG = { listas:'Listas do cadastro', entrada:'Checklist de entrada', reguas:'Réguas da priorização' };
+  function configPadrao(){
+    return { versao: 1, listas: JSON.parse(JSON.stringify(CAT_PADRAO)), entrada: ENTRADA_BASE.map(q => ({ id:q.id, tipo:q.tipo, pergunta:q.pergunta, seNao:q.seNao, ativa:true })), corte: Object.assign({}, CORTE_PADRAO) };
+  }
+  const inteiro = (v, a, b, pad) => { const n = Math.round(+v); return Number.isFinite(n) && v !== '' && v != null ? Math.max(a, Math.min(b, n)) : pad; };
+  const siglaOk = v => String(v ?? '').toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 12);
+  function textosUnicos(lista, max){
+    const vistos = new Set(), out = [];
+    (Array.isArray(lista) ? lista : []).forEach(v => { const t = typeof v === 'string' ? v.trim().slice(0, max) : ''; const k = t.toLowerCase(); if(t && !vistos.has(k)){ vistos.add(k); out.push(t); } });
+    return out;
+  }
+  function limparConfig(c){
+    const pad = configPadrao(); if(!c || typeof c !== 'object') return pad;
+    const L = c.listas && typeof c.listas === 'object' ? c.listas : {}, vistos = new Set();
+    const ger = (Array.isArray(L.gerencias) ? L.gerencias : []).map(g => g && typeof g === 'object' ? { id: siglaOk(g.id), nome: txt(g.nome, 120).trim() } : null)
+      .filter(g => g && g.id && !vistos.has(g.id) && vistos.add(g.id)).map(g => ({ id: g.id, nome: g.nome || g.id }));
+    const tipos = textosUnicos(L.tipos, 60), origens = textosUnicos(L.origens, 60);
+    const ent = ENTRADA_BASE.map(b => { const x = (Array.isArray(c.entrada) ? c.entrada : []).find(q => q && q.id === b.id) || {};
+      const perg = txt(x.pergunta, 240).trim(), se = txt(x.seNao, 240).trim();
+      return { id: b.id, tipo: x.tipo === 'barreira' || x.tipo === 'informacao' ? x.tipo : b.tipo, pergunta: perg || b.pergunta, seNao: se || b.seNao, ativa: x.ativa === undefined ? true : !!x.ativa }; });
+    if(!ent.some(q => q.ativa)) ent.forEach(q => { q.ativa = true; });
+    const k = c.corte && typeof c.corte === 'object' ? c.corte : {};
+    const classeA = inteiro(k.classeA, 1, 100, CORTE_PADRAO.classeA);
+    const corte = { valor: inteiro(k.valor, 5, 95, CORTE_PADRAO.valor), esforco: inteiro(k.esforco, 5, 95, CORTE_PADRAO.esforco), classeA, classeB: Math.min(classeA - 1, inteiro(k.classeB, 0, 99, CORTE_PADRAO.classeB)) };
+    return { versao: inteiro(c.versao, 1, 1e6, 1), listas: { gerencias: ger.length ? ger : pad.listas.gerencias, tipos: tipos.length ? tipos : pad.listas.tipos, origens: origens.length ? origens : pad.listas.origens }, entrada: ent, corte };
+  }
+  function limparVersoesCfg(vs, cfg){
+    const ok = (Array.isArray(vs) ? vs : []).filter(v => v && typeof v === 'object' && +v.n >= 1)
+      .map(v => ({ n: Math.floor(+v.n), data: txt(v.data, 40), resumo: (Array.isArray(v.resumo) ? v.resumo : []).map(r => txt(r, 200)).slice(0, 40), areas: (Array.isArray(v.areas) ? v.areas : []).filter(a => a in AREAS_CFG) }))
+      .filter(v => v.n <= cfg.versao).slice(-30);
+    return ok.length ? ok : [{ n: cfg.versao, data: '', resumo: ['Configuração inicial (sugestão do sistema).'], areas: [] }];
+  }
+  /** Copia as regras para os catálogos em uso. Perguntas eliminatórias primeiro, para a numeração ficar contínua. */
+  function aplicarConfig(c){
+    c = c && c.listas ? c : configPadrao();
+    CAT.gerencias.splice(0, CAT.gerencias.length, ...c.listas.gerencias.map(g => ({ id: g.id, nome: g.nome })));
+    CAT.tipos.splice(0, CAT.tipos.length, ...c.listas.tipos);
+    CAT.origens.splice(0, CAT.origens.length, ...c.listas.origens);
+    const ativas = c.entrada.filter(q => q.ativa).map(q => Object.assign({}, ENTRADA_BASE.find(b => b.id === q.id), { tipo: q.tipo, pergunta: q.pergunta, seNao: q.seNao }));
+    ENTRADA.splice(0, ENTRADA.length, ...ativas.filter(q => q.tipo === 'barreira'), ...ativas.filter(q => q.tipo !== 'barreira'));
+    Object.assign(CORTE, c.corte);
+  }
+  /** Texto das perguntas de um tipo no checklist em uso: '1 a 3', '4' ou '' (sem perguntas desse tipo). */
+  const faixaEntrada = tipo => { const ns = ENTRADA.map((q, i) => q.tipo === tipo ? i + 1 : 0).filter(Boolean); return !ns.length ? '' : ns.length === 1 ? String(ns[0]) : `${ns[0]} a ${ns[ns.length - 1]}`; };
+  const versaoCfg = () => (S() && S().config && S().config.versao) || 1;
+  /** Última versão que mexeu numa área (0 = nunca mudou desde a configuração inicial). */
+  const ultimaMudanca = area => Math.max(0, ...((S() && S().configVersoes) || []).filter(v => v.areas.includes(area)).map(v => v.n));
+  /** O que muda de a para b, em frases curtas. renomes: {tipos:{antigo:novo}, origens:{antigo:novo}}. */
+  function diffConfig(a, b, renomes = {}){
+    const resumo = [], areas = new Set(), add = (area, t) => { areas.add(area); resumo.push(t); };
+    const ga = new Map(a.listas.gerencias.map(g => [g.id, g])), gb = new Map(b.listas.gerencias.map(g => [g.id, g]));
+    gb.forEach((g, id) => { if(!ga.has(id)) add('listas', `Gerência incluída: ${id}.`); else if(ga.get(id).nome !== g.nome) add('listas', `Gerência ${id}: nome alterado.`); });
+    ga.forEach((g, id) => { if(!gb.has(id)) add('listas', `Gerência removida: ${id}.`); });
+    [['tipos', 'Tipo'], ['origens', 'Origem']].forEach(([k, rot]) => {
+      const ren = renomes[k] || {}, novos = new Set(b.listas[k]), antes = new Set(a.listas[k]);
+      Object.entries(ren).forEach(([de, para]) => { if(de !== para && antes.has(de) && novos.has(para)) add('listas', `${rot} renomeado: “${de}” → “${para}”.`); });
+      const renomeados = new Set(Object.values(ren));
+      b.listas[k].forEach(t => { if(!antes.has(t) && !renomeados.has(t)) add('listas', `${rot} incluído: “${t}”.`); });
+      a.listas[k].forEach(t => { if(!novos.has(t) && !(t in ren)) add('listas', `${rot} removido: “${t}”.`); });
+    });
+    b.entrada.forEach((q, i) => { const o = a.entrada.find(x => x.id === q.id) || {}, n = `Pergunta ${q.id.replace('E', '')}`;
+      if(o.ativa !== q.ativa) add('entrada', `${n} ${q.ativa ? 'ligada' : 'desligada'}.`);
+      if(o.pergunta !== q.pergunta) add('entrada', `${n}: texto alterado.`);
+      if(o.seNao !== q.seNao) add('entrada', `${n}: orientação para “Não” alterada.`);
+      if(o.tipo !== q.tipo) add('entrada', `${n} agora ${q.tipo === 'barreira' ? 'é eliminatória' : 'indica falta de informação'}.`); });
+    [['valor', 'Corte de valor (matriz)'], ['esforco', 'Corte de esforço (matriz)'], ['classeA', 'Classe A a partir de'], ['classeB', 'Classe B a partir de']].forEach(([k, rot]) => {
+      if(a.corte[k] !== b.corte[k]) add('reguas', `${rot}: ${a.corte[k]} → ${b.corte[k]}.`); });
+    return { resumo, areas: [...areas] };
+  }
+  /**
+   * Grava as regras como nova versão e aplica em todo o sistema. Renomear tipo ou origem atualiza os projetos que usam o nome antigo.
+   * Retorna {ok, versao, resumo} ou {ok:false, erro} (nada muda).
+   */
+  function salvarConfig(novo, renomes = {}){
+    const atual = S().config || configPadrao(), limpo = limparConfig(Object.assign({}, novo, { versao: atual.versao }));
+    const d = diffConfig(atual, limpo, renomes); if(!d.resumo.length) return { ok:false, erro:'Nenhuma alteração para salvar.' };
+    const emUso = id => S().projetos.filter(p => p.gerencia === id).length;
+    const sem = atual.listas.gerencias.find(g => !limpo.listas.gerencias.some(x => x.id === g.id) && emUso(g.id));
+    if(sem) return { ok:false, erro:`A gerência ${sem.id} está em uso por ${emUso(sem.id)} projeto(s).` };
+    ['tipos', 'origens'].forEach(k => { const ren = renomes[k] || {}, campo = k === 'tipos' ? 'tipo' : 'origem';
+      Object.entries(ren).forEach(([de, para]) => { if(de !== para && limpo.listas[k].includes(para)) S().projetos.forEach(p => { if(p[campo] === de) p[campo] = para; }); }); });
+    limpo.versao = atual.versao + 1;
+    S().config = limpo;
+    S().configVersoes = limparVersoesCfg(S().configVersoes, atual).concat({ n: limpo.versao, data: new Date().toISOString(), resumo: d.resumo, areas: d.areas }).slice(-30);
+    aplicarConfig(limpo); GP.save();
+    return { ok:true, versao: limpo.versao, resumo: d.resumo };
+  }
+
   /* --------------------------------------------------------------- estado */
   function estadoInicial(){
-    return { v: VERSAO, projetos: [], seq: 0, criterios: JSON.parse(JSON.stringify(CRITERIOS_PADRAO)), capacidade: Object.assign({}, CAPACIDADE_PADRAO), forcar: {}, ui: { nivel: 1, menuMini: false } };
+    return { v: VERSAO, projetos: [], seq: 0, criterios: JSON.parse(JSON.stringify(CRITERIOS_PADRAO)), capacidade: Object.assign({}, CAPACIDADE_PADRAO), forcar: {}, config: configPadrao(), configVersoes: [], ui: { nivel: 1, menuMini: false } };
   }
   /* Higienização: tudo o que vem do armazenamento ou de um backup passa por aqui (tipos, ids seguros, catálogos). */
   const idSeguro = v => String(v ?? '').replace(/[^\w-]/g, '').slice(0, 60);
   const txt = (v, max = 2000) => typeof v === 'string' ? v.slice(0, max) : v == null ? '' : String(v).slice(0, max);
   const numOuNull = v => v === '' || v == null || isNaN(v) ? null : Math.max(0, +v);
   const dataOuVazio = v => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : '';
-  function limparProjeto(p){
+  function limparProjeto(p, gerencias = CAT.gerencias){
     if(!p || typeof p !== 'object' || !p.id || typeof p.titulo !== 'string') return null;
     const o = {};
     ['titulo', 'descricao', 'beneficio', 'area', 'ferramenta', 'demandante', 'patrocinador', 'responsavel', 'link', 'observacoes', 'codigo', 'tipo', 'origem'].forEach(k => o[k] = txt(p[k], k === 'titulo' ? 140 : 2000));
     o.id = idSeguro(p.id); o.codigo = idSeguro(p.codigo) || o.id;
-    o.gerencia = CAT.gerencias.some(g => g.id === p.gerencia) ? p.gerencia : '';
+    o.gerencia = gerencias.some(g => g.id === p.gerencia) ? p.gerencia : '';
+    const versao = v => Number.isFinite(+v) && +v >= 1 ? Math.floor(+v) : null;
+    if(p.ctx && versao(p.ctx.cfg)) o.ctx = { cfg: versao(p.ctx.cfg) };
     o.etapa = ETAPAS.some(e => e.id === p.etapa) ? p.etapa : 'entrada';
     o.obrigatorio = !!p.obrigatorio; o.exemplo = !!p.exemplo;
     o.natureza = p.natureza === 'demanda' ? 'demanda' : 'projeto';
@@ -334,12 +434,15 @@
     ['criadoEm', 'atualizadoEm'].forEach(k => { if(p[k]) o[k] = txt(p[k], 40); });
     o.historico = Array.isArray(p.historico) ? p.historico.filter(h => h && typeof h === 'object').map(h => ({ data: txt(h.data, 40), acao: txt(h.acao, 60), detalhe: txt(h.detalhe, 1000) })) : [];
     if(p.entrada && typeof p.entrada === 'object' && RESULTADO_ENTRADA[p.entrada.resultado]){
-      const r = {}; Object.entries(p.entrada.respostas || {}).forEach(([k, v]) => { if(ENTRADA.some(q => q.id === k) && (v === 'sim' || v === 'nao')) r[k] = v; });
+      const r = {}; Object.entries(p.entrada.respostas || {}).forEach(([k, v]) => { if(ENTRADA_BASE.some(q => q.id === k) && (v === 'sim' || v === 'nao')) r[k] = v; });
       o.entrada = { respostas: r, resultado: p.entrada.resultado, motivos: Array.isArray(p.entrada.motivos) ? p.entrada.motivos.map(m => txt(m, 300)) : [], obs: txt(p.entrada.obs, 300), data: txt(p.entrada.data, 40) };
+      if(versao(p.entrada.cfg)) o.entrada.cfg = versao(p.entrada.cfg);
     }
     if(p.avaliacao && typeof p.avaliacao === 'object'){
       const r = {}; Object.entries(p.avaliacao.respostas || {}).forEach(([k, v]) => { if(/^[\w-]{1,20}$/.test(k) && v !== '' && v != null && !isNaN(v)) r[k] = Math.max(0, Math.min(3, Math.round(+v))); });
       o.avaliacao = { respostas: r, obs: txt(p.avaliacao.obs, 300), data: txt(p.avaliacao.data, 40) };
+      if(versao(p.avaliacao.cfg)) o.avaliacao.cfg = versao(p.avaliacao.cfg);
+      if(versao(p.avaliacao.pesos)) o.avaliacao.pesos = versao(p.avaliacao.pesos);
     }
     return o;
   }
@@ -358,8 +461,9 @@
     const per = periodoCap({ periodoIni: c.periodoIni, periodoFim: c.periodoFim, periodo: typeof c.periodo === 'string' || typeof c.periodo === 'number' ? txt(c.periodo, 40) : null });   // '2027' antigo vira jan a dez/2027
     S.capacidade = { periodo: per.rotulo, periodoIni: per.ini, periodoFim: per.fim, fte: numOuNull(c.fte) ?? CAPACIDADE_PADRAO.fte, reservaPct: Math.min(60, numOuNull(c.reservaPct) ?? CAPACIDADE_PADRAO.reservaPct),
       orcamento: numOuNull(c.orcamento) ?? CAPACIDADE_PADRAO.orcamento, descontarExecucao: c.descontarExecucao === undefined ? CAPACIDADE_PADRAO.descontarExecucao : !!c.descontarExecucao };
-    const vistos = new Set();
-    S.projetos = (Array.isArray(S.projetos) ? S.projetos : []).map(limparProjeto).filter(p => p && !vistos.has(p.id) && vistos.add(p.id));
+    S.config = limparConfig(S.config); S.configVersoes = limparVersoesCfg(S.configVersoes, S.config);
+    const vistos = new Set(), gers = S.config.listas.gerencias;
+    S.projetos = (Array.isArray(S.projetos) ? S.projetos : []).map(p => limparProjeto(p, gers)).filter(p => p && !vistos.has(p.id) && vistos.add(p.id));
     const f = {}; Object.entries(S.forcar && typeof S.forcar === 'object' ? S.forcar : {}).forEach(([k, v]) => { if(vistos.has(k) && (v === 'in' || v === 'out')) f[k] = v; }); S.forcar = f;
     S.seq = Math.max(Math.round(+S.seq) || 0, ...S.projetos.map(p => +(String(p.codigo).match(/(\d+)$/) || [0, 0])[1] || 0));
     S.meta = Object.assign({}, S.meta && typeof S.meta === 'object' ? S.meta : {}, {datasetId: idSeguro(S.meta?.datasetId) || uid('carteira'), revisao: Math.max(0,Math.floor(+S.meta?.revisao || 0)), salvoEm:txt(S.meta?.salvoEm,40)});
@@ -413,7 +517,7 @@
     criar(dados){
       const p = normalizar(Object.assign({ etapa:'entrada', dataEntrada: hoje() }, dados));
       const erros = validar(p); if(Object.keys(erros).length) return { ok:false, erros };
-      p.id = uid('p'); p.codigo = proximoCodigo(); p.criadoEm = new Date().toISOString(); p.historico = [];
+      p.id = uid('p'); p.codigo = proximoCodigo(); p.criadoEm = new Date().toISOString(); p.historico = []; p.ctx = { cfg: versaoCfg() };
       registrar(p, 'Cadastro', (p.natureza === 'demanda' ? 'Demanda' : 'Projeto') + ' cadastrado na fila de entrada.');
       S().projetos.push(p); GP.save(); return { ok:true, projeto:p };
     },
@@ -435,7 +539,7 @@
     registrarEntrada(id, respostas, obs = ''){
       const p = projetos.get(id); if(!p) return { ok:false };
       const r = avaliarEntrada(respostas); if(r.resultado === 'incompleto') return { ok:false, r };
-      p.entrada = { respostas: Object.assign({}, respostas), resultado: r.resultado, motivos: r.motivos, obs: (obs || '').trim(), data: new Date().toISOString() };
+      p.entrada = { respostas: Object.assign({}, respostas), resultado: r.resultado, motivos: r.motivos, obs: (obs || '').trim(), data: new Date().toISOString(), cfg: versaoCfg() };
       registrar(p, 'Entrada', `${RESULTADO_ENTRADA[r.resultado].nome}${r.motivos.length ? ': ' + r.motivos.join(' ') : ''}${p.entrada.obs ? ' Obs.: ' + p.entrada.obs : ''}`);
       const alvo = RESULTADO_ENTRADA[r.resultado].etapa;
       if(alvo && p.etapa !== alvo && ['entrada', 'triagem', 'aprovado', 'nao_entra'].includes(p.etapa)) projetos.mudarEtapa(id, alvo, r.motivos.join(' '));
@@ -445,7 +549,8 @@
     avaliar(id, respostas, obs = ''){
       const p = projetos.get(id); if(!p) return { ok:false };
       const r = {}; Object.entries(respostas || {}).forEach(([k, v]) => { if(v !== '' && v != null && !isNaN(v)) r[k] = Math.max(0, Math.min(3, +v)); });
-      p.avaliacao = { respostas: r, obs: (obs || '').trim(), data: new Date().toISOString() };
+      p.avaliacao = { respostas: r, obs: (obs || '').trim(), data: new Date().toISOString(), cfg: versaoCfg() };
+      const vp = GP.versaoPesosAtual && GP.versaoPesosAtual(); if(vp) p.avaliacao.pesos = vp;
       const s = pontuar(p);
       registrar(p, 'Priorização', s.completo ? `Valor ${GP.util.fmt.n(s.valor, 1)} · esforço ${GP.util.fmt.n(s.esforco, 1)} · ${QUADRANTES[s.quadrante].nome}` : `Avaliação parcial (faltam ${s.faltam} ${s.faltam === 1 ? 'resposta' : 'respostas'}).`);
       GP.save(); return { ok:true, s };
@@ -492,7 +597,8 @@
     GP.save(); return n;
   }
 
-  GP.modelo = { VERSAO, CAT, ETAPAS, etapa, CAMPOS, OBRIGATORIOS, ENTRADA, RESULTADO_ENTRADA, avaliarEntrada, CRITERIOS_PADRAO, EIXOS, CORTE, QUADRANTES, ETAPAS_PRIORIZAVEIS, criterios, sugestao, notaEixo, pontuar, ranking, decompor, pendentesAvaliacao, CAPACIDADE_PADRAO, STATUS_CARTEIRA, montarCarteira, demandaMensal, demandaCarteira, estadoInicial, migrar, validar, carregarExemplos };
+  GP.modelo = { VERSAO, CAT, ETAPAS, etapa, CAMPOS, OBRIGATORIOS, ENTRADA, RESULTADO_ENTRADA, avaliarEntrada, CRITERIOS_PADRAO, EIXOS, CORTE, QUADRANTES, ETAPAS_PRIORIZAVEIS, criterios, sugestao, notaEixo, pontuar, ranking, decompor, pendentesAvaliacao, CAPACIDADE_PADRAO, STATUS_CARTEIRA, montarCarteira, demandaMensal, demandaCarteira, estadoInicial, migrar, validar, carregarExemplos,
+    AREAS_CFG, faixaEntrada, configPadrao, limparConfig, aplicarConfig, diffConfig, salvarConfig, versaoCfg, ultimaMudanca };
   GP.projetos = projetos;
 })();
 

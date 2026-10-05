@@ -718,7 +718,7 @@
       <div class="report-card"><div class="report-cover gold"><small>PowerPoint executivo / 6 slides</small><h2>Priorização e decisões<br>da carteira</h2><p>Ranking, capacidade simulada e pauta do comitê.</p></div><div class="report-body"><ol><li>Base elegível e contexto da decisão</li><li>Prioridade dos projetos aprovados</li><li>Distribuição por valor e esforço</li><li>Capacidade e novos inícios simulados</li><li>Projetos que exigem decisão</li><li>Pauta sugerida para o comitê</li></ol><button class="btn btn-primary" data-ppt="decisao">${icon('download',16)} Baixar PPT de prioridades e decisões</button></div></div></div>
       <p class="report-note">Os PPTs usam o recorte acima e os critérios do modelo sob curadoria da FEG. Textos e gráficos são editáveis. Estimativas e simulações ficam identificadas. As decisões permanecem com as instâncias de governança e exemplos fictícios recebem sinalização.</p>
       <div class="gx-rel-base"><div class="card gx-rel-card">${U.secH('Base do recorte','Cadastros e indicadores para abrir no Excel.')}<div class="row"><button class="btn btn-ghost" data-exportar-recorte>${icon('download',16)} Projetos e demandas (CSV)</button><button class="btn btn-ghost" data-exportar-indicadores>${icon('download',16)} Indicadores (CSV)</button></div></div>
-      <a class="card gx-rel-link" href="#/config"><span class="gx-rel-ic">${ico('escudo',20)}</span><span><b>Backup e cópia do sistema</b><small>Backup completo e HTML com os dados atuais ficam em Dados e configurações.</small></span>${icon('seta',16)}</a></div></div>`;
+      <a class="card gx-rel-link" href="#/config?secao=dados"><span class="gx-rel-ic">${ico('escudo',20)}</span><span><b>Backup e cópia do sistema</b><small>Backup completo e HTML com os dados atuais ficam em Dados e configurações.</small></span>${icon('seta',16)}</a></div></div>`;
     bindFilters(el);
     if(f.de&&f.ate&&f.de>f.ate){el.querySelectorAll('[data-ppt],[data-exportar-recorte],[data-exportar-indicadores]').forEach(b=>b.disabled=true);el.querySelector('.gx-rel').insertAdjacentHTML('beforeend',U.callout('<p>Ajuste o período: a data inicial deve ser anterior ou igual à data final.</p>','warn'));}
   }
@@ -1165,7 +1165,8 @@
         <a class="card admin-action" href="#/criterios"><i>${icon('pesos',20)}</i><div><b>Critérios e pesos</b><span>Manter o método de priorização</span></div><small>Nível 2</small></a>
         <a class="card admin-action" href="#/carteira"><i>${icon('carteira',20)}</i><div><b>Capacidade e cenários</b><span>Revisar FTE, reserva e orçamento</span></div><small>Nível 3</small></a>
         <a class="card admin-action" href="#/indicadores"><i>${icon('ranking',20)}</i><div><b>Qualidade e indicadores</b><span>Ver cobertura e pendências da base</span></div><small>Todos</small></a>
-        <a class="card admin-action" href="#/config"><i>${icon('config',20)}</i><div><b>Dados e continuidade</b><span>Backup, restauração e usuários locais</span></div><small>Administração</small></a>
+        <a class="card admin-action" href="#/config?secao=regras"><i>${icon('pesos',20)}</i><div><b>Regras do portfólio</b><span>Listas do cadastro, checklist de entrada e réguas</span></div><small>Administração</small></a>
+        <a class="card admin-action" href="#/config?secao=dados"><i>${icon('config',20)}</i><div><b>Dados e continuidade</b><span>Backup, restauração e usuários locais</span></div><small>Administração</small></a>
       </div>
       <section class="card governance-rules">${U.secH('Responsabilidade operacional','Regras aplicadas ao uso do sistema.')}
         <div class="portfolio-table tbl-wrap"><table class="tbl"><thead><tr><th>Papel</th><th>Responsabilidade no sistema</th><th>Não substitui</th></tr></thead><tbody>

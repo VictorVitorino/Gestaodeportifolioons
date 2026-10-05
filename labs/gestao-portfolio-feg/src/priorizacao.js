@@ -88,6 +88,8 @@
   }
   /** Versão vigente: a última, se os pesos atuais forem os dela */
   const versaoAtual = () => { const vs = versoes(), u = vs[vs.length - 1]; return u && mesmosPesos(u.pesos, pesosAtuais()) ? u : null; };
+  /** Número da versão dos pesos em uso (null = sugestão inicial, nunca salva). A avaliação de cada projeto guarda esse número. */
+  GP.versaoPesosAtual = () => { const v = versaoAtual(); return v ? +v.n : null; };
   const seloVersao = () => { const v = versaoAtual(), padrao = M.CRITERIOS_PADRAO.every(c => { const a = GP.state().criterios.find(x => x.id === c.id); return a && +a.peso === +c.peso; });
     const txt = v ? `Pesos v${v.n} · ${fmt.data(String(v.data).slice(0, 10))}` : padrao ? 'Pesos sugeridos' : 'Pesos ajustados';
     return `<a class="pz-versao" href="#/criterios" title="Ver critérios e versões dos pesos">${icon('pesos', 14)}<span>${esc(txt)}</span></a>`; };

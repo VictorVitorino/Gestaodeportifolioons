@@ -79,7 +79,7 @@
       if(v('dataEntrada')) d.dataEntrada = data(v('dataEntrada'));
       const et = idx.etapa != null ? M.ETAPAS.find(e => norm(e.nome) === norm(l[idx.etapa]) || e.id === String(l[idx.etapa] || '').trim()) : null;
       const erros = Object.assign({}, M.validar(d));
-      if(d.gerencia && !ger) erros.gerencia = `Gerência "${d.gerencia}" não reconhecida (use FEG, FEL, FEN ou FER).`;
+      if(d.gerencia && !ger) erros.gerencia = `Gerência "${d.gerencia}" não reconhecida (use ${M.CAT.gerencias.map(g => g.id).join(', ')}).`;
       if(d.tipo && !tipo) erros.tipo = `Tipo "${d.tipo}" não reconhecido.`;
       ['esforcoFte', 'duracaoMeses', 'custo'].forEach(k => { if(d[k] === 'inválido') erros[k] = 'Número inválido.'; });
       ['inicioPrevisto', 'fimPrevisto'].forEach(k => { if(d[k] === 'inválida') erros[k] = 'Data inválida (use dd/mm/aaaa).'; });

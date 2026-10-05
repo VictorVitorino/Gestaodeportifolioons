@@ -191,3 +191,54 @@ test('demanda mensal de pessoas', () => {
   assert.equal(M.demandaMensal(lista, '2027-01', '2032-12').length, 72);       // sem corte em 61 meses
   assert.equal(M.demandaMensal(lista, '2027-01', '2032-12', 24).length, 24);   // limite explícito (janela do roadmap)
 });
+
+test('regras editáveis: versão, aplicação em todo o modelo e referência nos projetos', () => {
+  const GP = carregar(), M = GP.modelo, S = GP.state();
+  assert.equal(S.config.versao, 1);
+  const a = GP.projetos.criar(base).projeto;
+  assert.equal(a.ctx.cfg, 1);
+  GP.projetos.registrarEntrada(a.id, Object.fromEntries(M.ENTRADA.map(q => [q.id, 'sim'])));
+  assert.equal(a.entrada.cfg, 1);
+  const novo = JSON.parse(JSON.stringify(S.config));
+  novo.corte.valor = 60; novo.corte.classeA = 75;
+  novo.entrada.find(q => q.id === 'E6').ativa = false;
+  novo.entrada.find(q => q.id === 'E4').tipo = 'barreira';
+  novo.listas.tipos = novo.listas.tipos.map(t => t === 'Projeto' ? 'Projeto estruturante' : t);
+  novo.listas.gerencias.push({ id: 'fex', nome: 'FEX · Nova gerência' });
+  const r = M.salvarConfig(novo, { tipos: { 'Projeto': 'Projeto estruturante' } });
+  assert.equal(r.ok, true); assert.equal(r.versao, 2);
+  assert.equal(M.CORTE.valor, 60); assert.equal(M.CORTE.classeA, 75);
+  assert.equal(M.ENTRADA.length, 5);
+  assert.deepEqual([...M.ENTRADA.map(q => q.id)], ['E1', 'E2', 'E3', 'E4', 'E5']);   // eliminatórias primeiro
+  assert.equal(M.faixaEntrada('barreira'), '1 a 4'); assert.equal(M.faixaEntrada('informacao'), '5');
+  assert.ok(M.CAT.gerencias.some(g => g.id === 'FEX'));
+  assert.equal(a.tipo, 'Projeto estruturante');                                  // renomear atualiza os projetos
+  const v = S.configVersoes.at(-1);
+  assert.equal(v.n, 2); assert.deepEqual([...v.areas].sort(), ['entrada', 'listas', 'reguas']);
+  assert.ok(v.resumo.some(t => /Corte de valor/.test(t)));
+  assert.equal(M.ultimaMudanca('entrada'), 2);
+  const b = GP.projetos.criar({ ...base, titulo: 'Depois da mudança', tipo: 'Projeto estruturante' }).projeto;
+  assert.equal(b.ctx.cfg, 2); assert.equal(a.ctx.cfg, 1);                       // cada um guarda a versão em que foi registrado
+  // a decisão de entrada usa só as perguntas ligadas
+  assert.equal(M.avaliarEntrada({ E1:'sim', E2:'sim', E3:'sim', E4:'sim', E5:'sim' }).resultado, 'entra');
+  assert.equal(M.avaliarEntrada({ E1:'sim', E2:'sim', E3:'sim', E4:'nao', E5:'sim' }).resultado, 'nao_entra');
+  // sem alteração não cria versão; gerência em uso não pode sair
+  assert.equal(M.salvarConfig(JSON.parse(JSON.stringify(S.config))).ok, false);
+  const semFeg = JSON.parse(JSON.stringify(S.config)); semFeg.listas.gerencias = semFeg.listas.gerencias.filter(g => g.id !== 'FEG');
+  assert.match(M.salvarConfig(semFeg).erro, /FEG/);
+  assert.equal(S.config.versao, 2);
+  // migrar preserva as referências e a configuração
+  const m = M.migrar(JSON.parse(JSON.stringify(S)));
+  assert.equal(m.projetos.find(p => p.id === a.id).entrada.cfg, 1);
+  assert.equal(m.config.corte.valor, 60); assert.equal(m.configVersoes.length, 2);
+});
+
+test('regras editáveis: higienização das réguas e do checklist', () => {
+  const GP = carregar(), M = GP.modelo;
+  const c = M.limparConfig({ corte: { valor: 200, esforco: -3, classeA: 40, classeB: 80 }, entrada: [{ id: 'E1', ativa: false, pergunta: '' }].concat(['E2','E3','E4','E5','E6'].map(id => ({ id, ativa: false }))) });
+  assert.equal(c.corte.valor, 95); assert.equal(c.corte.esforco, 5);
+  assert.ok(c.corte.classeB < c.corte.classeA);
+  assert.ok(c.entrada.every(q => q.ativa));                                      // ao menos uma pergunta fica ligada
+  assert.ok(c.entrada[0].pergunta.length > 10);                                  // texto vazio volta ao original
+  assert.equal(c.listas.gerencias.length, 4);
+});

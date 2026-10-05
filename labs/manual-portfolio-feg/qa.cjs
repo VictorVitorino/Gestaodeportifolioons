@@ -16,9 +16,9 @@ const checar = (cond, nome, extra) => { if(cond){ ok++; } else { falhas++; conso
   // visão geral
   await p.goto(URL); await p.evaluate(() => localStorage.clear()); await p.reload(); await p.waitForTimeout(300);
   checar(await p.locator('.hm-hero h1').isVisible(), 'visão geral: título visível');
-  checar(await p.locator('.hm-card').count() === 11, 'visão geral: 11 cartões de módulo', await p.locator('.hm-card').count());
+  checar(await p.locator('.hm-card').count() === 12, 'visão geral: 12 cartões de módulo', await p.locator('.hm-card').count());
   checar(await p.locator('.hm-passos li').count() === 3, 'visão geral: método em 3 tempos');
-  checar(await p.locator('.side-mod').count() === 11, 'menu: 11 módulos');
+  checar(await p.locator('.side-mod').count() === 12, 'menu: 12 módulos');
   checar(await p.locator('.mt-top .ons').isVisible(), 'topo: logo ONS');
   const href = await p.locator('.mt-btn-app').getAttribute('href');
   checar(href === 'gestao-portfolio-feg.html', 'topo: link para o sistema', href);
@@ -136,7 +136,7 @@ const checar = (cond, nome, extra) => { if(cond){ ok++; } else { falhas++; conso
   checar(s.fim, 'fim do clipe', s);
   checar(await p.locator('.cover.on[data-tipo="fim"]').isVisible(), 'capa de módulo concluído');
   checar(await p.locator('.side-mod.on.ok').count() === 1, 'menu marca o módulo como assistido');
-  checar(/1 de 11/.test(await p.textContent('[data-prog-txt]')), 'progresso geral 1 de 11');
+  checar(/1 de 12/.test(await p.textContent('[data-prog-txt]')), 'progresso geral 1 de 12');
   await p.click('[data-resp="0"]');
   checar(await p.locator('[data-resp="0"].errado').count() === 1, 'quiz: resposta errada sinalizada');
   await p.click('[data-resp="2"]');
@@ -160,7 +160,7 @@ const checar = (cond, nome, extra) => { if(cond){ ok++; } else { falhas++; conso
   checar(await p.locator('.hm-card.ok').count() === 1, 'visão geral mostra o módulo assistido');
   // cobertura: todas as cenas renderizam sem erro
   const total = await p.evaluate(async () => { let n = 0; for(const m of window.MANUAL.modulos){ location.hash = '#/' + m.id; await new Promise(r => setTimeout(r, 60)); for(let i = 0; i < m.cenas.length; i++){ const P = window.MANUAL_PLAYER; P.irCena(i); P.irPara(P.estado().T + 4.5); n++; } } return n; });
-  checar(total === 54, 'todas as cenas percorridas', total);
+  checar(total === 59, 'todas as cenas percorridas', total);
 
   // celular
   const m = await b.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });

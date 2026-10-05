@@ -90,7 +90,7 @@ module.exports = {
     await p.click('[data-limpar]'); await p.waitForTimeout(150);
     await p.click('th[data-sort="acervo|titulo"]'); await p.click('th[data-sort="acervo|titulo"]'); await p.waitForTimeout(150);
     check(/Relatórios gerenciais/.test(await p.locator('tbody tr').first().textContent()), 'ordenação decrescente por título falhou');
-    await ir('#/config'); await p.click('[data-exemplos]'); await p.waitForTimeout(150);
+    await ir('#/config?secao=dados'); await p.click('[data-exemplos]'); await p.waitForTimeout(150);
     check(await p.evaluate(() => GP.projetos.todos().length) === 14, 'carregar exemplos duas vezes não pode duplicar');
   },
   /* Passo 3 — funil de entrada */
@@ -255,7 +255,7 @@ module.exports = {
   },
   async 'passo7: backup e restauração preservam tudo'({ p, ir, check }){
     await p.evaluate(() => { GP.modelo.carregarExemplos(); GP.state().criterios[0].peso = 30; GP.state().criterios[1].peso = 15; GP.save(); });
-    await ir('#/config');
+    await ir('#/config?secao=dados');
     const [dl] = await Promise.all([p.waitForEvent('download'), p.click('[data-backup]')]);
     const arq = require('path').join(require('os').tmpdir(), 'qa-backup.json'); await dl.saveAs(arq);
     await p.click('[data-apagar]'); await p.fill('.modal [data-confirma-texto]', 'APAGAR'); await p.click('.modal [data-ok]'); await p.waitForTimeout(200);
@@ -278,7 +278,7 @@ module.exports = {
   async 'qa8-01: backup malformado não trava o app'({ p, ir, check }){
     const arq = require('path').join(require('os').tmpdir(), 'qa-bk-ruim.json');
     require('fs').writeFileSync(arq, JSON.stringify({ tipo:'BACKUP_GESTAO_PORTFOLIO_FEG', exportadoEm:'xx', estado:{ projetos:[null, 5, { id:'ok-1', titulo:'Projeto válido do backup', etapa:'xyz', gerencia:'FEN', esforcoFte:'abc', link:'javascript:alert(1)' }] } }));
-    await ir('#/config');
+    await ir('#/config?secao=dados');
     const [fc] = await Promise.all([p.waitForEvent('filechooser'), p.click('[data-restaurar-backup]')]);
     await fc.setFiles(arq); await p.waitForTimeout(200);
     const t = await p.textContent('.modal');
@@ -324,7 +324,7 @@ module.exports = {
     const x = '<img src=x onerror="window.__xss=1">';
     require('fs').writeFileSync(arq, JSON.stringify({ tipo:'BACKUP_GESTAO_PORTFOLIO_FEG', estado:{ ui:{ nivel:3 }, capacidade:{ reservaPct:x, fte:x, periodo:x }, forcar:{}, criterios:[{ id:x, eixo:'valor', peso:x, nome:x, pergunta:x, niveis:[x,x,x,x] }],
       projetos:[{ id:'a"><img src=x onerror=window.__xss=2>', codigo:x, titulo:'Projeto '+x, etapa:'aprovado', gerencia:'FEN', tipo:x, esforcoFte:1 }] } }));
-    await ir('#/config');
+    await ir('#/config?secao=dados');
     const [fc] = await Promise.all([p.waitForEvent('filechooser'), p.click('[data-restaurar-backup]')]);
     await fc.setFiles(arq); await p.waitForTimeout(200); await p.click('.modal [data-ok]'); await p.waitForTimeout(200);
     await p.evaluate(() => { GP.state().ui.nivel = 3; GP.save(); });

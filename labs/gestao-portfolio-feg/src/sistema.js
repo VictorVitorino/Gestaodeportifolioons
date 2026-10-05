@@ -1,6 +1,7 @@
 /* =========================================================================
    Dados e configurações (rodapé do menu)
-   Seções: Dados (cópias, importação e exemplos), Acesso, Interface, Outros e Zona de risco.
+   Três abas: Regras do portfólio (regras.js), Dados e cópias (cópias, importação, exemplos e zona de risco)
+   e Preferências (acesso, interface e outros). A aba vem de ?secao= (nomes antigos de seção continuam valendo).
    Extensão: GP.configCartoes - {ordem, secao:'dados'|'acesso'|'interface'|'outros', render(el)} para cartões extras.
    ========================================================================= */
 (function(){
@@ -13,6 +14,12 @@
     ['interface', 'Interface', 'Preferências de leitura salvas neste navegador.'],
     ['outros', 'Outros recursos', ''],
   ];
+  const ABAS = [
+    { id:'regras', nome:'Regras do portfólio', icone:'pesos', desc:'Listas do cadastro, checklist de entrada e réguas da priorização. Valem para todo o sistema.' },
+    { id:'dados', nome:'Dados e cópias', icone:'nuvem', desc:'Backup, planilhas, projetos de exemplo e zona de risco.' },
+    { id:'preferencias', nome:'Preferências', icone:'config', desc:'Acesso desta cópia e preferências de leitura.' },
+  ];
+  const ALIAS = { risco:'dados', acesso:'preferencias', interface:'preferencias', outros:'preferencias' };
   const secaoH = (id, titulo, sub) => `<div class="gx-cfg-h"><h2 id="cfg-${id}">${esc(titulo)}</h2>${sub ? `<p>${esc(sub)}</p>` : ''}</div>`;
 
   function cartaoCopias(){
@@ -38,21 +45,27 @@
   function tela(el, rota){
     const todos = GP.projetos.todos(), n = todos.length, ex = todos.filter(p => p.exemplo).length, temDados = n || (GP.state().riscos || []).length;
     const grupos = {}; GP.configCartoes.slice().sort((a, b) => (a.ordem || 50) - (b.ordem || 50)).forEach(c => { const s = ['dados', 'acesso', 'interface'].includes(c.secao) ? c.secao : 'outros'; (grupos[s] ||= []).push(c); });
-    el.innerHTML = `<div class="gx-cfg">` + U.pageHead({ titulo:'Dados e configurações', sub:'Os dados ficam salvos neste navegador. Guarde cópias com frequência e leve a carteira para outro computador quando precisar.' }) +
-      `<section class="gx-cfg-sec" data-secao="dados" aria-labelledby="cfg-dados">${secaoH('dados', 'Dados', 'Cópias, importação e registros de exemplo.')}
+    const pedido = rota && rota.query && rota.query.secao || '', aba = ABAS.some(x => x.id === pedido) ? pedido : ALIAS[pedido] || 'regras', A = ABAS.find(x => x.id === aba);
+    const abas = `<div class="cfg-abas" role="tablist" aria-label="Partes de Dados e configurações">${ABAS.map(x => `<a role="tab" href="#/config?secao=${x.id}" class="${x.id === aba ? 'on' : ''}" aria-selected="${x.id === aba}" ${x.id === aba ? 'aria-current="page"' : ''}>${icon(x.icone, 16)}<span>${x.nome}</span></a>`).join('')}</div>
+      <p class="cfg-aba-desc">${esc(A.desc)}</p>`;
+    const corpo = aba === 'regras' ? `<div data-regras></div>`
+      : aba === 'dados' ? `<section class="gx-cfg-sec" data-secao="dados" aria-labelledby="cfg-dados">${secaoH('dados', 'Cópias e planilhas', 'Guarde cópias, leve a carteira para outro computador ou traga dados de uma planilha.')}
         <div class="card stack gx-cfg-copias">${cartaoCopias()}</div>
         <div class="card stack">${cartaoExemplos(n, ex)}</div>
         <div data-cartoes="dados" style="display:contents"></div></section>
-      ${SECOES.filter(([id]) => grupos[id] && grupos[id].length).map(([id, t, s]) => `<section class="gx-cfg-sec" data-secao="${id}" aria-labelledby="cfg-${id}">${secaoH(id, t, s)}<div data-cartoes="${id}" style="display:contents"></div></section>`).join('')}
       <section class="gx-cfg-sec gx-zona" data-secao="risco" aria-labelledby="cfg-risco">${secaoH('risco', 'Zona de risco', 'Ações que não podem ser desfeitas.')}
         <div class="card gx-zona-card"><div><b>Apagar todos os dados</b><p>Remove projetos, avaliações, riscos e configurações deste navegador e volta ao estado inicial. Baixe um backup antes.</p></div>
-        <button class="btn btn-danger" data-apagar ${temDados ? '' : 'disabled'}>${icon('lixo', 16)} Apagar tudo</button></div></section></div>`;
+        <button class="btn btn-danger" data-apagar ${temDados ? '' : 'disabled'}>${icon('lixo', 16)} Apagar tudo</button></div></section>`
+      : SECOES.filter(([id]) => grupos[id] && grupos[id].length).map(([id, t, s]) => `<section class="gx-cfg-sec" data-secao="${id}" aria-labelledby="cfg-${id}">${secaoH(id, t, s)}<div data-cartoes="${id}" style="display:contents"></div></section>`).join('');
+    el.innerHTML = `<div class="gx-cfg">` + U.pageHead({ titulo:'Dados e configurações', sub:'Ajuste as regras do portfólio, guarde cópias dos dados e escolha suas preferências.' }) + abas + `<div class="cfg-corpo" role="tabpanel">${corpo}</div></div>`;
+    if(aba === 'regras' && GP.configRegras) GP.configRegras(el.querySelector('[data-regras]'));
     Object.entries(grupos).forEach(([s, cs]) => { const host = el.querySelector(`[data-cartoes="${s}"]`); if(!host) return;
       cs.forEach(c => { const d = document.createElement('div'); d.className = 'card stack'; host.appendChild(d); try { c.render(d); } catch(e){ console.error(e); d.remove(); } }); });
-    el.querySelector('[data-remover-exemplos]').onclick = () => GP.confirmar('Remover projetos de exemplo?', `<p>${plural(ex, 'registro marcado como exemplo será removido', 'registros marcados como exemplo serão removidos')}. Seus projetos não são afetados.</p>`, 'Remover', () => {
+    const rem = el.querySelector('[data-remover-exemplos]'), apagar = el.querySelector('[data-apagar]');
+    if(rem) rem.onclick = () => GP.confirmar('Remover projetos de exemplo?', `<p>${plural(ex, 'registro marcado como exemplo será removido', 'registros marcados como exemplo serão removidos')}. Seus projetos não são afetados.</p>`, 'Remover', () => {
       GP.state().projetos = GP.projetos.todos().filter(p => !p.exemplo); GP.save(); GP.toast('Exemplos removidos.'); GP.refresh(); });
-    el.querySelector('[data-apagar]').onclick = confirmarApagar;
-    const alvo = rota && rota.query && rota.query.secao ? el.querySelector(`[data-secao="${CSS.escape(rota.query.secao)}"]`) : null;
+    if(apagar) apagar.onclick = confirmarApagar;
+    const alvo = ALIAS[pedido] ? el.querySelector(`[data-secao="${CSS.escape(pedido)}"]`) : null;
     if(alvo) setTimeout(() => alvo.scrollIntoView({ block:'start' }), 0);
   }
   /** Confirmação digitada: o botão só fica ativo depois de escrever APAGAR. */

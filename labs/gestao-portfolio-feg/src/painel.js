@@ -22,7 +22,7 @@
   }
 
   function boasVindas(el){
-    const passos = [['novo', 'Cadastre', 'Registre cada projeto ou demanda com as informações mínimas.'], ['funil', 'Decida a entrada', 'Responda 6 perguntas simples: entra, não entra ou falta informação.'], ['ranking', 'Priorize', 'No nível 2, responda as perguntas de prioridade e veja o ranking.']];
+    const passos = [['novo', 'Cadastre', 'Registre cada projeto ou demanda com as informações mínimas.'], ['funil', 'Decida a entrada', `Responda ${GP.modelo.ENTRADA.length} perguntas simples: entra, não entra ou falta informação.`], ['ranking', 'Priorize', 'No nível 2, responda as perguntas de prioridade e veja o ranking.']];
     el.innerHTML = U.pageHead({ titulo:'Boas-vindas à Gestão de Portfólio da FEG', sub:'Um lugar único para registrar os projetos, decidir o que entra e definir prioridades.' }) +
       (OP.passos ? OP.passos({ titulo:'Comece em três passos', sub:'Quer ver como fica com dados? Carregue 14 projetos fictícios e remova depois em Dados e configurações.', passos, extra:'<button class="btn btn-ghost" data-ajuda-nivel>Entender os níveis</button>' })
         : `<div class="card"><a class="btn btn-primary" href="#/novo">Novo cadastro</a> <button class="btn btn-ghost" data-exemplos>Carregar exemplos</button></div>`);

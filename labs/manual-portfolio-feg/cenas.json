@@ -1266,7 +1266,7 @@
     "id": "m10-1",
     "titulo": "Salvo no navegador",
     "texto": "O sistema salva sozinho, neste navegador, a cada alteração. O selo no topo confirma o último salvamento.",
-    "rota": "#/config",
+    "rota": "#/config?secao=dados",
     "nivel": 1,
     "img": "frames/m10-1.webp",
     "alvo": {
@@ -1285,19 +1285,19 @@
     "id": "m10-2",
     "titulo": "Backup e cópia do sistema",
     "texto": "Faça um backup com frequência. Ele guarda tudo num arquivo que você pode restaurar em outro computador ou em outro navegador.",
-    "rota": "#/config",
+    "rota": "#/config?secao=dados",
     "nivel": 1,
     "img": "frames/m10-2.webp",
     "alvo": {
      "x": 343,
-     "y": 556,
+     "y": 632,
      "w": 161,
      "h": 40
     },
     "dicas": [
      {
       "x": 326,
-      "y": 681,
+      "y": 757,
       "w": 595,
       "h": 58,
       "titulo": "Atenção",
@@ -1313,7 +1313,7 @@
     "id": "m10-3",
     "titulo": "Planilhas do Excel",
     "texto": "Baixe o modelo de planilha, preencha no Excel e importe. O sistema mostra uma prévia com os erros antes de gravar.",
-    "rota": "#/config",
+    "rota": "#/config?secao=dados",
     "nivel": 1,
     "img": "frames/m10-3.webp",
     "alvo": {
@@ -1332,16 +1332,173 @@
     "id": "m10-4",
     "titulo": "Dados de exemplo",
     "texto": "Os projetos de exemplo servem para treinar. Quando for usar de verdade, remova os exemplos aqui: seus cadastros reais continuam.",
-    "rota": "#/config",
+    "rota": "#/config?secao=dados",
     "nivel": 1,
     "img": "frames/m10-4.webp",
     "alvo": {
      "x": 1014,
-     "y": 480,
+     "y": 505,
      "w": 196,
      "h": 40
     },
     "dicas": [],
+    "zoom": 1.6,
+    "seta": true,
+    "cursor": "clique",
+    "dur": 0
+   }
+  ]
+ },
+ {
+  "id": "m11",
+  "nivel": 1,
+  "titulo": "Regras do portfólio",
+  "subtitulo": "Listas, checklist e réguas que valem para todo o sistema",
+  "icone": "pesos",
+  "cenas": [
+   {
+    "id": "m11-1",
+    "titulo": "Onde ficam as regras",
+    "texto": "Em Dados e configurações, a aba Regras do portfólio reúne o que vale para todo o sistema: as listas do cadastro, o checklist de entrada e as réguas da priorização.",
+    "rota": "#/config?secao=regras",
+    "nivel": 1,
+    "img": "frames/m11-1.webp",
+    "alvo": {
+     "x": 301,
+     "y": 200,
+     "w": 563,
+     "h": 52
+    },
+    "dicas": [
+     {
+      "x": 1308,
+      "y": 332,
+      "w": 89,
+      "h": 38,
+      "titulo": "Versão em uso",
+      "texto": "Cada vez que as regras são salvas, uma nova versão numerada é criada."
+     }
+    ],
+    "zoom": 1.5,
+    "seta": true,
+    "cursor": null,
+    "dur": 0
+   },
+   {
+    "id": "m11-2",
+    "titulo": "Listas do cadastro",
+    "texto": "Edite os nomes, inclua opções novas ou remova as que não têm uso. Renomear um tipo ou uma origem atualiza os projetos que já usam o nome antigo.",
+    "rota": "#/config?secao=regras",
+    "nivel": 1,
+    "img": "frames/m11-2.webp",
+    "alvo": {
+     "x": 326,
+     "y": 232,
+     "w": 1065,
+     "h": 537
+    },
+    "dicas": [
+     {
+      "x": 751,
+      "y": 287,
+      "w": 62,
+      "h": 18,
+      "titulo": "Em uso",
+      "texto": "Mostra quantos projetos usam o item. Um item em uso não pode ser removido."
+     },
+     {
+      "x": 341,
+      "y": 367,
+      "w": 1035,
+      "h": 45,
+      "titulo": "Incluir",
+      "texto": "Digite a sigla e o nome da gerência e clique em Incluir."
+     }
+    ],
+    "zoom": 1.1,
+    "seta": false,
+    "cursor": null,
+    "dur": 0
+   },
+   {
+    "id": "m11-3",
+    "titulo": "Checklist de entrada",
+    "texto": "Clique em Editar para mudar o texto da pergunta, a orientação para o Não e o efeito do Não: não entra ou falta informação. O interruptor liga ou desliga a pergunta.",
+    "rota": "#/config?secao=regras",
+    "nivel": 1,
+    "img": "frames/m11-3.webp",
+    "alvo": {
+     "x": 326,
+     "y": 467,
+     "w": 1065,
+     "h": 179
+    },
+    "dicas": [
+     {
+      "x": 339,
+      "y": 411,
+      "w": 42,
+      "h": 24,
+      "titulo": "Ligar e desligar",
+      "texto": "Uma pergunta desligada sai do checklist do funil de entrada."
+     }
+    ],
+    "zoom": 1.3,
+    "seta": true,
+    "cursor": null,
+    "dur": 0
+   },
+   {
+    "id": "m11-4",
+    "titulo": "Réguas com prévia",
+    "texto": "Ajuste onde começam as classes A, B e C e os cortes da matriz valor e esforço. A prévia mostra o efeito antes de salvar.",
+    "rota": "#/config?secao=regras",
+    "nivel": 1,
+    "img": "frames/m11-4.webp",
+    "alvo": {
+     "x": 326,
+     "y": 384,
+     "w": 1065,
+     "h": 233
+    },
+    "dicas": [
+     {
+      "x": 845,
+      "y": 581,
+      "w": 530,
+      "h": 22,
+      "titulo": "Prévia",
+      "texto": "Mostra na hora como os projetos avaliados ficariam com as novas réguas."
+     }
+    ],
+    "zoom": 1.15,
+    "seta": false,
+    "cursor": null,
+    "dur": 0
+   },
+   {
+    "id": "m11-5",
+    "titulo": "Salvar e aplicar",
+    "texto": "Nada muda até você clicar em Salvar e aplicar. O sistema mostra o resumo, grava uma nova versão e cada projeto guarda a versão das regras em que foi registrado.",
+    "rota": "#/config?secao=regras",
+    "nivel": 1,
+    "img": "frames/m11-5.webp",
+    "alvo": {
+     "x": 1229,
+     "y": 835,
+     "w": 171,
+     "h": 40
+    },
+    "dicas": [
+     {
+      "x": 320,
+      "y": 844,
+      "w": 780,
+      "h": 22,
+      "titulo": "O que vai mudar",
+      "texto": "A barra mostra quantas alterações estão pendentes e o resumo delas."
+     }
+    ],
     "zoom": 1.6,
     "seta": true,
     "cursor": "clique",

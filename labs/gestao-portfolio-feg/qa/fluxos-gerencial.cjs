@@ -151,7 +151,7 @@ module.exports = {
     check(/#\/novo$/.test(p.url()), 'G12: cadastrar abre o formulário');
   },
   async 'gerencial G13: configurações em seções e apagar só na zona de risco'({ p, ir, check, recarregar }){
-    await exemplos(p, recarregar, 1); await ir('#/config', 300);
+    await exemplos(p, recarregar, 1); await ir('#/config?secao=dados', 300);
     const r = await p.evaluate(() => { const secs = [...document.querySelectorAll('.gx-cfg-sec')]; return { backup: document.querySelectorAll('#conteudo [data-backup]').length, apagar: document.querySelectorAll('#conteudo [data-apagar]').length,
       ultima: secs[secs.length - 1].dataset.secao, naZona: !!document.querySelector('.gx-zona [data-apagar]'), prim: (document.querySelector('.gx-cfg-ex .btn-primary') || {}).textContent || '' }; });
     check(r.backup === 1, 'G13: "Baixar backup" uma vez em Config (veio ' + r.backup + ')');
@@ -163,7 +163,7 @@ module.exports = {
     await p.fill('.modal [data-confirma-texto]', 'APAGAR'); await p.click('.modal [data-ok]'); await p.waitForTimeout(200);
     check(await p.evaluate(() => GP.projetos.todos().length) === 0, 'G13: confirmação digitada apaga os dados');
     await ir('#/relatorios', 200);
-    check(await p.locator('#conteudo [data-backup], #conteudo [data-html-atualizado]').count() === 0 && await p.locator('#conteudo a[href="#/config"]').count() >= 1, 'G13: Relatórios mostra um link para Config em vez de backup/HTML');
+    check(await p.locator('#conteudo [data-backup], #conteudo [data-html-atualizado]').count() === 0 && await p.locator('#conteudo a[href^="#/config"]').count() >= 1, 'G13: Relatórios mostra um link para Config em vez de backup/HTML');
   },
   async 'gerencial G14: barras com rótulo justo, ordem por valor e zeros esmaecidos'({ p, ir, check, recarregar }){
     await exemplos(p, recarregar, 1); await ir('#/indicadores', 300);
@@ -215,7 +215,7 @@ module.exports = {
     check(/\.pptx$/.test(ppt.suggestedFilename()), 'PPT da visão executiva não gerado');
     const [csv] = await Promise.all([p.waitForEvent('download'), p.click('[data-exportar-indicadores]')]);
     check(/\.csv$/.test(csv.suggestedFilename()), 'CSV de indicadores não gerado');
-    await ir('#/config', 250);
+    await ir('#/config?secao=dados', 250);
     const [html] = await Promise.all([p.waitForEvent('download', { timeout:60000 }), p.click('[data-html-atualizado]')]);
     check(/\.html$/.test(html.suggestedFilename()), 'HTML atualizado não gerado');
     check(!/Nenhuma cópia baixada ainda/.test(await p.textContent('#conteudo')) || true, 'cópia registrada');

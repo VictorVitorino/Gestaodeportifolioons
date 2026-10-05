@@ -123,7 +123,7 @@
             <span class="op-eyebrow">Resumo do cadastro</span>
             <div class="op-prog"><div class="op-prog-n"><b data-prog-n>0 de ${M.OBRIGATORIOS.length}</b> obrigatórios preenchidos</div><div class="op-prog-tr" role="progressbar" aria-label="Campos obrigatórios preenchidos" aria-valuemin="0" aria-valuemax="${M.OBRIGATORIOS.length}" aria-valuenow="0" data-prog-tr><i data-prog-bar></i></div></div>
             <ul class="op-prog-lista">${M.OBRIGATORIOS.map(k => `<li data-req="${k}"><span class="op-prog-ok">${icon('check', 13)}</span>${esc(M.CAMPOS[k])}</li>`).join('')}</ul>
-            <p class="op-depois">${p ? 'As alterações ficam registradas no histórico do projeto.' : 'Depois: entra como <b>Nova demanda</b> → checklist de entrada (6 perguntas, cerca de 1 minuto).'}</p>
+            <p class="op-depois">${p ? 'As alterações ficam registradas no histórico do projeto.' : `Depois: entra como <b>Nova demanda</b> → checklist de entrada (${M.ENTRADA.length} perguntas, cerca de 1 minuto).`}</p>
           </div>
           <div class="op-form-acoes"><button class="btn btn-primary" type="submit">${icon('check', 16)} ${p ? 'Salvar alterações' : 'Cadastrar'}</button>
             <a class="btn btn-ghost" href="${p ? '#/projeto/' + p.id : '#/acervo'}">Cancelar</a><span class="op-obrig-nota"><span class="req" aria-hidden="true">*</span> obrigatório</span></div>
@@ -282,7 +282,7 @@
   function proximoPasso(p){
     const sec = (tom, ic, titulo, texto, acoes = '', extra = '') => `<section class="op-proximo t-${tom}" aria-label="Próximo passo"><span class="op-proximo-ic">${icon(ic, 20)}</span><div class="op-proximo-txt"><span class="op-eyebrow">Próximo passo</span><b>${titulo}</b><p>${texto}</p>${extra}</div>${acoes ? `<div class="op-proximo-acoes">${acoes}</div>` : ''}</section>`;
     const btnChecklist = rot => `<button class="btn btn-primary" data-entrada="${p.id}">${icon('funil', 16)} ${rot}</button>`;
-    if(p.etapa === 'entrada') return sec('info', 'funil', 'Responda o checklist de entrada', '6 perguntas de Sim ou Não, cerca de 1 minuto. O resultado indica se entra no portfólio, se falta informação ou se não entra.', btnChecklist('Fazer o checklist'));
+    if(p.etapa === 'entrada') return sec('info', 'funil', 'Responda o checklist de entrada', `${M.ENTRADA.length} perguntas de Sim ou Não, cerca de 1 minuto. O resultado indica se entra no portfólio, se falta informação ou se não entra.`, btnChecklist('Fazer o checklist'));
     if(p.etapa === 'triagem'){
       const resp = (p.entrada && p.entrada.respostas) || {};
       const pedidas = Object.keys(CAMPOS_ENTRADA).filter(q => resp[q] === 'nao').flatMap(q => CAMPOS_ENTRADA[q]);
@@ -326,6 +326,15 @@
       if(h.acao === 'Priorização') d = d.replace(/(\d)\.(\d)/g, '$1,$2'); return d; };
     return itens.reverse().map(h => `<li class="op-hist-item"><span class="op-hist-dot" aria-hidden="true"></span><div><div class="op-hist-h"><b>${esc(h.acao)}</b><time class="dim">${fmt.dataHora(h.data)}</time></div>${h.detalhe ? `<div class="op-hist-d">${esc(det(h))}</div>` : ''}${h.sub ? `<div class="op-hist-sub">${icon('seta', 13)} Etapa: ${esc(h.sub)}</div>` : ''}</div></li>`).join('');
   }
+  /** Versão das regras (Dados e configurações → Regras do portfólio) em que o projeto foi cadastrado, decidido e avaliado. */
+  function contexto(p){
+    const ver = n => n ? `versão ${n}` : '<span class="dim">antes das versões</span>';
+    const aviso = (txt, dica) => ` <span class="op-ctx-aviso" data-tt="${esc(dica)}" tabindex="0">${txt}</span>`;
+    const uE = M.ultimaMudanca('entrada'), uR = M.ultimaMudanca('reguas');
+    return [['Cadastro', ver(p.ctx && p.ctx.cfg)],
+      ['Decisão de entrada', p.entrada ? ver(p.entrada.cfg) + ((p.entrada.cfg || 0) < uE ? aviso('checklist mudou depois', `Checklist alterado na versão ${uE}\nA decisão continua valendo. Reavalie a entrada se quiser aplicar as perguntas atuais.`) : '') : null],
+      ['Avaliação', p.avaliacao && GP.nivel() >= 2 ? ver(p.avaliacao.cfg) + (p.avaliacao.pesos ? ` · pesos v${p.avaliacao.pesos}` : '') + ((p.avaliacao.cfg || 0) < uR ? aviso('réguas mudaram depois', `Réguas alteradas na versão ${uR}\nA nota é a mesma; a classe e o quadrante já seguem as réguas atuais.`) : '') : null]];
+  }
   function dados(p){
     const val = (k, v) => ({ k, v });
     const periodo = !p.inicioPrevisto && !p.fimPrevisto ? null : p.inicioPrevisto && p.fimPrevisto ? `${fmt.data(p.inicioPrevisto)} a ${fmt.data(p.fimPrevisto)}` : p.inicioPrevisto ? `a partir de ${fmt.data(p.inicioPrevisto)}` : `até ${fmt.data(p.fimPrevisto)}`;
@@ -334,6 +343,7 @@
       ['Estimativas', [['Esforço', p.esforcoFte != null ? fmt.n(p.esforcoFte, p.esforcoFte % 1 ? 1 : 0) + (p.esforcoFte === 1 ? ' pessoa (FTE)' : ' pessoas (FTE)') : null], ['Duração', p.duracaoMeses != null ? fmt.n(p.duracaoMeses, p.duracaoMeses % 1 ? 1 : 0) + (p.duracaoMeses === 1 ? ' mês' : ' meses') : null],
         ['Custo estimado', p.custo != null && p.custo !== '' ? fmt.brl(p.custo) : null], ['Avanço físico', p.etapa === 'concluido' ? '100% (concluído)' : p.progresso != null ? fmt.n(p.progresso, p.progresso % 1 ? 1 : 0) + '%' : null]]],
       ['Datas', [['Entrada', p.dataEntrada ? fmt.data(p.dataEntrada) : null], ['Período previsto', periodo || '<span class="dim">Sem datas previstas</span>']]],
+      [`Registro <button type="button" class="cfg-ajuda" data-tt="Versão das regras&#10;Cada projeto guarda a versão das regras em uso quando foi cadastrado, decidido na entrada e avaliado.&#10;As regras ficam em Dados e configurações → Regras do portfólio." aria-label="Ajuda: versão das regras em que este projeto foi registrado">?</button>`, contexto(p)],
     ];
     const extras = [['Link', p.link ? `<a href="${esc(p.link)}" target="_blank" rel="noopener">${esc(p.link)}</a>` : null], ['Observações', p.observacoes ? esc(p.observacoes) : null]].filter(x => x[1]);
     const faltam = ['beneficio', 'area', 'ferramenta', 'origem', 'demandante', 'patrocinador', 'responsavel', 'esforcoFte', 'duracaoMeses', 'custo', 'inicioPrevisto', 'fimPrevisto'].filter(k => vazioCampo(p[k]));

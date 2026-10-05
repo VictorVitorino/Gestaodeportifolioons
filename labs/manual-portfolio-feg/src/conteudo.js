@@ -12,7 +12,7 @@ window.MANUAL_CONTEUDO = {
     { id: 'priorizacao', titulo: 'Trilha de priorização', publico: 'Para quem avalia e define a ordem dos projetos', nivel: 2,
       modulos: ['m4', 'm5', 'm7'] },
     { id: 'gestao', titulo: 'Trilha de gestão e comitê', publico: 'Para quem planeja a capacidade e conduz a decisão', nivel: 3,
-      modulos: ['m6', 'm8', 'm9'] },
+      modulos: ['m6', 'm8', 'm9', 'm11'] },
   ],
   quiz: {
     m0: { p: 'O que acontece quando você clica num nível que já está ligado, como o nível 3?', o: ['O nível é desligado e os módulos dele saem do menu', 'Nada: os níveis só podem ser ligados', 'O sistema apaga os dados daquele nível'], c: 0,
@@ -35,6 +35,8 @@ window.MANUAL_CONTEUDO = {
       e: 'Os gráficos são filtros: clicar numa barra recalcula toda a análise para aquele item.' },
     m9: { p: 'O que o sistema gera ao final do modo comitê?', o: ['Uma planilha de custos', 'A ata da reunião com as decisões', 'Um novo ranking aleatório'], c: 1,
       e: 'Cada decisão é registrada com o motivo e, no fim, o sistema monta a ata da reunião.' },
+    m11: { p: 'Você mudou o corte da classe A nas Regras do portfólio. Quando a mudança passa a valer?', o: ['Assim que o número é digitado', 'Depois de clicar em Salvar e aplicar, que grava uma nova versão', 'Só no dia seguinte'], c: 1,
+      e: 'As alterações ficam num rascunho com prévia. Ao salvar, viram uma nova versão aplicada em todo o sistema.' },
     m10: { p: 'Onde os dados ficam guardados?', o: ['Num servidor da internet', 'Neste navegador; por isso o backup é importante', 'Em lugar nenhum: precisam ser salvos à mão a cada tela'], c: 1,
       e: 'O sistema salva sozinho no navegador. O backup leva tudo para um arquivo que pode ser restaurado em outro lugar.' },
   },
