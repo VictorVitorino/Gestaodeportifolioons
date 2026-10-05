@@ -88,11 +88,12 @@
   ];
   const EIXOS = { valor:'Valor (por que fazer?)', esforco:'Esforço (quanto custa fazer?)' };
   const CORTE = { valor:50, esforco:50, classeA:70, classeB:40 };
+  /** Cores dos quadrantes = tokens de design.css (--ons, --slate, --teal, --copper). O âmbar fica reservado a pendência. */
   const QUADRANTES = {
     rapido:     { nome:'Ganho rápido', desc:'Alto valor e baixo esforço: fazer primeiro.', cor:'#3E6801' },
-    estrategico:{ nome:'Estratégico', desc:'Alto valor e alto esforço: planejar e fatiar.', cor:'#2F6FA3' },
-    complementar:{ nome:'Complementar', desc:'Baixo valor e baixo esforço: encaixar se sobrar capacidade.', cor:'#B7791F' },
-    repensar:   { nome:'Repensar', desc:'Baixo valor e alto esforço: questionar antes de fazer.', cor:'#B9381F' },
+    estrategico:{ nome:'Estratégico', desc:'Alto valor e alto esforço: planejar e fatiar.', cor:'#477b91' },
+    complementar:{ nome:'Complementar', desc:'Baixo valor e baixo esforço: encaixar se sobrar capacidade.', cor:'#188787' },
+    repensar:   { nome:'Repensar', desc:'Baixo valor e alto esforço: questionar antes de fazer.', cor:'#ac7044' },
   };
   const criterios = () => (GP.state() && GP.state().criterios) || CRITERIOS_PADRAO;
   /** Sugestões de resposta a partir do cadastro (o usuário confirma). */
@@ -125,6 +126,24 @@
   }
   /** Etapas em que faz sentido priorizar */
   const ETAPAS_PRIORIZAVEIS = ['aprovado', 'execucao', 'espera', 'triagem'];
+  /**
+   * "Por que esta nota?": contribuição de cada pergunta, com a mesma normalização de notaEixo.
+   * Retorna [{id, nome, eixo, peso, resp, pontos, max}] (pontos e max em pontos da nota 0-100 do eixo; resp null = sem resposta).
+   * Aceita um projeto ({avaliacao:{respostas}}) ou o próprio objeto de respostas em {respostas}.
+   */
+  function decompor(p, crit = criterios(), eixo){
+    const resp = (p && p.avaliacao && p.avaliacao.respostas) || (p && p.respostas) || {};
+    const tot = { valor:0, esforco:0 }; crit.forEach(c => { if(c.peso > 0) tot[c.eixo] += c.peso; });
+    return crit.filter(c => c.peso > 0 && (!eixo || c.eixo === eixo)).map(c => {
+      const max = tot[c.eixo] ? c.peso / tot[c.eixo] * 100 : 0, r = resp[c.id] == null ? null : +resp[c.id];
+      return { id:c.id, nome:c.nome, eixo:c.eixo, peso:c.peso, resp:r, pontos: r == null ? 0 : r / 3 * max, max };
+    });
+  }
+  /** Priorizáveis (ETAPAS_PRIORIZAVEIS) sem pontuação completa: a fila de avaliação. Ordem: aprovados, em execução, em espera, em triagem; depois código. */
+  function pendentesAvaliacao(lista = (GP.state() && GP.state().projetos) || [], crit = criterios()){
+    return lista.filter(p => ETAPAS_PRIORIZAVEIS.includes(p.etapa) && !pontuar(p, crit).completo)
+      .sort((a, b) => ETAPAS_PRIORIZAVEIS.indexOf(a.etapa) - ETAPAS_PRIORIZAVEIS.indexOf(b.etapa) || String(a.codigo).localeCompare(String(b.codigo)));
+  }
 
   /* --------------------------------------------- capacidade e carteira (nível 3) */
   const CAPACIDADE_PADRAO = { periodo:'2027', fte:10, reservaPct:15, orcamento:4000000, descontarExecucao:true };
@@ -302,7 +321,7 @@
       const r = {}; Object.entries(respostas || {}).forEach(([k, v]) => { if(v !== '' && v != null && !isNaN(v)) r[k] = Math.max(0, Math.min(3, +v)); });
       p.avaliacao = { respostas: r, obs: (obs || '').trim(), data: new Date().toISOString() };
       const s = pontuar(p);
-      registrar(p, 'Priorização', s.completo ? `Valor ${s.valor.toFixed(1)} · esforço ${s.esforco.toFixed(1)} · ${QUADRANTES[s.quadrante].nome}` : `Avaliação parcial (faltam ${s.faltam} resposta(s)).`);
+      registrar(p, 'Priorização', s.completo ? `Valor ${GP.util.fmt.n(s.valor, 1)} · esforço ${GP.util.fmt.n(s.esforco, 1)} · ${QUADRANTES[s.quadrante].nome}` : `Avaliação parcial (faltam ${s.faltam} ${s.faltam === 1 ? 'resposta' : 'respostas'}).`);
       GP.save(); return { ok:true, s };
     },
     excluir(id){ const i = S().projetos.findIndex(p => p.id === id); if(i < 0) return false; S().projetos.splice(i, 1); GP.save(); return true; },
@@ -347,7 +366,7 @@
     GP.save(); return n;
   }
 
-  GP.modelo = { VERSAO, CAT, ETAPAS, etapa, CAMPOS, OBRIGATORIOS, ENTRADA, RESULTADO_ENTRADA, avaliarEntrada, CRITERIOS_PADRAO, EIXOS, CORTE, QUADRANTES, ETAPAS_PRIORIZAVEIS, criterios, sugestao, notaEixo, pontuar, ranking, CAPACIDADE_PADRAO, STATUS_CARTEIRA, montarCarteira, demandaMensal, estadoInicial, migrar, validar, carregarExemplos };
+  GP.modelo = { VERSAO, CAT, ETAPAS, etapa, CAMPOS, OBRIGATORIOS, ENTRADA, RESULTADO_ENTRADA, avaliarEntrada, CRITERIOS_PADRAO, EIXOS, CORTE, QUADRANTES, ETAPAS_PRIORIZAVEIS, criterios, sugestao, notaEixo, pontuar, ranking, decompor, pendentesAvaliacao, CAPACIDADE_PADRAO, STATUS_CARTEIRA, montarCarteira, demandaMensal, estadoInicial, migrar, validar, carregarExemplos };
   GP.projetos = projetos;
 })();
 
