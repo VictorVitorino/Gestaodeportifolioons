@@ -1,19 +1,47 @@
 (function(){
   'use strict';
   const GP=window.GP,M=GP.modelo,P=GP.projetos,U=GP.ui,{esc,fmt,sum,hoje,clone}=GP.util,icon=GP.icon;
+  const plural=GP.util.plural||((n,s,p)=>fmt.n(n)+' '+(Math.abs(+n)===1?s:p));
   /* Séries categóricas: oliva e ouro originais; petróleo, ardósia e cobre em passos validados para daltonismo (ΔE ≥ 13). */
   const PALETTE=['#6b8f2a','#3a74a8','#d5a32d','#00908f','#b8642c','#859c98','#a06137','#899b67'];
-  const TOM_ETAPA={andamento:'#6b8f2a',concluido:'#00908f',fora:'#a3b2ac'},UNICA='#6b8f2a';
+  const TOM_ETAPA={andamento:'#6b8f2a',concluido:'#00908f',fora:'#a3b2ac'},UNICA='#6b8f2a',COBRE='#b8642c',TXT='#17302b',TXT2='#566b64';
   GP.charts.PAL.splice(0,GP.charts.PAL.length,...PALETTE);
   const NATUREZAS={projeto:'Projeto',demanda:'Demanda'};
-  const ENCERRADOS=['concluido','nao_entra','cancelado'];
   const CARTEIRA=['aprovado','execucao','espera','concluido'];
   const ABERTOS=['aprovado','execucao','espera'];
-  const DEF={gerencia:'',natureza:'',etapa:'',tipo:'',origem:'',fonte:'todos',de:'',ate:'',q:''};
+  const FILA=['entrada','triagem'];
+  const DEF={gerencia:'',natureza:'',etapa:'',tipo:'',origem:'',fonte:'todos',de:'',ate:'',q:'',periodo:''};
   const filtros=()=>GP.state().ui.filtroIndicadores=Object.assign({},DEF,GP.state().ui.filtroIndicadores||{});
   const natureza=p=>p.natureza==='demanda'?'demanda':'projeto';
   const progresso=p=>p.etapa==='concluido'?100:p.progresso==null?null:+p.progresso;
   const divisao=(n,d)=>d?n/d:null;
+  /** Título sem o sufixo técnico " (exemplo)": a marcação de exemplo aparece como selo. */
+  const semExemplo=t=>String(t||'').replace(/\s*\(exemplo\)\s*$/i,'');
+  const dataEntrada=p=>p.dataEntrada||String(p.criadoEm||'').slice(0,10);
+  const addDias=(iso,n)=>{const d=new Date(iso+'T12:00:00');d.setDate(d.getDate()+n);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
+  const diasEntre=(a,b)=>Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/864e5);
+
+  /* ------------------------------------------------ ícones por conceito (complementam GP.icon) */
+  const EXTRA={
+    moeda:'<circle cx="12" cy="12" r="9"/><path d="M15 9.4c-.5-.9-1.6-1.4-3-1.4-1.7 0-3 .9-3 2.1 0 2.9 6 1.4 6 4.3 0 1.2-1.3 2.1-3 2.1-1.4 0-2.6-.6-3.1-1.5M12 6.4V8M12 16v1.6"/>',
+    pessoas:'<circle cx="9" cy="8" r="3"/><path d="M3.5 19c.6-3 2.8-5 5.5-5s4.9 2 5.5 5"/><circle cx="17" cy="9" r="2.4"/><path d="M15.8 14.2c2.3.2 4 1.9 4.6 4.8"/>',
+    pessoa:'<circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-3.6 3.6-6 7-6s6.2 2.4 7 6"/>',
+    organograma:'<rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M6 16v-2.5h12V16"/>',
+    etiqueta:'<path d="M3 12.5V4h8.5L21 13.5 13.5 21z"/><circle cx="7.6" cy="8.3" r="1.3"/>',
+    escudo:'<path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/>',
+    cadeado:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>',
+    calendario:'<rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+    servidor:'<rect x="4" y="4" width="16" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="16" height="6.5" rx="1.5"/><path d="M8 7.25h.01M8 16.75h.01"/>',
+    elo:'<path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/>',
+    pulso:'<path d="M3 12h4l2.5-6 5 12 2.5-6h4"/>',
+    medidor:'<path d="M4 16a8 8 0 0116 0"/><path d="M12 16l4.2-4.6"/><path d="M4 20h16"/>',
+    mais:'<circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/>',
+    baixo:'<path d="M6 9l6 6 6-6"/>',
+    alvo:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".6"/>',
+  };
+  const ico=(n,s=18)=>EXTRA[n]?`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${EXTRA[n]}</svg>`:icon(n,s);
+  GP.iconeGerencial=ico;
+
   function filtrar(lista,f={}){
     const q=GP.util.normTxt(f.q||'').trim();
     return lista.filter(p=>(!f.gerencia||p.gerencia===f.gerencia)&&(!f.natureza||natureza(p)===f.natureza)&&(!f.etapa||p.etapa===f.etapa)
@@ -38,6 +66,30 @@
     }
     return {pontos,passo,ini:mesISO(a),fim:mesISO(b),semData:lista.filter(p=>!p.dataEntrada).length};
   }
+
+  /* ------------------------------------------------ tendência de 30 dias (entradas e saídas da fila pelo histórico) */
+  const NOMES_FILA=new Set(FILA.map(id=>M.etapa(id).nome));
+  function saidaDaFila(p){
+    for(const h of p.historico||[]){
+      if(h.acao!=='Etapa')continue;
+      const [de,para]=String(h.detalhe||'').split('. Motivo')[0].split(' → ').map(s=>(s||'').trim());
+      if(NOMES_FILA.has(de)&&para&&!NOMES_FILA.has(para))return String(h.data||'').slice(0,10);
+    }
+    return '';
+  }
+  function naFilaEm(p,dia){
+    const e=dataEntrada(p);if(!e||e>dia)return false;
+    if(FILA.includes(p.etapa))return true;
+    const s=saidaDaFila(p);return !!s&&s>dia;
+  }
+  function tendencia(lista){
+    const t=hoje(),d30=addDias(t,-30),d60=addDias(t,-60),e=dataEntrada;
+    const novos=lista.filter(p=>e(p)>d30&&e(p)<=t).length,antes=lista.filter(p=>e(p)>d60&&e(p)<=d30).length;
+    const filaAgora=lista.filter(p=>FILA.includes(p.etapa)).length,filaAntes=lista.filter(p=>naFilaEm(p,d30)).length;
+    return {novos,antes,fila:filaAgora-filaAntes};
+  }
+  const sinal=n=>n>0?'+'+fmt.n(n):n<0?'−'+fmt.n(Math.abs(n)):'0';
+
   function medir(lista,f={}){
     const n=lista.length,cont=fn=>lista.filter(fn).length,exec=lista.filter(p=>p.etapa==='execucao'),ativos=lista.filter(p=>ABERTOS.includes(p.etapa)),carteira=lista.filter(p=>CARTEIRA.includes(p.etapa));
     const entrada=lista.filter(p=>p.entrada&&['entra','falta_info','nao_entra'].includes(p.entrada.resultado)),entram=entrada.filter(p=>p.entrada.resultado==='entra').length;
@@ -46,16 +98,18 @@
     const atrasados=ativos.filter(p=>p.fimPrevisto&&p.fimPrevisto<hoje());
     const avaliados=lista.filter(p=>M.pontuar(p).completo),priorizados=priorizaveis.filter(p=>M.pontuar(p).completo);
     const capacidade=M.montarCarteira(lista,GP.state().capacidade,GP.state().forcar);
+    const porValor=a=>a.slice().sort((x,y)=>y.value-x.value||String(x.label).localeCompare(String(y.label),'pt-BR'));
     return {lista,n,projetos:cont(p=>natureza(p)==='projeto'),demandas:cont(p=>natureza(p)==='demanda'),exemplos:cont(p=>p.exemplo),execucao:exec.length,ativos:ativos.length,
-      fila:cont(p=>['entrada','triagem'].includes(p.etapa)),concluidos:cont(p=>p.etapa==='concluido'),cancelados:cont(p=>p.etapa==='cancelado'),recusados:cont(p=>p.etapa==='nao_entra'),
+      fila:cont(p=>FILA.includes(p.etapa)),novas:cont(p=>p.etapa==='entrada'),triagem:cont(p=>p.etapa==='triagem'),concluidos:cont(p=>p.etapa==='concluido'),cancelados:cont(p=>p.etapa==='cancelado'),recusados:cont(p=>p.etapa==='nao_entra'),
       aprovados:cont(p=>p.etapa==='aprovado'),espera:cont(p=>p.etapa==='espera'),carteira:carteira.length,entram,entradaAvaliada:entrada.length,taxaEntrada:divisao(entram,entrada.length),
       taxaConclusao:divisao(cont(p=>p.etapa==='concluido'),carteira.length),custo:sum(custo,p=>p.custo),comCusto:custo.length,fteExecucao:sum(ftes,p=>p.esforcoFte),comFteExecucao:ftes.length,
       progresso:av.length?sum(av,progresso)/av.length:null,comProgresso:av.length,atrasados,avaliados:avaliados.length,priorizados:priorizados.length,priorizaveis:priorizaveis.length,
-      etapas:M.ETAPAS.map(e=>({key:e.id,label:e.nome,value:cont(p=>p.etapa===e.id),color:TOM_ETAPA[e.grupo]||UNICA})),
-      gerencias:[...M.CAT.gerencias.map(g=>({key:g.id,label:g.id,value:cont(p=>p.gerencia===g.id),color:UNICA})),...(cont(p=>!p.gerencia)?[{key:'',label:'Não informada',value:cont(p=>!p.gerencia),color:'#859c98'}]:[])],
-      tipos:[...new Set([...M.CAT.tipos,...lista.map(p=>p.tipo||'Não informado')])].map((t,i)=>({key:t,label:t,value:cont(p=>(p.tipo||'Não informado')===t),color:UNICA})),
-      origens:[...new Set([...M.CAT.origens,...lista.map(p=>p.origem||'Não informada')])].map((t,i)=>({key:t,label:t,value:cont(p=>(p.origem||'Não informada')===t),color:UNICA})),
-      serie:serieEntrada(lista,f),capacidade,qualidade:[
+      semDatas:ativos.filter(p=>!(p.inicioPrevisto&&p.fimPrevisto)),
+      etapas:M.ETAPAS.map(e=>({key:e.id,label:e.nome,value:cont(p=>p.etapa===e.id),projetos:cont(p=>p.etapa===e.id&&natureza(p)==='projeto'),demandas:cont(p=>p.etapa===e.id&&natureza(p)==='demanda'),color:TOM_ETAPA[e.grupo]||UNICA})),
+      gerencias:porValor([...M.CAT.gerencias.map(g=>({key:g.id,label:g.id,nome:g.nome,value:cont(p=>p.gerencia===g.id),color:UNICA})),...(cont(p=>!p.gerencia)?[{key:'',label:'Não informada',value:cont(p=>!p.gerencia),color:'#859c98'}]:[])]),
+      tipos:porValor([...new Set([...M.CAT.tipos,...lista.map(p=>p.tipo||'Não informado')])].map(t=>({key:t,label:t,value:cont(p=>(p.tipo||'Não informado')===t),color:UNICA}))),
+      origens:porValor([...new Set([...M.CAT.origens,...lista.map(p=>p.origem||'Não informada')])].map(t=>({key:t,label:t,value:cont(p=>(p.origem||'Não informada')===t),color:UNICA}))),
+      serie:serieEntrada(lista,f),capacidade,tendencia:tendencia(lista),qualidade:[
         {label:'Responsável definido',num:ativos.filter(p=>p.responsavel).length,den:ativos.length,desc:'Aprovados, em execução e em espera'},
         {label:'Datas previstas completas',num:ativos.filter(p=>p.inicioPrevisto&&p.fimPrevisto).length,den:ativos.length,desc:'Aprovados, em execução e em espera'},
         {label:'Benefício esperado descrito',num:cont(p=>p.beneficio&&p.beneficio.trim()),den:n,desc:'Todos os registros do recorte'},
@@ -66,53 +120,213 @@
         {label:'Avanço físico informado',num:av.length,den:exec.length,desc:'Somente os registros em execução'}
       ]};
   }
-  GP.analytics={filtrar,medir,filtros,natureza,progresso,serieEntrada};
+  GP.analytics={filtrar,medir,filtros,natureza,progresso,serieEntrada,tendencia};
+
+  /* ------------------------------------------------ componentes visuais */
   /** Medidor radial: trilho no mesmo tom (16%), preenchimento com ponta arredondada. ratio null = sem dado. */
   function ring(ratio,tone='var(--c1)',size=46,centro=''){
     const sw=size>=80?10:5,r=(size-sw)/2-1,c=size/2,L=2*Math.PI*r,f=ratio==null?0:Math.max(0,Math.min(1,ratio));
-    return `<svg class="ring" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="${ratio==null?'Sem dado':fmt.pct(f)}"><circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${tone}" stroke-opacity=".16" stroke-width="${sw}" style="stroke:${tone}"/>${f>0?`<circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${tone}" style="stroke:${tone}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${Math.max(.01,f*L-(f<1?0:0))} ${L}" transform="rotate(-90 ${c} ${c})"/>`:''}${centro?`<text x="${c}" y="${c+size*.07}" text-anchor="middle" font-size="${size*.2}" font-weight="700" fill="#17302b">${esc(centro)}</text>`:''}</svg>`;
+    return `<svg class="ring" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true"><circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${tone}" stroke-opacity=".16" stroke-width="${sw}" style="stroke:${tone}"/>${f>0?`<circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${tone}" style="stroke:${tone}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${Math.max(.01,f*L)} ${L}" transform="rotate(-90 ${c} ${c})"/>`:''}${centro?`<text x="${c}" y="${c+size*.07}" text-anchor="middle" font-size="${size*.2}" font-weight="700" fill="${TXT}">${esc(centro)}</text>`:''}</svg>`;
   }
-  const legendaEtapas=()=>`<div class="legend legend-mini"><span><i style="background:${TOM_ETAPA.andamento}"></i>Em andamento</span><span><i style="background:${TOM_ETAPA.concluido}"></i>Concluído</span><span><i style="background:${TOM_ETAPA.fora}"></i>Fora do portfólio</span></div>`;
-  const metric=(label,value,sub,{tone='#668d27',tint='#f1f6ea',ic='painel',ratio=null}={})=>`<div class="metric" style="--tone:${tone};--tint:${tint}"><div class="metric-head"><span>${esc(label)}</span><i class="metric-icon">${icon(ic,15)}</i></div><div class="metric-body"><strong class="metric-value">${value}</strong>${ratio!=null?ring(ratio,tone,46):''}</div><div class="metric-sub">${sub}</div></div>`;
-  const chartHead=(title,sub='',ic='ranking')=>`<div class="chart-head"><div><h3>${esc(title)}</h3>${sub?`<p>${esc(sub)}</p>`:''}</div><span class="chart-mark">${icon(ic,17)}</span></div>`;
-  const sample=m=>m.exemplos?`<div class="sample-banner"><span><b>Dados de demonstração:</b> ${m.exemplos} de ${m.n} registros são exemplos fictícios e entram nos indicadores exibidos.</span><button class="link" data-so-reais>Mostrar apenas reais</button></div>`:'';
-  function hbars(items,total,{key,monetario=false}={}){
-    const max=Math.max(1e-9,...items.map(i=>i.value));
-    return `<div class="percent-bars">${items.map(it=>{const count=monetario?fmt.mi(it.value):fmt.n(it.value),percent=fmt.pct(divisao(it.value,total));
-      const attr=key&&it.key?`data-analytics-filter="${key}" data-value="${esc(it.key)}" aria-label="Filtrar por ${esc(it.label)}"`:'';
-      return `<${attr?'button':'div'} class="percent-row" ${attr} data-tt="${esc(it.label)}&#10;${esc(count)} · ${esc(percent)}"><span class="name">${esc(it.label)}</span><span class="track"><i style="width:${it.value/max*100}%;--bar:${it.color||UNICA}"></i></span><span class="count">${count}<small>${percent}</small></span></${attr?'button':'div'}>`;}).join('')}</div>`;
+  /** Cartão de indicador: usa GP.ui.metric (pacote base) quando existe, com o mesmo markup no fallback.
+      icone aceita os ícones extras; deltaTom 'ruim' (cobre, com seta) ou 'bom' (oliva). */
+  function metric(o){
+    const {label,valor,sub='',icone='painel',tom=UNICA,tint='#f1f6ea',ratio=null,delta='',deltaTom=''}=o;
+    let h=GP.ui.metric?GP.ui.metric({label,valor,sub,icone:'painel',tom,tint,ratio,delta}):
+      `<div class="metric" style="--tone:${tom};--tint:${tint}"><div class="metric-head"><span>${esc(label)}</span><i class="metric-icon">${ico(icone,15)}</i></div><div class="metric-body"><strong class="metric-value">${valor??'-'}</strong>${ratio!=null?ring(ratio,tom,46):''}</div>${delta?`<span class="metric-delta">${esc(delta)}</span>`:''}<div class="metric-sub">${sub}</div></div>`;
+    h=h.replace(/(<i class="metric-icon"[^>]*>)[\s\S]*?(<\/i>)/,`$1${ico(icone,15)}$2`);
+    if(delta)h=h.replace(/class="metric-delta"/,`class="metric-delta gx-delta ${deltaTom?'gx-delta-'+deltaTom:''}"`);
+    return h;
   }
-  function donut(items,total,label='registros',{key}={}){
-    const r=72,c=94,L=2*Math.PI*r,vivos=items.filter(i=>i.value>0).length,gap=vivos>1?3:0; let offset=0;
-    const arcs=items.map(it=>{const length=total?it.value/total*L:0;if(!length)return '';const v=`<circle class="arc" cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${it.color}" stroke-width="18" stroke-dasharray="${Math.max(.01,length-gap)} ${L-length+gap}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${c} ${c})" data-tt="${esc(it.label)}&#10;${it.value} · ${fmt.pct(divisao(it.value,total))}"/>`;offset+=length;return v;}).join('');
-    return `<div class="donut-layout"><svg viewBox="0 0 188 188" role="img" aria-label="${esc(items.map(i=>i.label+': '+i.value).join(', '))}"><circle cx="94" cy="94" r="72" fill="none" stroke="#e9efeb" stroke-width="18"/>${arcs}<text x="94" y="98" text-anchor="middle" font-size="38" font-weight="700" fill="#17302b" letter-spacing="-1">${total}</text><text x="94" y="120" text-anchor="middle" font-size="11.5" fill="#566b64">${esc(label)}</text></svg><div class="donut-legend">${items.map(it=>`<${key?'button':'div'} class="legend-line" ${key?`data-analytics-filter="${key}" data-value="${esc(it.key)}" aria-label="Filtrar ${esc(it.label)}"`:''}><i style="background:${it.color}"></i><span>${esc(it.label)}<small>${fmt.pct(divisao(it.value,total))} do total</small></span><b>${it.value}</b></${key?'button':'div'}>`).join('')}</div></div>`;
+  const deltaChip=(n,{ruimSeSobe=true,sufixo='em 30 dias'}={})=>{
+    const tom=n===0?'':((n>0)===ruimSeSobe?'ruim':'bom'),seta=n>0?'↑ ':n<0?'↓ ':'';
+    return {texto:`${tom==='ruim'?seta:''}${sinal(n)} ${sufixo}`,tom};
+  };
+  const chartHead=(title,sub='',ic='ranking')=>`<div class="chart-head"><div><h3>${esc(title)}</h3>${sub?`<p>${esc(sub)}</p>`:''}</div><span class="chart-mark">${ico(ic,17)}</span></div>`;
+  const sample=m=>m.exemplos?`<div class="sample-banner"><span><b>Dados de demonstração:</b> ${m.exemplos===m.n?`os ${fmt.n(m.n)} registros`:`${m.exemplos} de ${m.n} registros`} são fictícios e entram nos indicadores.</span><button class="link" data-so-reais>Mostrar apenas reais</button></div>`:'';
+  /** Tabela de apoio de cada gráfico (GP.charts.dados do pacote base, com fallback local). */
+  function dados(titulo,colunas,linhas){
+    if(GP.charts.dados)return GP.charts.dados(titulo,colunas,linhas);
+    const cols=colunas.map(c=>typeof c==='string'?{label:c}:c);
+    return `<details class="chart-data gx-dados" data-noprint><summary>Ver dados em tabela</summary><div class="gx-dados-wrap"><table class="gx-mini"><caption class="sr-only">${esc(titulo)}</caption><thead><tr>${cols.map(c=>`<th scope="col" class="${c.align||''}">${esc(c.label)}</th>`).join('')}</tr></thead><tbody>${linhas.map(l=>`<tr>${l.map((v,i)=>`<td class="${(cols[i]&&cols[i].align)||''}">${esc(typeof v==='number'?fmt.n(v,v%1?1:0):v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></details>`;
+  }
+  /** Barras horizontais. ordem 'valor' (dimensões nominais) ou 'fixa' (processo). modoPct: itens {label,num,den} → '89%' e '8 de 9'.
+      Rótulo em coluna única (subgrid) com teto de 180px e reticências; linhas zeradas esmaecidas. */
+  function hbars(items,total,{key,monetario=false,modoPct=false,ordem='valor'}={}){
+    let its=items.map(it=>modoPct?{...it,value:it.den?it.num/it.den*100:0}:it);
+    if(ordem==='valor')its=its.slice().sort((a,b)=>b.value-a.value);
+    const max=modoPct?100:Math.max(1e-9,...its.map(i=>i.value));
+    return `<div class="percent-bars gx-bars">${its.map(it=>{
+      const vazio=modoPct?!it.den:!it.value;
+      const count=modoPct?(it.den?fmt.pct(it.num/it.den):'-'):monetario?fmt.mi(it.value):fmt.n(it.value);
+      const small=modoPct?(it.den?`${fmt.n(it.num)} de ${fmt.n(it.den)}`:'sem base'):fmt.pct(divisao(it.value,total));
+      const attr=key&&it.key!=null?`data-analytics-filter="${key}" data-value="${esc(it.key)}" aria-label="Filtrar por ${esc(it.label)}: ${esc(count)}"`:'';
+      const tt=`${esc(it.label)}&#10;${esc(count)} · ${esc(small)}${it.desc?'&#10;'+esc(it.desc):''}`;
+      return `<${attr?'button':'div'} class="percent-row ${vazio?'is-zero':''}" ${attr} data-tt="${tt}"><span class="name">${esc(it.label)}</span><span class="track"><i style="width:${Math.max(0,Math.min(100,it.value/max*100))}%;--bar:${it.color||UNICA}"></i></span><span class="count">${count}<small>${small}</small></span></${attr?'button':'div'}>`;}).join('')}</div>`;
+  }
+  /** Barras empilhadas por etapa: Projetos (c1) e Demandas (c2), 2px de respiro, ponta só no fim. */
+  function empilhadas(etapas){
+    const max=Math.max(1,...etapas.map(e=>e.value));
+    return `<div class="percent-bars gx-bars gx-stack">${etapas.map(e=>{
+      const wp=e.projetos/max*100,wd=e.demandas/max*100;
+      return `<div class="percent-row ${e.value?'':'is-zero'}" data-tt="${esc(e.label)}&#10;Projetos: ${e.projetos}&#10;Demandas: ${e.demandas}"><span class="name">${esc(e.label)}</span><span class="track gx-stack-track">${e.projetos?`<i class="gx-seg ${e.demandas?'':'fim'}" style="width:${wp}%;--bar:${PALETTE[0]}"></i>`:''}${e.demandas?`<i class="gx-seg fim" style="width:${wd}%;--bar:${PALETTE[1]}"></i>`:''}</span><span class="count">${fmt.n(e.value)}<small>${e.value?`${e.projetos} / ${e.demandas}`:'-'}</small></span></div>`;}).join('')}</div>
+      <div class="legend gx-legend"><span><i style="background:${PALETTE[0]}"></i>Projetos</span><span><i style="background:${PALETTE[1]}"></i>Demandas</span></div>`;
+  }
+  /** Cruzamento etapa × gerência: mapa de calor de matiz único (oliva), valor escrito em cada célula. */
+  function cruzamento(m){
+    const gers=[...M.CAT.gerencias.map(g=>g.id),...(m.lista.some(p=>!p.gerencia)?['']:[])];
+    const max=Math.max(1,...M.ETAPAS.flatMap(e=>gers.map(g=>m.lista.filter(p=>p.etapa===e.id&&(p.gerencia||'')===g).length)));
+    const nome=g=>g||'Não inf.';
+    let h=`<div class="gx-heat-scroll scroll-fade"><div class="gx-heat" style="--cols:${gers.length}" role="table" aria-label="Registros por etapa e gerência"><div class="gx-heat-row gx-heat-h" role="row"><span role="columnheader">Etapa</span>${gers.map(g=>`<span role="columnheader">${esc(nome(g))}</span>`).join('')}<span role="columnheader">Total</span></div>`;
+    M.ETAPAS.forEach(e=>{
+      const tot=m.lista.filter(p=>p.etapa===e.id).length;
+      h+=`<div class="gx-heat-row ${tot?'':'is-zero'}" role="row"><span class="gx-heat-lbl" role="rowheader">${esc(e.nome)}</span>${gers.map(g=>{
+        const v=m.lista.filter(p=>p.etapa===e.id&&(p.gerencia||'')===g).length,a=v?(.12+.78*v/max):0,escuro=a>.55;
+        return v?`<button class="gx-heat-cell" role="cell" style="background:rgba(107,143,42,${a.toFixed(2)});color:${escuro?'#fff':TXT}" data-gx-cruz="${e.id}|${esc(g)}" data-tt="${esc(e.nome)} · ${esc(nome(g))}&#10;${plural(v,'registro','registros')}" aria-label="${esc(e.nome)}, ${esc(nome(g))}: ${v}">${v}</button>`:`<span class="gx-heat-cell vazio" role="cell" aria-label="${esc(e.nome)}, ${esc(nome(g))}: 0">·</span>`;}).join('')}<b class="gx-heat-tot" role="cell">${tot}</b></div>`;
+    });
+    h+=`</div></div><p class="chart-footnote">Intensidade proporcional à quantidade. Clique em uma célula para filtrar etapa e gerência ao mesmo tempo.</p>`;
+    return h+dados('Registros por etapa e gerência',['Etapa',...gers.map(g=>({label:nome(g),align:'r'})),{label:'Total',align:'r'}],M.ETAPAS.map(e=>[e.nome,...gers.map(g=>m.lista.filter(p=>p.etapa===e.id&&(p.gerencia||'')===g).length),m.lista.filter(p=>p.etapa===e.id).length]));
+  }
+
+  /* ------------------------------------------------ gráfico de entradas: colunas empilhadas desenhadas na largura real */
+  const SERIES=[];
+  function svgEntradas(serie,W){
+    W=Math.max(260,Math.round(W||800));
+    const compacto=W<560;let pts=serie.pontos;
+    if(compacto&&pts.length>12)pts=pts.slice(-6);
+    const H=compacto?230:270,L=compacto?30:40,R=compacto?8:14,T=26,B=34,pw=W-L-R,ph=H-T-B;
+    const max=Math.max(2,...pts.map(p=>p.total)),passoY=max<=4?1:Math.ceil(max/4),nY=max<=4?max:4,yMax=passoY*nY;
+    const step=pw/Math.max(1,pts.length),bw=Math.max(6,Math.min(24,step*.56)),cada=Math.max(1,Math.ceil((compacto?44:52)/step));
+    const cores={projetos:PALETTE[0],demandas:PALETTE[1]},fs=compacto?11:12.5;
+    const seg=(x,y,h,topo)=>{if(h<=0)return '';const rr=topo?Math.min(4,h,bw/2):0;return rr?`M${x} ${y+h}V${y+rr}Q${x} ${y} ${x+rr} ${y}H${x+bw-rr}Q${x+bw} ${y} ${x+bw} ${y+rr}V${y+h}Z`:`M${x} ${y+h}V${y}H${x+bw}V${y+h}Z`;};
+    let g='';
+    for(let k=0;k<=nY;k++){const y=T+ph*(1-k/nY);g+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="${k?'#e3eae6':'#c9d6cf'}" stroke-width="1"/><text x="${L-8}" y="${y+4}" text-anchor="end" font-size="${fs-1}" fill="${TXT2}">${fmt.n(k*passoY)}</text>`;}
+    pts.forEach((p,i)=>{
+      const x=+(L+step*i+(step-bw)/2).toFixed(1),base=T+ph,hp=p.projetos/yMax*ph,hd=p.demandas/yMax*ph,gap=hp&&hd?2:0;
+      const yP=base-hp,yD=yP-gap-hd,topo=hd?yD:yP;
+      g+=`<path d="${seg(x,yP,hp,!hd)}" fill="${cores.projetos}"/><path d="${seg(x,yD,hd,true)}" fill="${cores.demandas}"/>`;
+      if(p.total)g+=`<text x="${x+bw/2}" y="${topo-6}" text-anchor="middle" font-size="${fs}" font-weight="650" fill="${TXT}">${fmt.n(p.total)}</text>`;
+      g+=`<rect class="hit" tabindex="0" x="${(L+step*i).toFixed(1)}" y="${T}" width="${step.toFixed(1)}" height="${ph}" fill="transparent" data-gx-col data-lbl="${esc(p.label)}" data-p="${p.projetos}" data-d="${p.demandas}" data-topo="${Math.min(topo,base).toFixed(1)}" data-cx="${(x+bw/2).toFixed(1)}" aria-label="${esc(p.label)}: ${plural(p.projetos,'projeto','projetos')} e ${plural(p.demandas,'demanda','demandas')}"/>`;
+      if(i%cada===0)g+=`<text x="${x+bw/2}" y="${H-12}" text-anchor="middle" font-size="${fs}" fill="${TXT2}">${esc(p.label)}</text>`;
+    });
+    const unid=serie.passo===1?'mês':serie.passo===3?'trimestre':'ano';
+    const aria=`Entradas por ${unid}: `+pts.map(p=>`${p.label} ${p.total} (${p.projetos} projetos, ${p.demandas} demandas)`).join('; ');
+    return `<svg class="chart chart-cols gx-cols" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(aria)}">${g}</svg>`;
   }
   function graficoEntradas(serie){
-    /* Colunas agrupadas: ≤24px, ponta arredondada de 4px e base reta, 2px de respiro entre o par, grade fina e dica por período. */
-    const pts=serie.pontos,W=800,H=260,L=40,R=12,T=18,B=44,pw=W-L-R,ph=H-T-B,max=Math.max(2,...pts.map(p=>Math.max(p.projetos,p.demandas))),step=pw/Math.max(1,pts.length),bw=Math.max(4,Math.min(24,(step-14)/2));
-    const passoY=max<=4?1:Math.ceil(max/4),nY=max<=4?max:4,yMax=passoY*nY,cores={projetos:PALETTE[0],demandas:PALETTE[1]};
-    const col=(x,v,cor)=>{if(!v)return '';const h=v/yMax*ph,y=T+ph-h,rr=Math.min(4,h,bw/2);return `<path d="M${x} ${T+ph}V${y+rr}Q${x} ${y} ${x+rr} ${y}H${x+bw-rr}Q${x+bw} ${y} ${x+bw} ${y+rr}V${T+ph}Z" fill="${cor}"/>`;};
-    let g=''; for(let k=0;k<=nY;k++){const t=k/nY,y=T+ph*(1-t),v=k*passoY;g+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="${k?'#e3eae6':'#c9d6cf'}" stroke-width="1"/><text x="${L-10}" y="${y+5}" text-anchor="end" font-size="14" fill="#71857e">${fmt.n(v)}</text>`;}
-    const rotulos=pts.length<=10?1:Math.ceil(pts.length/10);
-    pts.forEach((p,i)=>{const cx=L+step*(i+.5);g+=col(cx-bw-1,p.projetos,cores.projetos)+col(cx+1,p.demandas,cores.demandas);
-      g+=`<rect class="hit" x="${L+step*i}" y="${T}" width="${step}" height="${ph}" fill="transparent" data-tt="${esc(p.label)}&#10;Projetos: ${p.projetos}&#10;Demandas: ${p.demandas}"/>`;
-      if(i%rotulos===0)g+=`<text x="${cx}" y="${H-16}" text-anchor="middle" font-size="14" fill="#566b64">${esc(p.label)}</text>`;
+    const idx=SERIES.push(serie)-1;if(SERIES.length>40)SERIES.splice(0,SERIES.length-40);
+    const cores={projetos:PALETTE[0],demandas:PALETTE[1]};
+    return `<div class="gx-cols-host" data-gx-serie="${idx}">${svgEntradas(serie,800)}</div><div class="legend"><span><i style="background:${cores.projetos}"></i>Projetos</span><span><i style="background:${cores.demandas}"></i>Demandas</span></div><p class="chart-footnote">Data de entrada do cadastro. ${serie.passo===3?'Agrupado por trimestre para permitir a leitura de todo o período.':serie.passo===12?'Agrupado por ano para permitir a leitura de todo o período.':'Quantidade de novos cadastros em cada mês.'}${serie.semData?` ${plural(serie.semData,'registro sem data não aparece','registros sem data não aparecem')} neste gráfico.`:''}</p>`+
+      dados('Entradas por período',['Período',{label:'Projetos',align:'r'},{label:'Demandas',align:'r'},{label:'Total',align:'r'}],serie.pontos.map(p=>[p.label,p.projetos,p.demandas,p.total]));
+  }
+  function desenharEntradas(raiz=document){
+    raiz.querySelectorAll('.gx-cols-host[data-gx-serie]').forEach(h=>{
+      const s=SERIES[+h.dataset.gxSerie],w=h.clientWidth;if(!s||!w)return;
+      if(+h.dataset.w===w)return;h.dataset.w=w;h.innerHTML=svgEntradas(s,w);
     });
-    return `<div class="chart-scroll" tabindex="0" aria-label="Gráfico de entradas. Use a rolagem horizontal em telas menores."><svg class="chart chart-cols" viewBox="0 0 ${W} ${H}" role="img" aria-label="Entradas de projetos e demandas por ${serie.passo===1?'mês':serie.passo===3?'trimestre':'ano'}">${g}</svg></div><div class="legend"><span><i style="background:${cores.projetos}"></i>Projetos</span><span><i style="background:${cores.demandas}"></i>Demandas</span></div><p class="chart-footnote">Data de entrada do cadastro. ${serie.passo===3?'Agrupado por trimestre para permitir a leitura de todo o período.':serie.passo===12?'Agrupado por ano para permitir a leitura de todo o período.':'Quantidade de novos cadastros em cada mês.'}${serie.semData?` ${serie.semData} registro(s) sem data não aparecem neste gráfico.`:''}</p>`;
   }
-  function opcoes(itens,valor,vazio){return `<option value="">${esc(vazio)}</option>`+itens.map(([v,l])=>`<option value="${esc(v)}" ${v===valor?'selected':''}>${esc(l)}</option>`).join('');}
-  function filterPanel(f){
-    return `<div class="filter-panel" data-noprint><div class="filter-heading">${icon('funil',16)} Filtros do portfólio<span class="spacer"></span><button class="link" data-limpar-analise>Limpar filtros</button></div><div class="filter-controls">
-      <label>Gerência<select class="select" data-af="gerencia">${opcoes(M.CAT.gerencias.map(g=>[g.id,g.id]),f.gerencia,'Todas as gerências')}</select></label>
-      <label>Natureza<select class="select" data-af="natureza">${opcoes(Object.entries(NATUREZAS),f.natureza,'Projetos e demandas')}</select></label>
-      <label>Etapa<select class="select" data-af="etapa">${opcoes(M.ETAPAS.map(e=>[e.id,e.nome]),f.etapa,'Todas as etapas')}</select></label>
-      <label>Tipo de iniciativa<select class="select" data-af="tipo">${opcoes(M.CAT.tipos.map(t=>[t,t]),f.tipo,'Todos os tipos')}</select></label>
-      <label>Origem<select class="select" data-af="origem">${opcoes(M.CAT.origens.map(t=>[t,t]),f.origem,'Todas as origens')}</select></label>
-      <label>Base exibida<select class="select" data-af="fonte">${[['todos','Todos os registros'],['reais','Somente dados reais'],['exemplos','Somente exemplos fictícios']].map(([k,l])=>`<option value="${k}" ${k===f.fonte?'selected':''}>${l}</option>`).join('')}</select></label>
-      <label>Entrada a partir de<input class="input" type="date" data-af="de" value="${esc(f.de)}" min="2000-01-01" max="2100-12-31"></label>
-      <label>Entrada até<input class="input" type="date" data-af="ate" value="${esc(f.ate)}" min="2000-01-01" max="2100-12-31"></label>
-    </div>${f.q?`<p class="chart-footnote">Busca ativa: <b>${esc(f.q)}</b></p>`:''}</div>`;
+  let tmRes;window.addEventListener('resize',()=>{clearTimeout(tmRes);tmRes=setTimeout(()=>desenharEntradas(),120);});
+  /* Dica ancorada no topo da coluna, com amostra de cor por série */
+  let dica=null;
+  const esconderDica=()=>{if(dica){dica.remove();dica=null;}};
+  function mostrarDica(hit){
+    const svg=hit.ownerSVGElement;if(!svg)return;
+    const r=svg.getBoundingClientRect(),k=r.width/(svg.viewBox.baseVal.width||r.width),x=r.left+(+hit.dataset.cx)*k,y=r.top+(+hit.dataset.topo)*k;
+    if(!dica){dica=document.createElement('div');dica.className='gp-tt gx-tt';dica.setAttribute('role','tooltip');document.body.appendChild(dica);}
+    const p=+hit.dataset.p,d=+hit.dataset.d;
+    dica.innerHTML=`<b>${esc(hit.dataset.lbl)}</b><span><i style="background:${PALETTE[0]}"></i>Projetos: ${p}</span><span><i style="background:${PALETTE[1]}"></i>Demandas: ${d}</span><span>Total: ${p+d}</span>`;
+    const w=dica.offsetWidth,h=dica.offsetHeight;
+    dica.style.left=Math.max(8,Math.min(window.innerWidth-w-8,x-w/2))+'px';dica.style.top=Math.max(8,y-h-10)+'px';
   }
+  document.addEventListener('mouseover',e=>{const h=e.target.closest&&e.target.closest('[data-gx-col]');if(h)mostrarDica(h);else esconderDica();},{passive:true});
+  document.addEventListener('focusin',e=>{const h=e.target.closest&&e.target.closest('[data-gx-col]');if(h)mostrarDica(h);});
+  document.addEventListener('focusout',e=>{if(e.target.closest&&e.target.closest('[data-gx-col]'))esconderDica();});
+  window.addEventListener('scroll',()=>{const a=document.activeElement;if(dica&&a&&a.matches&&a.matches('[data-gx-col]'))mostrarDica(a);else esconderDica();},{passive:true});window.addEventListener('hashchange',esconderDica);
+
+  /* ------------------------------------------------ filtros compactos (chips) */
+  const PERIODOS={'3m':['Últimos 3 meses','3 meses',3],'6m':['Últimos 6 meses','6 meses',6],'12m':['Últimos 12 meses','12 meses',12],ano:['Este ano','este ano',0]};
+  function inicioPeriodo(k){const t=hoje();if(k==='ano')return t.slice(0,4)+'-01-01';const d=new Date(t+'T12:00:00');d.setMonth(d.getMonth()-PERIODOS[k][2]);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+  const rotuloPeriodo=f=>f.periodo&&Object.prototype.hasOwnProperty.call(PERIODOS,f.periodo)?PERIODOS[f.periodo][1]:(f.de||f.ate)?`${f.de?fmt.data(f.de):'início'} a ${f.ate?fmt.data(f.ate):'hoje'}`:'todo';
+  const MAIS=['natureza','tipo','origem','fonte'];
+  const contaMais=f=>MAIS.filter(k=>k==='fonte'?f.fonte!=='todos':!!f[k]).length+((f.de||f.ate)&&!f.periodo?1:0);
+  function ativosFiltro(f){
+    const a=[];
+    if(f.gerencia)a.push(['gerencia','Gerência '+f.gerencia]);if(f.etapa)a.push(['etapa',M.etapa(f.etapa).nome]);
+    if(f.de||f.ate)a.push(['periodo','Período: '+rotuloPeriodo(f)]);if(f.natureza)a.push(['natureza',NATUREZAS[f.natureza]+'s']);
+    if(f.tipo)a.push(['tipo',f.tipo]);if(f.origem)a.push(['origem','Origem '+f.origem.toLowerCase()]);
+    if(f.fonte==='reais')a.push(['fonte','Somente reais']);if(f.fonte==='exemplos')a.push(['fonte','Somente exemplos']);if(f.q)a.push(['q','Busca: '+f.q]);
+    return a;
+  }
+  function barraFiltros(f,{abas=''}={}){
+    const chip=(campo,rot,val,on)=>`<button type="button" class="gx-chip ${on?'on':''}" data-gx-pop="${campo}" aria-haspopup="true" aria-expanded="false">${esc(rot)}: <b>${esc(val)}</b>${ico('baixo',14)}</button>`;
+    const n=contaMais(f),ativos=ativosFiltro(f);
+    return `<div class="gx-toolbar" data-noprint>${abas}<div class="gx-chips" role="group" aria-label="Filtros">
+      ${chip('gerencia','Gerência',f.gerencia||'Todas',!!f.gerencia)}${chip('etapa','Etapa',f.etapa?M.etapa(f.etapa).nome:'Todas',!!f.etapa)}${chip('periodo','Período',rotuloPeriodo(f),!!(f.de||f.ate))}
+      <button type="button" class="gx-chip ${n?'on':''}" data-gx-mais>${ico('funil',14)} Mais filtros${n?` (${n})`:''}</button></div></div>
+      ${ativos.length?`<div class="gx-ativos" data-noprint><span class="gx-ativos-lbl">Filtros ativos</span>${ativos.map(([k,l])=>`<button type="button" class="gx-tag" data-gx-limpar="${k}" aria-label="Remover filtro ${esc(l)}">${esc(l)}${icon('x',13)}</button>`).join('')}<button class="link" data-limpar-analise>Limpar tudo</button></div>`:''}`;
+  }
+  let pop=null;
+  const fecharPop=()=>{if(pop){pop.remove();pop=null;document.querySelectorAll('[data-gx-pop][aria-expanded="true"]').forEach(b=>b.setAttribute('aria-expanded','false'));}};
+  function abrirPop(btn){
+    const campo=btn.dataset.gxPop,f=filtros();if(pop&&pop.dataset.campo===campo){fecharPop();return;}fecharPop();
+    let ops=[];
+    if(campo==='gerencia')ops=[['','Todas as gerências'],...M.CAT.gerencias.map(g=>[g.id,g.id+(g.nome&&g.nome!==g.id?' · '+g.nome:'')])];
+    if(campo==='etapa')ops=[['','Todas as etapas'],...M.ETAPAS.map(e=>[e.id,e.nome])];
+    if(campo==='periodo')ops=[['','Todo o período'],...Object.entries(PERIODOS).map(([k,v])=>[k,v[0]]),['__datas','Escolher datas…']];
+    const atual=campo==='periodo'?(f.periodo||(f.de||f.ate?'__datas':'')):f[campo]||'';
+    pop=document.createElement('div');pop.className='gx-pop';pop.dataset.campo=campo;pop.setAttribute('role','menu');
+    pop.innerHTML=ops.map(([v,l])=>`<button type="button" role="menuitemradio" aria-checked="${v===atual}" class="${v===atual?'on':''}" data-gx-set="${campo}" data-value="${esc(v)}">${v===atual?icon('check',14):'<i></i>'}<span>${esc(l)}</span></button>`).join('');
+    document.body.appendChild(pop);btn.setAttribute('aria-expanded','true');
+    const r=btn.getBoundingClientRect(),w=pop.offsetWidth,h=pop.offsetHeight;
+    pop.style.left=Math.max(8,Math.min(window.innerWidth-w-8,r.left))+'px';
+    pop.style.top=(r.bottom+6+h>window.innerHeight-8?Math.max(8,r.top-h-6):r.bottom+6)+'px';
+    const first=pop.querySelector('.on')||pop.querySelector('button');if(first)first.focus();
+  }
+  function aplicar(campo,valor){
+    const f=filtros();
+    if(campo==='periodo'){
+      if(valor==='__datas'){fecharPop();maisFiltros(true);return;}
+      f.periodo=valor;f.de=valor?inicioPeriodo(valor):'';f.ate='';
+    }else if(campo==='q')f.q='';
+    else if(campo==='fonte')f.fonte=valor||'todos';
+    else f[campo]=valor;
+    GP.save();fecharPop();GP.refresh();
+  }
+  function maisFiltros(focoDatas=false){
+    const f=filtros(),sel=(k,ops,vazio)=>`<select class="select" name="${k}">${vazio!=null?`<option value="">${esc(vazio)}</option>`:''}${ops.map(([v,l])=>`<option value="${esc(v)}" ${v===f[k]?'selected':''}>${esc(l)}</option>`).join('')}</select>`;
+    const m=GP.modal(`<h3>Mais filtros</h3><p class="muted">Os filtros valem para os cartões, gráficos, tabela e exportações do recorte.</p>
+      <form class="form gx-mais-form" data-gx-mais-form>
+        <label class="field">Natureza${sel('natureza',Object.entries(NATUREZAS).map(([k,v])=>[k,v+'s']),'Projetos e demandas')}</label>
+        <label class="field">Tipo de iniciativa${sel('tipo',M.CAT.tipos.map(t=>[t,t]),'Todos os tipos')}</label>
+        <label class="field">Origem${sel('origem',M.CAT.origens.map(t=>[t,t]),'Todas as origens')}</label>
+        <label class="field">Base exibida${sel('fonte',[['todos','Todos os registros'],['reais','Somente dados reais'],['exemplos','Somente exemplos fictícios']])}</label>
+        <label class="field">Entrada a partir de<input class="input" type="date" name="de" value="${esc(f.de)}" min="2000-01-01" max="2100-12-31"></label>
+        <label class="field">Entrada até<input class="input" type="date" name="ate" value="${esc(f.ate)}" min="2000-01-01" max="2100-12-31"></label>
+      </form>
+      <div class="m-act"><button class="btn btn-ghost" type="button" data-gx-mais-limpar>Limpar estes filtros</button><button class="btn btn-primary" type="button" data-gx-mais-ok>Aplicar</button></div>`,{largo:true});
+    if(focoDatas){const d=m.querySelector('[name=de]');if(d)d.focus();}
+    m.querySelector('[data-gx-mais-ok]').onclick=()=>{
+      const d=Object.fromEntries(new FormData(m.querySelector('form')).entries());
+      if(d.de!==f.de||d.ate!==f.ate)f.periodo='';
+      Object.assign(f,{natureza:d.natureza||'',tipo:d.tipo||'',origem:d.origem||'',fonte:d.fonte||'todos',de:d.de||'',ate:d.ate||''});
+      GP.save();GP.closeModal();GP.refresh();
+    };
+    m.querySelector('[data-gx-mais-limpar]').onclick=()=>{Object.assign(f,{natureza:'',tipo:'',origem:'',fonte:'todos'});if(!f.periodo){f.de='';f.ate='';}GP.save();GP.closeModal();GP.refresh();};
+  }
+  document.addEventListener('click',e=>{
+    const b=e.target.closest('[data-gx-pop]');if(b){abrirPop(b);return;}
+    const s=e.target.closest('[data-gx-set]');if(s){aplicar(s.dataset.gxSet,s.dataset.value);return;}
+    if(pop&&!e.target.closest('.gx-pop'))fecharPop();
+    if(e.target.closest('[data-gx-mais]')){maisFiltros();return;}
+    const l=e.target.closest('[data-gx-limpar]');if(l){const k=l.dataset.gxLimpar;if(k==='periodo'){const f=filtros();f.periodo='';f.de='';f.ate='';GP.save();GP.refresh();}else aplicar(k,'');return;}
+    const c=e.target.closest('[data-gx-cruz]');if(c){const [et,ger]=c.dataset.gxCruz.split('|');Object.assign(filtros(),{etapa:et,gerencia:ger});GP.save();GP.refresh();return;}
+  });
+  document.addEventListener('keydown',e=>{
+    if(!pop)return;
+    if(e.key==='Escape'){const campo=pop.dataset.campo;fecharPop();const b=document.querySelector(`[data-gx-pop="${campo}"]`);if(b)b.focus();e.stopPropagation();return;}
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){const bs=[...pop.querySelectorAll('button')],i=bs.indexOf(document.activeElement);const n=bs[(i+(e.key==='ArrowDown'?1:-1)+bs.length)%bs.length];if(n){n.focus();e.preventDefault();}}
+  },true);
+  window.addEventListener('hashchange',fecharPop);window.addEventListener('resize',fecharPop);
   function descricaoFiltros(f){
     const partes=[];
     if(f.gerencia)partes.push('Gerência '+f.gerencia);if(f.natureza)partes.push(NATUREZAS[f.natureza]);if(f.etapa)partes.push(M.etapa(f.etapa).nome);
@@ -120,84 +334,283 @@
     if(f.fonte==='reais')partes.push('Somente reais');if(f.fonte==='exemplos')partes.push('Somente exemplos');if(f.q)partes.push('Busca: '+f.q);
     return partes.length?partes.join(' / '):'Todos os registros cadastrados';
   }
-  function kpis(m){return `<div class="metric-grid">
-    ${metric('Registros na base',fmt.n(m.n),`${m.projetos} projetos e ${m.demandas} demandas`,{ic:'acervo'})}
-    ${metric('Fila de entrada',fmt.n(m.fila),`${fmt.pct(divisao(m.fila,m.n))} do total cadastrado`,{tone:'#c39127',tint:'#fff7e6',ic:'funil',ratio:divisao(m.fila,m.n)})}
-    ${metric('Em execução',fmt.n(m.execucao),`${fmt.pct(divisao(m.execucao,m.n))} do total cadastrado`,{tone:'#188787',tint:'#e8f4f1',ic:'carteira',ratio:divisao(m.execucao,m.n)})}
-    ${metric('Admissão na entrada',fmt.pct(m.taxaEntrada),`${m.entram} entram / ${m.entradaAvaliada} checklists completos`,{tone:'#60852a',ic:'avaliar',ratio:m.taxaEntrada})}
-    ${metric('Conclusão da carteira',fmt.pct(m.taxaConclusao),`${m.concluidos} concluídos / ${m.carteira} aceitos na carteira`,{tone:'#477b91',tint:'#ecf2f6',ic:'check',ratio:m.taxaConclusao})}
-    ${metric('Prazos vencidos',fmt.n(m.atrasados.length),'Aprovados, em execução ou em espera com fim vencido',{tone:'#bb7d2c',tint:'#fff1df',ic:'relogio'})}
-    </div>`;}
-  function tabela(lista,{busca=false,limit=null}={}){
-    const rows=limit?lista.slice(0,limit):lista;
-    return `<div class="table-tools"><div><h3>Projetos e demandas ${limit?'recentes':'do recorte'}</h3><span class="dim" style="font-size:11px">${rows.length} registro(s)${limit&&lista.length>limit?` de ${lista.length}`:''}. Clique em um registro para abrir a ficha.</span></div>${busca?`<input class="input" data-af="q" value="${esc(filtros().q)}" placeholder="Buscar por título, código, área ou pessoa" aria-label="Buscar nos indicadores">`:'<a class="link" href="#/acervo">Consultar acervo</a>'}</div><div class="portfolio-table">${U.table({id:'analytics',rows,cols:[
-      {key:'titulo',label:'Registro',fmt:(v,p)=>`<span class="code">${esc(p.codigo)}</span> <b>${esc(v)}</b><small>${esc(p.area||p.tipo)}${p.exemplo?' / Exemplo fictício':''}</small>`},
-      {key:'natureza',label:'Natureza',fmt:(v,p)=>U.pill(NATUREZAS[natureza(p)],natureza(p)==='demanda'?'info':'ok'),sortVal:natureza},
+  const temFiltro=f=>ativosFiltro(f).length>0;
+
+  /* ------------------------------------------------ tabela gerencial */
+  const iconeNatureza=p=>natureza(p)==='demanda'
+    ?`<span class="gx-nat gx-nat-d" data-tt="Demanda" aria-label="Demanda" role="img">${ico('etiqueta',16)}</span>`
+    :`<span class="gx-nat gx-nat-p" data-tt="Projeto" aria-label="Projeto" role="img">${ico('alvo',16)}</span>`;
+  function celulaAvanco(p){
+    const v=progresso(p);
+    if(p.etapa==='concluido'||((p.etapa==='execucao'||p.etapa==='espera')&&v!=null))return `<div class="progress-cell gx-prog"><span>${fmt.n(v)}%</span><span class="gx-prog-bar"><i style="width:${Math.max(0,Math.min(100,v))}%"></i></span></div>`;
+    if(p.etapa==='execucao'||p.etapa==='espera')return '<span class="dim">Não informado</span>';
+    return '<span class="dim" aria-label="Não se aplica">—</span>';
+  }
+  function tabela(lista,f){
+    const filtrado=temFiltro(f);
+    return `<div class="table-tools"><div><h3>Projetos e demandas do recorte</h3><span class="dim" style="font-size:11px">${plural(lista.length,'registro','registros')}. Clique em um registro para abrir a ficha.</span></div><input class="input" data-af="q" value="${esc(f.q)}" placeholder="Buscar por título, código, área ou pessoa" aria-label="Buscar nos indicadores"></div><div class="portfolio-table gx-tabela">${U.table({id:'analytics',rows:lista,cols:[
+      {key:'codigo',label:'Código',fmt:(v,p)=>`<span class="code">${esc(v)}</span>${p.exemplo?'<span class="gx-ex">Exemplo</span>':''}`,sortVal:p=>p.codigo,sort:true},
+      {key:'titulo',label:'Registro',main:true,fmt:(v,p)=>`<b class="gx-clamp" title="${esc(semExemplo(v))}">${esc(semExemplo(v))}</b><small>${esc(p.area||p.tipo||'')}</small>`,sortVal:p=>semExemplo(p.titulo)},
+      {key:'natureza',label:'Natureza',fmt:(v,p)=>iconeNatureza(p),sortVal:natureza},
       {key:'gerencia',label:'Gerência'},
       {key:'etapa',label:'Etapa',fmt:v=>GP.etapaPill(v),sortVal:p=>M.etapa(p.etapa).ordem},
-      {key:'progresso',label:'Avanço',align:'r',fmt:(v,p)=>`<div class="progress-cell">${progresso(p)==null?'<span class="dim">Não informado</span>':`${fmt.n(progresso(p))}%<div class="bar"><i style="width:${progresso(p)}%"></i></div>`}</div>`,sortVal:p=>progresso(p)??-1},
-      {key:'custo',label:'Custo estimado',align:'r',fmt:v=>`<span style="white-space:nowrap">${fmt.brl(v)}</span>`},
-      {key:'fimPrevisto',label:'Fim previsto',fmt:(v,p)=>`<span style="${ABERTOS.includes(p.etapa)&&v&&v<hoje()?'color:var(--warn);font-weight:600':''}">${fmt.data(v)}</span>`}
-    ],rowAttr:p=>`class="click" data-abrir="${p.id}" tabindex="0"`,vazioTxt:'Nenhum registro com os filtros selecionados.'})}</div>`;
+      {key:'progresso',label:'Avanço',align:'r',fmt:(v,p)=>celulaAvanco(p),sortVal:p=>progresso(p)??-1},
+      {key:'custo',label:'Custo',align:'r',fmt:v=>`<span class="gx-num" style="white-space:nowrap">${fmt.brl(v)}</span>`},
+      {key:'fimPrevisto',label:'Prazo',fmt:(v,p)=>`<span class="gx-num" title="Fim previsto" style="${ABERTOS.includes(p.etapa)&&v&&v<hoje()?'color:var(--warn);font-weight:600':''}">${fmt.data(v)}</span>`}
+    ],rowAttr:p=>`class="click" data-abrir="${p.id}" tabindex="0"`,vazioTxt:filtrado?'Nenhum registro com os filtros selecionados.':'Nenhum registro cadastrado'})}</div>`;
+  }
+
+  /* ------------------------------------------------ painel: próximo passo, atenção, atividade */
+  function proximosPassos(m){
+    const lista=m.lista,nivel=GP.nivel(),t=hoje(),passos=[];
+    m.atrasados.slice().sort((a,b)=>a.fimPrevisto.localeCompare(b.fimPrevisto)).slice(0,1).forEach(p=>{const d=diasEntre(p.fimPrevisto,t);
+      passos.push({verbo:'Revisar o prazo de',p,motivo:`O fim previsto era ${fmt.data(p.fimPrevisto)}: vencido há ${plural(d,'dia','dias')}.${m.atrasados.length>1?` Outros ${m.atrasados.length-1} estão na mesma situação.`:''}`,acao:{rotulo:'Abrir a ficha',href:'#/projeto/'+p.id}});});
+    const fila=lista.filter(p=>FILA.includes(p.etapa)&&dataEntrada(p)&&diasEntre(dataEntrada(p),t)>30).sort((a,b)=>dataEntrada(a).localeCompare(dataEntrada(b)));
+    if(fila.length){const p=fila[0],d=diasEntre(dataEntrada(p),t);
+      passos.push({verbo:'Decidir a entrada de',p,motivo:`Está na fila há ${plural(d,'dia','dias')}, desde ${fmt.data(dataEntrada(p))}.${fila.length>1?` ${plural(fila.length-1,'outro registro espera','outros registros esperam')} há mais de 30 dias.`:''}`,acao:{rotulo:'Fazer o checklist',entrada:p.id}});}
+    if(nivel>=2){
+      const semNota=lista.filter(p=>p.etapa==='aprovado'&&!M.pontuar(p).completo);
+      if(semNota.length){const p=semNota[0];passos.push({verbo:'Avaliar',p,motivo:`Foi admitido, mas ainda não tem as notas de valor e esforço.${semNota.length>1?` Há mais ${semNota.length-1} na mesma situação.`:''}`,acao:{rotulo:'Avaliar agora',href:'#/avaliar/'+p.id}});}
+      const forcar=GP.state().forcar||{},prontos=M.ranking(lista.filter(p=>p.etapa==='aprovado')).filter(x=>!forcar[x.p.id]);
+      if(prontos.length)passos.push({verbo:'Levar ao comitê',objeto:plural(prontos.length,'iniciativa priorizada','iniciativas priorizadas'),motivo:'Estão avaliadas e ordenadas no ranking, mas ainda sem decisão de início.',acao:{rotulo:'Abrir o ranking',href:'#/ranking'}});
+    }
+    if(nivel>=3&&!GP.state().meta.capacidadeConfirmada){const cap=GP.state().capacidade;
+      passos.push({verbo:'Confirmar a capacidade de',objeto:String(cap.periodo||'período'),motivo:`A simulação usa valores sugeridos (${fmt.n(cap.fte,1)} FTE e ${cap.reservaPct}% de reserva). Confirme com a equipe.`,acao:{rotulo:'Revisar capacidade',href:'#/carteira'}});}
+    return passos;
+  }
+  const botaoPasso=(a,cls='btn btn-primary')=>a.entrada?`<button class="${cls}" data-gx-entrada="${esc(a.entrada)}">${esc(a.rotulo)}</button>`:`<a class="${cls}" href="${a.href}">${esc(a.rotulo)}</a>`;
+  const objetoPasso=s=>s.p?`<span class="code">${esc(s.p.codigo)}</span>`:esc(s.objeto);
+  function cartaoProximo(m){
+    const ps=proximosPassos(m);
+    if(!ps.length)return `<section class="card gx-next gx-next-ok"><span class="gx-eyebrow">Seu próximo passo</span><h2>Tudo em dia</h2><p class="gx-next-why">${icon('check',16)}<span>Nenhuma pendência pelas regras de prazo, fila, avaliação e decisão.</span></p><div class="gx-next-act"><a class="btn btn-primary" href="#/novo">${icon('novo',15)} Nova iniciativa</a></div></section>`;
+    const [s,...resto]=ps;
+    return `<section class="card gx-next" aria-label="Seu próximo passo"><span class="gx-eyebrow">Seu próximo passo</span>
+      <h2>${esc(s.verbo)} ${objetoPasso(s)}</h2>${s.p?`<p class="gx-next-obj">${esc(semExemplo(s.p.titulo))}</p>`:''}
+      <p class="gx-next-why">${icon('relogio',16)}<span>${esc(s.motivo)}</span></p>
+      <div class="gx-next-act">${botaoPasso(s.acao)}${resto.length?`<details class="gx-mais"><summary>Ver mais ${resto.length}</summary><ul>${resto.map(r=>`<li><span><b>${esc(r.verbo)} ${objetoPasso(r)}</b><small>${esc(r.motivo)}</small></span>${botaoPasso(r.acao,'link')}</li>`).join('')}</ul></details>`:''}</div></section>`;
+  }
+  /** Regras de acompanhamento: as que falham viram pendências; as que passam aparecem como verificadas. */
+  function regrasAtencao(m){
+    const nivel=GP.nivel(),semResp=m.lista.filter(p=>ABERTOS.includes(p.etapa)&&!p.responsavel),semAv=m.lista.filter(p=>p.etapa==='execucao'&&progresso(p)==null),semPrior=m.lista.filter(p=>p.etapa==='aprovado'&&!M.pontuar(p).completo);
+    const r=[
+      {lista:m.atrasados,txt:n=>plural(n,'prazo previsto vencido','prazos previstos vencidos'),ok:'Prazos previstos em dia',desc:'Revise datas e situação com os responsáveis.',href:p=>'#/projeto/'+p.id},
+      {lista:semResp,txt:n=>plural(n,'iniciativa sem responsável','iniciativas sem responsável'),ok:'Responsáveis definidos',desc:'Aprovadas, em execução ou em espera.',href:p=>'#/novo/'+p.id},
+      ...(nivel>=2?[{lista:semPrior,txt:n=>plural(n,'aprovado sem prioridade completa','aprovados sem prioridade completa'),ok:'Aprovados com avaliação completa',desc:'Conclua a avaliação antes da decisão de início.',href:p=>'#/avaliar/'+p.id}]:[]),
+      {lista:semAv,txt:n=>plural(n,'execução sem avanço informado','execuções sem avanço informado'),ok:'Avanço informado nas execuções',desc:'Atualize o percentual de avanço na ficha.',href:p=>'#/novo/'+p.id},
+      {lista:m.semDatas,txt:n=>plural(n,'iniciativa sem datas previstas','iniciativas sem datas previstas'),ok:'Datas previstas completas',desc:'Informe início e fim para o planejamento.',href:p=>'#/novo/'+p.id},
+    ];
+    if(nivel>=2&&GP.riscos&&GP.riscos.medir){const v=GP.riscos.medir().vencidos;r.push({lista:v,txt:n=>plural(n,'ação de risco vencida','ações de risco vencidas'),ok:'Ações de risco no prazo',desc:'Atualize o plano de mitigação.',href:()=>'#/riscos'});}
+    return r;
+  }
+  function itensAtencao(m){
+    return regrasAtencao(m).filter(x=>x.lista.length).map(x=>({n:x.lista.length,txt:x.txt(x.lista.length),desc:x.desc,href:x.href(x.lista[0])}));
+  }
+  function atencoes(m,max=5){
+    const rg=regrasAtencao(m),it=itensAtencao(m).slice(0,max),ok=rg.filter(x=>!x.lista.length);
+    if(!it.length)return `<div class="attention-list gx-att"><div class="info-empty gx-tudo-ok">${icon('check',22)}<p><b>Tudo em dia</b>${m.n?'Nenhuma pendência pelas regras de prazo, responsável, avanço e datas.':'Cadastre registros para acompanhar as pendências.'}</p></div></div>`;
+    return `<div class="attention-list gx-att">${it.map(x=>`<a class="attention-item" href="${x.href}"><span class="ic">${icon('alerta',15)}</span><p><b>${esc(x.txt)}</b>${esc(x.desc)}</p></a>`).join('')}
+      ${ok.length&&it.length<4?`<ul class="gx-ok-list" aria-label="Regras verificadas">${ok.map(x=>`<li>${icon('check',14)}<span>${esc(x.ok)}</span></li>`).join('')}</ul>`:''}</div>`;
+  }
+  /* Atividade recente: históricos de projetos e riscos */
+  let visitaRegistrada=false;
+  function registrarVisita(){
+    if(visitaRegistrada||!GP.state())return;visitaRegistrada=true;
+    const ui=GP.state().ui;ui.visitaAnterior=typeof ui.ultimaVisita==='string'&&!isNaN(new Date(ui.ultimaVisita))?ui.ultimaVisita.slice(0,40):'';ui.ultimaVisita=new Date().toISOString();GP.save();
+  }
+  GP.registrarVisita=registrarVisita;
+  const TIPO_EVENTO={Cadastro:'novo',Etapa:'seta',Entrada:'funil','Priorização':'avaliar','Edição':'editar','Importação':'upload',Risco:'alerta'};
+  function eventos(){
+    const ev=[];
+    P.todos().forEach(p=>(p.historico||[]).forEach(h=>ev.push({data:h.data,acao:h.acao,detalhe:h.detalhe,codigo:p.codigo,titulo:semExemplo(p.titulo),href:'#/projeto/'+p.id,tipo:h.acao})));
+    if(GP.riscos&&GP.riscos.todos)GP.riscos.todos().forEach(r=>(r.historico||[]).forEach(h=>ev.push({data:h.data,acao:h.acao,detalhe:r.titulo,codigo:r.codigo,titulo:r.titulo,href:'#/riscos',tipo:'Risco'})));
+    return ev.filter(e=>e.data&&!isNaN(new Date(e.data))).sort((a,b)=>String(b.data).localeCompare(String(a.data)));
+  }
+  function relativo(iso){
+    const ms=Date.now()-new Date(iso).getTime();if(ms<60e3)return 'há instantes';
+    const min=Math.floor(ms/60e3);if(min<60)return `há ${min} min`;const h=Math.floor(min/60);if(h<24)return `há ${h} h`;
+    const d=Math.floor(h/24);return d===1?'ontem':d<30?`há ${d} dias`:fmt.data(String(iso).slice(0,10));
+  }
+  const ACAO_TXT={Cadastro:'Cadastrado',Etapa:'Mudou de etapa',Entrada:'Checklist de entrada','Priorização':'Avaliação registrada','Edição':'Cadastro editado','Importação':'Importado'};
+  function atividade(){
+    const ev=eventos(),ant=typeof GP.state().ui.visitaAnterior==='string'?GP.state().ui.visitaAnterior:'',novos=ant?ev.filter(e=>e.data>ant).length:0;
+    const ult=ev.slice(0,6);
+    return `<div class="card b-4 gx-ativ">${chartHead('Atividade recente','Últimas mudanças nos projetos e riscos.','relogio')}
+      ${novos?`<span class="gx-novidades"><i></i>${plural(novos,'novidade','novidades')} desde ${fmt.data(ant.slice(0,10)).slice(0,5)}</span>`:''}
+      ${ult.length?`<ol class="gx-feed">${ult.map(e=>`<li class="${ant&&e.data>ant?'novo':''}"><span class="gx-feed-ic">${ico(TIPO_EVENTO[e.tipo]||'info',15)}</span><span class="gx-feed-txt"><span class="gx-feed-l1"><a class="code" href="${e.href}">${esc(e.codigo)}</a> ${esc(ACAO_TXT[e.acao]||e.acao)}${ant&&e.data>ant?'<i class="gx-dot" aria-label="Novidade"></i>':''}</span><small title="${esc(e.detalhe||'')}">${esc(e.tipo==='Etapa'?String(e.detalhe||'').split('. Motivo')[0]:e.titulo)}</small></span><time datetime="${esc(e.data)}">${esc(relativo(e.data))}</time></li>`).join('')}</ol>`:`<div class="info-empty">Nenhuma atividade registrada ainda.</div>`}</div>`;
+  }
+  function recentes(todos){
+    const ult=todos.slice().sort((a,b)=>(b.atualizadoEm||b.criadoEm||'').localeCompare(a.atualizadoEm||a.criadoEm||'')).slice(0,6);
+    return `<div class="card b-8 gx-recentes">${chartHead('Atualizados recentemente','Os registros alterados por último.','acervo')}
+      <ul class="gx-rec">${ult.map(p=>`<li><a href="#/projeto/${p.id}"><span class="code">${esc(p.codigo)}</span><span class="gx-rec-t">${esc(semExemplo(p.titulo))}</span><span class="gx-rec-e">${GP.etapaPill(p.etapa)}</span><span class="gx-rec-d">${fmt.data(String(p.atualizadoEm||p.criadoEm||'').slice(0,10))}</span></a></li>`).join('')}</ul>
+      <div class="gx-card-foot"><a class="link" href="#/acervo">Ver todos no acervo (${fmt.n(todos.length)})</a></div></div>`;
+  }
+  function cartaoDecisoes(m){
+    const forcar=GP.state().forcar||{},rk=M.ranking(m.lista.filter(p=>p.etapa==='aprovado')),pend=rk.filter(x=>!forcar[x.p.id]),sem=m.capacidade.semNota.length;
+    return `<div class="card b-4 gx-dec">${chartHead('Decisões pendentes','Priorizadas pelo ranking e ainda sem decisão do comitê.','avaliar')}
+      ${pend.length?`<ol class="gx-dec-list">${pend.slice(0,3).map(x=>`<li><a href="#/projeto/${x.p.id}"><span class="gx-pos">${x.pos}</span><span class="gx-dec-t"><span class="code">${esc(x.p.codigo)}</span>${esc(semExemplo(x.p.titulo))}</span><b class="gx-num" data-tt="Valor ${fmt.n(x.s.valor)} · esforço ${fmt.n(x.s.esforco)}">${fmt.n(x.s.valor)}</b></a></li>`).join('')}</ol>`:`<div class="info-empty">${icon('check',20)}<p>Nenhuma iniciativa avaliada aguarda decisão.</p></div>`}
+      <div class="gx-card-foot">${sem?`<a class="link" href="#/avaliar">${plural(sem,'aprovado aguarda avaliação','aprovados aguardam avaliação')}</a>`:''}<a class="link" href="#/ranking">Abrir o ranking${pend.length>3?` (${pend.length})`:''}</a></div></div>`;
+  }
+  function cartaoRiscos(){
+    if(!GP.riscos||!GP.riscos.medir)return '';
+    const r=GP.riscos.medir(),niv={baixo:0,moderado:0,alto:0,critico:0};r.avaliados.forEach(x=>{const k=GP.riscos.nivel(x);if(k in niv)niv[k]++;});
+    const cores={baixo:'#6b8f2a',moderado:'#d5a32d',alto:'#b8642c',critico:'#ac7044'},nomes={baixo:'Baixo',moderado:'Moderado',alto:'Alto',critico:'Crítico'},tot=r.avaliados.length;
+    const topo=r.avaliados.slice().sort((a,b)=>(GP.riscos.nota(b)||0)-(GP.riscos.nota(a)||0))[0];
+    return `<div class="card b-4 gx-risco">${chartHead('Riscos','Exposição dos riscos abertos e em tratamento.','alerta')}
+      <div class="gx-risco-nums"><div><strong>${fmt.n(r.ativos.length)}</strong><span>ativos</span></div><div><strong class="${r.altos.length?'gx-cobre':''}">${fmt.n(r.altos.length)}</strong><span>altos ou críticos</span></div><div><strong class="${r.vencidos.length?'gx-cobre':''}">${fmt.n(r.vencidos.length)}</strong><span>ações vencidas</span></div></div>
+      ${tot?`<div class="gx-risco-bar" role="img" aria-label="${esc(Object.keys(niv).map(k=>nomes[k]+': '+niv[k]).join(', '))}">${Object.keys(niv).filter(k=>niv[k]).map(k=>`<i style="flex:${niv[k]};background:${cores[k]}" data-tt="${nomes[k]}&#10;${plural(niv[k],'risco','riscos')}"></i>`).join('')}</div><div class="legend legend-mini">${Object.keys(niv).filter(k=>niv[k]).map(k=>`<span><i style="background:${cores[k]}"></i>${nomes[k]} ${niv[k]}</span>`).join('')}</div>`:''}
+      ${topo?`<p class="gx-risco-top"><span class="dim">Maior exposição</span><a href="#/riscos"><span class="code">${esc(topo.codigo)}</span> ${esc(topo.titulo)}</a></p>`:`<p class="gx-risco-top dim">${r.n?'Nenhum risco ativo avaliado.':'Nenhum risco registrado ainda.'}</p>`}
+      <div class="gx-card-foot"><a class="link" href="#/riscos">${r.n?'Abrir gestão de riscos':'Registrar o primeiro risco'}</a></div></div>`;
+  }
+  function cartaoCapacidade(m){
+    if(GP.capacidadeResumo){try{return `<div class="b-4 gx-cap-host">${GP.capacidadeResumo()}</div>`;}catch(e){console.error(e);}}
+    const c=m.capacidade,cap=GP.state().capacidade,uso=c.efetiva?m.fteExecucao/c.efetiva:null,acima=uso!=null&&uso>1;
+    return `<div class="card b-4 gx-capf">${chartHead('Capacidade · '+String(cap.periodo||''),'Pessoas disponíveis e novos inícios que cabem.','medidor')}
+      <div class="gx-capf-body">${ring(uso==null?null:Math.min(1,uso),acima?COBRE:'var(--c1)',96,uso==null?'-':fmt.pct(uso))}<div><b>${fmt.n(m.fteExecucao,1)} de ${fmt.n(c.efetiva,1)} FTE</b><span class="dim">em execução${acima?' · acima da capacidade':''}</span><b>${plural(c.cabem,'novo início cabe','novos inícios cabem')}</b><span class="dim">de ${c.candidatos} aprovados avaliados</span></div></div>
+      <div class="gx-card-foot"><a class="link" href="#/carteira">Abrir carteira e capacidade</a></div></div>`;
+  }
+  function etapaFluxo(href,rot,n,sub,extra=''){return `<a class="gx-step" href="${href}"><span class="gx-step-lbl">${esc(rot)}</span><strong>${fmt.n(n)}</strong><small>${sub}</small>${extra}</a>`;}
+  const etapaBloqueada=(rot,nv)=>`<div class="gx-step locked"><span class="gx-step-lbl">${esc(rot)}</span><span class="gx-lock">${ico('cadeado',16)} Disponível no nível ${nv}</span><button type="button" class="link gx-ativar" data-nivel="${nv}">Ativar nível ${nv}</button></div>`;
+  function fluxo(m){
+    const nivel=GP.nivel(),todos=m.lista,avaliar=todos.filter(p=>p.etapa==='aprovado'&&!M.pontuar(p).completo).length,prontos=todos.filter(p=>p.etapa==='aprovado'&&M.pontuar(p).completo).length;
+    const dl=deltaChip(m.tendencia.fila);
+    const chip=`<span class="gx-delta ${dl.tom?'gx-delta-'+dl.tom:''}">${esc(dl.texto)}</span>`;
+    return `<section class="b-full operation-flow gx-flow" aria-label="Fluxo do portfólio">
+      ${etapaFluxo('#/funil','Fila de entrada',m.fila,`${plural(m.novas,'nova','novas')} · ${fmt.n(m.triagem)} em triagem`,chip)}
+      ${nivel>=2?etapaFluxo('#/avaliar','Avaliação',avaliar,avaliar===1?'aprovado sem nota':'aprovados sem nota')+etapaFluxo('#/ranking','Decisão',prontos,prontos===1?'pronta para decisão':'prontas para decisão'):etapaBloqueada('Avaliação e decisão',2)}
+      ${etapaFluxo('#/acervo','Em execução',m.execucao,m.atrasados.length?`<span class="gx-cobre">${plural(m.atrasados.length,'prazo vencido','prazos vencidos')}</span>`:m.progresso!=null?`avanço médio de ${fmt.n(m.progresso)}%`:'sem avanço informado')}
+      ${nivel>=3?etapaFluxo('#/carteira','Planejamento',m.capacidade.cabem,m.capacidade.cabem===1?'novo início cabe':'novos inícios cabem'):etapaBloqueada('Planejamento',3)}
+    </section>`;
+  }
+  function sintese(m){
+    const nivel=GP.nivel(),lk=(h,t)=>`<a href="${h}"><b>${t}</b></a>`,cap=GP.state().capacidade,prontos=m.lista.filter(p=>p.etapa==='aprovado'&&M.pontuar(p).completo).length;
+    let s=`A carteira soma ${lk('#/acervo',plural(m.n,'iniciativa','iniciativas'))}${m.comCusto?` e ${lk('#/indicadores',fmt.mi(m.custo))} em custo estimado`:''}. `;
+    if(nivel>=2&&prontos){
+      s+=`${lk('#/ranking',`${fmt.n(prontos)} ${prontos===1?'está pronta':'estão prontas'} para decisão`)}`;
+      if(nivel>=3){const c=m.capacidade.cabem;s+=`${c<prontos?', mas':' e'} a capacidade de ${esc(String(cap.periodo||'período'))} comporta ${lk('#/carteira',plural(c,'novo início','novos inícios'))}`;}
+      s+='.';
+    }else{
+      s+=`${lk('#/acervo',`${fmt.n(m.execucao)} ${m.execucao===1?'está':'estão'} em execução`)}${m.concluidos?` e ${plural(m.concluidos,'foi concluída','foram concluídas')}`:''}.`;
+    }
+    if(m.atrasados.length)s+=` ${lk('#/projeto/'+m.atrasados[0].id,plural(m.atrasados.length,'prazo venceu','prazos venceram'))}.`;
+    return s;
+  }
+  function kpisPainel(m){
+    const t=m.tendencia;
+    return `<div class="metric-grid gx-kpis gx-kpis-4 scroll-fade">
+      ${metric({label:'Registros na base',valor:fmt.n(m.n),sub:`${plural(m.projetos,'projeto','projetos')} e ${plural(m.demandas,'demanda','demandas')}`,icone:'acervo',delta:`${sinal(t.novos)} em 30 dias`,deltaTom:t.novos>0?'bom':''})}
+      ${metric({label:'Admissão na entrada',valor:fmt.pct(m.taxaEntrada),sub:`${m.entram} de ${plural(m.entradaAvaliada,'checklist completo','checklists completos')} admitidos`,icone:'funil',ratio:m.taxaEntrada})}
+      ${metric({label:'Conclusão da carteira',valor:fmt.pct(m.taxaConclusao),sub:`${plural(m.concluidos,'concluído','concluídos')} de ${fmt.n(m.carteira)} aceitos`,icone:'check',ratio:m.taxaConclusao})}
+      ${metric({label:'Prazos vencidos',valor:fmt.n(m.atrasados.length),sub:'Aceitos e abertos com fim previsto vencido',icone:'relogio',tom:m.atrasados.length?COBRE:UNICA,tint:m.atrasados.length?'#fbeee6':'#f1f6ea'})}
+    </div>`;
+  }
+  function vazioPainel(el){
+    el.innerHTML=`<section class="gx-vazio" aria-labelledby="gx-vazio-h">
+      <svg class="gx-vazio-art" viewBox="0 0 220 150" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="18" y="22" width="120" height="96" rx="12" stroke="#3E6801" stroke-width="1.6"/><path d="M34 46h56M34 62h80M34 78h44" stroke="#6b8f2a" stroke-width="1.6"/>
+        <path d="M34 100V92M50 100V84M66 100V88M82 100V76" stroke="#6b8f2a" stroke-width="5"/>
+        <circle cx="160" cy="64" r="30" stroke="#d5a32d" stroke-width="1.6"/><path d="M160 46v18l12 8" stroke="#d5a32d" stroke-width="1.6"/>
+        <path d="M118 128h84" stroke="#3E6801" stroke-width="1.6"/><circle cx="196" cy="30" r="4" stroke="#6b8f2a" stroke-width="1.6"/><circle cx="24" cy="134" r="3" stroke="#d5a32d" stroke-width="1.6"/>
+      </svg>
+      <div class="gx-vazio-txt"><span class="gx-eyebrow">Painel do portfólio</span><h1 id="gx-vazio-h">Seu portfólio começa aqui</h1>
+        <p>O painel mostra o que precisa de atenção assim que houver registros. Comece por um destes caminhos:</p>
+        <ol class="gx-passos"><li><b>Cadastrar</b><span>Registre projetos e demandas com gerência, responsável e estimativas.</span></li><li><b>Decidir a entrada</b><span>Use o checklist para dizer o que entra no portfólio.</span></li><li><b>Priorizar</b><span>Avalie valor e esforço e leve o ranking ao comitê.</span></li></ol>
+        <div class="actions"><a class="btn btn-primary" href="#/novo">${icon('novo',15)} Cadastrar primeiro registro</a><button class="btn btn-ghost" data-importar-csv>${icon('upload',15)} Importar planilha</button><button class="btn btn-ghost" data-exemplos>${icon('estrela',15)} Explorar com 14 exemplos</button></div>
+      </div></section>`;
   }
   function resumo(el){
-    const todos=P.todos(),m=medir(todos),nivel=GP.nivel(),L=GP.NIVEIS[nivel-1],ultimos=todos.slice().sort((a,b)=>(b.atualizadoEm||b.criadoEm||'').localeCompare(a.atualizadoEm||a.criadoEm||''));
-    const novas=todos.filter(p=>p.etapa==='entrada').length,triagem=todos.filter(p=>p.etapa==='triagem').length,avaliar=todos.filter(p=>p.etapa==='aprovado'&&!M.pontuar(p).completo).length,prontos=todos.filter(p=>p.etapa==='aprovado'&&M.pontuar(p).completo).length;
-    el.innerHTML=`<div class="bento bento-painel">
-      <section class="b-hero hero operational-hero"><div><div class="hero-eyebrow"><i></i>Projeto Maestro / Sistema de Gestão de Portfólio</div><h1>Central do portfólio</h1><p>Cadastre, organize, priorize e acompanhe as iniciativas da FE. A FEG mantém o modelo e a consistência da carteira.</p><div class="actions"><a class="btn btn-primary" href="#/novo">${icon('novo',15)} Nova iniciativa</a><button class="btn btn-ghost" data-importar-csv>${icon('upload',15)} Importar iniciativas</button><a class="btn btn-ghost" href="#/acervo">${icon('acervo',15)} Abrir carteira</a></div></div></section>
-      <aside class="b-side"><div class="hero-stat level-tile"><small>Nível de uso ativo</small><div class="level-num"><strong>${nivel}</strong><span class="level-steps" aria-hidden="true">${[1,2,3].map(n=>`<i class="${n<=nivel?'on':''}"></i>`).join('')}</span></div><span>${esc(L.nome)}</span><button class="link" data-ajuda-nivel>Ver ou alterar nível</button></div>
-        <section class="work-session"><div class="session-state"><span class="session-dot ${GP.storage.ok?'ok':'warn'}"></span><div><b>${GP.storage.ok?'Trabalho salvo':'Atenção ao salvamento'}</b><small>${GP.storage.ok?'Salvamento automático neste navegador / '+fmt.dataHora(GP.storage.salvoEm):'Baixe uma cópia para preservar as alterações desta sessão.'}</small></div></div><div class="actions"><button class="btn btn-ghost btn-sm" data-save-now>${icon('check',14)} Salvar agora</button><button class="btn btn-ghost btn-sm" data-backup>${icon('download',14)} Baixar cópia</button><button class="btn btn-ghost btn-sm" data-restaurar-backup>${icon('upload',14)} Continuar de backup</button></div></section></aside>
-      <section class="b-full operation-flow" aria-label="Fluxo do portfólio"><a href="#/funil"><span>Entrada</span><strong>${novas}</strong><small>novas iniciativas</small></a><a href="#/funil"><span>Triagem</span><strong>${triagem}</strong><small>em análise</small></a>${nivel>=2?`<a href="#/avaliar"><span>Avaliação</span><strong>${avaliar}</strong><small>sem nota completa</small></a><a href="#/ranking"><span>Priorização</span><strong>${prontos}</strong><small>prontas para decisão</small></a>`:`<button data-nivel="2" class="locked"><span>Próxima função</span><strong>2</strong><small>ativar priorização</small></button>`}${nivel>=3?`<a href="#/carteira"><span>Planejamento</span><strong>${m.capacidade.cabem}</strong><small>novos inícios simulados</small></a>`:`<button data-nivel="3" class="locked"><span>Planejamento</span><strong>3</strong><small>ativar capacidade</small></button>`}</section>
-      ${sample(m)}${kpis(m)}
-      ${!m.n?`<div class="callout b-full"><span class="ic">${icon('info',17)}</span><div><p><b>Seu portfólio começa aqui.</b> Cadastre o primeiro projeto, importe uma planilha ou <button class="link" data-exemplos>carregue exemplos fictícios</button> para conhecer os gráficos. Os indicadores usam somente registros cadastrados.</p></div></div>`:''}
-      <div class="card b-7">${chartHead('Distribuição por etapa','Todos os registros, incluindo concluídos e saídas. Clique para filtrar.','funil')}${hbars(m.etapas,m.n,{key:'etapa'})}${legendaEtapas()}</div>
-      <div class="card b-5">${chartHead('Projetos e demandas','Natureza informada no cadastro.','carteira')}${donut([{key:'projeto',label:'Projetos',value:m.projetos,color:PALETTE[0]},{key:'demanda',label:'Demandas',value:m.demandas,color:PALETTE[1]}],m.n,'registros',{key:'natureza'})}<p class="chart-footnote">A natureza do registro é independente da etapa. Cadastros anteriores a esta versão recebem a classificação Projeto, que pode ser alterada na ficha.</p></div>
-      <div class="card b-8 card-wide">${chartHead('Entrada de projetos e demandas','Histórico dos cadastros a partir da data de entrada.','roadmap')}${graficoEntradas(m.serie)}</div>
-      <div class="card b-4">${chartHead('Pontos para acompanhamento','Pendências calculadas a partir dos registros.','alerta')}${atencoes(m)}<div style="margin-top:15px"><a class="link" href="#/indicadores">Abrir análise completa</a></div></div>
-      <div class="card b-6">${chartHead('Registros por gerência','Participação no total cadastrado.','acervo')}${hbars(m.gerencias,m.n,{key:'gerencia'})}</div>
-      <div class="card b-6">${chartHead('Avanço e estimativas','Valores informados nos cadastros.','ranking')}<div class="figures"><div class="figure-ring">${ring(m.progresso==null?null:m.progresso/100,'var(--c4)',108,m.progresso==null?'-':fmt.n(m.progresso)+'%')}<div><span class="fig-lbl">Avanço médio em execução</span><span class="fig-sub">${m.comProgresso} de ${m.execucao} com avanço informado</span></div></div><div class="figure-num"><span class="fig-lbl">Custo estimado total</span><strong>${m.comCusto?fmt.mi(m.custo):'-'}</strong><span class="fig-sub">${m.comCusto} de ${m.n} com custo informado</span></div></div><p class="chart-footnote">O custo é uma estimativa dos registros e inclui todas as etapas. O avanço é a média simples dos percentuais informados para os itens em execução.</p></div>
+    registrarVisita();
+    const todos=P.todos(),m=medir(todos),nivel=GP.nivel();
+    if(!m.n){vazioPainel(el);return;}
+    let linha2='';
+    if(nivel>=2){
+      const caps=nivel>=3?cartaoCapacidade(m):'',risc=cartaoRiscos();
+      linha2=nivel>=3?cartaoDecisoes(m)+risc+caps:cartaoDecisoes(m).replace('card b-4','card b-6')+risc.replace('card b-4','card b-6');
+    }
+    el.innerHTML=`<div class="bento bento-painel gx-painel">
+      <section class="b-hero gx-hero"><div class="gx-hero-in"><h1>Painel do portfólio</h1><p class="gx-sintese">${sintese(m)}</p>
+        <div class="actions gx-hero-act"><a class="btn btn-ghost" href="#/novo">${icon('novo',15)} Nova iniciativa</a><details class="gx-menu"><summary class="btn btn-ghost gx-menu-btn" aria-label="Mais ações">${ico('mais',18)}</summary><div class="gx-menu-pop" role="menu"><button type="button" role="menuitem" data-importar-csv>${icon('upload',15)} Importar planilha</button><a role="menuitem" href="#/acervo">${icon('acervo',15)} Abrir acervo</a></div></details></div></div></section>
+      <aside class="b-side gx-side">${cartaoProximo(m)}</aside>
+      ${fluxo(m)}
+      ${sample(m)}${kpisPainel(m)}
+      ${linha2}
+      <div class="card b-8 card-wide gx-entradas">${chartHead('Entrada de projetos e demandas','Novos cadastros por data de entrada.','roadmap')}${graficoEntradas(m.serie)}</div>
+      <div class="card b-4 gx-atencao">${chartHead('Pontos para acompanhamento','Pendências calculadas a partir dos registros.','alerta')}${atencoes(m)}<div class="gx-card-foot"><a class="link" href="#/indicadores">Abrir análise completa</a></div></div>
+      ${recentes(todos)}${atividade()}
+    </div>`;
+    desenharEntradas(el);
+  }
+
+  /* ------------------------------------------------ indicadores */
+  function kpisIndicadores(m){
+    const t=m.tendencia,df=deltaChip(t.fila);
+    return `<div class="metric-grid gx-kpis scroll-fade">
+      ${metric({label:'Registros na base',valor:fmt.n(m.n),sub:`${plural(m.projetos,'projeto','projetos')} e ${plural(m.demandas,'demanda','demandas')}`,icone:'acervo',delta:`${sinal(t.novos)} em 30 dias`,deltaTom:t.novos>0?'bom':''})}
+      ${metric({label:'Fila de entrada',valor:fmt.n(m.fila),sub:`${fmt.pct(divisao(m.fila,m.n))} do total cadastrado`,icone:'funil',tom:'#c39127',tint:'#fff7e6',delta:df.texto,deltaTom:df.tom})}
+      ${metric({label:'Em execução',valor:fmt.n(m.execucao),sub:`${fmt.pct(divisao(m.execucao,m.n))} do total cadastrado`,icone:'pulso',tom:'#188787',tint:'#e8f4f1'})}
+      ${metric({label:'Admissão na entrada',valor:fmt.pct(m.taxaEntrada),sub:`${m.entram} de ${plural(m.entradaAvaliada,'checklist completo','checklists completos')}`,icone:'avaliar',ratio:m.taxaEntrada})}
+      ${metric({label:'Conclusão da carteira',valor:fmt.pct(m.taxaConclusao),sub:`${plural(m.concluidos,'concluído','concluídos')} de ${fmt.n(m.carteira)} aceitos`,icone:'check',ratio:m.taxaConclusao})}
+      ${metric({label:'Prazos vencidos',valor:fmt.n(m.atrasados.length),sub:'Aceitos e abertos com fim vencido',icone:'relogio',tom:m.atrasados.length?COBRE:UNICA,tint:m.atrasados.length?'#fbeee6':'#f1f6ea'})}
+    </div>`;
+  }
+  function visaoGeral(m,lista){
+    const et=m.etapas,chk=['entra','falta_info','nao_entra'].map(k=>({key:k,label:M.RESULTADO_ENTRADA[k].nome,value:lista.filter(p=>p.entrada?.resultado===k).length,color:{entra:'#6b8f2a',falta_info:'#d5a32d',nao_entra:'#b8642c'}[k]}));
+    const linhas=it=>it.map(i=>[i.label,i.value,fmt.pct(divisao(i.value,m.n))]);
+    const colsQ=(rot)=>[rot,{label:'Registros',align:'r'},{label:'% do recorte',align:'r'}];
+    return kpisIndicadores(m)+`
+      <div class="card gx-card gx-entradas-ind">${chartHead('Projetos e demandas por período','Entradas do recorte, conforme o período selecionado.','roadmap')}${graficoEntradas(m.serie)}</div>
+      <div class="analytics-grid analytics-equal gx-row">
+        <div class="card gx-card">${chartHead('Distribuição por etapa','Quantidade e percentual no recorte. Clique para filtrar.','funil')}${hbars(et,m.n,{key:'etapa',ordem:'fixa'})}<div class="gx-card-foot">${dados('Distribuição por etapa',colsQ('Etapa'),linhas(et))}</div></div>
+        <div class="card gx-card">${chartHead('Natureza por etapa','Projetos e demandas em cada etapa do processo.','etiqueta')}${empilhadas(et)}<div class="gx-card-foot">${dados('Natureza por etapa',['Etapa',{label:'Projetos',align:'r'},{label:'Demandas',align:'r'},{label:'Total',align:'r'}],et.map(e=>[e.label,e.projetos,e.demandas,e.value]))}</div></div>
       </div>
-      ${tabela(ultimos)}`;
-  }
-  function atencoes(m){
-    const semResp=m.lista.filter(p=>ABERTOS.includes(p.etapa)&&!p.responsavel),semAv=m.lista.filter(p=>p.etapa==='execucao'&&progresso(p)==null),semPrior=m.lista.filter(p=>p.etapa==='aprovado'&&!M.pontuar(p).completo);
-    const itens=[...(m.atrasados.length?[{n:m.atrasados.length,title:'Prazos previstos vencidos',desc:'Revise datas e situação com os responsáveis.',key:'etapa',val:'execucao',href:'#/projeto/'+m.atrasados[0].id}]:[]),
-      ...(m.fila?[{n:m.fila,title:'Registros na fila de entrada',desc:'Demandas novas ou em triagem aguardam análise.',href:'#/funil'}]:[]),
-      ...(semResp.length?[{n:semResp.length,title:'Sem responsável definido',desc:'Aprovados, em execução ou em espera.',href:'#/novo/'+semResp[0].id}]:[]),
-      ...(semPrior.length?[{n:semPrior.length,title:'Aprovados sem prioridade completa',desc:'Conclua a avaliação antes da decisão de início.',href:'#/avaliar/'+semPrior[0].id}]:[]),
-      ...(semAv.length?[{n:semAv.length,title:'Em execução sem avanço informado',desc:'Atualize o percentual de avanço na ficha.',href:'#/novo/'+semAv[0].id}]:[])];
-    return `<div class="attention-list">${itens.slice(0,4).map(it=>`<a class="attention-item" href="${it.href}"><span class="ic">${icon('alerta',15)}</span><p><b>${it.n} ${esc(it.title.toLowerCase())}</b>${esc(it.desc)}</p></a>`).join('')||`<div class="info-empty">${icon('check',22)}<p>${m.n?'Nenhuma pendência identificada por estas regras.':'Cadastre registros para acompanhar as pendências.'}</p></div>`}</div>`;
-  }
-  function indicadores(el){
-    const f=filtros(),todos=P.todos(),lista=filtrar(todos,f),m=medir(lista,f),nivel=GP.nivel();let aba=GP.state().ui.abaIndicadores||'visao';if((aba==='custos'&&nivel<3)||(aba==='riscos'&&nivel<2))aba='visao';
-    let html=U.pageHead({titulo:'Indicadores do portfólio',sub:'Análise dos registros da carteira sob governança do modelo Maestro. Os filtros recalculam indicadores, gráficos e base de consulta.',acoes:`<button class="btn btn-ghost" data-dicionario>${icon('info',15)} Regras dos indicadores</button><button class="btn btn-ghost" data-exportar-recorte>${icon('download',15)} Exportar recorte</button>${GP.botaoPDF()}`})+filterPanel(f);
-    if(f.de&&f.ate&&f.de>f.ate){el.innerHTML=html+U.callout('<p>A data inicial do período deve ser anterior ou igual à data final. Ajuste os filtros para calcular os indicadores.</p>','warn');bindFilters(el);return;}
-    html+=`<div class="scope-line"><span><b>${m.n}</b> de ${todos.length} registros / ${esc(descricaoFiltros(f))}</span><span class="live-dot"><i></i>Atualiza a cada alteração salva</span></div>${sample(m)}
-      <div class="analysis-tabs" data-noprint>${[['visao','Visão geral'],['qualidade','Qualidade dos dados'],...(nivel>=3?[['custos','Custos e capacidade']]:[])].map(([k,l])=>`<button class="${k===aba?'on':''}" data-analysis-tab="${k}">${l}</button>`).join('')}${nivel<3?`<button data-nivel="3">Ativar análise de capacidade</button>`:''}</div>`;
-    if(aba==='custos')html+=custos(m);
-    else if(aba==='qualidade')html+=qualidade(m);
-    else html+=kpis(m)+`<div class="analytics-grid"><div class="card card-wide">${chartHead('Projetos e demandas por período','Entradas do recorte, conforme o período selecionado.','roadmap')}${graficoEntradas(m.serie)}</div><div class="card">${chartHead('Composição da base','Comparação entre projetos e demandas.','carteira')}${donut([{key:'projeto',label:'Projetos',value:m.projetos,color:PALETTE[0]},{key:'demanda',label:'Demandas',value:m.demandas,color:PALETTE[1]}],m.n,'registros',{key:'natureza'})}</div></div>
-      <div class="analytics-grid analytics-equal"><div class="card">${chartHead('Distribuição por etapa','Quantidade e percentual no recorte. Clique para filtrar.','funil')}${hbars(m.etapas,m.n,{key:'etapa'})}</div><div class="card">${chartHead('Distribuição por gerência','Participação no recorte. Clique para filtrar.','acervo')}${hbars(m.gerencias,m.n,{key:'gerencia'})}<div style="margin-top:24px">${chartHead('Origem das iniciativas','Quantidade por origem do cadastro.','estrela')}${hbars(m.origens.filter(i=>i.value),m.n,{key:'origem'})}</div></div></div>
-      <div class="analytics-grid analytics-equal"><div class="card">${chartHead('Tipos de iniciativa','Composição do recorte por tipo.','acervo')}${hbars(m.tipos.filter(i=>i.value),m.n,{key:'tipo'})}${!m.n?'<div class="info-empty">Nenhum registro neste recorte.</div>':''}</div><div class="card">${chartHead('Resultado do checklist de entrada','Checklists completos do recorte. Não representa conversão histórica.','avaliar')}${hbars(['entra','falta_info','nao_entra'].map((k,i)=>({label:M.RESULTADO_ENTRADA[k].nome,value:lista.filter(p=>p.entrada?.resultado===k).length,color:{entra:'#6b8f2a',falta_info:'#d5a32d',nao_entra:'#b8642c'}[k]})),m.entradaAvaliada)}<p class="chart-footnote">${m.n-m.entradaAvaliada} registros sem checklist completo ficam fora desta distribuição. A admissão é a razão entre “Entra” e todos os checklists completos.</p></div></div>`;
-    html+=tabela(lista,{busca:true});el.innerHTML=html;bindFilters(el);
+      <div class="card gx-card gx-cruz">${chartHead('Etapa × gerência','Onde está cada parte da carteira.','organograma')}${cruzamento(m)}</div>
+      <div class="analytics-grid analytics-equal gx-row">
+        <div class="card gx-card">${chartHead('Distribuição por gerência','Participação no recorte, da maior para a menor.','organograma')}${hbars(m.gerencias,m.n,{key:'gerencia'})}<div class="gx-card-foot">${dados('Distribuição por gerência',colsQ('Gerência'),linhas(m.gerencias))}</div></div>
+        <div class="card gx-card">${chartHead('Resultado do checklist de entrada','Checklists completos do recorte.','avaliar')}${hbars(chk,m.entradaAvaliada,{ordem:'fixa'})}<p class="chart-footnote">${plural(m.n-m.entradaAvaliada,'registro sem checklist completo fica','registros sem checklist completo ficam')} fora desta distribuição. A admissão é a razão entre “Entra” e todos os checklists completos.</p><div class="gx-card-foot">${dados('Resultado do checklist',['Resultado',{label:'Registros',align:'r'}],chk.map(c=>[c.label,c.value]))}</div></div>
+      </div>
+      <div class="analytics-grid analytics-equal gx-row">
+        <div class="card gx-card">${chartHead('Origem das iniciativas','Quantidade por origem do cadastro.','estrela')}${hbars(m.origens,m.n,{key:'origem'})}<div class="gx-card-foot">${dados('Origem das iniciativas',colsQ('Origem'),linhas(m.origens))}</div></div>
+        <div class="card gx-card">${chartHead('Tipos de iniciativa','Composição do recorte por tipo.','etiqueta')}${hbars(m.tipos,m.n,{key:'tipo'})}<div class="gx-card-foot">${dados('Tipos de iniciativa',colsQ('Tipo'),linhas(m.tipos))}</div></div>
+      </div>`;
   }
   function custos(m){
-    const c=m.capacidade,cap=GP.state().capacidade,custosGer=m.gerencias.map(g=>({...g,value:sum(m.lista.filter(p=>p.gerencia===g.key&&p.custo!=null),p=>p.custo)}));
-    const ratio=c.efetiva?m.fteExecucao/c.efetiva:null;
-    return `<div class="metric-grid">
-      ${metric('Custo estimado total',m.comCusto?fmt.mi(m.custo):'-',`${m.comCusto} de ${m.n} registros com estimativa`,{ic:'carteira'})}
-      ${metric('FTE em execução',fmt.n(m.fteExecucao,1),`${m.comFteExecucao} de ${m.execucao} com FTE informado`,{tone:'#188787',ic:'carteira'})}
-      ${metric('Capacidade efetiva',fmt.n(c.efetiva,1),`${fmt.n(cap.fte,1)} FTE menos ${cap.reservaPct}% de reserva`,{tone:'#477b91',ic:'config'})}
-      ${metric('Uso em execução',fmt.pct(ratio),'FTE em execução / capacidade efetiva configurada',{tone:'#c39127',ic:'ranking',ratio})}
-      ${metric('Novos inícios que cabem',fmt.n(c.cabem),`${c.candidatos} candidatos aprovados e avaliados`,{ic:'avaliar'})}
-      ${metric('Avanço em execução',m.progresso==null?'-':fmt.n(m.progresso)+'%',`${m.comProgresso} de ${m.execucao} com avanço informado`,{tone:'#188787',ic:'check',ratio:m.progresso==null?null:m.progresso/100})}
+    const c=m.capacidade,cap=GP.state().capacidade,custosGer=m.gerencias.map(g=>({...g,value:sum(m.lista.filter(p=>(p.gerencia||'')===g.key&&p.custo!=null),p=>p.custo)}));
+    const ratio=c.efetiva?m.fteExecucao/c.efetiva:null,acima=ratio!=null&&ratio>1;
+    const sim=['cabe','fixado','fixado_estoura','nao_cabe','excluido','sem_estimativa'].map(k=>({key:null,label:M.STATUS_CARTEIRA[k].nome,value:c.itens.filter(it=>it.status===k).length,color:{cabe:'#6b8f2a',fixado:'#00908f',fixado_estoura:'#b8642c',nao_cabe:'#d5a32d',excluido:'#a3b2ac',sem_estimativa:'#a3b2ac'}[k]})).filter(x=>x.value);
+    return `<div class="metric-grid gx-kpis scroll-fade">
+      ${metric({label:'Custo estimado total',valor:m.comCusto?fmt.mi(m.custo):'-',sub:`${m.comCusto} de ${plural(m.n,'registro','registros')} com estimativa`,icone:'moeda'})}
+      ${metric({label:'FTE em execução',valor:fmt.n(m.fteExecucao,1),sub:`${m.comFteExecucao} de ${fmt.n(m.execucao)} com FTE informado`,icone:'pessoas',tom:'#188787'})}
+      ${metric({label:'Capacidade efetiva',valor:fmt.n(c.efetiva,1),sub:`${fmt.n(cap.fte,1)} FTE menos ${cap.reservaPct}% de reserva`,icone:'carteira',tom:'#477b91'})}
+      ${metric({label:'Uso da capacidade',valor:fmt.pct(ratio),sub:acima?'<b class="gx-cobre">Acima da capacidade efetiva</b>':'FTE em execução / capacidade efetiva',icone:'medidor',tom:acima?COBRE:UNICA,tint:acima?'#fbeee6':'#f1f6ea',ratio:ratio==null?null:Math.min(1,ratio)})}
+      ${metric({label:'Novos inícios que cabem',valor:fmt.n(c.cabem),sub:`${plural(c.candidatos,'candidato aprovado e avaliado','candidatos aprovados e avaliados')}`,icone:'novo'})}
+      ${metric({label:'Avanço em execução',valor:m.progresso==null?'-':fmt.n(m.progresso)+'%',sub:`${m.comProgresso} de ${fmt.n(m.execucao)} com avanço informado`,icone:'pulso',ratio:m.progresso==null?null:m.progresso/100})}
     </div>${U.callout(`<p><b>Simulação de capacidade:</b> período ${esc(cap.periodo)}. ${GP.state().meta.capacidadeConfirmada?'Parâmetros ajustados pelo usuário.':'Os valores iniciais são sugestões e precisam de validação.'} A capacidade é global; a simulação considera somente o recorte dos filtros. <a class="link" href="#/carteira">Ajustar capacidade</a>.</p>`)}
-    <div class="analytics-grid analytics-equal"><div class="card">${chartHead('Custo estimado por gerência','Soma dos valores informados. Não representa gasto realizado.','carteira')}${hbars(custosGer,m.custo,{monetario:true})}<p class="chart-footnote">${m.n-m.comCusto} registros sem custo ficam fora da soma. Custos de registros em todas as etapas entram na análise.</p></div><div class="card">${chartHead('Simulação de novos inícios','Aprovados com avaliação completa. Usa os critérios e a capacidade atuais.','ranking')}${hbars(['cabe','fixado','fixado_estoura','nao_cabe','excluido','sem_estimativa'].map((k,i)=>({label:M.STATUS_CARTEIRA[k].nome,value:c.itens.filter(it=>it.status===k).length,color:{cabe:'#6b8f2a',fixado:'#00908f',fixado_estoura:'#b8642c',nao_cabe:'#d5a32d',excluido:'#a3b2ac',sem_estimativa:'#a3b2ac'}[k]})).filter(x=>x.value),c.candidatos)}${!c.candidatos?'<div class="info-empty">Nenhum candidato aprovado e avaliado neste recorte.</div>':''}<p class="chart-footnote">${c.semNota.length} aprovados sem avaliação completa não participam da simulação. Orçamento de novos projetos: ${cap.orcamento?fmt.mi(cap.orcamento):'sem limite'}.</p></div></div>`;
+    <div class="analytics-grid analytics-equal gx-row"><div class="card gx-card">${chartHead('Custo estimado por gerência','Soma dos valores informados. Não representa gasto realizado.','moeda')}${hbars(custosGer,m.custo,{monetario:true})}<p class="chart-footnote">${plural(m.n-m.comCusto,'registro sem custo fica','registros sem custo ficam')} fora da soma. Custos de registros em todas as etapas entram na análise.</p><div class="gx-card-foot">${dados('Custo estimado por gerência',['Gerência',{label:'Custo (R$)',align:'r'}],custosGer.map(g=>[g.label,fmt.brl(g.value)]))}</div></div>
+    <div class="card gx-card">${chartHead('Simulação de novos inícios','Aprovados com avaliação completa, pelos critérios e pela capacidade atuais.','ranking')}${sim.length?hbars(sim,c.candidatos,{ordem:'fixa'}):'<div class="info-empty">Nenhum candidato aprovado e avaliado neste recorte.</div>'}<p class="chart-footnote">${plural(c.semNota.length,'aprovado sem avaliação completa não participa','aprovados sem avaliação completa não participam')} da simulação. Orçamento de novos projetos: ${cap.orcamento?fmt.mi(cap.orcamento):'sem limite'}.</p><div class="gx-card-foot">${dados('Simulação de novos inícios',['Situação',{label:'Candidatos',align:'r'}],sim.map(s=>[s.label,s.value]))}</div></div></div>`;
   }
   function qualidade(m){
-    const q=m.qualidade;
-    return `<div class="metric-grid">${q.slice(0,6).map((x,i)=>metric(x.label,fmt.pct(divisao(x.num,x.den)),`${x.num} de ${x.den} / ${esc(x.desc)}`,{tone:UNICA,ic:'avaliar',ratio:divisao(x.num,x.den)})).join('')}</div>
-      <div class="analytics-grid analytics-equal"><div class="card">${chartHead('Cobertura dos campos e avaliações','Percentual de registros com informação. A base de cada indicador varia.','avaliar')}${hbars(q.map((x,i)=>({label:x.label,value:x.den?x.num/x.den*100:0,color:UNICA})),100)}<p class="chart-footnote">Consulte a base de cada medida nas regras dos indicadores. Quando a base é vazia, o cartão exibe “-”. A barra fica vazia.</p></div><div class="card">${chartHead('Pendências para revisão','Registros do recorte que precisam de acompanhamento.','alerta')}${atencoes(m)}<p class="chart-footnote">A qualidade mede preenchimento e conclusão das avaliações. Não valida o conteúdo técnico informado.</p></div></div>`;
+    const q=m.qualidade,comBase=q.filter(x=>x.den),media=comBase.length?sum(comBase,x=>x.num/x.den)/comBase.length:null;
+    const pior=comBase.slice().sort((a,b)=>a.num/a.den-b.num/b.den)[0],pend=sum(itensAtencao(m),x=>x.n);
+    return `<div class="metric-grid gx-kpis gx-kpis-3 scroll-fade">
+      ${metric({label:'Cobertura média',valor:fmt.pct(media),sub:`Média de ${plural(comBase.length,'medida','medidas')} com base no recorte`,icone:'escudo',ratio:media})}
+      ${metric({label:'Campo menos preenchido',valor:pior?fmt.pct(pior.num/pior.den):'-',sub:pior?`${esc(pior.label)} · ${pior.num} de ${pior.den}`:'Sem base no recorte',icone:'alerta',tom:pior&&pior.num/pior.den<.6?COBRE:UNICA,tint:pior&&pior.num/pior.den<.6?'#fbeee6':'#f1f6ea'})}
+      ${metric({label:'Itens pendentes',valor:fmt.n(pend),sub:'Somados nas pendências para revisão',icone:'relogio',tom:'#477b91',tint:'#ecf2f6'})}
+    </div>
+      <div class="analytics-grid analytics-equal gx-row"><div class="card gx-card">${chartHead('Cobertura dos campos e avaliações','Percentual de registros com a informação. A base de cada medida varia.','escudo')}${hbars(q.map(x=>({label:x.label,num:x.num,den:x.den,desc:x.desc,color:UNICA})),100,{modoPct:true,ordem:'fixa'})}<p class="chart-footnote">Passe o mouse sobre uma linha para ver a base da medida. Quando a base é vazia, a linha mostra “-”.</p><div class="gx-card-foot">${dados('Cobertura dos campos',['Medida',{label:'Com informação',align:'r'},{label:'Base',align:'r'},{label:'%',align:'r'}],q.map(x=>[x.label,x.num,x.den,x.den?fmt.pct(x.num/x.den):'-']))}</div></div>
+      <div class="card gx-card">${chartHead('Pendências para revisão','Registros do recorte que precisam de acompanhamento.','alerta')}${atencoes(m,6)}<p class="chart-footnote">A qualidade mede preenchimento e conclusão das avaliações. Não valida o conteúdo técnico informado.</p></div></div>`;
+  }
+  function indicadores(el){
+    const f=filtros(),todos=P.todos(),lista=filtrar(todos,f),m=medir(lista,f),nivel=GP.nivel(),riscos=nivel>=2&&GP.riscos&&GP.riscos.painel;
+    let aba=GP.state().ui.abaIndicadores||'visao';if((aba==='custos'&&nivel<3)||(aba==='riscos'&&!riscos))aba='visao';
+    const abas=[['visao','Visão geral'],['qualidade','Qualidade'],...(nivel>=3?[['custos','Custos']]:[]),...(riscos?[['riscos','Riscos']]:[])];
+    const abasHtml=`<div class="analysis-tabs gx-tabs scroll-fade" role="tablist" aria-label="Seções dos indicadores">${abas.map(([k,l])=>`<button role="tab" aria-selected="${k===aba}" class="${k===aba?'on':''}" data-analysis-tab="${k}">${l}</button>`).join('')}</div>`;
+    let html=`<div class="gx-ind">`+U.pageHead({titulo:'Indicadores',acoes:`<button class="btn btn-ghost" data-dicionario>${icon('info',15)} Regras</button><button class="btn btn-ghost" data-exportar-recorte>${icon('download',15)} Exportar recorte</button>${GP.botaoPDF()}`})+barraFiltros(f,{abas:abasHtml});
+    if(f.de&&f.ate&&f.de>f.ate){el.innerHTML=html+U.callout('<p>A data inicial do período deve ser anterior ou igual à data final. Ajuste os filtros para calcular os indicadores.</p>','warn')+'</div>';bindFilters(el);return;}
+    html+=`<div class="scope-line gx-scope"><span><b>${fmt.n(m.n)}</b> de ${plural(todos.length,'registro','registros')} · ${esc(descricaoFiltros(f))}</span>${m.exemplos?`<span class="gx-scope-ex">${m.exemplos===m.n?'Todos são exemplos fictícios':`${m.exemplos} exemplos fictícios incluídos`} · <button class="link" data-so-reais>Mostrar apenas reais</button></span>`:''}</div>`;
+    if(aba==='custos')html+=custos(m);
+    else if(aba==='qualidade')html+=qualidade(m);
+    else if(aba==='riscos')html+=GP.riscos.painel(lista);
+    else html+=visaoGeral(m,lista);
+    html+=tabela(lista,f)+'</div>';el.innerHTML=html;bindFilters(el);desenharEntradas(el);
   }
   function bindFilters(el){
     el.querySelectorAll('[data-af]').forEach(i=>i.addEventListener(i.tagName==='INPUT'&&i.type!=='date'?'input':'change',()=>{
@@ -209,6 +622,7 @@
     ['Projetos e demandas','Quantidade conforme a natureza informada no cadastro. Registros antigos recebem Projeto até que o usuário altere a classificação.'],
     ['Percentual por etapa, gerência ou natureza','Quantidade na categoria dividida pelo total de registros do recorte. Inclui todas as etapas, inclusive concluídos, recusados e cancelados.'],
     ['Fila de entrada','Registros nas etapas Nova demanda ou Em triagem. A etapa é independente da natureza Projeto/Demanda.'],
+    ['Variação em 30 dias','Registros: entradas com data nos últimos 30 dias. Fila: tamanho atual da fila menos o tamanho de 30 dias atrás, reconstruído pela data de entrada e pelas mudanças de etapa do histórico. Cobre indica direção ruim.'],
     ['Admissão na entrada','Checklists com resultado Entra divididos pelos checklists completos (Entra, Falta informação ou Não entra). Sem checklist fica fora da base. É uma fotografia do último checklist.'],
     ['Conclusão da carteira','Concluídos divididos por Aprovados, Em execução, Em espera e Concluídos. Recusados, cancelados e fila de entrada ficam fora da base.'],
     ['Prazos vencidos','Aprovados, Em execução ou Em espera com fim previsto anterior à data atual. Representa a data prevista vencida, sem inferir motivo ou desempenho.'],
@@ -223,7 +637,7 @@
   function salvarHtml(){
     GP.state().meta.ultimaCopiaHtmlEm=new Date().toISOString();GP.save();
     const doc=document.documentElement.cloneNode(true),app=doc.querySelector('#app');app.innerHTML='';
-    doc.querySelectorAll('.modal-bg,.toast,.busy,.tip,.side-backdrop,#gp-snapshot').forEach(x=>x.remove());
+    doc.querySelectorAll('.modal-bg,.toast,.busy,.tip,.side-backdrop,#gp-snapshot,.gx-pop,.gx-tt,.gp-tt').forEach(x=>x.remove());
     const seed=document.createElement('script');seed.id='gp-snapshot';seed.type='application/json';seed.textContent=JSON.stringify(GP.state()).replace(/</g,'\\u003c');
     const boot=[...doc.querySelectorAll('script')].find(x=>x.textContent.trim()==='GP.start();');boot.before(seed);
     GP.exportar.baixar(`portfolio-feg-atualizado-${hoje()}.html`,'<!doctype html>\n'+doc.outerHTML,'text/html;charset=utf-8');
@@ -237,56 +651,59 @@
       ['Conclusão da carteira (%)',m.taxaConclusao==null?'':(m.taxaConclusao*100).toFixed(2).replace('.',','),`${m.concluidos} / ${m.carteira} registros aceitos`],
       ['Prazos vencidos',m.atrasados.length,'Aceitos abertos com fim anterior a hoje'],['Custo estimado (R$)',m.comCusto?String(m.custo).replace('.',','):'',`${m.comCusto} registros com estimativa`],
       ['Avanço médio em execução (%)',m.progresso==null?'':m.progresso.toFixed(2).replace('.',','),`${m.comProgresso} de ${m.execucao} com avanço`],
+      ['Variação de registros em 30 dias',m.tendencia.novos,'Entradas nos últimos 30 dias'],['Variação da fila em 30 dias',m.tendencia.fila,'Fila atual menos a de 30 dias atrás'],
       ...m.etapas.map(x=>['Etapa: '+x.label,x.value,m.n+' registros']),...m.gerencias.map(x=>['Gerência: '+x.label,x.value,m.n+' registros']),
       ...m.serie.pontos.map(x=>['Entradas: '+x.label,x.total,x.projetos+' projetos / '+x.demandas+' demandas'])];
     GP.exportar.baixar('indicadores-feg-'+hoje()+'.csv',GP.exportar.csv(rows),'text/csv;charset=utf-8');GP.toast('Indicadores do recorte exportados.');
   }
   GP.exportarIndicadores=()=>csvIndicadores(medir(filtrar(P.todos(),filtros()),filtros()));
+
+  /* ------------------------------------------------ relatórios */
   function relatorios(el){
     const f=filtros(),m=medir(filtrar(P.todos(),f),f);
-    el.innerHTML=U.pageHead({titulo:'Relatórios e exportações',sub:'Gere apresentações executivas com os dados atuais e baixe a base para análise ou continuidade do trabalho.'})+filterPanel(f)+
-      `<div class="scope-line"><span><b>${m.n}</b> registros nos relatórios / ${esc(descricaoFiltros(f))}</span><span>${fmt.data(hoje())}</span></div>${sample(m)}
+    el.innerHTML=`<div class="gx-rel">`+U.pageHead({titulo:'Relatórios',sub:'Gere apresentações executivas com os dados atuais e baixe a base do recorte para análise.'})+barraFiltros(f)+
+      `<div class="scope-line gx-scope"><span><b>${fmt.n(m.n)}</b> ${m.n===1?'registro':'registros'} nos relatórios · ${esc(descricaoFiltros(f))}</span>${m.exemplos?`<span class="gx-scope-ex">${m.exemplos===m.n?'Todos são exemplos fictícios':`${m.exemplos} exemplos fictícios incluídos`} · <button class="link" data-so-reais-rel>Mostrar apenas reais</button></span>`:`<span>${fmt.data(hoje())}</span>`}</div>
       <div class="report-grid"><div class="report-card"><div class="report-cover"><small>PowerPoint executivo / 6 slides</small><h2>Visão executiva<br>do portfólio</h2><p>Composição, fluxo de entrada e situação da carteira.</p></div><div class="report-body"><ol><li>Visão geral e base da análise</li><li>Composição por gerência e natureza</li><li>Distribuição dos projetos por etapa</li><li>Entrada de projetos e demandas por período</li><li>Avanço, estimativas e prazos previstos</li><li>Pendências para acompanhamento executivo</li></ol><button class="btn btn-primary" data-ppt="visao">${icon('download',16)} Baixar PPT da visão executiva</button></div></div>
       <div class="report-card"><div class="report-cover gold"><small>PowerPoint executivo / 6 slides</small><h2>Priorização e decisões<br>da carteira</h2><p>Ranking, capacidade simulada e pauta do comitê.</p></div><div class="report-body"><ol><li>Base elegível e contexto da decisão</li><li>Prioridade dos projetos aprovados</li><li>Distribuição por valor e esforço</li><li>Capacidade e novos inícios simulados</li><li>Projetos que exigem decisão</li><li>Pauta sugerida para o comitê</li></ol><button class="btn btn-primary" data-ppt="decisao">${icon('download',16)} Baixar PPT de prioridades e decisões</button></div></div></div>
       <p class="report-note">Os PPTs usam o recorte acima e os critérios do modelo sob curadoria da FEG. Textos e gráficos são editáveis. Estimativas e simulações ficam identificadas. As decisões permanecem com as instâncias de governança e exemplos fictícios recebem sinalização.</p>
-      <div class="grid g3" style="margin-top:20px"><div class="card stack">${U.secH('Base do recorte','Cadastros e indicadores para abrir no Excel.')}<button class="btn btn-ghost" data-exportar-recorte>${icon('download',16)} Projetos e demandas (CSV)</button><button class="btn btn-ghost" data-exportar-indicadores>${icon('download',16)} Indicadores (CSV)</button></div>
-      <div class="card stack">${U.secH('Backup completo','Inclui toda a carteira, mesmo fora do recorte.')}<button class="btn btn-ghost" data-backup>${icon('download',16)} Baixar backup JSON</button><button class="btn btn-ghost" data-restaurar-backup>${icon('upload',16)} Restaurar backup</button></div>
-      <div class="card stack">${U.secH('Sistema com os dados atuais','Arquivo HTML completo para reabrir ou transportar.')}<button class="btn btn-primary" data-html-atualizado>${icon('download',16)} Baixar HTML atualizado</button><p class="muted" style="font-size:11px;margin:0">Contém toda a carteira e funciona sem conexão.</p></div></div>`;
+      <div class="gx-rel-base"><div class="card gx-rel-card">${U.secH('Base do recorte','Cadastros e indicadores para abrir no Excel.')}<div class="row"><button class="btn btn-ghost" data-exportar-recorte>${icon('download',16)} Projetos e demandas (CSV)</button><button class="btn btn-ghost" data-exportar-indicadores>${icon('download',16)} Indicadores (CSV)</button></div></div>
+      <a class="card gx-rel-link" href="#/config"><span class="gx-rel-ic">${ico('escudo',20)}</span><span><b>Backup e cópia do sistema</b><small>Backup completo e HTML com os dados atuais ficam em Dados e configurações.</small></span>${icon('seta',16)}</a></div></div>`;
     bindFilters(el);
-    if(f.de&&f.ate&&f.de>f.ate){el.querySelectorAll('[data-ppt],[data-exportar-recorte],[data-exportar-indicadores]').forEach(b=>b.disabled=true);el.insertAdjacentHTML('beforeend',U.callout('<p>Ajuste o período: a data inicial deve ser anterior ou igual à data final.</p>','warn'));}
+    if(f.de&&f.ate&&f.de>f.ate){el.querySelectorAll('[data-ppt],[data-exportar-recorte],[data-exportar-indicadores]').forEach(b=>b.disabled=true);el.querySelector('.gx-rel').insertAdjacentHTML('beforeend',U.callout('<p>Ajuste o período: a data inicial deve ser anterior ou igual à data final.</p>','warn'));}
   }
-  GP.configCartoes.push({ordem:1,render:el=>{
+
+  /* ------------------------------------------------ continuidade (cartão em Dados e configurações) */
+  GP.continuidade=()=>{
     const st=GP.storage,meta=GP.state().meta,n=Object.keys(GP.state().ui.rascunhos||{}).length;
-    el.innerHTML=U.secH('Salvamento e continuidade','Alterações registradas e rascunhos do cadastro ficam neste navegador.')+`<div class="data-status ${!st.ok?'error':''}">${icon(st.ok?'check':'alerta',17)}<b>${st.conflito?'Outra aba atualizou a carteira':st.ok?'Salvamento automático ativo':'O salvamento no navegador está indisponível'}</b></div>
-      <p class="muted" style="font-size:12px;margin:0">Último salvamento: ${fmt.dataHora(st.salvoEm)}${n?` / ${n} rascunho(s) de cadastro`:''}.</p>
-      <p class="muted" style="font-size:12px;margin:0">Baixe uma cópia do HTML com os dados atuais para continuar em outro computador. O salvamento local depende deste navegador e pode ser removido ao limpar seus dados.</p>
-      <div class="row"><button class="btn btn-primary" data-html-atualizado>${icon('download',16)} Baixar HTML atualizado</button><button class="btn btn-ghost" data-backup>Baixar backup</button></div>
-      <p class="dim" style="font-size:11px;margin:0">Última cópia do HTML: ${fmt.dataHora(meta.ultimaCopiaHtmlEm)}. Os arquivos exportados são fotografias da carteira no momento do download.</p>
+    return `<div class="data-status ${!st.ok?'error':''}">${icon(st.ok?'check':'alerta',17)}<b>${st.conflito?'Outra aba atualizou a carteira':st.ok?'Salvamento automático ativo':'O salvamento no navegador está indisponível'}</b></div>
+      <p class="muted gx-cfg-p">Último salvamento: ${fmt.dataHora(st.salvoEm)}${n?` · ${plural(n,'rascunho de cadastro','rascunhos de cadastro')}`:''}. ${meta.ultimaCopiaHtmlEm?`Última cópia do HTML: ${fmt.dataHora(meta.ultimaCopiaHtmlEm)}.`:'Nenhuma cópia baixada ainda.'}</p>
       ${st.conflito?'<button class="btn btn-ghost" data-load-latest>Carregar a versão da outra aba</button>':''}
-      ${GP.snapshotDisponivel?'<button class="btn btn-ghost" data-load-snapshot>Carregar os dados contidos neste HTML</button>':''}
-      <button class="link" style="text-align:left;font-size:12px" data-recuperar-anterior>Recuperar a cópia local anterior</button>`;
-  }});
+      ${GP.snapshotDisponivel?'<button class="btn btn-ghost" data-load-snapshot>Carregar os dados contidos neste HTML</button>':''}`;
+  };
   GP.tela({id:'painel',nivel:1,ordem:0.1,gerencial:true,titulo:'Painel do portfólio',icone:'painel',render:resumo});
   GP.tela({id:'indicadores',nivel:1,ordem:0.2,gerencial:true,titulo:'Indicadores',icone:'ranking',render:indicadores});
-  GP.tela({id:'relatorios',nivel:1,ordem:0.3,gerencial:true,titulo:'Relatórios e exportações',icone:'download',render:relatorios});
-  const backupOriginal=GP.exportar.exportarBackup;
+  GP.tela({id:'relatorios',nivel:1,ordem:0.3,gerencial:true,titulo:'Relatórios',icone:'download',render:relatorios});
   // O evento original continua sendo a fonte única do download do backup.
   document.addEventListener('click',e=>{
     if(e.target.closest('[data-save-now]')){const ok=GP.save();GP.toast(ok?'Trabalho salvo neste navegador.':'Não foi possível salvar no navegador. Baixe uma cópia para preservar as alterações.');GP.refresh();return;}
-    const b=e.target.closest('[data-analytics-filter]');if(b){Object.assign(filtros(),DEF,{[b.dataset.analyticsFilter]:b.dataset.value});GP.save();GP.go('#/indicadores');return;}
+    const en=e.target.closest('[data-gx-entrada]');if(en){if(typeof GP.abrirEntrada==='function')GP.abrirEntrada(en.dataset.gxEntrada);else GP.go('#/projeto/'+en.dataset.gxEntrada);return;}
+    const mn=e.target.closest('.gx-menu-pop [role=menuitem]');if(mn){const d=mn.closest('details');if(d)d.open=false;}
+    document.querySelectorAll('details.gx-menu[open]').forEach(d=>{if(!d.contains(e.target))d.open=false;});
+    const b=e.target.closest('[data-analytics-filter]');if(b){const f=filtros(),k=b.dataset.analyticsFilter,aqui=location.hash.startsWith('#/indicadores');if(aqui)f[k]=b.dataset.value;else Object.assign(f,DEF,{[k]:b.dataset.value});GP.save();if(aqui)GP.refresh();else GP.go('#/indicadores');return;}
     if(e.target.closest('[data-so-reais]')){Object.assign(filtros(),DEF,{fonte:'reais'});GP.save();GP.go('#/indicadores');return;}
+    if(e.target.closest('[data-so-reais-rel]')){filtros().fonte='reais';GP.save();GP.refresh();return;}
     if(e.target.closest('[data-limpar-analise]')){GP.state().ui.filtroIndicadores={...DEF};GP.save();GP.refresh();return;}
-    const tab=e.target.closest('[data-analysis-tab]');if(tab){GP.state().ui.abaIndicadores=tab.dataset.analysisTab;GP.save();GP.refresh();return;}
+    const tab=e.target.closest('[data-analysis-tab]');if(tab){GP.state().ui.abaIndicadores=tab.dataset.analysisTab;GP.save();GP.refresh();const n=document.querySelector(`[data-analysis-tab="${tab.dataset.analysisTab}"]`);if(n)n.focus();return;}
     if(e.target.closest('[data-dicionario]')){dicionario();return;}
     if(e.target.closest('[data-exportar-recorte]')){P.todos().length?GP.exportar.exportarProjetos(filtrar(P.todos(),filtros())):GP.exportar.exportarProjetos([]);return;}
     if(e.target.closest('[data-exportar-indicadores]')){GP.exportarIndicadores();return;}
     if(e.target.closest('[data-html-atualizado]')){salvarHtml();return;}
     if(e.target.closest('[data-load-latest]')){GP.confirmar('Carregar versão mais recente?','<p>As alterações apenas desta sessão serão substituídas pela carteira salva pela outra aba. Baixe o HTML ou um backup desta sessão para guardar essas alterações antes de continuar.</p>','Carregar versão',()=>GP.loadLatest());return;}
-    if(e.target.closest('[data-load-snapshot]')&&GP.snapshot){GP.confirmar('Carregar carteira deste HTML?',`<p>Este arquivo contém ${GP.snapshot.projetos.length} registros. Eles substituirão a carteira exibida. Guarde um backup se desejar manter os dados atuais.</p>`,'Carregar arquivo',()=>{GP.resetState(clone(GP.snapshot));GP.snapshotDisponivel=false;GP.refresh();GP.toast('Carteira do arquivo carregada.');});return;}
+    if(e.target.closest('[data-load-snapshot]')&&GP.snapshot){GP.confirmar('Carregar carteira deste HTML?',`<p>Este arquivo contém ${plural(GP.snapshot.projetos.length,'registro','registros')}. Eles substituirão a carteira exibida. Guarde um backup se desejar manter os dados atuais.</p>`,'Carregar arquivo',()=>{GP.resetState(clone(GP.snapshot));GP.snapshotDisponivel=false;GP.refresh();GP.toast('Carteira do arquivo carregada.');});return;}
     if(e.target.closest('[data-recuperar-anterior]')){
       let ant;try{ant=JSON.parse(localStorage.getItem(GP.storageKey+'-anterior'));}catch(x){}
       if(!ant?.v||!Array.isArray(ant.projetos)){GP.toast('Não há uma cópia anterior disponível neste navegador.');return;}
-      GP.confirmar('Recuperar cópia anterior?',`<p>A cópia de ${fmt.dataHora(ant.meta?.salvoEm)} tem ${ant.projetos.length} registros e substituirá a carteira atual. Baixe um backup antes de continuar se desejar preservar o estado atual.</p>`,'Recuperar',()=>{GP.resetState(M.migrar(ant));GP.refresh();GP.toast('Cópia anterior recuperada.');});return;
+      GP.confirmar('Recuperar cópia anterior?',`<p>A cópia de ${fmt.dataHora(ant.meta?.salvoEm)} tem ${plural(ant.projetos.length,'registro','registros')} e substituirá a carteira atual. Baixe um backup antes de continuar se desejar preservar o estado atual.</p>`,'Recuperar',()=>{GP.resetState(M.migrar(ant));GP.refresh();GP.toast('Cópia anterior recuperada.');});return;
     }
   });
   document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.closest?.('[data-analytics-filter]'))e.target.closest('[data-analytics-filter]').click();});
@@ -653,31 +1070,42 @@
   }
   function card(el){const us=usuarios(),a=GP.state().acesso;el.classList.add('setting-card');el.innerHTML=U.secH('Usuários e acesso local','Perfis desta cópia do sistema. As permissões são descritivas nesta versão.',`<button class="btn btn-primary btn-sm" data-user-new>${icon('novo',14)} Novo usuário</button>`)+
     `<div class="user-note"><b>Importante:</b> este é um controle local e simples, adequado para organizar o uso de um HTML individual. Não substitui autenticação corporativa, servidor, Active Directory ou trilha de auditoria centralizada.</div><div class="setting-row"><div><b>Bloqueio ao abrir</b><p>Solicita usuário e senha sempre que esta página é recarregada.</p></div><label class="row"><input type="checkbox" data-local-lock ${a.bloqueioLocal?'checked':''} ${us.some(u=>u.ativo&&u.senhaHash)?'':'disabled'}> Ativar bloqueio</label></div><div class="setting-row"><div><b>Perfil exibido por padrão</b><p>Aparece no topo quando o bloqueio não está ativo.</p></div><select class="select" data-default-user><option value="">Nenhum perfil</option>${us.filter(u=>u.ativo).map(u=>`<option value="${u.id}" ${a.usuarioInicialId===u.id?'selected':''}>${esc(u.nome)} / ${papeis[u.papel]}</option>`).join('')}</select></div><div class="user-list">${us.map(u=>`<div class="user-item"><div class="user-info"><span class="profile-avatar">${iniciais(u.nome)}</span><div><b>${esc(u.nome)}</b><small>${esc(u.email||'Sem e-mail')} / ${papeis[u.papel]} / ${u.ativo?'Ativo':'Inativo'}</small></div></div><div class="actions"><button class="btn btn-ghost btn-sm" data-user-edit="${u.id}">${icon('editar',14)} Editar</button><button class="icon-btn" data-user-delete="${u.id}" aria-label="Excluir ${esc(u.nome)}" title="Excluir usuário">${icon('lixo',14)}</button></div></div>`).join('')||'<p class="risk-empty">Nenhum usuário cadastrado. O sistema continua acessível sem senha.</p>'}</div>`;}
-  GP.configCartoes.push({ordem:3,render:card});
+  GP.configCartoes.push({ordem:3,secao:'acesso',render:card});
   function gate(){document.getElementById('app').innerHTML=`<div class="auth-gate"><div class="auth-card"><img class="ons" src="${GP.LOGO_ONS}" alt="ONS"><h1>Acessar o portfólio</h1><p>Use um dos usuários cadastrados nesta cópia local.</p><form data-login><div class="form"><label class="field">Usuário ou e-mail<input class="input" name="login" autocomplete="username" required autofocus></label><label class="field">Senha<div class="password-wrap"><input class="input" name="senha" type="password" autocomplete="current-password" required><button type="button" data-show-password>Mostrar</button></div></label></div><p class="auth-error" data-login-error role="alert"></p><button class="btn btn-primary" type="submit">Entrar</button></form><p class="auth-local-note">A senha protege apenas esta cópia no navegador. Para recuperar o acesso, utilize um backup anterior sem bloqueio ou uma cópia administrada pelo responsável do portfólio.</p></div></div>`;const f=document.querySelector('[data-login]');f.querySelector('[data-show-password]').onclick=e=>{const i=f.elements.namedItem('senha'),show=i.type==='password';i.type=show?'text':'password';e.currentTarget.textContent=show?'Ocultar':'Mostrar';};f.onsubmit=async e=>{e.preventDefault();const b=f.querySelector('[type=submit]');b.disabled=true;const u=await validar(f.elements.namedItem('login').value,f.elements.namedItem('senha').value);if(u){sessao.id=u.id;sessao.liberada=true;GP.refresh();}else{f.querySelector('[data-login-error]').textContent='Usuário ou senha não conferem.';b.disabled=false;}};}
   GP.auth={usuario,usuarios,form,validar,salvarUsuario};
   const previous=GP.afterRender;
-  GP.afterRender=(el,r)=>{if(previous)previous(el,r);if(GP.state().acesso?.bloqueioLocal&&!sessao.liberada){gate();return;}const right=document.querySelector('.topbar .right'),u=usuario();if(right&&!right.querySelector('.profile-btn'))right.insertAdjacentHTML('beforeend',`<button class="profile-btn" data-profile title="Abrir configurações de usuários"><span class="profile-avatar">${iniciais(u?.nome)}</span><span class="profile-name">${esc(u?.nome||'Usuários')}</span></button>`);};
-  document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.hasAttribute('data-profile')){GP.go('#/config');return;}if(b.hasAttribute('data-user-new')){form();return;}if(b.dataset.userEdit){form(b.dataset.userEdit);return;}if(b.dataset.userDelete){const u=get(b.dataset.userDelete);if(!u)return;GP.confirmar('Excluir usuário?',`<p>${esc(u.nome)} será removido desta cópia local. Os dados da carteira permanecem.</p>`,'Excluir',()=>{GP.state().usuarios=usuarios().filter(x=>x.id!==u.id);if(GP.state().acesso.usuarioInicialId===u.id)GP.state().acesso.usuarioInicialId='';if(!GP.state().usuarios.some(x=>x.ativo&&x.senhaHash))GP.state().acesso.bloqueioLocal=false;GP.save();GP.refresh();GP.toast('Usuário excluído.');},{perigo:true});return;}if(b.hasAttribute('data-local-lock'))return;});
+  GP.afterRender=(el,r)=>{if(previous)previous(el,r);if(GP.state().acesso?.bloqueioLocal&&!sessao.liberada){gate();return;}const right=document.querySelector('.topbar .right'),u=usuario();if(right&&!right.querySelector('.profile-btn'))right.insertAdjacentHTML('beforeend',u?`<button class="profile-btn" data-profile title="Perfil e usuários desta cópia"><span class="profile-avatar">${iniciais(u.nome)}</span><span class="profile-name">${esc(u.nome)}</span></button>`:`<button class="profile-btn gx-perfil-vazio" data-profile title="Cadastrar ou escolher um perfil"><span class="profile-avatar" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-3.6 3.6-6 7-6s6.2 2.4 7 6"/></svg></span><span class="profile-name">Entrar / Perfis</span></button>`);};
+  document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.hasAttribute('data-profile')){GP.go('#/config?secao=acesso');return;}if(b.hasAttribute('data-user-new')){form();return;}if(b.dataset.userEdit){form(b.dataset.userEdit);return;}if(b.dataset.userDelete){const u=get(b.dataset.userDelete);if(!u)return;GP.confirmar('Excluir usuário?',`<p>${esc(u.nome)} será removido desta cópia local. Os dados da carteira permanecem.</p>`,'Excluir',()=>{GP.state().usuarios=usuarios().filter(x=>x.id!==u.id);if(GP.state().acesso.usuarioInicialId===u.id)GP.state().acesso.usuarioInicialId='';if(!GP.state().usuarios.some(x=>x.ativo&&x.senhaHash))GP.state().acesso.bloqueioLocal=false;GP.save();GP.refresh();GP.toast('Usuário excluído.');},{perigo:true});return;}if(b.hasAttribute('data-local-lock'))return;});
   document.addEventListener('change',e=>{if(e.target.matches('[data-local-lock]')){GP.state().acesso.bloqueioLocal=e.target.checked;GP.save();GP.toast(e.target.checked?'Bloqueio local ativado. Será solicitado ao reabrir o arquivo.':'Bloqueio local desativado.');}if(e.target.matches('[data-default-user]')){GP.state().acesso.usuarioInicialId=e.target.value;GP.save();GP.refresh();}});
 })();
 
 (function(){
   'use strict';
   const GP=window.GP,U=GP.ui,M=GP.modelo,P=GP.projetos,{esc,fmt,sum}=GP.util,icon=GP.icon;
+  const plural=GP.util.plural||((n,s,p)=>fmt.n(n)+' '+(Math.abs(+n)===1?s:p));
+  const ico=(n,s)=>GP.iconeGerencial?GP.iconeGerencial(n,s):icon(n,s);
+  /** Cartão de indicador com o markup canônico .metric (GP.ui.metric do pacote base, com fallback local). */
+  function metric({label,valor,sub='',icone='painel',tom='#6b8f2a',tint='#f1f6ea',ratio=null}){
+    let h=GP.ui.metric?GP.ui.metric({label,valor,sub,icone:'painel',tom,tint,ratio}):
+      `<div class="metric" style="--tone:${tom};--tint:${tint}"><div class="metric-head"><span>${esc(label)}</span><i class="metric-icon">${ico(icone,15)}</i></div><div class="metric-body"><strong class="metric-value">${valor}</strong></div><div class="metric-sub">${sub}</div></div>`;
+    return h.replace(/(<i class="metric-icon"[^>]*>)[\s\S]*?(<\/i>)/,`$1${ico(icone,15)}$2`);
+  }
+  const nota=(titulo,html)=>`<aside class="gx-nota"><span class="gx-nota-ic">${icon('info',16)}</span><p><b>${esc(titulo)}</b> ${html}</p></aside>`;
 
   function governanca(el){
     const lista=P.todos(),abertos=lista.filter(p=>['aprovado','execucao','espera'].includes(p.etapa));
     const semResponsavel=abertos.filter(p=>!p.responsavel).length,semDatas=abertos.filter(p=>!(p.inicioPrevisto&&p.fimPrevisto)).length,semAtivo=lista.filter(p=>!p.ferramenta).length;
-    const semPrioridade=lista.filter(p=>M.ETAPAS_PRIORIZAVEIS.includes(p.etapa)&&!M.pontuar(p).completo).length,nivel=GP.nivel();
-    el.innerHTML=U.pageHead({titulo:'Administração do modelo',sub:'Controles da FEG para manter regras, qualidade e continuidade do portfólio.',acoes:`<button class="btn btn-ghost" data-backup>${icon('download',15)} Baixar cópia</button><button class="btn btn-primary" data-importar-csv>${icon('upload',15)} Importar iniciativas</button>`})+
-      `<div class="guardian-banner"><div class="guardian-mark">${icon('config',24)}</div><div><span class="eyebrow">FEG / Projeto Maestro</span><h2>Guardiã do modelo de gestão do portfólio</h2><p>A FEG administra as regras, os critérios, a taxonomia e a qualidade consolidada. As áreas responsáveis mantêm o conteúdo e executam as iniciativas.</p></div></div>
-      <div class="metric-grid governance-metrics">
-        <div class="metric"><span>Nível ativo</span><strong>${nivel}</strong><small>${esc(GP.NIVEIS[nivel-1].nome)}</small></div>
-        <div class="metric"><span>Sem responsável</span><strong>${fmt.n(semResponsavel)}</strong><small>iniciativas abertas</small></div>
-        <div class="metric"><span>Sem datas completas</span><strong>${fmt.n(semDatas)}</strong><small>iniciativas abertas</small></div>
-        <div class="metric"><span>Sem ativo relacionado</span><strong>${fmt.n(semAtivo)}</strong><small>registros da base</small></div>
-        <div class="metric"><span>Sem prioridade completa</span><strong>${fmt.n(semPrioridade)}</strong><small>itens elegíveis</small></div>
+    const semPrioridade=lista.filter(p=>M.ETAPAS_PRIORIZAVEIS.includes(p.etapa)&&!M.pontuar(p).completo).length;
+    const q=GP.analytics?GP.analytics.medir(lista).qualidade.filter(x=>x.den):[],cob=q.length?sum(q,x=>x.num/x.den)/q.length:null;
+    const tomQ=n=>n?{tom:'#c39127',tint:'#fff7e6'}:{tom:'#6b8f2a',tint:'#f1f6ea'};
+    el.innerHTML=`<div class="gx-gov">`+U.pageHead({titulo:'Governança do modelo',sub:'Controles da FEG para manter regras, qualidade e continuidade do portfólio.',acoes:`<button class="btn btn-ghost" data-importar-csv>${icon('upload',15)} Importar iniciativas</button>`})+
+      `<div class="guardian-banner"><div class="guardian-mark">${icon('config',24)}</div><div><span class="eyebrow">FEG · Guardiã do modelo</span><h2>Quem cuida de quê no portfólio</h2><p>A FEG administra as regras, os critérios, a taxonomia e a qualidade consolidada. As áreas responsáveis mantêm o conteúdo e executam as iniciativas.</p></div></div>
+      <div class="metric-grid governance-metrics gx-kpis gx-kpis-5 scroll-fade">
+        ${metric({label:'Sem responsável',valor:fmt.n(semResponsavel),sub:'Iniciativas abertas',icone:'pessoa',...tomQ(semResponsavel)})}
+        ${metric({label:'Sem datas completas',valor:fmt.n(semDatas),sub:'Iniciativas abertas',icone:'calendario',...tomQ(semDatas)})}
+        ${metric({label:'Sem ativo relacionado',valor:fmt.n(semAtivo),sub:'Registros da base',icone:'servidor',...tomQ(semAtivo)})}
+        ${metric({label:'Sem prioridade completa',valor:fmt.n(semPrioridade),sub:'Itens elegíveis',icone:'avaliar',...tomQ(semPrioridade)})}
+        ${metric({label:'Cobertura dos dados',valor:fmt.pct(cob),sub:'Média das medidas de qualidade',icone:'escudo',ratio:cob})}
       </div>
       <div class="admin-actions">
         <a class="card admin-action" href="#/criterios"><i>${icon('pesos',20)}</i><div><b>Critérios e pesos</b><span>Manter o método de priorização</span></div><small>Nível 2</small></a>
@@ -691,56 +1119,51 @@
           <tr><td><b>Responsável pela iniciativa</b></td><td>Atualiza situação, datas, avanço, dependências e riscos</td><td>Validação do demandante e do patrocinador</td></tr>
           <tr><td><b>Instância de governança</b></td><td>Registra decisões de entrada, prioridade, capacidade e início</td><td>Análise técnica e responsabilidade executiva</td></tr>
         </tbody></table></div></section>
-      ${U.callout('<p><b>Escopo:</b> este sistema centraliza a gestão do portfólio, o histórico e o apoio às decisões. A execução detalhada continua no ADO ou Jira, e o inventário oficial de sistemas permanece em sua fonte corporativa.</p>')}`;
+      ${nota('Escopo.','Este sistema centraliza a gestão do portfólio, o histórico e o apoio às decisões. A execução detalhada continua no ADO ou Jira, e o inventário oficial de sistemas permanece em sua fonte corporativa.')}</div>`;
   }
 
   function sistemas(el){
     const lista=P.todos(),comAtivo=lista.filter(p=>p.ferramenta&&p.ferramenta.trim()),semAtivo=lista.length-comAtivo.length;
     const mapa=new Map();
-    comAtivo.forEach(p=>{
-      const nome=p.ferramenta.trim(),key=GP.util.normTxt(nome);
-      if(!mapa.has(key))mapa.set(key,{nome,lista:[]});
-      mapa.get(key).lista.push(p);
-    });
+    comAtivo.forEach(p=>{const nome=p.ferramenta.trim(),key=GP.util.normTxt(nome);if(!mapa.has(key))mapa.set(key,{nome,lista:[]});mapa.get(key).lista.push(p);});
     const ativos=[...mapa.values()].map(a=>{
-      const abertos=a.lista.filter(p=>!['concluido','nao_entra','cancelado'].includes(p.etapa));
-      const exec=a.lista.filter(p=>p.etapa==='execucao');
-      const riscos=(GP.state().riscos||[]).filter(r=>a.lista.some(p=>p.id===r.projetoId)&&r.status!=='encerrado');
-      return {...a,abertos:abertos.length,exec:exec.length,riscos:riscos.length,custo:sum(a.lista.filter(p=>p.custo!=null),p=>p.custo)};
-    }).sort((a,b)=>b.abertos-a.abertos||a.nome.localeCompare(b.nome,'pt-BR'));
-    const rows=ativos.map(a=>`<tr><td><b>${esc(a.nome)}</b></td><td>${fmt.n(a.lista.length)}</td><td>${fmt.n(a.abertos)}</td><td>${fmt.n(a.exec)}</td><td>${a.riscos?`<span class="pill t-warn"><i></i>${fmt.n(a.riscos)}</span>`:'0'}</td><td>${a.custo?fmt.mi(a.custo):'Não informado'}</td></tr>`).join('');
-    el.innerHTML=U.pageHead({titulo:'Sistemas, modelos e ferramentas',sub:'Leitura do portfólio pelo ativo técnico informado em cada projeto ou demanda.'})+
-      `<div class="scope-note"><b>Escopo desta visão</b><span>Consolida iniciativas relacionadas ao mesmo ativo. Não representa o inventário oficial, a criticidade operacional ou a propriedade técnica dos sistemas.</span></div>
-      <div class="metric-grid system-metrics">
-        <div class="metric"><span>Ativos relacionados</span><strong>${fmt.n(ativos.length)}</strong><small>Nomes distintos informados</small></div>
-        <div class="metric"><span>Iniciativas vinculadas</span><strong>${fmt.n(comAtivo.length)}</strong><small>Projetos e demandas com o campo preenchido</small></div>
-        <div class="metric"><span>Sem ativo relacionado</span><strong>${fmt.n(semAtivo)}</strong><small>Registros a revisar, quando aplicável</small></div>
-        <div class="metric"><span>Em execução</span><strong>${fmt.n(comAtivo.filter(p=>p.etapa==='execucao').length)}</strong><small>Iniciativas vinculadas em andamento</small></div>
+      const enc=a.lista.filter(p=>['concluido','nao_entra','cancelado'].includes(p.etapa)).length,exec=a.lista.filter(p=>p.etapa==='execucao').length;
+      const riscos=(GP.state().riscos||[]).filter(r=>a.lista.some(p=>p.id===r.projetoId)&&['aberto','em_tratamento'].includes(r.status));
+      const comCusto=a.lista.filter(p=>p.custo!=null);
+      return {...a,abertos:a.lista.length-enc,exec,outrasAbertas:a.lista.length-enc-exec,encerradas:enc,riscos:riscos.length,custo:sum(comCusto,p=>p.custo),temCusto:comCusto.length>0};
+    }).sort((a,b)=>b.abertos-a.abertos||b.lista.length-a.lista.length||a.nome.localeCompare(b.nome,'pt-BR'));
+    const maxCusto=Math.max(1,...ativos.map(a=>a.custo)),comRiscos=ativos.some(a=>a.riscos>0);
+    const COR={exec:'#6b8f2a',abertas:'#3a74a8',enc:'#a3b2ac'};
+    const situacao=a=>{const t=a.lista.length;return `<span class="gx-sit" role="img" aria-label="${plural(a.exec,'em execução','em execução')}, ${plural(a.outrasAbertas,'outra aberta','outras abertas')}, ${plural(a.encerradas,'encerrada','encerradas')}" data-tt="${esc(a.nome)}&#10;Em execução: ${a.exec}&#10;Outras abertas: ${a.outrasAbertas}&#10;Encerradas: ${a.encerradas}">${[['exec',a.exec],['abertas',a.outrasAbertas],['enc',a.encerradas]].filter(x=>x[1]).map(([k,v])=>`<i style="flex:${v/t};background:${COR[k]}"></i>`).join('')}</span>`;};
+    const rows=ativos.map(a=>`<tr><td><b>${esc(a.nome)}</b></td><td class="r gx-num">${fmt.n(a.lista.length)}</td><td>${situacao(a)}</td><td class="r gx-num">${fmt.n(a.abertos)}</td><td class="r gx-num">${fmt.n(a.exec)}</td>${comRiscos?`<td class="r gx-num">${a.riscos?`<span class="pill t-warn"><i></i>${fmt.n(a.riscos)}</span>`:'0'}</td>`:''}<td class="r"><span class="gx-custo"><span class="gx-num">${a.temCusto?fmt.mi(a.custo):'Não informado'}</span>${a.temCusto?`<span class="gx-custo-bar" aria-hidden="true"><i style="width:${(a.custo/maxCusto*100).toFixed(1)}%"></i></span>`:''}</span></td></tr>`).join('');
+    el.innerHTML=`<div class="gx-sis">`+U.pageHead({titulo:'Sistemas e ativos',sub:'Leitura do portfólio pelo sistema, modelo ou ferramenta informado em cada projeto ou demanda.'})+
+      `<div class="metric-grid system-metrics gx-kpis gx-kpis-4 scroll-fade">
+        ${metric({label:'Ativos relacionados',valor:fmt.n(ativos.length),sub:'Nomes distintos informados',icone:'servidor'})}
+        ${metric({label:'Iniciativas vinculadas',valor:fmt.n(comAtivo.length),sub:'Projetos e demandas com o campo preenchido',icone:'elo'})}
+        ${metric({label:'Sem ativo relacionado',valor:fmt.n(semAtivo),sub:'Registros a revisar, quando aplicável',icone:'alerta',tom:semAtivo?'#c39127':'#6b8f2a',tint:semAtivo?'#fff7e6':'#f1f6ea'})}
+        ${metric({label:'Em execução',valor:fmt.n(comAtivo.filter(p=>p.etapa==='execucao').length),sub:'Iniciativas vinculadas em andamento',icone:'pulso',tom:'#188787',tint:'#e8f4f1'})}
       </div>
-      <section class="card">${U.secH('Carteira por ativo relacionado','Agrupamento pelo texto informado no cadastro. Padronize os nomes para evitar duplicidades.')}
-        ${ativos.length?`<div class="portfolio-table tbl-wrap"><table class="tbl"><thead><tr><th>Sistema, modelo ou ferramenta</th><th>Iniciativas</th><th>Abertas</th><th>Em execução</th><th>Riscos abertos</th><th>Custo estimado</th></tr></thead><tbody>${rows}</tbody></table></div>`:U.vazio('Nenhum ativo relacionado','Preencha o campo Sistema, modelo ou ferramenta relacionada nos cadastros aplicáveis.','<a class="btn btn-primary" href="#/novo">Novo cadastro</a>')}
+      <section class="card gx-sis-card">${U.secH('Carteira por ativo relacionado','Agrupamento pelo texto informado no cadastro. Padronize os nomes para evitar duplicidades.')}
+        ${ativos.length?`<div class="legend gx-legend"><span><i style="background:${COR.exec}"></i>Em execução</span><span><i style="background:${COR.abertas}"></i>Outras abertas</span><span><i style="background:${COR.enc}"></i>Encerradas</span></div>
+        <div class="portfolio-table tbl-wrap"><table class="tbl gx-sis-tbl"><thead><tr><th>Sistema, modelo ou ferramenta</th><th class="r">Iniciativas</th><th>Situação</th><th class="r">Abertas</th><th class="r">Em execução</th>${comRiscos?'<th class="r">Riscos abertos</th>':''}<th class="r">Custo estimado</th></tr></thead><tbody>${rows}</tbody></table></div>`:U.vazio('Nenhum ativo relacionado','Preencha o campo Sistema, modelo ou ferramenta relacionada nos cadastros aplicáveis.','<a class="btn btn-primary" href="#/novo">Novo cadastro</a>')}
       </section>
       <div class="grid g2 governance-detail"><section class="card">${U.secH('Para manter a visão coerente','Orientações de preenchimento.')}
         <ul class="clean-list"><li>Use o nome oficial e uma grafia única para cada ativo</li><li>Informe o ativo principal impactado pela iniciativa</li><li>Não use este campo para registrar equipe, fornecedor ou tecnologia isolada</li></ul></section>
         <section class="card">${U.secH('Responsabilidade','A associação ao ativo não muda a governança.')}
-        <p class="muted">O responsável pela iniciativa atualiza o cadastro. A área técnica valida impactos no sistema, modelo ou ferramenta. A FEG monitora a consistência do portfólio e mantém o padrão de informação.</p></section></div>`;
+        <p class="muted">O responsável pela iniciativa atualiza o cadastro. A área técnica valida impactos no sistema, modelo ou ferramenta. A FEG monitora a consistência do portfólio e mantém o padrão de informação.</p></section></div>
+      ${nota('Escopo desta visão.','Consolida iniciativas relacionadas ao mesmo ativo. Não representa o inventário oficial, a criticidade operacional ou a propriedade técnica dos sistemas.')}</div>`;
   }
 
-  GP.tela({id:'governanca',nivel:1,ordem:0.25,gerencial:true,titulo:'Administração do modelo',icone:'config',render:governanca});
+  GP.tela({id:'governanca',nivel:1,ordem:0.25,gerencial:true,titulo:'Governança do modelo',icone:'config',render:governanca});
   GP.tela({id:'sistemas',nivel:1,ordem:0.27,gerencial:true,titulo:'Sistemas e ativos',icone:'carteira',render:sistemas});
 })();
 
 (function(){
   'use strict';
-  const GP=window.GP,{esc}=GP.util,icon=GP.icon;
-  const oldResumo=GP.telas().find(t=>t.id==='painel')?.render;
-  if(oldResumo)GP.tela({...GP.telas().find(t=>t.id==='painel'),render(el,r){oldResumo(el,r);if(GP.nivel()>=2){const table=el.querySelector('.table-tools');if(table)table.insertAdjacentHTML('beforebegin',GP.riscos.resumoPainel());}}});
-  const oldIndicadores=GP.telas().find(t=>t.id==='indicadores')?.render;
-  if(oldIndicadores)GP.tela({...GP.telas().find(t=>t.id==='indicadores'),render(el,r){oldIndicadores(el,r);const tabs=el.querySelector('.analysis-tabs');if(GP.nivel()>=2&&tabs&&!tabs.querySelector('[data-analysis-tab="riscos"]'))tabs.insertAdjacentHTML('beforeend','<button data-analysis-tab="riscos">Riscos</button>');if(GP.nivel()>=2&&GP.state().ui.abaIndicadores==='riscos'){const start=tabs?.nextElementSibling;let node=start;while(node){const next=node.nextElementSibling;if(!node.classList.contains('table-tools')&&!node.classList.contains('portfolio-table'))node.remove();node=next;}tabs.insertAdjacentHTML('afterend',GP.riscos.painel(GP.analytics.filtrar(GP.projetos.todos(),GP.analytics.filtros())));tabs.querySelector('[data-analysis-tab="riscos"]').classList.add('on');}}});
-  GP.configCartoes.push({ordem:2,render:el=>{const ui=GP.state().ui,scale=ui.escalaInterface||'normal';el.classList.add('setting-card');el.innerHTML=GP.ui.secH('Interface e leitura','Preferências visuais salvas nesta cópia do navegador.')+`<div class="setting-row"><div><b>Tamanho da interface</b><p>Ajusta textos, cartões e controles sem depender do zoom do navegador.</p></div><select class="select" data-ui-scale><option value="compacto" ${scale==='compacto'?'selected':''}>Compacto</option><option value="normal" ${scale==='normal'?'selected':''}>Confortável</option><option value="ampliado" ${scale==='ampliado'?'selected':''}>Ampliado</option></select></div><div class="setting-row"><div><b>Menu lateral</b><p>O menu pode ficar recolhido no computador e sempre vira painel deslizante em telas menores.</p></div><button class="btn btn-ghost" data-recolher>${icon(ui.menuMini?'expandir':'recolher',15)} ${ui.menuMini?'Expandir menu':'Recolher menu'}</button></div><div class="setting-row"><div><b>Textos e separadores</b><p>Os títulos e descrições usam quebra natural. Separadores longos foram substituídos por hífen simples.</p></div><span class="pill t-ok"><i></i>Revisado</span></div>`;}});
+  const GP=window.GP,icon=GP.icon;
+  GP.configCartoes.push({ordem:2,secao:'interface',render:el=>{const ui=GP.state().ui,scale=ui.escalaInterface||'normal';el.classList.add('setting-card');el.innerHTML=GP.ui.secH('Interface e leitura','Preferências visuais salvas nesta cópia do navegador.')+`<div class="setting-row"><div><b>Tamanho da interface</b><p>Ajusta textos, cartões e controles sem depender do zoom do navegador.</p></div><select class="select" data-ui-scale aria-label="Tamanho da interface"><option value="compacto" ${scale==='compacto'?'selected':''}>Compacto</option><option value="normal" ${scale==='normal'?'selected':''}>Confortável</option><option value="ampliado" ${scale==='ampliado'?'selected':''}>Ampliado</option></select></div><div class="setting-row"><div><b>Menu lateral</b><p>O menu pode ficar recolhido no computador e sempre vira painel deslizante em telas menores.</p></div><button class="btn btn-ghost" data-recolher>${icon(ui.menuMini?'expandir':'recolher',15)} ${ui.menuMini?'Expandir menu':'Recolher menu'}</button></div>`;}});
   const applyScale=()=>{const scale=GP.state()?.ui?.escalaInterface||'normal';document.documentElement.style.setProperty('--ui-font-scale',scale==='compacto'?'.94':scale==='ampliado'?'1.08':'1');};
-  const previous=GP.afterRender;GP.afterRender=(el,r)=>{if(previous)previous(el,r);applyScale();};
+  const previous=GP.afterRender;GP.afterRender=(el,r)=>{if(previous)previous(el,r);applyScale();if(GP.registrarVisita)GP.registrarVisita();};
   document.addEventListener('change',e=>{if(e.target.matches('[data-ui-scale]')){GP.state().ui.escalaInterface=e.target.value;GP.save();applyScale();GP.refresh();}});
   if(globalThis.ResizeObserver){const observer=new ResizeObserver(entries=>{for(const entry of entries){const el=entry.target;if(el.scrollWidth>el.clientWidth+2&&getComputedStyle(el).overflowX==='visible')el.classList.add('layout-overflow');else el.classList.remove('layout-overflow');}});document.addEventListener('DOMContentLoaded',()=>observer.observe(document.body));}
 })();
-

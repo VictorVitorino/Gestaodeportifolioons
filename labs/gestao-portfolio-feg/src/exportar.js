@@ -4,6 +4,7 @@
 (function(){
   'use strict';
   const GP = window.GP, U = GP.ui, M = GP.modelo, P = GP.projetos, { esc, fmt, hoje } = GP.util, icon = GP.icon;
+  const plural = GP.util.plural || ((n, s, p) => fmt.n(n) + ' ' + (Math.abs(+n) === 1 ? s : p));
 
   /* ----------------------------------------------------------- utilidades */
   function baixar(nome, conteudo, tipo){
@@ -45,7 +46,7 @@
         M.etapa(p.etapa).nome, p.entrada ? M.RESULTADO_ENTRADA[p.entrada.resultado].nome : '', p.entrada ? (p.entrada.motivos || []).join(' ') : '',
         s.valor != null ? nBR(s.valor.toFixed(1)) : '', s.esforco != null ? nBR(s.esforco.toFixed(1)) : '', s.quadrante ? M.QUADRANTES[s.quadrante].nome : '', pos[p.id] || '', p.exemplo ? 'Sim' : 'Não']; });
     baixar(`portfolio-feg-${hoje()}.csv`, csv([cab, ...linhas]), 'text/csv;charset=utf-8');
-    GP.toast(`${lista.length} projeto(s) exportado(s) para planilha.`);
+    GP.toast(`${plural(lista.length, 'registro exportado', 'registros exportados')} para planilha.`);
   }
   function baixarModelo(){
     const cab = COLUNAS.filter(c => c[0] !== 'codigo').map(c => c[1]);
@@ -93,15 +94,15 @@
       const res = prepararImportacao(lerCSV(decodificar(r.result)));
       if(res.erroGeral){ GP.toast(esc(res.erroGeral)); return; }
       const inval = res.itens.filter(i => Object.keys(i.erros).length);
-      const m = GP.modal(`<h3>Importar planilha</h3><p class="muted" style="margin:0 0 12px">${esc(arquivo.name)} · ${res.itens.length} linha(s)</p>
-        <div class="row" style="margin-bottom:12px">${U.pill(`${res.validos.length} prontas para importar`, 'ok')} ${inval.length ? U.pill(`${inval.length} com erro (serão ignoradas)`, 'bad') : ''}</div>
+      const m = GP.modal(`<h3>Importar planilha</h3><p class="muted" style="margin:0 0 12px">${esc(arquivo.name)} · ${plural(res.itens.length, 'linha', 'linhas')}</p>
+        <div class="row" style="margin-bottom:12px">${U.pill(`${res.validos.length} prontas para importar`, 'ok')} ${inval.length ? U.pill(`${inval.length} com erro (${inval.length === 1 ? 'será ignorada' : 'serão ignoradas'})`, 'bad') : ''}</div>
         ${inval.length ? `<div class="tbl-wrap" style="max-height:240px;overflow:auto"><table class="tbl"><thead><tr><th>Linha</th><th>Título</th><th>Problema</th></tr></thead><tbody>${inval.map(i => `<tr><td>${i.linha}</td><td>${esc(i.d.titulo || '-')}</td><td>${Object.entries(i.erros).map(([k, e]) => `<b>${esc(M.CAMPOS[k] || k)}:</b> ${esc(e)}`).join('<br>')}</td></tr>`).join('')}</tbody></table></div>` : ''}
         ${res.itens.some(i => i.etapa && i.etapa !== 'entrada') ? `<label class="check-row" style="margin:6px 0"><input type="checkbox" data-manter-etapa><span>Manter a etapa informada na planilha (coluna “Etapa”). Sem marcar, todos entram como <b>Nova demanda</b> e passam pelo funil.</span></label>` : `<p class="muted" style="font-size:12.5px">As iniciativas importadas entram como <b>Nova demanda</b> e passam pelo funil de entrada.</p>`}
         <p class="dim" style="font-size:12px;margin:0">A planilha traz os dados do cadastro. Checklist de entrada, avaliações e pesos só voltam por <b>backup</b>.</p>
-        <div class="m-act"><button class="btn btn-ghost" data-close="1">Cancelar</button><button class="btn btn-primary" data-confirmar ${res.validos.length ? '' : 'disabled'}>Importar ${res.validos.length} iniciativa(s)</button></div>`, { largo:true });
+        <div class="m-act"><button class="btn btn-ghost" data-close="1">Cancelar</button><button class="btn btn-primary" data-confirmar ${res.validos.length ? '' : 'disabled'}>Importar ${plural(res.validos.length, 'iniciativa', 'iniciativas')}</button></div>`, { largo:true });
       m.querySelector('[data-confirmar]').onclick = () => { const manter = !!(m.querySelector('[data-manter-etapa]') || {}).checked; let n = 0;
         res.validos.forEach(i => { const x = P.criar(i.d); if(x.ok){ n++; P.registrar(x.projeto, 'Importação', `Importado da planilha ${arquivo.name} (linha ${i.linha}).`); if(manter && i.etapa && i.etapa !== 'entrada') P.mudarEtapa(x.projeto.id, i.etapa, 'Etapa trazida da planilha.'); } });
-        GP.save(); GP.closeModal(); GP.toast(`${n} iniciativa(s) importada(s).`); GP.go('#/acervo'); };
+        GP.save(); GP.closeModal(); GP.toast(`${plural(n, 'iniciativa importada', 'iniciativas importadas')}.`); GP.go('#/acervo'); };
     };
     r.readAsArrayBuffer(arquivo);
   }
@@ -121,7 +122,7 @@
       let est; try { est = M.migrar(JSON.parse(JSON.stringify(j.estado))); } catch(e){ GP.toast('Backup corrompido: não foi possível ler os dados.'); return; }
       const descartados = j.estado.projetos.length - est.projetos.length;
       const quando = fmt.dataHora(j.exportadoEm);
-      GP.confirmar('Restaurar backup?', `<p>Backup ${quando !== '-' ? 'de ' + quando : 'sem data'} com <b>${est.projetos.length} projeto(s) válido(s)</b>${descartados ? ` (${descartados} registro(s) inválido(s) serão descartados)` : ''}. Os dados atuais deste navegador serão substituídos.</p>`, 'Restaurar', () => {
+      GP.confirmar('Restaurar backup?', `<p>Backup ${quando !== '-' ? 'de ' + quando : 'sem data'} com <b>${plural(est.projetos.length, 'projeto válido', 'projetos válidos')}</b>${descartados ? ` (${plural(descartados, 'registro inválido será descartado', 'registros inválidos serão descartados')})` : ''}. Os dados atuais deste navegador serão substituídos.</p>`, 'Restaurar', () => {
         const ui = GP.state().ui; est.ui = Object.assign({}, est.ui, { nivel: ui.nivel, menuMini: ui.menuMini }); GP.resetState(est); GP.toast('Backup restaurado.'); GP.go('#/painel'); }); };
     r.readAsText(arquivo, 'utf-8');
   }
@@ -142,7 +143,7 @@
       c.querySelectorAll('select').forEach((s, i) => { const o = el.querySelectorAll('select')[i]; const t = document.createElement('span'); t.textContent = o && o.selectedOptions[0] ? o.selectedOptions[0].textContent : ''; s.replaceWith(t); });
       c.querySelectorAll('input:not([type=checkbox]):not([type=radio]):not([type=range])').forEach((x, i) => { const t = document.createElement('div'); t.className = 'input'; t.textContent = x.value; x.replaceWith(t); });
       // Botões que carregam dados (barras e legendas clicáveis, etapas do fluxo) viram blocos estáticos; os demais saem
-      c.querySelectorAll('button.percent-row, button.legend-line, .operation-flow > button').forEach(b => { const d = document.createElement('div'); d.className = b.className; d.innerHTML = b.innerHTML; b.replaceWith(d); });
+      c.querySelectorAll('button.percent-row, button.legend-line, .operation-flow > button, button.gx-heat-cell').forEach(b => { const d = document.createElement('div'); d.className = b.className; d.innerHTML = b.innerHTML; b.replaceWith(d); });
       c.querySelectorAll('.actions, button, input[type=range], [data-noprint]').forEach(x => x.remove()); w.appendChild(c); document.body.appendChild(w);
       const escala = 1.6, topo = w.getBoundingClientRect().top;
       const cortes = [...w.querySelectorAll('tr, .card, .page-h, .g-row, .callout, .kpi')].map(x => Math.round((x.getBoundingClientRect().bottom - topo) * escala)).sort((a, b) => a - b);
@@ -170,12 +171,6 @@
     else if(e.target.closest('[data-backup]')) exportarBackup();
     else if(e.target.closest('[data-restaurar-backup]')) escolherArquivo('.json,application/json', restaurarBackup);
   });
-  GP.configCartoes.push({ ordem:10, render: el => { el.innerHTML = `${U.secH('Planilha (Excel)', 'Exporte o acervo ou importe vários projetos de uma vez.')}
-      <div class="row"><button class="btn btn-primary" data-exportar-csv>${icon('download', 16)} Exportar projetos</button><button class="btn btn-ghost" data-importar-csv>${icon('upload', 16)} Importar planilha</button></div>
-      <p class="muted" style="margin:0;font-size:12.5px">Para importar, use o <span class="link" data-modelo-csv>modelo de planilha</span>. Salve no Excel como “CSV UTF-8”.</p>`; } });
-  GP.configCartoes.push({ ordem:20, render: el => { el.innerHTML = `${U.secH('Backup', 'Cópia completa: projetos, avaliações, pesos e capacidade.')}
-      <div class="row"><button class="btn btn-primary" data-backup>${icon('download', 16)} Baixar backup</button><button class="btn btn-ghost" data-restaurar-backup>${icon('upload', 16)} Restaurar backup</button></div>
-      <p class="muted" style="margin:0;font-size:12.5px">Recomendado semanalmente. Os dados ficam só neste navegador.</p>`; } });
   GP.exportar = { lerCSV, prepararImportacao, exportarProjetos, exportarPDF, baixar, csv, exportarBackup, restaurarBackup, escolherArquivo };
 })();
 
