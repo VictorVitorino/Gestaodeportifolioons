@@ -190,14 +190,15 @@ module.exports = {
     await p.evaluate(() => { GP.modelo.carregarExemplos(); const S = GP.state(); S.ui.nivel = 3; GP.save(); });
     await ir('#/carteira');
     let t = await p.textContent('#conteudo');
-    check(/Pessoas para novos projetos\s*2,0/.test(t), 'FTE livre deveria ser 2,0 (10 − 15% − 6,5)');
-    check(/Projetos que cabem\s*1\s*\/\s*5/.test(t), 'deveriam caber 1 de 5');
+    check(/Pessoas para novos projetos\s*7,0/.test(t), 'FTE livre deveria ser 7,0 (10 − 15% − 1,5 em execução no período 2027)');
+    check(/Projetos que cabem\s*4\s*\/\s*5/.test(t), 'deveriam caber 4 de 5 (encaixe mês a mês)');
     await p.uncheck('[data-cap="descontarExecucao"]'); await p.waitForTimeout(200);
     t = await p.textContent('#conteudo');
     check(/Projetos que cabem\s*4\s*\/\s*5/.test(t), 'sem descontar execução deveriam caber 4 de 5');
     const id14 = await p.evaluate(() => GP.projetos.todos().find(x => x.codigo === 'PRJ-014').id);
-    await p.selectOption(`[data-forcar="${id14}"]`, 'in'); await p.waitForTimeout(200);
-    check(/Fixado/.test(await p.locator('tbody tr').first().textContent()), 'projeto fixado deveria ir para o topo');
+    await p.click(`[data-forcar="${id14}"][data-v="in"]`); await p.waitForTimeout(200);
+    if(await p.locator('.modal [data-ok]').count()){ await p.click('.modal [data-ok]'); await p.waitForTimeout(200); }
+    check(/Fixado/.test(await p.locator('tbody tr[data-id]').first().textContent()), 'projeto fixado deveria ir para o topo');
     await p.fill('[data-cap="fte"]', '20'); await p.press('[data-cap="fte"]', 'Tab'); await p.waitForTimeout(200);
     check(/Projetos que cabem\s*5\s*\/\s*5/.test(await p.textContent('#conteudo')), 'com 20 FTE deveriam caber todos');
     await p.click('[data-pauta]'); await p.waitForTimeout(150);
