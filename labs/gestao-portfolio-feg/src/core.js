@@ -533,9 +533,11 @@
 
   /* ----------------------------------------------------------------- layout */
   let ultimaChave = '';
-  /** Entre 901 e 1279px o trilho abre recolhido (sem gravar a preferência) */
+  /** Entre 901 e 1279px (notebooks) o trilho abre recolhido por padrão; o botão continua disponível e a escolha de expandir fica em S.ui.menuExpandido */
   const miniAuto = () => window.innerWidth > 900 && window.innerWidth < 1280;
-  function aplicarMini(){ const sh = document.querySelector('.shell'); if(!sh || !S) return; sh.classList.toggle('mini', !!S.ui.menuMini || miniAuto()); sh.classList.toggle('mini-auto', miniAuto()); }
+  const estaMini = () => !!S.ui.menuMini || (miniAuto() && !S.ui.menuExpandido);
+  function aplicarMini(){ const sh = document.querySelector('.shell'); if(!sh || !S) return; const antes = sh.classList.contains('mini'); sh.classList.toggle('mini', estaMini());
+    if(antes !== estaMini()){ const b = sh.querySelector('.nav-toggle'); if(b){ const t = estaMini() ? 'Expandir menu' : 'Recolher menu'; b.dataset.tip = t; b.setAttribute('aria-label', t); b.setAttribute('aria-expanded', String(!estaMini())); b.innerHTML = icon(estaMini() ? 'expandir' : 'recolher', 16); } } sh.classList.toggle('mini-auto', miniAuto()); }
   /** Seletor estável do elemento com foco, para devolvê-lo depois de um render da mesma rota */
   const ESCOPOS = ['.modal', '.side', '.topbar', '.dock', '#conteudo'];
   function chaveFoco(a){
@@ -567,7 +569,7 @@
     const tela = TELAS.find(t => t.id === r.id) || TELAS.find(t => t.id === 'painel');
     const chave = r.id + '/' + (r.arg || ''), mudouRota = chave !== ultimaChave, primeira = !ultimaChave;
     const foco = mudouRota ? null : chaveFoco(document.activeElement);
-    const mini = !!S.ui.menuMini || miniAuto(), aberto = document.querySelector('.side.open') && ehMovel();
+    const mini = estaMini(), aberto = document.querySelector('.side.open') && ehMovel();
     const painel = tela && tela.id === 'painel', titulo = tela ? tela.titulo : '';
     const L = tela && tela.nivel ? GP.NIVEIS[tela.nivel - 1] : null, secao = tela && tela.gerencial ? 'Visão gerencial' : tela && tela.rodape ? 'Configuração' : L ? `Nível ${L.n} · ${L.curto}` : '';
     const [dLonga, dCurta] = datas();
@@ -639,7 +641,7 @@
   }
   function menu(r, tela, nivel, niveis){
     const item = t => { const on = tela && tela.id === t.id; return `<a class="nav-item ${on ? 'on' : ''}" href="#/${t.id}" data-tip="${esc(t.titulo)}" aria-label="${esc(t.titulo)}"${on ? ' aria-current="page"' : ''}><span class="ic">${icon(t.icone)}</span><span class="lbl">${esc(t.titulo)}</span></a>`; };
-    const mini = !!S.ui.menuMini;
+    const mini = estaMini();
     let h = `<div class="side-top"><a class="brand" href="#/painel" data-tip="Gestão de Portfólio FEG" aria-label="Gestão de Portfólio FEG, ir para o painel">${GP.logoFEG(36, true)}<span class="txt" aria-hidden="true"><b>Gestão de Portfólio</b><span>FEG · ONS · Maestro</span></span></a>
       <button type="button" class="side-close" data-fechar-menu aria-label="Fechar menu">${icon('x', 20)}</button></div>
       <div class="side-levels" role="group" aria-label="Nível do sistema">${niveis()}</div>
@@ -672,7 +674,9 @@
     if(e.target.closest('[data-storage-status]')){ GP.go('#/config'); return; }
     if(e.target.closest('[data-ajuda-nivel]')){ GP.explicarNiveis(); return; }
     if(e.target.closest('[data-fechar-menu]')){ fecharMenuMovel(); return; }
-    if(e.target.closest('[data-recolher]')){ if(ehMovel() || miniAuto()) return; S.ui.menuMini = !S.ui.menuMini; GP.save(); hideTip(); render(true); return; }
+    if(e.target.closest('[data-recolher]')){ if(ehMovel()) return;
+      if(miniAuto()){ const expandir = estaMini(); S.ui.menuExpandido = expandir; if(expandir) S.ui.menuMini = false; } else S.ui.menuMini = !S.ui.menuMini;
+      GP.save(); hideTip(); render(true); return; }
     const mb = e.target.closest('[data-menu]');
     if(mb){ const s = document.querySelector('.side'); if(s.classList.contains('open')) fecharMenuMovel(); else abrirMenuMovel(mb); return; }
     if(e.target.closest('.side .nav-item, .side .brand') && ehMovel()) fecharMenuMovel(false);

@@ -542,9 +542,6 @@ button.legend-line:hover{background:rgba(241,246,234,.8)}
 @media(min-width:901px){
   .shell.mini .side .side-top{justify-content:center}
   .shell.mini .side .side-top .brand{flex:none}
-  /* entre 901 e 1279px o trilho fica recolhido automaticamente; o botão de recolher não se aplica */
-  .shell.mini-auto .nav-toggle{display:none}
-  .shell.mini-auto .nav-heading{min-height:8px}
 }
 
 /* gaveta do celular: fora da tela e fora do Tab quando fechada */
@@ -714,3 +711,9 @@ body.has-modal .toast{z-index:55}
   #conteudo .btn,#conteudo a.btn,#conteudo summary.btn{min-height:44px}
   #conteudo .chart-data summary{min-height:44px;display:flex;align-items:center}
 }
+
+/* trilho: rolagem sem a barra nativa (Windows mostrava setas dentro da pílula); o degradê de borda sinaliza que há mais itens */
+.shell .side-nav{scrollbar-width:none}
+.shell .side-nav::-webkit-scrollbar{display:none}
+/* botão de expandir/recolher sempre visível, inclusive no modo recolhido automático dos notebooks */
+.shell.mini .nav-heading .nav-toggle{display:grid}
