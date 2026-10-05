@@ -170,63 +170,74 @@
     if(mesIdx(fim) - mesIdx(ini) + 1 > MAX_PERIODO) fim = deIdx(mesIdx(ini) + MAX_PERIODO - 1);
     return { ini, fim, rotulo: rotuloPeriodo(ini, fim) };
   }
-  const DENTRO = ['cabe', 'fixado', 'fixado_estoura'], FORA = ['nao_cabe', 'cabe_a_partir', 'obrigatorio_deslocado'];
+  /* DENTRO: na carteira (ocupa capacidade). CABE: na carteira sem estourar; fixado_estoura está na carteira mas NÃO cabe. */
+  const DENTRO = ['cabe', 'fixado', 'fixado_estoura'], CABE = ['cabe', 'fixado'], FORA = ['nao_cabe', 'cabe_a_partir', 'obrigatorio_deslocado'];
   /**
-   * Monta a carteira que cabe, mês a mês, dentro do período da capacidade.
+   * Monta a carteira que cabe, mês a mês, dentro do período da capacidade. É a ÚNICA fonte das respostas sobre capacidade:
+   * carteira, pauta, painel, roadmap, sinais de risco e indicadores leem os números daqui.
    * - Capacidade efetiva = FTE × (1 − reserva). Em execução (se descontarExecucao) ocupa os meses das suas datas previstas.
    * - Percorre o ranking dos aprovados (fixados pelo comitê primeiro). Um projeto cabe se, em todos os meses da sua duração
    *   dentro do período, a demanda acumulada continuar ≤ capacidade efetiva, e se o orçamento acumulado couber.
    * - Projeto sem datas ocupa o período inteiro. Projeto inteiramente fora do período fica como 'fora_periodo'.
-   * - 'cabe_a_partir': não cabe nas datas previstas, mas caberia começando num mês posterior (aPartir, AAAA-MM).
+   * - Quem fica de fora é medido contra a carteira FINAL (acumFte = pico se entrasse; falta = quanto passa da capacidade),
+   *   e 'cabe_a_partir' (aPartir, AAAA-MM) só é dado se couber junto com a carteira e com os adiados de maior prioridade.
    * - 'obrigatorio_deslocado': obrigatório que caberia sem as fixações do comitê.
    * forcar: {id:'in'|'out'} - decisão manual do comitê (fixar ou excluir).
-   * Retorna também a demanda mensal {mes, execucao, carteira, total}, o mês de pico e quem as fixações deslocaram.
+   * Números do período (todos no MESMO mês de pico da carteira selecionada = execução + quem entrou):
+   *   pico {mes, total, execucao, carteira}; comprometido = execução nesse mês; livre = efetiva − comprometido (pessoas para novos);
+   *   usadoFte = carteira nesse mês; sobraFte = efetiva − total. execucaoMax/folgaMin = mês mais carregado só pela execução;
+   *   excesso = quanto a execução sozinha passa da capacidade. cabem = cabe + fixado (sem os fixados que estouram, contados em estouram).
+   * demanda[k] = {mes, execucao, carteira, total, aguardando, planejada}: aguardando = quem ficou de fora, nas datas previstas;
+   *   planejada = total + aguardando (a demanda se todos os aprovados começarem como planejado). picoPlanejado idem.
    */
   function montarCarteira(lista, cap = CAPACIDADE_PADRAO, forcar = {}, crit){
     forcar = forcar || {}; cap = cap || CAPACIDADE_PADRAO;
     const per = periodoCap(cap), i0 = mesIdx(per.ini), n = mesIdx(per.fim) - i0 + 1;
     const meses = Array.from({ length:n }, (_, k) => deIdx(i0 + k));
     const efetiva = Math.max(0, +cap.fte || 0) * (1 - Math.min(60, Math.max(0, +cap.reservaPct || 0)) / 100);
-    const dataOk = v => typeof v === 'string' && /^\d{4}-(0[1-9]|1[0-2])/.test(v);
-    /** meses do projeto no período: {a, b} (índices), a0 (início real, pode ser < 0), dur (meses), semDatas; null = fora do período */
-    const janela = p => {
-      if(!dataOk(p.inicioPrevisto) || !dataOk(p.fimPrevisto) || p.fimPrevisto < p.inicioPrevisto) return { a:0, b:n - 1, a0:0, dur:n, semDatas:true };
-      const a0 = mesIdx(p.inicioPrevisto) - i0, b0 = mesIdx(p.fimPrevisto) - i0;
-      if(b0 < 0 || a0 > n - 1) return null;
-      return { a:Math.max(0, a0), b:Math.min(n - 1, b0), a0, dur:b0 - a0 + 1, semDatas:false };
-    };
-    const exec = new Array(n).fill(0);
-    if(cap.descontarExecucao) lista.filter(p => p.etapa === 'execucao').forEach(p => { const j = janela(p); if(j && p.esforcoFte) for(let k = j.a; k <= j.b; k++) exec[k] += +p.esforcoFte; });
-    const comprometido = Math.max(0, ...exec);
-    const excesso = Math.max(0, comprometido - efetiva), livre = Math.max(0, efetiva - comprometido), orc = +cap.orcamento || 0;
-    const rk = ranking(lista.filter(p => p.etapa === 'aprovado'), {}, crit);
+    const janela = p => janelaCap(p, i0, n);
+    const exec = new Array(n).fill(0), semDatas = [];
+    if(cap.descontarExecucao) lista.filter(p => p.etapa === 'execucao').forEach(p => { const j = janela(p); if(j && p.esforcoFte){ if(j.semDatas) semDatas.push(p); for(let k = j.a; k <= j.b; k++) exec[k] += +p.esforcoFte; } });
     const pico = v => { let m = -Infinity, k0 = 0; v.forEach((x, k) => { if(x > m + 1e-9){ m = x; k0 = k; } }); return { k:k0, v:Math.max(0, m) }; };
+    const pkExec = pico(exec), execucaoMax = pkExec.v;
+    const excesso = Math.max(0, execucaoMax - efetiva), orc = +cap.orcamento || 0;
+    const rk = ranking(lista.filter(p => p.etapa === 'aprovado'), {}, crit);
+    const cabeEm = (v, a, b, f) => { for(let k = a; k <= b; k++) if(v[k] + f > efetiva + 1e-9) return false; return true; };
     const encaixar = usarFixos => {
       const dem = exec.slice(), cart = new Array(n).fill(0); let custo = 0;
       const fixo = x => usarFixos && forcar[x.p.id] === 'in';
       const ordem = [...rk.filter(fixo), ...rk.filter(x => !fixo(x))];   // fixados entram primeiro, na ordem do ranking
-      const cabeEm = (a, b, f) => { for(let k = a; k <= b; k++) if(dem[k] + f > efetiva + 1e-9) return false; return true; };
+      const jan = new Map();
       const itens = ordem.map(x => {
         const p = x.p, f = p.esforcoFte, c = p.custo || 0, j = f == null ? null : janela(p); let status, falta = null, aPartir = null, acumFte = null, picoMes = null;
         if(forcar[p.id] === 'out') status = 'excluido';
         else if(f == null) status = 'sem_estimativa';
         else if(!j) status = 'fora_periodo';
         else {
-          const okF = cabeEm(j.a, j.b, f), okO = !orc || custo + c <= orc + 1e-9;
+          const okF = cabeEm(dem, j.a, j.b, f), okO = !orc || custo + c <= orc + 1e-9;
           if(fixo(x)) status = okF && okO ? 'fixado' : 'fixado_estoura';
           else if(okF && okO) status = 'cabe';
-          else if(!okF){
-            let m = 0; for(let k = j.a; k <= j.b; k++) m = Math.max(m, dem[k] + f - efetiva);
-            falta = { tipo:'FTE', valor:m }; status = 'nao_cabe';
-            if(okO && !j.semDatas) for(let s = Math.max(0, j.a0 + 1); s < n; s++){ if(cabeEm(s, Math.min(n - 1, s + j.dur - 1), f)){ aPartir = meses[s]; status = 'cabe_a_partir'; break; } }
-          } else { falta = { tipo:'R$', valor:custo + c - orc }; status = 'nao_cabe'; }
-          // pico mensal (execução + carteira) com este projeto: real se entrou, hipotético se ficou de fora
-          const pk = pico(dem.map((v, k) => k >= j.a && k <= j.b ? v + f : v)); acumFte = pk.v; picoMes = meses[pk.k];
-          if(DENTRO.includes(status)){ for(let k = j.a; k <= j.b; k++){ dem[k] += f; cart[k] += f; } custo += c; }
+          else { status = 'nao_cabe'; falta = { tipo: okF ? 'R$' : 'FTE', valor:0, orcOk:okO }; }
+          if(DENTRO.includes(status)){
+            for(let k = j.a; k <= j.b; k++){ dem[k] += f; cart[k] += f; } custo += c;
+            const pk = pico(dem); acumFte = pk.v; picoMes = meses[pk.k];   // pico real da carteira até aqui (só cresce)
+          }
         }
-        return Object.assign({}, x, { status, falta, aPartir, fixado:fixo(x), acumFte, picoMes, acumCusto: DENTRO.includes(status) ? custo : custo + c });
+        const it = Object.assign({}, x, { status, falta, aPartir, fixado:fixo(x), acumFte, picoMes, acumCusto: DENTRO.includes(status) ? custo : null });
+        if(j) jan.set(it, j); return it;
       });
-      return { itens, dem, cart, custo };
+      // quem ficou de fora: medido contra a carteira final; "cabe a partir de" considera os adiados de maior prioridade
+      const adiados = dem.slice();
+      itens.filter(it => it.status === 'nao_cabe').forEach(it => {
+        const j = jan.get(it), f = it.p.esforcoFte, c = it.p.custo || 0;
+        const pk = pico(dem.map((v, k) => k >= j.a && k <= j.b ? v + f : v)); it.acumFte = pk.v; it.picoMes = meses[pk.k]; it.acumCusto = custo + c;
+        if(it.falta.tipo === 'R$'){ it.falta = { tipo:'R$', valor:custo + c - orc }; return; }
+        let m = 0, km = j.a; for(let k = j.a; k <= j.b; k++) if(dem[k] + f - efetiva > m + 1e-9){ m = dem[k] + f - efetiva; km = k; }
+        const orcOk = it.falta.orcOk; it.falta = { tipo:'FTE', valor:m, mes:meses[km] };
+        if(orcOk && !j.semDatas) for(let s = Math.max(0, j.a0 + 1); s < n; s++){ const b = Math.min(n - 1, s + j.dur - 1);
+          if(cabeEm(adiados, s, b, f)){ it.aPartir = meses[s]; it.status = 'cabe_a_partir'; for(let k = s; k <= b; k++) adiados[k] += f; break; } }
+      });
+      return { itens, dem, cart, custo, jan };
     };
     const r = encaixar(true); let deslocados = [];
     if(rk.some(x => forcar[x.p.id] === 'in')){
@@ -234,15 +245,55 @@
       deslocados = r.itens.filter(i => FORA.includes(i.status) && sem.has(i.p.id));
       deslocados.forEach(i => { if(i.p.obrigatorio) i.status = 'obrigatorio_deslocado'; });
     }
-    const pk = pico(r.dem), dentro = r.itens.filter(i => DENTRO.includes(i.status));
-    const usadoFte = r.cart[pk.k] || 0, picoTotal = r.dem[pk.k] || 0;
+    const agu = new Array(n).fill(0);
+    r.itens.filter(i => FORA.includes(i.status)).forEach(i => { const j = r.jan.get(i); for(let k = j.a; k <= j.b; k++) agu[k] += i.p.esforcoFte; });
+    const pk = pico(r.dem), dentro = r.itens.filter(i => DENTRO.includes(i.status)), cabem = r.itens.filter(i => CABE.includes(i.status)).length;
+    const usadoFte = r.cart[pk.k] || 0, picoTotal = r.dem[pk.k] || 0, comprometido = exec[pk.k] || 0;
+    const planejada = r.dem.map((v, k) => v + agu[k]), pkP = pico(planejada);
+    // mês mais carregado só pela execução (primeira sequência de meses no máximo)
+    let ateK = pkExec.k; while(ateK + 1 < n && Math.abs(exec[ateK + 1] - execucaoMax) < 1e-9) ateK++;
     const barra = r.itens.find(i => i.falta && FORA.includes(i.status));
-    return { periodo:{ ini:per.ini, fim:per.fim, rotulo:per.rotulo, meses }, efetiva, comprometido, excesso, livre, orcamento: orc,
-      usadoFte, usadoCusto: r.custo, sobraFte: efetiva - picoTotal, sobraOrc: orc - r.custo,
-      pico:{ mes:meses[pk.k], total:picoTotal, execucao:exec[pk.k] || 0, carteira:usadoFte },
-      demanda: meses.map((mes, k) => ({ mes, execucao:exec[k], carteira:r.cart[k], total:r.dem[k] })),
+    r.itens.forEach(i => { if(i.falta) delete i.falta.orcOk; });
+    dentro.forEach(i => { const j = r.jan.get(i); if(j && j.semDatas) semDatas.push(i.p); });
+    return { periodo:{ ini:per.ini, fim:per.fim, rotulo:per.rotulo, meses }, efetiva, descontarExecucao: !!cap.descontarExecucao,
+      comprometido, livre: Math.max(0, efetiva - comprometido), execucaoMax, excesso, folgaMin:{ valor: Math.max(0, efetiva - execucaoMax), de: meses[pkExec.k], ate: meses[ateK] },
+      orcamento: orc, usadoFte, usadoCusto: r.custo, sobraFte: efetiva - picoTotal, sobraOrc: orc - r.custo,
+      pico:{ mes:meses[pk.k], total:picoTotal, execucao:comprometido, carteira:usadoFte },
+      picoPlanejado:{ mes:meses[pkP.k], total:planejada[pkP.k] || 0 },
+      demanda: meses.map((mes, k) => ({ mes, execucao:exec[k], carteira:r.cart[k], total:r.dem[k], aguardando:agu[k], planejada:planejada[k] })),
       restricao: barra ? (barra.falta.tipo === 'FTE' ? 'pessoas' : 'orcamento') : r.itens.some(i => i.status === 'fixado_estoura') ? 'pessoas' : '',
-      deslocados, itens:r.itens, dentro, cabem: dentro.length, candidatos: rk.length, semNota: lista.filter(p => p.etapa === 'aprovado' && !pontuar(p, crit).completo) };
+      deslocados, itens:r.itens, dentro, cabem, estouram: dentro.length - cabem, semDatas, candidatos: rk.length,
+      semNota: lista.filter(p => p.etapa === 'aprovado' && !pontuar(p, crit).completo) };
+  }
+  /** Meses do projeto no período {a, b} (índices), a0 (início real, pode ser < 0), dur (meses), semDatas; null = fora do período. */
+  function janelaCap(p, i0, n){
+    const dataOk = v => typeof v === 'string' && /^\d{4}-(0[1-9]|1[0-2])/.test(v);
+    if(!dataOk(p.inicioPrevisto) || !dataOk(p.fimPrevisto) || p.fimPrevisto < p.inicioPrevisto) return { a:0, b:n - 1, a0:0, dur:n, semDatas:true };
+    const a0 = mesIdx(p.inicioPrevisto) - i0, b0 = mesIdx(p.fimPrevisto) - i0;
+    if(b0 < 0 || a0 > n - 1) return null;
+    return { a:Math.max(0, a0), b:Math.min(n - 1, b0), a0, dur:b0 - a0 + 1, semDatas:false };
+  }
+  /**
+   * Pessoas por mês de uma janela qualquer (roadmap, painel), lidas da carteira c = montarCarteira(...):
+   * {mes, noPeriodo, execucao, carteira, total, aguardando, planejada}. Dentro do período os números são exatamente os de c.demanda
+   * (inclusive projetos sem datas, que ocupam o período inteiro); fora dele, as datas previstas dos mesmos projetos.
+   * total = execução + carteira selecionada (a pergunta "a carteira cabe?"); aguardando = aprovados fora da carteira (exceto
+   * excluídos pelo comitê) nas datas previstas; planejada = total + aguardando ("e se todos começarem como planejado?").
+   */
+  function demandaCarteira(lista, c, de, ate, max = 120){
+    const i0 = mesIdx(c.periodo.ini), n = c.periodo.meses.length, st = {}; c.itens.forEach(i => { st[i.p.id] = i.status; });
+    const temDatas = p => p.inicioPrevisto && p.fimPrevisto && p.fimPrevisto >= p.inicioPrevisto;
+    const soma = (ps, mes) => ps.reduce((a, p) => a + (temDatas(p) && p.inicioPrevisto.slice(0, 7) <= mes && p.fimPrevisto.slice(0, 7) >= mes ? +p.esforcoFte || 0 : 0), 0);
+    const exec = c.descontarExecucao ? lista.filter(p => p.etapa === 'execucao' && p.esforcoFte) : [];
+    const dentro = c.dentro.map(i => i.p);
+    const fora = lista.filter(p => p.etapa === 'aprovado' && p.esforcoFte != null && !DENTRO.includes(st[p.id]) && st[p.id] !== 'excluido' && st[p.id] !== 'sem_estimativa');
+    const semItem = fora.filter(p => !(p.id in st));   // aprovados sem avaliação completa: não entram na conta da carteira
+    const out = []; for(let k = mesIdx(de); k <= mesIdx(ate) && out.length < max; k++){
+      const mes = deIdx(k), kp = k - i0;
+      if(kp >= 0 && kp < n){ const d = c.demanda[kp], ag = d.aguardando + soma(semItem, mes); out.push({ mes, noPeriodo:true, execucao:d.execucao, carteira:d.carteira, total:d.total, aguardando:ag, planejada:d.total + ag }); }
+      else { const e = soma(exec, mes), ca = soma(dentro, mes), ag = soma(fora, mes); out.push({ mes, noPeriodo:false, execucao:e, carteira:ca, total:e + ca, aguardando:ag, planejada:e + ca + ag }); }
+    }
+    return out;
   }
   /** fora: aprovado que ficou fora da carteira por capacidade (o roadmap o desenha hachurado). */
   const STATUS_CARTEIRA = {
@@ -441,7 +492,7 @@
     GP.save(); return n;
   }
 
-  GP.modelo = { VERSAO, CAT, ETAPAS, etapa, CAMPOS, OBRIGATORIOS, ENTRADA, RESULTADO_ENTRADA, avaliarEntrada, CRITERIOS_PADRAO, EIXOS, CORTE, QUADRANTES, ETAPAS_PRIORIZAVEIS, criterios, sugestao, notaEixo, pontuar, ranking, decompor, pendentesAvaliacao, CAPACIDADE_PADRAO, STATUS_CARTEIRA, montarCarteira, demandaMensal, estadoInicial, migrar, validar, carregarExemplos };
+  GP.modelo = { VERSAO, CAT, ETAPAS, etapa, CAMPOS, OBRIGATORIOS, ENTRADA, RESULTADO_ENTRADA, avaliarEntrada, CRITERIOS_PADRAO, EIXOS, CORTE, QUADRANTES, ETAPAS_PRIORIZAVEIS, criterios, sugestao, notaEixo, pontuar, ranking, decompor, pendentesAvaliacao, CAPACIDADE_PADRAO, STATUS_CARTEIRA, montarCarteira, demandaMensal, demandaCarteira, estadoInicial, migrar, validar, carregarExemplos };
   GP.projetos = projetos;
 })();
 

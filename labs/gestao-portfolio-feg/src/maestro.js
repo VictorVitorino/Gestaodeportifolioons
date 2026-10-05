@@ -575,14 +575,15 @@
   }
   function custos(m){
     const c=m.capacidade,cap=GP.state().capacidade,custosGer=m.gerencias.map(g=>({...g,value:sum(m.lista.filter(p=>(p.gerencia||'')===g.key&&p.custo!=null),p=>p.custo)}));
-    const ratio=c.efetiva?m.fteExecucao/c.efetiva:null,acima=ratio!=null&&ratio>1;
+    // uso da capacidade: mesma conta do medidor da Carteira e do Painel (execução + carteira selecionada no mês de pico do período)
+    const ratio=c.efetiva?c.pico.total/c.efetiva:null,acima=c.sobraFte<-0.05,mesPico=c.pico.mes?`${['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'][+c.pico.mes.slice(5,7)-1]}/${c.pico.mes.slice(0,4)}`:'';
     const sim=['cabe','fixado','cabe_a_partir','nao_cabe','fixado_estoura','obrigatorio_deslocado','excluido','sem_estimativa','fora_periodo'].filter(k=>M.STATUS_CARTEIRA[k]).map(k=>({key:null,label:M.STATUS_CARTEIRA[k].nome,value:c.itens.filter(it=>it.status===k).length,color:{cabe:'#6b8f2a',fixado:'#00908f',cabe_a_partir:'#3a74a8',nao_cabe:'#d5a32d',fixado_estoura:'#b8642c',obrigatorio_deslocado:'#ac7044',excluido:'#a3b2ac',sem_estimativa:'#a3b2ac',fora_periodo:'#c3cdc9'}[k]})).filter(x=>x.value);
     return `<div class="metric-grid gx-kpis scroll-fade">
       ${metric({label:'Custo estimado total',valor:m.comCusto?fmt.mi(m.custo):'-',sub:`${m.comCusto} de ${plural(m.n,'registro','registros')} com estimativa`,icone:'moeda'})}
-      ${metric({label:'FTE em execução',valor:fmt.n(m.fteExecucao,1),sub:`${m.comFteExecucao} de ${fmt.n(m.execucao)} com FTE informado`,icone:'pessoas',tom:'#188787'})}
-      ${metric({label:'Capacidade efetiva',valor:fmt.n(c.efetiva,1),sub:`${fmt.n(cap.fte,1)} FTE menos ${cap.reservaPct}% de reserva`,icone:'carteira',tom:'#477b91'})}
-      ${metric({label:'Uso da capacidade',valor:fmt.pct(ratio),sub:acima?'<b class="gx-cobre">Acima da capacidade efetiva</b>':'FTE em execução / capacidade efetiva',icone:'medidor',tom:acima?COBRE:UNICA,tint:acima?'#fbeee6':'#f1f6ea',ratio:ratio==null?null:Math.min(1,ratio)})}
-      ${metric({label:'Novos inícios que cabem',valor:fmt.n(c.cabem),sub:`${plural(c.candidatos,'candidato aprovado e avaliado','candidatos aprovados e avaliados')}`,icone:'novo'})}
+      ${metric({label:'FTE em execução hoje',valor:fmt.n(m.fteExecucao,1),sub:`${m.comFteExecucao} de ${fmt.n(m.execucao)} com FTE informado · ${fmt.n(c.pico.execucao,1)} no pico de ${esc(c.periodo.rotulo)}`,icone:'pessoas',tom:'#188787'})}
+      ${metric({label:'Capacidade efetiva',valor:fmt.n(c.efetiva,1),sub:`${fmt.n(cap.fte,1)} FTE menos ${cap.reservaPct}% de reserva · ${esc(c.periodo.rotulo)}`,icone:'carteira',tom:'#477b91'})}
+      ${metric({label:'Uso da capacidade no pico',valor:fmt.pct(ratio),sub:acima?`<b class="gx-cobre">Acima da capacidade em ${esc(mesPico)}</b>: ${fmt.n(c.pico.total,1)} de ${fmt.n(c.efetiva,1)} FTE`:`${fmt.n(c.pico.total,1)} de ${fmt.n(c.efetiva,1)} FTE em ${esc(mesPico)} · execução + carteira selecionada`,icone:'medidor',tom:acima?COBRE:UNICA,tint:acima?'#fbeee6':'#f1f6ea',ratio:ratio==null?null:Math.min(1,ratio)})}
+      ${metric({label:'Novos inícios que cabem',valor:fmt.n(c.cabem),sub:`de ${plural(c.candidatos,'candidato aprovado e avaliado','candidatos aprovados e avaliados')}${c.estouram?` · <b class="gx-cobre">${plural(c.estouram,'fixado estoura','fixados estouram')}</b>`:''}`,icone:'novo'})}
       ${metric({label:'Avanço em execução',valor:m.progresso==null?'-':fmt.n(m.progresso)+'%',sub:`${m.comProgresso} de ${fmt.n(m.execucao)} com avanço informado`,icone:'pulso',ratio:m.progresso==null?null:m.progresso/100})}
     </div>${U.callout(`<p><b>Simulação de capacidade:</b> período ${esc(cap.periodo)}. ${GP.state().meta.capacidadeConfirmada?'Parâmetros ajustados pelo usuário.':'Os valores iniciais são sugestões e precisam de validação.'} A capacidade é global; a simulação considera somente o recorte dos filtros. <a class="link" href="#/carteira">Ajustar capacidade</a>.</p>`)}
     <div class="analytics-grid analytics-equal gx-row"><div class="card gx-card">${chartHead('Custo estimado por gerência','Soma dos valores informados. Não representa gasto realizado.','moeda')}${hbars(custosGer,m.custo,{monetario:true})}<p class="chart-footnote">${plural(m.n-m.comCusto,'registro sem custo fica','registros sem custo ficam')} fora da soma. Custos de registros em todas as etapas entram na análise.</p><div class="gx-card-foot">${dados('Custo estimado por gerência',['Gerência',{label:'Custo (R$)',align:'r'}],custosGer.map(g=>[g.label,fmt.brl(g.value)]))}</div></div>
@@ -954,16 +955,19 @@
     const m=GP.analytics.medir(lista),ativos=lista.filter(p=>['aprovado','execucao','espera'].includes(p.etapa)),itens=[];
     if(m.atrasados.length)itens.push({titulo:'Prazos previstos vencidos',n:m.atrasados.length,desc:'Revise as datas e avalie os impactos sobre as entregas.',categoria:'prazo',projetoId:m.atrasados[0].id});
     const semResp=ativos.filter(p=>!p.responsavel);if(semResp.length)itens.push({titulo:'Entregas sem responsável',n:semResp.length,desc:'Defina quem acompanha a entrega e as decisões.',categoria:'governanca',projetoId:semResp[0].id});
-    if(m.capacidade.excesso>0)itens.push({titulo:'Execução acima da capacidade',n:f1(m.capacidade.excesso)+' FTE',desc:'A execução excede a capacidade global configurada. Avalie a necessidade de redistribuição.',categoria:'capacidade',projetoId:''});
-    if((GP.nivel?GP.nivel():3)>=3){
-      const S=GP.state(),c=M.montarCarteira(lista,S.capacidade,S.forcar),capMes=c.efetiva,datas=ativos.filter(p=>p.inicioPrevisto&&p.fimPrevisto);
-      if(datas.length){
-        const ini=datas.map(p=>p.inicioPrevisto.slice(0,7)).sort()[0],fim=datas.map(p=>p.fimPrevisto.slice(0,7)).sort().at(-1),dm=M.demandaMensal(datas,ini,fim,72),faixas=[];
-        dm.forEach((x,i)=>{if(x.fte>capMes+1e-9){const u=faixas[faixas.length-1];if(u&&u.b===i-1){u.b=i;u.max=Math.max(u.max,x.fte);}else faixas.push({a:i,b:i,max:x.fte});}});
-        faixas.slice(0,3).forEach(fx=>itens.push({titulo:`${intervalo(dm[fx.a].mes,dm[fx.b].mes)} acima da capacidade`,n:`${f1(fx.max)} de ${f1(capMes)} FTE`,desc:'Aprovados e em execução pedem mais pessoas do que a capacidade efetiva nesses meses. Reveja datas, fixações ou capacidade no roadmap.',categoria:'capacidade',projetoId:'',href:'#/roadmap'}));
-      }
-      const aguardam=c.itens.filter(i=>['nao_cabe','cabe_a_partir'].includes(i.status));
-      if(aguardam.length)itens.push({titulo:'Aprovados aguardando capacidade',n:aguardam.length,desc:aguardam.slice(0,4).map(i=>`${i.p.codigo}${i.status==='cabe_a_partir'?` (cabe a partir de ${rotMes(i.aPartir)})`:''}`).join(', ')+'. Decida se aguardam, mudam de data ou se a capacidade aumenta.',categoria:'capacidade',projetoId:aguardam[0].p.id,href:'#/carteira'});
+    const nivel3=(GP.nivel?GP.nivel():3)>=3;
+    if(!nivel3&&m.capacidade.excesso>0)itens.push({titulo:'Execução acima da capacidade',n:f1(m.capacidade.excesso)+' FTE',desc:'A execução excede a capacidade global configurada. Avalie a necessidade de redistribuição.',categoria:'capacidade',projetoId:''});
+    if(nivel3){
+      // mesma conta da Carteira (montarCarteira, mês a mês no período): "acima da capacidade" só quando a carteira selecionada
+      // (execução + quem entrou) passa; quem aguarda é outra pergunta e vem no sinal dos aguardando, como hipótese.
+      const S=GP.state(),c=M.montarCarteira(lista,S.capacidade,S.forcar),capMes=c.efetiva,dm=c.demanda;
+      const agrupar=v=>{const fx=[];dm.forEach((x,i)=>{const y=v(x);if(y>capMes+1e-9){const u=fx[fx.length-1];if(u&&u.b===i-1){u.b=i;u.max=Math.max(u.max,y);u.exec=Math.max(u.exec,x.execucao);}else fx.push({a:i,b:i,max:y,exec:x.execucao});}});return fx;};
+      agrupar(x=>x.total).slice(0,3).forEach(fx=>itens.push({titulo:`${intervalo(dm[fx.a].mes,dm[fx.b].mes)} acima da capacidade`,n:`${f1(fx.max)} de ${f1(capMes)} FTE`,
+        desc:fx.exec>capMes+1e-9?'Só os projetos em execução já pedem mais pessoas do que a capacidade efetiva nesses meses. Avalie redistribuir ou rever a capacidade.':`A carteira selecionada (em execução + ${c.estouram?'fixados que estouram':'novos inícios'}) passa da capacidade efetiva nesses meses. Reveja fixações, datas ou capacidade.`,
+        categoria:'capacidade',projetoId:'',href:'#/carteira'}));
+      const aguardam=c.itens.filter(i=>['nao_cabe','cabe_a_partir'].includes(i.status)),fxAg=agrupar(x=>x.aguardando>0?x.planejada:0);
+      const seTodos=fxAg.length?` Se começarem como planejado, ${fxAg.slice(0,2).map(fx=>`${intervalo(dm[fx.a].mes,dm[fx.b].mes)} chegaria a ${f1(fx.max)} de ${f1(capMes)} FTE`).join('; ')}.`:'';
+      if(aguardam.length)itens.push({titulo:'Aprovados aguardando capacidade',n:aguardam.length,desc:aguardam.slice(0,4).map(i=>`${i.p.codigo}${i.status==='cabe_a_partir'?` (cabe a partir de ${rotMes(i.aPartir)})`:''}`).join(', ')+`. Ficam fora da carteira selecionada${c.sobraFte<-0.05?'':', que cabe'}.${seTodos} Decida se aguardam, mudam de data ou se a capacidade aumenta.`,categoria:'capacidade',projetoId:aguardam[0].p.id,href:fxAg.length?'#/roadmap':'#/carteira'});
       const obrig=c.itens.filter(i=>i.p.obrigatorio&&!['cabe','fixado','fixado_estoura','fora_periodo'].includes(i.status));
       if(obrig.length)itens.push({titulo:'Obrigatório fora da carteira',n:obrig.length,desc:obrig.map(i=>i.p.codigo).join(', ')+' tem exigência legal ou regulatória e não está na carteira do período.',categoria:'capacidade',projetoId:obrig[0].p.id,href:'#/carteira'});
     }
