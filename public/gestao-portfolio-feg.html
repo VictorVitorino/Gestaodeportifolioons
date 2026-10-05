@@ -1165,6 +1165,41 @@ body.has-modal .toast{z-index:55}
 .shell .side-nav::-webkit-scrollbar{display:none}
 /* botão de expandir/recolher sempre visível, inclusive no modo recolhido automático dos notebooks */
 .shell.mini .nav-heading .nav-toggle{display:grid}
+
+/* ---------- 17. ambientes de cor por área ----------
+   Ao trocar de área, o canvas e o trilho mudam de clima dentro da paleta ONS (transição suave de 600ms):
+   gerencial = floresta/petróleo (profundo), operação = verde-limão (leve), priorização = oliva/ouro (quente),
+   planejamento = ardósia/petróleo (denso), configurações = neutro. */
+@property --amb-a{syntax:'<color>';inherits:true;initial-value:rgba(166,198,90,.30)}
+@property --amb-b{syntax:'<color>';inherits:true;initial-value:rgba(24,135,135,.16)}
+@property --amb-c{syntax:'<color>';inherits:true;initial-value:rgba(213,163,45,.10)}
+@property --amb-top{syntax:'<color>';inherits:true;initial-value:#F1F5EF}
+@property --amb-bot{syntax:'<color>';inherits:true;initial-value:#EAF0E9}
+@property --rail-1{syntax:'<color>';inherits:true;initial-value:rgba(37,78,71,.97)}
+@property --rail-2{syntax:'<color>';inherits:true;initial-value:rgba(25,58,61,.98)}
+@property --rail-3{syntax:'<color>';inherits:true;initial-value:rgba(21,49,52,.98)}
+:root{--amb-a:rgba(166,198,90,.30);--amb-b:rgba(24,135,135,.16);--amb-c:rgba(213,163,45,.10);--amb-top:#F1F5EF;--amb-bot:#EAF0E9;
+  --rail-1:rgba(37,78,71,.97);--rail-2:rgba(25,58,61,.98);--rail-3:rgba(21,49,52,.98);
+  transition:--amb-a .6s var(--ease),--amb-b .6s var(--ease),--amb-c .6s var(--ease),--amb-top .6s var(--ease),--amb-bot .6s var(--ease),--rail-1 .6s var(--ease),--rail-2 .6s var(--ease),--rail-3 .6s var(--ease)}
+html[data-ambiente="gerencial"]{--amb-a:rgba(62,104,1,.24);--amb-b:rgba(24,135,135,.30);--amb-c:rgba(37,78,71,.22);--amb-top:#E6EEEA;--amb-bot:#DAE6E0;
+  --rail-1:rgba(31,68,63,.98);--rail-2:rgba(22,52,55,.98);--rail-3:rgba(17,42,45,.99)}
+html[data-ambiente="operacao"]{--amb-a:rgba(166,198,90,.44);--amb-b:rgba(198,220,164,.40);--amb-c:rgba(213,163,45,.08);--amb-top:#F7FAF2;--amb-bot:#F0F6EA;
+  --rail-1:rgba(45,88,64,.97);--rail-2:rgba(33,70,58,.98);--rail-3:rgba(27,60,54,.98)}
+html[data-ambiente="priorizacao"]{--amb-a:rgba(107,143,42,.30);--amb-b:rgba(213,163,45,.30);--amb-c:rgba(172,112,68,.14);--amb-top:#F7F5EA;--amb-bot:#EFECDE;
+  --rail-1:rgba(52,78,48,.97);--rail-2:rgba(38,62,46,.98);--rail-3:rgba(31,52,42,.98)}
+html[data-ambiente="planejamento"]{--amb-a:rgba(58,116,168,.24);--amb-b:rgba(0,144,143,.26);--amb-c:rgba(37,78,71,.18);--amb-top:#E7EEF1;--amb-bot:#DCE5EA;
+  --rail-1:rgba(30,64,74,.98);--rail-2:rgba(22,50,60,.98);--rail-3:rgba(17,40,50,.99)}
+html[data-ambiente="config"]{--amb-a:rgba(166,198,90,.14);--amb-b:rgba(120,140,134,.12);--amb-c:rgba(213,163,45,.05);--amb-top:#F3F5F3;--amb-bot:#ECEFEC;
+  --rail-1:rgba(40,66,62,.97);--rail-2:rgba(30,54,54,.98);--rail-3:rgba(24,45,46,.98)}
+html{background:var(--amb-bot)}
+body{background:var(--amb-bot)}
+body::before{background:
+    radial-gradient(48vw 38vw at 4% -6%,var(--amb-a),transparent 62%),
+    radial-gradient(42vw 34vw at 102% 2%,var(--amb-b),transparent 64%),
+    radial-gradient(46vw 30vw at 70% 108%,var(--amb-c),transparent 60%),
+    linear-gradient(180deg,var(--amb-top) 0%,var(--amb-bot) 100%)}
+.shell .side{background:linear-gradient(165deg,var(--rail-1) 0%,var(--rail-2) 70%,var(--rail-3) 100%)}
+@media(prefers-reduced-motion:reduce){:root{transition:none}}
 /* src/telas/operacao.css */
 /* =========================================================================
    Telas de Operação (nível 1): cadastro, acervo, ficha, funil, checklist e entrada.
@@ -3661,6 +3696,8 @@ window.GP = Object.assign(window.GP || {}, { LOGO_ONS: 'data:image/png;base64,iV
     const L = tela && tela.nivel ? GP.NIVEIS[tela.nivel - 1] : null, secao = tela && tela.gerencial ? 'Visão gerencial' : tela && tela.rodape ? 'Configuração' : L ? `Nível ${L.n} · ${L.curto}` : '';
     const [dLonga, dCurta] = datas();
     document.title = `${titulo || 'Início'} · Gestão de Portfólio FEG`;
+    // Ambiente de cor por área (percepção de mudança de contexto): gerencial, operação, priorização, planejamento, configurações
+    document.documentElement.dataset.ambiente = !tela ? 'gerencial' : tela.rodape ? 'config' : tela.gerencial ? 'gerencial' : ({1:'operacao', 2:'priorizacao', 3:'planejamento'})[tela.nivel] || 'gerencial';
     const quando = `<span class="when"><span class="when-l">${esc(dLonga)}</span><span class="when-s" aria-hidden="true">${esc(dCurta)}</span></span>`;
     const niveis = cls => GP.NIVEIS.map(Lv => `<button type="button" class="${Lv.n === nivel ? 'on' : ''}" data-nivel="${Lv.n}" data-alternar aria-pressed="${Lv.n === nivel}" aria-label="Nível ${Lv.n}, ${esc(Lv.nome)}${Lv.n === nivel && Lv.n > 1 ? ' (ativo; clique para desativar)' : ''}" title="${Lv.n === nivel && Lv.n > 1 ? `Nível ${Lv.n} ativo · clique de novo para desativar e voltar ao nível ${Lv.n - 1}` : `Nível ${Lv.n} · ${esc(Lv.nome)}`}"><b aria-hidden="true">${Lv.n}</b><span aria-hidden="true">${esc(Lv.curto)}</span></button>`).join('');
     app.innerHTML = `<a class="skip" href="#conteudo" data-pular>Ir para o conteúdo</a><div class="shell ${mini ? 'mini' : ''} ${miniAuto() ? 'mini-auto' : ''}">

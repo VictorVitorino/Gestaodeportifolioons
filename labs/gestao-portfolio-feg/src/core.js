@@ -574,6 +574,8 @@
     const L = tela && tela.nivel ? GP.NIVEIS[tela.nivel - 1] : null, secao = tela && tela.gerencial ? 'Visão gerencial' : tela && tela.rodape ? 'Configuração' : L ? `Nível ${L.n} · ${L.curto}` : '';
     const [dLonga, dCurta] = datas();
     document.title = `${titulo || 'Início'} · Gestão de Portfólio FEG`;
+    // Ambiente de cor por área (percepção de mudança de contexto): gerencial, operação, priorização, planejamento, configurações
+    document.documentElement.dataset.ambiente = !tela ? 'gerencial' : tela.rodape ? 'config' : tela.gerencial ? 'gerencial' : ({1:'operacao', 2:'priorizacao', 3:'planejamento'})[tela.nivel] || 'gerencial';
     const quando = `<span class="when"><span class="when-l">${esc(dLonga)}</span><span class="when-s" aria-hidden="true">${esc(dCurta)}</span></span>`;
     const niveis = cls => GP.NIVEIS.map(Lv => `<button type="button" class="${Lv.n === nivel ? 'on' : ''}" data-nivel="${Lv.n}" data-alternar aria-pressed="${Lv.n === nivel}" aria-label="Nível ${Lv.n}, ${esc(Lv.nome)}${Lv.n === nivel && Lv.n > 1 ? ' (ativo; clique para desativar)' : ''}" title="${Lv.n === nivel && Lv.n > 1 ? `Nível ${Lv.n} ativo · clique de novo para desativar e voltar ao nível ${Lv.n - 1}` : `Nível ${Lv.n} · ${esc(Lv.nome)}`}"><b aria-hidden="true">${Lv.n}</b><span aria-hidden="true">${esc(Lv.curto)}</span></button>`).join('');
     app.innerHTML = `<a class="skip" href="#conteudo" data-pular>Ir para o conteúdo</a><div class="shell ${mini ? 'mini' : ''} ${miniAuto() ? 'mini-auto' : ''}">
