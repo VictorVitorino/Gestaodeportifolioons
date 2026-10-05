@@ -3,7 +3,7 @@
 
 /* ---------- utilitários das telas gerenciais ---------- */
 .gx-num{font-variant-numeric:tabular-nums}
-.gx-cobre{color:#ac7044!important}
+.gx-cobre{color:#8f4f22!important}
 .gx-eyebrow{display:block;font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ons-700,#2E4F00)}
 .gx-card-foot{margin-top:auto;padding-top:14px;display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center}
 .gx-card-foot:empty{display:none}
@@ -145,7 +145,9 @@
   .gx-bars>.percent-row{grid-column:1/-1;grid-template-columns:subgrid!important;gap:0 12px!important}
 }
 .gx-bars .percent-row .name{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.gx-bars .percent-row.is-zero{opacity:.5}
+/* linhas zeradas: texto em var(--dim) e trilho neutro, sem opacidade (contraste ≥ 4,5:1) */
+.gx-bars .percent-row.is-zero .name,.gx-bars .percent-row.is-zero .count,.gx-bars .percent-row.is-zero .count small{color:var(--dim)!important}
+.gx-bars .percent-row.is-zero .track{background:#eef2f0}
 .gx-bars .percent-row .count{white-space:nowrap}
 .gx-stack-track{display:flex!important;gap:2px;align-items:stretch}
 .gx-stack-track::before{display:none}
@@ -157,13 +159,13 @@
 .gx-heat-scroll{overflow-x:auto}
 .gx-heat{display:grid;gap:4px;min-width:min(100%,440px)}
 .gx-heat-row{display:grid;grid-template-columns:minmax(120px,1.4fr) repeat(var(--cols),minmax(44px,1fr)) minmax(44px,.6fr);gap:4px;align-items:center}
-.gx-heat-row.is-zero .gx-heat-lbl,.gx-heat-row.is-zero .gx-heat-tot{opacity:.5}
+.gx-heat-row.is-zero .gx-heat-lbl,.gx-heat-row.is-zero .gx-heat-tot{color:var(--dim)}
 .gx-heat-h span{font-size:.72rem;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);text-align:center;padding:2px 0}
 .gx-heat-h span:first-child{text-align:left}
 .gx-heat-lbl{font-size:.82rem;color:var(--text);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .gx-heat-cell{display:grid;place-items:center;height:36px;border:0;border-radius:8px;font-weight:650;font-size:.86rem;font-variant-numeric:tabular-nums;cursor:pointer;padding:0}
 .gx-heat-cell:hover{outline:2px solid #19352f;outline-offset:-2px}
-.gx-heat-cell.vazio{background:#f4f7f5;color:#a3b2ac;cursor:default}
+.gx-heat-cell.vazio{background:#f4f7f5;color:var(--dim);cursor:default}
 .gx-heat-tot{text-align:center;font-size:.86rem;color:var(--text);font-variant-numeric:tabular-nums}
 
 /* ---------- gráfico de entradas ---------- */
@@ -213,10 +215,13 @@
 .gx-ind .table-tools{margin-top:26px}
 
 /* ---------- tabela gerencial ---------- */
-.gx-tabela td.col-main,.gx-tabela td:nth-child(2){min-width:340px}
+/* 280px: as 8 colunas cabem em 1440 com o menu expandido (Prazo inteiro, sem rolagem interna) */
+.gx-tabela td.col-main,.gx-tabela td:nth-child(2){min-width:280px}
 .gx-clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.4}
-.gx-tabela td small{display:block;color:var(--muted);font-size:.74rem;margin-top:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:420px}
-.gx-ex{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:#fcf4e3;color:#7a5512;font-size:.68rem;font-weight:650;vertical-align:middle}
+.gx-tabela td small{display:block;color:var(--muted);font-size:.76rem;margin-top:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:420px}
+/* a área (uma linha com reticências) não alarga a coluna: ocupa a largura que o título definir */
+.gx-tabela td.col-main small{width:0;min-width:100%}
+.gx-ex{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:#fcf4e3;color:#7a5512;font-size:.72rem;font-weight:650;vertical-align:middle}
 .gx-nat{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%}
 .gx-nat-p{background:#f1f6ea;color:#4C7A0B}.gx-nat-d{background:#eaf2f7;color:#2f5f86}
 .gx-prog{display:flex;flex-direction:column;align-items:flex-end;gap:5px;min-width:70px}
@@ -240,12 +245,30 @@
 .gx-sis-card .gx-legend{margin:0 0 10px}
 .gx-sis-tbl th.r,.gx-sis-tbl td.r{text-align:right}
 .gx-sis-tbl td.gx-num,.gx-sis-tbl .gx-num{font-variant-numeric:tabular-nums}
-.gx-sit{display:flex;gap:2px;width:120px;height:8px}
+/* tabela compacta: cabe em 1024 (área útil de ~830px); rótulos longos quebram em duas linhas no cabeçalho */
+.portfolio-table .tbl.gx-sis-tbl{min-width:0}
+.gx-sis-tbl th{white-space:normal;vertical-align:bottom;line-height:1.3}
+.gx-sis-tbl th,.gx-sis-tbl td{padding-left:10px!important;padding-right:10px!important}
+.gx-sis-tbl th.r{max-width:96px}
+.portfolio-table .tbl.gx-sis-tbl td:first-child{min-width:170px;max-width:300px}
+.gx-sis-tbl td.r{white-space:nowrap}
+.gx-sit{display:flex;gap:2px;width:96px;height:8px}
 .gx-sit i{display:block;height:100%;min-width:3px}
 .gx-sit i:first-child{border-radius:3px 0 0 3px}.gx-sit i:last-child{border-radius:0 3px 3px 0}.gx-sit i:only-child{border-radius:3px}
 .gx-custo{display:inline-flex;flex-direction:column;align-items:flex-end;gap:5px}
-.gx-custo-bar{display:block;width:96px;height:6px;border-radius:3px;background:#e9efeb;overflow:hidden}
+.gx-custo-bar{display:block;width:80px;height:6px;border-radius:3px;background:#e9efeb;overflow:hidden}
 .gx-custo-bar i{display:block;height:100%;background:#6b8f2a;border-radius:0 3px 3px 0}
+
+@container workspace (max-width:640px){
+  /* cartão compacto: nome no topo, três números lado a lado, custo alinhado ao rótulo e situação no fim */
+  .tbl.tbl-cards.tbl-sm.gx-sis-tbl tbody tr{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 12px;padding:14px 16px}
+  .tbl.tbl-cards.tbl-sm.gx-sis-tbl td{font-size:.9rem;white-space:normal;min-width:0;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start}
+  .tbl.tbl-cards.tbl-sm.gx-sis-tbl td::before{letter-spacing:.04em;line-height:1.3}
+  .tbl.tbl-cards.tbl-sm.gx-sis-tbl td[data-label="Custo estimado"]{grid-column:span 2}
+  .tbl.tbl-cards.tbl-sm.gx-sis-tbl td[data-label="Situação"]{grid-column:1/-1;order:9}
+  .gx-sis-tbl.tbl-cards td .gx-custo{display:flex;align-items:flex-start}
+  .gx-sis-tbl.tbl-cards td .gx-sit{width:100%}
+}
 
 /* ---------- dados e configurações ---------- */
 .gx-cfg-sec{margin:0 0 26px;display:flex;flex-direction:column;gap:16px}
@@ -337,5 +360,12 @@
 /* integração: mini mapa de calor (pacote planejamento) dentro do cartão de riscos */
 .gx-risco .gx-risco-mapa{max-width:150px;margin:2px 0 14px}
 .gx-risco .gx-risco-mapa .rk-mini{width:100%}
+.gx-risco .gx-risco-mapa .rk-mini .rk-mtz{grid-template-columns:repeat(5,22px)}
+.gx-risco .gx-risco-mapa .rk-mini .rk-cel{min-height:22px}
+.gx-risco .gx-risco-mapa .rk-mini .rk-n{width:18px;height:18px;font-size:11px}
+/* matriz da aba Riscos de Indicadores: eixos com pelo menos 11px também em área estreita */
+.gx-ind .rk-ax{font-size:11px}
+.gx-gov .admin-action>small{color:var(--ons-700,#2E4F00)}
 @media(max-width:640px){.gx-cta .btn,.gx-cta a.btn,.gx-vazio .btn{min-height:44px}}
 @media(max-width:640px){#conteudo .gx-menu-pop [role=menuitem]{min-height:44px}}
+@media(max-width:640px){.gx-check{min-height:44px;align-items:center}.gx-check input[type=checkbox]{width:22px;height:22px}}

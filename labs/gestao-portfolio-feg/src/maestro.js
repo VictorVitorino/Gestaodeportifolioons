@@ -77,16 +77,29 @@
     }
     return '';
   }
+  /** Dia em que o registro entrou no sistema (cadastro, importação ou carga de exemplos); '' quando desconhecido. */
+  function registroNoSistema(p){
+    const c=String(p.criadoEm||'').slice(0,10);if(/^\d{4}-\d{2}-\d{2}$/.test(c))return c;
+    const h=(p.historico||[]).map(x=>String(x.data||'').slice(0,10)).filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d)).sort()[0];
+    return h||'';
+  }
+  /** true/false: estava na fila no dia. null: o histórico não cobre o dia (registro retroativo que já saiu da fila,
+      como os exemplos e as planilhas importadas, cujas mudanças de etapa ficam datadas no momento da carga). */
   function naFilaEm(p,dia){
     const e=dataEntrada(p);if(!e||e>dia)return false;
+    const s=saidaDaFila(p);
+    if(FILA.includes(p.etapa)&&!s)return true;
+    const reg=registroNoSistema(p);if(reg&&reg>dia)return null;
     if(FILA.includes(p.etapa))return true;
-    const s=saidaDaFila(p);return !!s&&s>dia;
+    return !!s&&s>dia;
   }
+  /** Variação de 30 dias. fila = null quando não há histórico real que cubra a janela (o chip não aparece). */
   function tendencia(lista){
     const t=hoje(),d30=addDias(t,-30),d60=addDias(t,-60),e=dataEntrada;
     const novos=lista.filter(p=>e(p)>d30&&e(p)<=t).length,antes=lista.filter(p=>e(p)>d60&&e(p)<=d30).length;
-    const filaAgora=lista.filter(p=>FILA.includes(p.etapa)).length,filaAntes=lista.filter(p=>naFilaEm(p,d30)).length;
-    return {novos,antes,fila:filaAgora-filaAntes};
+    const estado=lista.map(p=>naFilaEm(p,d30));
+    const filaAgora=lista.filter(p=>FILA.includes(p.etapa)).length,filaAntes=estado.filter(x=>x===true).length;
+    return {novos,antes,fila:estado.includes(null)?null:filaAgora-filaAntes};
   }
   const sinal=n=>n>0?'+'+fmt.n(n):n<0?'−'+fmt.n(Math.abs(n)):'0';
 
@@ -139,6 +152,7 @@
     return h;
   }
   const deltaChip=(n,{ruimSeSobe=true,sufixo='em 30 dias'}={})=>{
+    if(n==null)return null;
     const tom=n===0?'':((n>0)===ruimSeSobe?'ruim':'bom'),seta=n>0?'↑ ':n<0?'↓ ':'';
     return {texto:`${tom==='ruim'?seta:''}${sinal(n)} ${sufixo}`,tom};
   };
@@ -181,8 +195,8 @@
     M.ETAPAS.forEach(e=>{
       const tot=m.lista.filter(p=>p.etapa===e.id).length;
       h+=`<div class="gx-heat-row ${tot?'':'is-zero'}" role="row"><span class="gx-heat-lbl" role="rowheader">${esc(e.nome)}</span>${gers.map(g=>{
-        const v=m.lista.filter(p=>p.etapa===e.id&&(p.gerencia||'')===g).length,a=v?(.12+.78*v/max):0,escuro=a>.55;
-        return v?`<button class="gx-heat-cell" role="cell" style="background:rgba(107,143,42,${a.toFixed(2)});color:${escuro?'#fff':TXT}" data-gx-cruz="${e.id}|${esc(g)}" data-tt="${esc(e.nome)} · ${esc(nome(g))}&#10;${plural(v,'registro','registros')}" aria-label="${esc(e.nome)}, ${esc(nome(g))}: ${v}">${v}</button>`:`<span class="gx-heat-cell vazio" role="cell" aria-label="${esc(e.nome)}, ${esc(nome(g))}: 0">·</span>`;}).join('')}<b class="gx-heat-tot" role="cell">${tot}</b></div>`;
+        const v=m.lista.filter(p=>p.etapa===e.id&&(p.gerencia||'')===g).length,a=v?(.12+.73*v/max):0;  // até 85% de oliva: texto escuro sempre acima de 4,5:1
+        return v?`<button class="gx-heat-cell" role="cell" style="background:rgba(107,143,42,${a.toFixed(2)});color:${TXT}" data-gx-cruz="${e.id}|${esc(g)}" data-tt="${esc(e.nome)} · ${esc(nome(g))}&#10;${plural(v,'registro','registros')}" aria-label="${esc(e.nome)}, ${esc(nome(g))}: ${v}">${v}</button>`:`<span class="gx-heat-cell vazio" role="cell" aria-label="${esc(e.nome)}, ${esc(nome(g))}: 0">·</span>`;}).join('')}<b class="gx-heat-tot" role="cell">${tot}</b></div>`;
     });
     h+=`</div></div><p class="chart-footnote">Intensidade proporcional à quantidade. Clique em uma célula para filtrar etapa e gerência ao mesmo tempo.</p>`;
     return h+dados('Registros por etapa e gerência',['Etapa',...gers.map(g=>({label:nome(g),align:'r'})),{label:'Total',align:'r'}],M.ETAPAS.map(e=>[e.nome,...gers.map(g=>m.lista.filter(p=>p.etapa===e.id&&(p.gerencia||'')===g).length),m.lista.filter(p=>p.etapa===e.id).length]));
@@ -361,6 +375,9 @@
   }
 
   /* ------------------------------------------------ painel: próximo passo, atenção, atividade */
+  /** Fila de avaliação: a mesma regra da priorização (GP.modelo.pendentesAvaliacao), usada pela faixa, pelo próximo passo e pelas pendências. */
+  const pendentesAvaliacao=lista=>M.pendentesAvaliacao?M.pendentesAvaliacao(lista):lista.filter(p=>M.ETAPAS_PRIORIZAVEIS.includes(p.etapa)&&!M.pontuar(p).completo);
+  const ETAPA_AVAL={aprovado:'Foi admitido',execucao:'Está em execução',espera:'Está em espera',triagem:'Está em triagem'};
   function proximosPassos(m){
     const lista=m.lista,nivel=GP.nivel(),t=hoje(),passos=[];
     m.atrasados.slice().sort((a,b)=>a.fimPrevisto.localeCompare(b.fimPrevisto)).slice(0,1).forEach(p=>{const d=diasEntre(p.fimPrevisto,t);
@@ -368,9 +385,13 @@
     const fila=lista.filter(p=>FILA.includes(p.etapa)&&dataEntrada(p)&&diasEntre(dataEntrada(p),t)>30).sort((a,b)=>dataEntrada(a).localeCompare(dataEntrada(b)));
     if(fila.length){const p=fila[0],d=diasEntre(dataEntrada(p),t);
       passos.push({verbo:'Decidir a entrada de',p,motivo:`Está na fila há ${plural(d,'dia','dias')}, desde ${fmt.data(dataEntrada(p))}.${fila.length>1?` ${plural(fila.length-1,'outro registro espera','outros registros esperam')} há mais de 30 dias.`:''}`,acao:{rotulo:'Fazer o checklist',entrada:p.id}});}
+    // Triagem com falta de informação: o checklist precisa ser completado (a mesma pendência do resumo da entrada)
+    const faltaInfo=lista.filter(p=>p.etapa==='triagem'&&p.entrada&&p.entrada.resultado==='falta_info'&&!fila.includes(p));
+    if(faltaInfo.length){const p=faltaInfo[0],mot=(p.entrada.motivos||[]).join(' ');
+      passos.push({verbo:'Completar a triagem de',p,motivo:`O checklist de entrada registrou falta de informação.${mot?' '+mot:''}${faltaInfo.length>1?` Há mais ${faltaInfo.length-1} na mesma situação.`:''}`,acao:{rotulo:'Fazer o checklist',entrada:p.id}});}
     if(nivel>=2){
-      const semNota=lista.filter(p=>p.etapa==='aprovado'&&!M.pontuar(p).completo);
-      if(semNota.length){const p=semNota[0];passos.push({verbo:'Avaliar',p,motivo:`Foi admitido, mas ainda não tem as notas de valor e esforço.${semNota.length>1?` Há mais ${semNota.length-1} na mesma situação.`:''}`,acao:{rotulo:'Avaliar agora',href:'#/avaliar/'+p.id}});}
+      const semNota=pendentesAvaliacao(lista);
+      if(semNota.length){const p=semNota[0];passos.push({verbo:'Avaliar',p,motivo:`${ETAPA_AVAL[p.etapa]||'Está na carteira'}, mas ainda não tem as notas de valor e esforço.${semNota.length>1?` Há mais ${semNota.length-1} na mesma situação.`:''}`,acao:{rotulo:'Avaliar agora',href:'#/avaliar/'+p.id}});}
       const forcar=GP.state().forcar||{},prontos=M.ranking(lista.filter(p=>p.etapa==='aprovado')).filter(x=>!forcar[x.p.id]);
       if(prontos.length)passos.push({verbo:'Levar ao comitê',objeto:plural(prontos.length,'iniciativa priorizada','iniciativas priorizadas'),motivo:'Estão avaliadas e ordenadas no ranking, mas ainda sem decisão de início.',acao:{rotulo:'Abrir o ranking',href:'#/ranking'}});
     }
@@ -382,7 +403,10 @@
   const objetoPasso=s=>s.p?`<span class="code">${esc(s.p.codigo)}</span>`:esc(s.objeto);
   function cartaoProximo(m){
     const ps=proximosPassos(m);
-    if(!ps.length)return `<section class="card gx-next gx-next-ok"><span class="gx-eyebrow">Seu próximo passo</span><h2>Tudo em dia</h2><p class="gx-next-why">${icon('check',16)}<span>Nenhuma pendência pelas regras de prazo, fila, avaliação e decisão.</span></p><div class="gx-next-act"><a class="btn btn-primary" href="#/novo">${icon('novo',15)} Nova iniciativa</a></div></section>`;
+    // Sem passo pelas regras principais, as pendências de acompanhamento da mesma tela viram o próximo passo:
+    // "Tudo em dia" só aparece quando o cartão "Pontos para acompanhamento" também está vazio.
+    if(!ps.length)itensAtencao(m).forEach(x=>ps.push({verbo:'Revisar',objeto:x.txt,motivo:x.desc,acao:{rotulo:'Abrir',href:x.href}}));
+    if(!ps.length)return `<section class="card gx-next gx-next-ok"><span class="gx-eyebrow">Seu próximo passo</span><h2>Tudo em dia</h2><p class="gx-next-why">${icon('check',16)}<span>Nenhuma pendência de prazo, fila, avaliação, decisão ou acompanhamento.</span></p><div class="gx-next-act"><a class="btn btn-primary" href="#/novo">${icon('novo',15)} Nova iniciativa</a></div></section>`;
     const [s,...resto]=ps;
     return `<section class="card gx-next" aria-label="Seu próximo passo"><span class="gx-eyebrow">Seu próximo passo</span>
       <h2>${esc(s.verbo)} ${objetoPasso(s)}</h2>${s.p?`<p class="gx-next-obj">${esc(semExemplo(s.p.titulo))}</p>`:''}
@@ -391,11 +415,11 @@
   }
   /** Regras de acompanhamento: as que falham viram pendências; as que passam aparecem como verificadas. */
   function regrasAtencao(m){
-    const nivel=GP.nivel(),semResp=m.lista.filter(p=>ABERTOS.includes(p.etapa)&&!p.responsavel),semAv=m.lista.filter(p=>p.etapa==='execucao'&&progresso(p)==null),semPrior=m.lista.filter(p=>p.etapa==='aprovado'&&!M.pontuar(p).completo);
+    const nivel=GP.nivel(),semResp=m.lista.filter(p=>ABERTOS.includes(p.etapa)&&!p.responsavel),semAv=m.lista.filter(p=>p.etapa==='execucao'&&progresso(p)==null),semPrior=pendentesAvaliacao(m.lista);
     const r=[
       {lista:m.atrasados,txt:n=>plural(n,'prazo previsto vencido','prazos previstos vencidos'),ok:'Prazos previstos em dia',desc:'Revise datas e situação com os responsáveis.',href:p=>'#/projeto/'+p.id},
       {lista:semResp,txt:n=>plural(n,'iniciativa sem responsável','iniciativas sem responsável'),ok:'Responsáveis definidos',desc:'Aprovadas, em execução ou em espera.',href:p=>'#/novo/'+p.id},
-      ...(nivel>=2?[{lista:semPrior,txt:n=>plural(n,'aprovado sem prioridade completa','aprovados sem prioridade completa'),ok:'Aprovados com avaliação completa',desc:'Conclua a avaliação antes da decisão de início.',href:p=>'#/avaliar/'+p.id}]:[]),
+      ...(nivel>=2?[{lista:semPrior,txt:n=>plural(n,'iniciativa aguarda avaliação','iniciativas aguardam avaliação'),ok:'Avaliações completas',desc:'Registre as notas de valor e esforço.',href:p=>'#/avaliar/'+p.id}]:[]),
       {lista:semAv,txt:n=>plural(n,'execução sem avanço informado','execuções sem avanço informado'),ok:'Avanço informado nas execuções',desc:'Atualize o percentual de avanço na ficha.',href:p=>'#/novo/'+p.id},
       {lista:m.semDatas,txt:n=>plural(n,'iniciativa sem datas previstas','iniciativas sem datas previstas'),ok:'Datas previstas completas',desc:'Informe início e fim para o planejamento.',href:p=>'#/novo/'+p.id},
     ];
@@ -407,17 +431,25 @@
   }
   function atencoes(m,max=5){
     const rg=regrasAtencao(m),it=itensAtencao(m).slice(0,max),ok=rg.filter(x=>!x.lista.length);
-    if(!it.length)return `<div class="attention-list gx-att"><div class="info-empty gx-tudo-ok">${icon('check',22)}<p><b>Tudo em dia</b>${m.n?'Nenhuma pendência pelas regras de prazo, responsável, avanço e datas.':'Cadastre registros para acompanhar as pendências.'}</p></div></div>`;
+    if(!it.length)return `<div class="attention-list gx-att"><div class="info-empty gx-tudo-ok">${icon('check',22)}<p><b>Tudo em dia</b>${m.n?`Nenhuma pendência de prazo, responsável, ${GP.nivel()>=2?'avaliação, ':''}avanço e datas.`:'Cadastre registros para acompanhar as pendências.'}</p></div></div>`;
     return `<div class="attention-list gx-att">${it.map(x=>`<a class="attention-item" href="${x.href}"><span class="ic">${icon('alerta',15)}</span><p><b>${esc(x.txt)}</b>${esc(x.desc)}</p></a>`).join('')}
-      ${ok.length&&it.length<4?`<ul class="gx-ok-list" aria-label="Regras verificadas">${ok.map(x=>`<li>${icon('check',14)}<span>${esc(x.ok)}</span></li>`).join('')}</ul>`:''}</div>`;
+      ${ok.length&&it.length<3?`<ul class="gx-ok-list" aria-label="Regras verificadas">${ok.map(x=>`<li>${icon('check',14)}<span>${esc(x.ok)}</span></li>`).join('')}</ul>`:''}</div>`;
   }
   /* Atividade recente: históricos de projetos e riscos */
-  let visitaRegistrada=false;
+  /* A visita é preferência deste navegador, não dado da carteira: fica numa chave própria, fora do estado versionado.
+     Assim abrir o sistema numa segunda aba não grava a carteira nem coloca as outras abas em conflito. */
+  const CHAVE_VISITA=(GP.storageKey||'gestao-portfolio-feg-v1')+'-visita';
+  const dataValida=v=>typeof v==='string'&&v&&!isNaN(new Date(v))?v.slice(0,40):'';
+  let visitaRegistrada=false,visitaAnterior='';
   function registrarVisita(){
     if(visitaRegistrada||!GP.state())return;visitaRegistrada=true;
-    const ui=GP.state().ui;ui.visitaAnterior=typeof ui.ultimaVisita==='string'&&!isNaN(new Date(ui.ultimaVisita))?ui.ultimaVisita.slice(0,40):'';ui.ultimaVisita=new Date().toISOString();GP.save();
+    let ultima='';try{ultima=dataValida(localStorage.getItem(CHAVE_VISITA));}catch(e){}
+    // Compatibilidade: cópias antigas guardavam a última visita em ui.ultimaVisita (só leitura)
+    visitaAnterior=ultima||dataValida(GP.state().ui&&GP.state().ui.ultimaVisita);
+    try{localStorage.setItem(CHAVE_VISITA,new Date().toISOString());}catch(e){}
   }
   GP.registrarVisita=registrarVisita;
+  GP.visitaAnterior=()=>visitaAnterior;
   const TIPO_EVENTO={Cadastro:'novo',Etapa:'seta',Entrada:'funil','Priorização':'avaliar','Edição':'editar','Importação':'upload',Risco:'alerta'};
   function eventos(){
     const ev=[];
@@ -432,7 +464,7 @@
   }
   const ACAO_TXT={Cadastro:'Cadastrado',Etapa:'Mudou de etapa',Entrada:'Checklist de entrada','Priorização':'Avaliação registrada','Edição':'Cadastro editado','Importação':'Importado'};
   function atividade(){
-    const ev=eventos(),ant=typeof GP.state().ui.visitaAnterior==='string'?GP.state().ui.visitaAnterior:'',novos=ant?ev.filter(e=>e.data>ant).length:0;
+    const ev=eventos(),ant=visitaAnterior,novos=ant?ev.filter(e=>e.data>ant).length:0;
     const ult=ev.slice(0,6);
     return `<div class="card b-4 gx-ativ">${chartHead('Atividade recente','Últimas mudanças nos projetos e riscos.','relogio')}
       ${novos?`<span class="gx-novidades"><i></i>${plural(novos,'novidade','novidades')} desde ${fmt.data(ant.slice(0,10)).slice(0,5)}</span>`:''}
@@ -472,12 +504,15 @@
   function etapaFluxo(href,rot,n,sub,extra=''){return `<a class="gx-step" href="${href}"><span class="gx-step-lbl">${esc(rot)}</span><strong>${fmt.n(n)}</strong><small>${sub}</small>${extra}</a>`;}
   const etapaBloqueada=(rot,nv)=>`<div class="gx-step locked"><span class="gx-step-lbl">${esc(rot)}</span><span class="gx-lock">${ico('cadeado',16)} Disponível no nível ${nv}</span><button type="button" class="link gx-ativar" data-nivel="${nv}">Ativar nível ${nv}</button></div>`;
   function fluxo(m){
-    const nivel=GP.nivel(),todos=m.lista,avaliar=(M.pendentesAvaliacao?M.pendentesAvaliacao(todos):todos.filter(p=>p.etapa==='aprovado'&&!M.pontuar(p).completo)).length,prontos=todos.filter(p=>p.etapa==='aprovado'&&M.pontuar(p).completo).length;
+    const nivel=GP.nivel(),todos=m.lista,pend=pendentesAvaliacao(todos),avaliar=pend.length,emTriagem=pend.filter(p=>p.etapa==='triagem').length,prontos=todos.filter(p=>p.etapa==='aprovado'&&M.pontuar(p).completo).length;
     const dl=deltaChip(m.tendencia.fila);
-    const chip=`<span class="gx-delta ${dl.tom?'gx-delta-'+dl.tom:''}">${esc(dl.texto)}</span>`;
+    const chip=dl?`<span class="gx-delta ${dl.tom?'gx-delta-'+dl.tom:''}">${esc(dl.texto)}</span>`:'';
+    // A avaliação segue a regra da priorização (aprovados, em execução, em espera e em triagem sem nota completa).
+    // Quem está em triagem também aparece na fila: o rótulo avisa para a soma não parecer duplicada.
+    const subAval=avaliar?`${avaliar===1?'aguarda avaliação':'aguardam avaliação'}${emTriagem?` · ${fmt.n(emTriagem)} em triagem`:''}`:'avaliações completas';
     return `<section class="b-full operation-flow gx-flow" aria-label="Fluxo do portfólio">
       ${etapaFluxo('#/funil','Fila de entrada',m.fila,`${plural(m.novas,'nova','novas')} · ${fmt.n(m.triagem)} em triagem`,chip)}
-      ${nivel>=2?etapaFluxo('#/avaliar','Avaliação',avaliar,avaliar===1?'aprovado sem nota':'aprovados sem nota')+etapaFluxo('#/ranking','Decisão',prontos,prontos===1?'pronta para decisão':'prontas para decisão'):etapaBloqueada('Avaliação e decisão',2)}
+      ${nivel>=2?etapaFluxo('#/avaliar','Avaliação',avaliar,subAval)+etapaFluxo('#/ranking','Decisão',prontos,prontos===1?'pronta para decisão':'prontas para decisão'):etapaBloqueada('Avaliação e decisão',2)}
       ${etapaFluxo('#/acervo','Em execução',m.execucao,m.atrasados.length?`<span class="gx-cobre">${plural(m.atrasados.length,'prazo vencido','prazos vencidos')}</span>`:m.progresso!=null?`avanço médio de ${fmt.n(m.progresso)}%`:'sem avanço informado')}
       ${nivel>=3?etapaFluxo('#/carteira','Planejamento',m.capacidade.cabem,m.capacidade.cabem===1?'novo início cabe':'novos inícios cabem'):etapaBloqueada('Planejamento',3)}
     </section>`;
@@ -546,7 +581,7 @@
     const t=m.tendencia,df=deltaChip(t.fila);
     return `<div class="metric-grid gx-kpis scroll-fade">
       ${metric({label:'Registros na base',valor:fmt.n(m.n),sub:`${plural(m.projetos,'projeto','projetos')} e ${plural(m.demandas,'demanda','demandas')}`,icone:'acervo',delta:`${sinal(t.novos)} em 30 dias`,deltaTom:t.novos>0?'bom':''})}
-      ${metric({label:'Fila de entrada',valor:fmt.n(m.fila),sub:`${fmt.pct(divisao(m.fila,m.n))} do total cadastrado`,icone:'funil',tom:'#c39127',tint:'#fff7e6',delta:df.texto,deltaTom:df.tom})}
+      ${metric({label:'Fila de entrada',valor:fmt.n(m.fila),sub:`${fmt.pct(divisao(m.fila,m.n))} do total cadastrado`,icone:'funil',tom:'#c39127',tint:'#fff7e6',delta:df?df.texto:'',deltaTom:df?df.tom:''})}
       ${metric({label:'Em execução',valor:fmt.n(m.execucao),sub:`${fmt.pct(divisao(m.execucao,m.n))} do total cadastrado`,icone:'pulso',tom:'#188787',tint:'#e8f4f1'})}
       ${metric({label:'Admissão na entrada',valor:fmt.pct(m.taxaEntrada),sub:`${m.entram} de ${plural(m.entradaAvaliada,'checklist completo','checklists completos')}`,icone:'avaliar',ratio:m.taxaEntrada})}
       ${metric({label:'Conclusão da carteira',valor:fmt.pct(m.taxaConclusao),sub:`${plural(m.concluidos,'concluído','concluídos')} de ${fmt.n(m.carteira)} aceitos`,icone:'check',ratio:m.taxaConclusao})}
@@ -613,6 +648,20 @@
     else if(aba==='riscos')html+=GP.riscos.painel(lista);
     else html+=visaoGeral(m,lista);
     html+=tabela(lista,f)+'</div>';el.innerHTML=html;bindFilters(el);desenharEntradas(el);
+    if(aba==='riscos')dadosMatriz(el,lista);
+  }
+  /* "Ver dados em tabela" da matriz de exposição (aba Riscos): mesmas regras da matriz (riscos ativos e avaliados do recorte). */
+  const PROB_RISCO=['Muito baixa','Baixa','Moderada','Alta','Muito alta'],IMP_RISCO=['Leve','Baixo','Moderado','Elevado','Crítico'];
+  const NIVEL_RISCO={baixo:'Baixo',moderado:'Moderado',alto:'Alto',critico:'Crítico'};
+  function dadosMatriz(el,listaProjetos){
+    const card=[...el.querySelectorAll('.rk-overview > .card')].find(c=>c.querySelector('.rk-mtz'));if(!card||card.querySelector('details.chart-data'))return;
+    const ids=new Set(listaProjetos.map(p=>p.id)),ativos=GP.riscos.todos().filter(r=>(!r.projetoId||ids.has(r.projetoId))&&['aberto','em_tratamento'].includes(r.status)&&r.probabilidade&&r.impacto);
+    const cel=new Map();ativos.forEach(r=>{const k=r.probabilidade+'|'+r.impacto;cel.set(k,(cel.get(k)||0)+1);});
+    const linhas=[...cel.entries()].map(([k,n])=>{const [p,i]=k.split('|').map(Number);return {p,i,n};}).sort((a,b)=>b.p*b.i-a.p*a.i||b.p-a.p||b.i-a.i)
+      .map(x=>[`${x.p} · ${PROB_RISCO[x.p-1]}`,`${x.i} · ${IMP_RISCO[x.i-1]}`,x.p*x.i,NIVEL_RISCO[GP.riscos.nivel(x)]||'-',x.n]);
+    const foot=document.createElement('div');foot.className='gx-card-foot';
+    foot.innerHTML=dados('Matriz de exposição',['Probabilidade','Impacto',{label:'Exposição',align:'r'},'Nível',{label:'Riscos ativos',align:'r'}],linhas.length?linhas:[['Nenhum risco ativo avaliado no recorte','','','','']]);
+    card.appendChild(foot);
   }
   function bindFilters(el){
     el.querySelectorAll('[data-af]').forEach(i=>i.addEventListener(i.tagName==='INPUT'&&i.type!=='date'?'input':'change',()=>{
@@ -653,7 +702,7 @@
       ['Conclusão da carteira (%)',m.taxaConclusao==null?'':(m.taxaConclusao*100).toFixed(2).replace('.',','),`${m.concluidos} / ${m.carteira} registros aceitos`],
       ['Prazos vencidos',m.atrasados.length,'Aceitos abertos com fim anterior a hoje'],['Custo estimado (R$)',m.comCusto?String(m.custo).replace('.',','):'',`${m.comCusto} registros com estimativa`],
       ['Avanço médio em execução (%)',m.progresso==null?'':m.progresso.toFixed(2).replace('.',','),`${m.comProgresso} de ${m.execucao} com avanço`],
-      ['Variação de registros em 30 dias',m.tendencia.novos,'Entradas nos últimos 30 dias'],['Variação da fila em 30 dias',m.tendencia.fila,'Fila atual menos a de 30 dias atrás'],
+      ['Variação de registros em 30 dias',m.tendencia.novos,'Entradas nos últimos 30 dias'],['Variação da fila em 30 dias',m.tendencia.fila==null?'':m.tendencia.fila,m.tendencia.fila==null?'Sem histórico que cubra os últimos 30 dias':'Fila atual menos a de 30 dias atrás'],
       ...m.etapas.map(x=>['Etapa: '+x.label,x.value,m.n+' registros']),...m.gerencias.map(x=>['Gerência: '+x.label,x.value,m.n+' registros']),
       ...m.serie.pontos.map(x=>['Entradas: '+x.label,x.total,x.projetos+' projetos / '+x.demandas+' demandas'])];
     GP.exportar.baixar('indicadores-feg-'+hoje()+'.csv',GP.exportar.csv(rows),'text/csv;charset=utf-8');GP.toast('Indicadores do recorte exportados.');
@@ -1074,7 +1123,7 @@
     m.querySelector('form').onsubmit=async e=>{e.preventDefault();const f=e.currentTarget,b=f.querySelector('[type=submit]');b.disabled=true;try{const d=Object.fromEntries(new FormData(f).entries());d.ativo=f.elements.namedItem('ativo').checked;await salvarUsuario(d,id);GP.closeModal();GP.refresh();GP.toast('Usuário salvo.');}catch(err){f.querySelector('[data-user-error]').textContent=err.message;}finally{b.disabled=false;}};
   }
   function card(el){const us=usuarios(),a=GP.state().acesso;el.classList.add('setting-card');el.innerHTML=U.secH('Usuários e acesso local','Perfis desta cópia do sistema. As permissões são descritivas nesta versão.',`<button class="btn btn-primary btn-sm" data-user-new>${icon('novo',14)} Novo usuário</button>`)+
-    `<div class="user-note"><b>Importante:</b> este é um controle local e simples, adequado para organizar o uso de um HTML individual. Não substitui autenticação corporativa, servidor, Active Directory ou trilha de auditoria centralizada.</div><div class="setting-row"><div><b>Bloqueio ao abrir</b><p>Solicita usuário e senha sempre que esta página é recarregada.</p></div><label class="row"><input type="checkbox" data-local-lock ${a.bloqueioLocal?'checked':''} ${us.some(u=>u.ativo&&u.senhaHash)?'':'disabled'}> Ativar bloqueio</label></div><div class="setting-row"><div><b>Perfil exibido por padrão</b><p>Aparece no topo quando o bloqueio não está ativo.</p></div><select class="select" data-default-user><option value="">Nenhum perfil</option>${us.filter(u=>u.ativo).map(u=>`<option value="${u.id}" ${a.usuarioInicialId===u.id?'selected':''}>${esc(u.nome)} / ${papeis[u.papel]}</option>`).join('')}</select></div><div class="user-list">${us.map(u=>`<div class="user-item"><div class="user-info"><span class="profile-avatar">${iniciais(u.nome)}</span><div><b>${esc(u.nome)}</b><small>${esc(u.email||'Sem e-mail')} / ${papeis[u.papel]} / ${u.ativo?'Ativo':'Inativo'}</small></div></div><div class="actions"><button class="btn btn-ghost btn-sm" data-user-edit="${u.id}">${icon('editar',14)} Editar</button><button class="icon-btn" data-user-delete="${u.id}" aria-label="Excluir ${esc(u.nome)}" title="Excluir usuário">${icon('lixo',14)}</button></div></div>`).join('')||'<p class="risk-empty">Nenhum usuário cadastrado. O sistema continua acessível sem senha.</p>'}</div>`;}
+    `<div class="user-note"><b>Importante:</b> este é um controle local e simples, adequado para organizar o uso de um HTML individual. Não substitui autenticação corporativa, servidor, Active Directory ou trilha de auditoria centralizada.</div><div class="setting-row"><div><b>Bloqueio ao abrir</b><p>Solicita usuário e senha sempre que esta página é recarregada.</p></div><label class="row gx-check"><input type="checkbox" data-local-lock ${a.bloqueioLocal?'checked':''} ${us.some(u=>u.ativo&&u.senhaHash)?'':'disabled'}> Ativar bloqueio</label></div><div class="setting-row"><div><b>Perfil exibido por padrão</b><p>Aparece no topo quando o bloqueio não está ativo.</p></div><select class="select" data-default-user><option value="">Nenhum perfil</option>${us.filter(u=>u.ativo).map(u=>`<option value="${u.id}" ${a.usuarioInicialId===u.id?'selected':''}>${esc(u.nome)} / ${papeis[u.papel]}</option>`).join('')}</select></div><div class="user-list">${us.map(u=>`<div class="user-item"><div class="user-info"><span class="profile-avatar">${iniciais(u.nome)}</span><div><b>${esc(u.nome)}</b><small>${esc(u.email||'Sem e-mail')} / ${papeis[u.papel]} / ${u.ativo?'Ativo':'Inativo'}</small></div></div><div class="actions"><button class="btn btn-ghost btn-sm" data-user-edit="${u.id}">${icon('editar',14)} Editar</button><button class="icon-btn" data-user-delete="${u.id}" aria-label="Excluir ${esc(u.nome)}" title="Excluir usuário">${icon('lixo',14)}</button></div></div>`).join('')||'<p class="risk-empty">Nenhum usuário cadastrado. O sistema continua acessível sem senha.</p>'}</div>`;}
   GP.configCartoes.push({ordem:3,secao:'acesso',render:card});
   function gate(){document.getElementById('app').innerHTML=`<div class="auth-gate"><div class="auth-card"><img class="ons" src="${GP.LOGO_ONS}" alt="ONS"><h1>Acessar o portfólio</h1><p>Use um dos usuários cadastrados nesta cópia local.</p><form data-login><div class="form"><label class="field">Usuário ou e-mail<input class="input" name="login" autocomplete="username" required autofocus></label><label class="field">Senha<div class="password-wrap"><input class="input" name="senha" type="password" autocomplete="current-password" required><button type="button" data-show-password>Mostrar</button></div></label></div><p class="auth-error" data-login-error role="alert"></p><button class="btn btn-primary" type="submit">Entrar</button></form><p class="auth-local-note">A senha protege apenas esta cópia no navegador. Para recuperar o acesso, utilize um backup anterior sem bloqueio ou uma cópia administrada pelo responsável do portfólio.</p></div></div>`;const f=document.querySelector('[data-login]');f.querySelector('[data-show-password]').onclick=e=>{const i=f.elements.namedItem('senha'),show=i.type==='password';i.type=show?'text':'password';e.currentTarget.textContent=show?'Ocultar':'Mostrar';};f.onsubmit=async e=>{e.preventDefault();const b=f.querySelector('[type=submit]');b.disabled=true;const u=await validar(f.elements.namedItem('login').value,f.elements.namedItem('senha').value);if(u){sessao.id=u.id;sessao.liberada=true;GP.refresh();}else{f.querySelector('[data-login-error]').textContent='Usuário ou senha não conferem.';b.disabled=false;}};}
   GP.auth={usuario,usuarios,form,validar,salvarUsuario};
@@ -1140,7 +1189,8 @@
     const maxCusto=Math.max(1,...ativos.map(a=>a.custo)),comRiscos=ativos.some(a=>a.riscos>0);
     const COR={exec:'#6b8f2a',abertas:'#3a74a8',enc:'#a3b2ac'};
     const situacao=a=>{const t=a.lista.length;return `<span class="gx-sit" role="img" aria-label="${plural(a.exec,'em execução','em execução')}, ${plural(a.outrasAbertas,'outra aberta','outras abertas')}, ${plural(a.encerradas,'encerrada','encerradas')}" data-tt="${esc(a.nome)}&#10;Em execução: ${a.exec}&#10;Outras abertas: ${a.outrasAbertas}&#10;Encerradas: ${a.encerradas}">${[['exec',a.exec],['abertas',a.outrasAbertas],['enc',a.encerradas]].filter(x=>x[1]).map(([k,v])=>`<i style="flex:${v/t};background:${COR[k]}"></i>`).join('')}</span>`;};
-    const rows=ativos.map(a=>`<tr><td><b>${esc(a.nome)}</b></td><td class="r gx-num">${fmt.n(a.lista.length)}</td><td>${situacao(a)}</td><td class="r gx-num">${fmt.n(a.abertos)}</td><td class="r gx-num">${fmt.n(a.exec)}</td>${comRiscos?`<td class="r gx-num">${a.riscos?`<span class="pill t-warn"><i></i>${fmt.n(a.riscos)}</span>`:'0'}</td>`:''}<td class="r"><span class="gx-custo"><span class="gx-num">${a.temCusto?fmt.mi(a.custo):'Não informado'}</span>${a.temCusto?`<span class="gx-custo-bar" aria-hidden="true"><i style="width:${(a.custo/maxCusto*100).toFixed(1)}%"></i></span>`:''}</span></td></tr>`).join('');
+    // Tabela compacta (cabe em 1024): só vira cartão no celular (tbl-sm), com rótulos próprios em cada célula
+    const rows=ativos.map(a=>`<tr><td data-label="Ativo"><b>${esc(a.nome)}</b></td><td class="r gx-num" data-label="Iniciativas">${fmt.n(a.lista.length)}</td><td data-label="Situação">${situacao(a)}</td><td class="r gx-num" data-label="Abertas">${fmt.n(a.abertos)}</td><td class="r gx-num" data-label="Em execução">${fmt.n(a.exec)}</td>${comRiscos?`<td class="r gx-num" data-label="Riscos abertos">${a.riscos?`<span class="pill t-warn"><i></i>${fmt.n(a.riscos)}</span>`:'0'}</td>`:''}<td class="r" data-label="Custo estimado"><span class="gx-custo"><span class="gx-num">${a.temCusto?fmt.mi(a.custo):'Não informado'}</span>${a.temCusto?`<span class="gx-custo-bar" aria-hidden="true"><i style="width:${(a.custo/maxCusto*100).toFixed(1)}%"></i></span>`:''}</span></td></tr>`).join('');
     el.innerHTML=`<div class="gx-sis">`+U.pageHead({titulo:'Sistemas e ativos',sub:'Leitura do portfólio pelo sistema, modelo ou ferramenta informado em cada projeto ou demanda.'})+
       `<div class="metric-grid system-metrics gx-kpis gx-kpis-4 scroll-fade">
         ${metric({label:'Ativos relacionados',valor:fmt.n(ativos.length),sub:'Nomes distintos informados',icone:'servidor'})}
@@ -1150,7 +1200,7 @@
       </div>
       <section class="card gx-sis-card">${U.secH('Carteira por ativo relacionado','Agrupamento pelo texto informado no cadastro. Padronize os nomes para evitar duplicidades.')}
         ${ativos.length?`<div class="legend gx-legend"><span><i style="background:${COR.exec}"></i>Em execução</span><span><i style="background:${COR.abertas}"></i>Outras abertas</span><span><i style="background:${COR.enc}"></i>Encerradas</span></div>
-        <div class="portfolio-table tbl-wrap"><table class="tbl gx-sis-tbl"><thead><tr><th>Sistema, modelo ou ferramenta</th><th class="r">Iniciativas</th><th>Situação</th><th class="r">Abertas</th><th class="r">Em execução</th>${comRiscos?'<th class="r">Riscos abertos</th>':''}<th class="r">Custo estimado</th></tr></thead><tbody>${rows}</tbody></table></div>`:U.vazio('Nenhum ativo relacionado','Preencha o campo Sistema, modelo ou ferramenta relacionada nos cadastros aplicáveis.','<a class="btn btn-primary" href="#/novo">Novo cadastro</a>')}
+        <div class="portfolio-table tbl-wrap"><table class="tbl tbl-cards tbl-sm gx-sis-tbl"><thead><tr><th>Sistema, modelo ou ferramenta</th><th class="r">Iniciativas</th><th>Situação</th><th class="r">Abertas</th><th class="r">Em execução</th>${comRiscos?'<th class="r">Riscos abertos</th>':''}<th class="r">Custo estimado</th></tr></thead><tbody>${rows}</tbody></table></div>`:U.vazio('Nenhum ativo relacionado','Preencha o campo Sistema, modelo ou ferramenta relacionada nos cadastros aplicáveis.','<a class="btn btn-primary" href="#/novo">Novo cadastro</a>')}
       </section>
       <div class="grid g2 governance-detail"><section class="card">${U.secH('Para manter a visão coerente','Orientações de preenchimento.')}
         <ul class="clean-list"><li>Use o nome oficial e uma grafia única para cada ativo</li><li>Informe o ativo principal impactado pela iniciativa</li><li>Não use este campo para registrar equipe, fornecedor ou tecnologia isolada</li></ul></section>
@@ -1169,6 +1219,29 @@
   GP.configCartoes.push({ordem:2,secao:'interface',render:el=>{const ui=GP.state().ui,scale=ui.escalaInterface||'normal';el.classList.add('setting-card');el.innerHTML=GP.ui.secH('Interface e leitura','Preferências visuais salvas nesta cópia do navegador.')+`<div class="setting-row"><div><b>Tamanho da interface</b><p>Ajusta textos, cartões e controles sem depender do zoom do navegador.</p></div><select class="select" data-ui-scale aria-label="Tamanho da interface"><option value="compacto" ${scale==='compacto'?'selected':''}>Compacto</option><option value="normal" ${scale==='normal'?'selected':''}>Confortável</option><option value="ampliado" ${scale==='ampliado'?'selected':''}>Ampliado</option></select></div><div class="setting-row"><div><b>Menu lateral</b><p>O menu pode ficar recolhido no computador e sempre vira painel deslizante em telas menores.</p></div><button class="btn btn-ghost" data-recolher>${icon(ui.menuMini?'expandir':'recolher',15)} ${ui.menuMini?'Expandir menu':'Recolher menu'}</button></div>`;}});
   const applyScale=()=>{const scale=GP.state()?.ui?.escalaInterface||'normal';document.documentElement.style.setProperty('--ui-font-scale',scale==='compacto'?'.94':scale==='ampliado'?'1.08':'1');};
   const previous=GP.afterRender;GP.afterRender=(el,r)=>{if(previous)previous(el,r);applyScale();if(GP.registrarVisita)GP.registrarVisita();};
+  /* Migração idempotente: os limpadores (projetos, riscos, usuários) remontam os objetos em outra ordem de chaves.
+     Sem mudança de conteúdo, a migração devolve as chaves na ordem recebida; assim abrir o sistema (outra aba,
+     recarga) não produz um JSON diferente do disco, não grava e não coloca as outras abas em conflito. */
+  const M=GP.modelo,migrarBase=M&&M.migrar;
+  const definir=(o,k,v)=>Object.defineProperty(o,k,{value:v,enumerable:true,writable:true,configurable:true});
+  const plano=o=>!!o&&typeof o==='object'&&!Array.isArray(o);
+  function naOrdem(molde,novo){
+    if(Array.isArray(novo)){
+      if(!Array.isArray(molde))return novo;
+      const porId=new Map();molde.forEach(x=>{if(plano(x)&&x.id!=null&&!porId.has(x.id))porId.set(x.id,x);});
+      return novo.map((x,i)=>naOrdem(plano(x)&&x.id!=null?porId.get(x.id):molde[i],x));
+    }
+    if(!plano(novo)||!plano(molde))return novo;
+    const out={};
+    Object.keys(molde).forEach(k=>{if(Object.prototype.hasOwnProperty.call(novo,k))definir(out,k,naOrdem(molde[k],novo[k]));});
+    Object.keys(novo).forEach(k=>{if(!Object.prototype.hasOwnProperty.call(out,k))definir(out,k,novo[k]);});
+    return out;
+  }
+  if(migrarBase)M.migrar=function(s){
+    let molde=null;try{if(plano(s))molde=JSON.parse(JSON.stringify(s));}catch(e){}
+    const st=migrarBase.call(this,s);
+    return molde&&plano(st)?naOrdem(molde,st):st;
+  };
   document.addEventListener('change',e=>{if(e.target.matches('[data-ui-scale]')){GP.state().ui.escalaInterface=e.target.value;GP.save();applyScale();GP.refresh();}});
   if(globalThis.ResizeObserver){const observer=new ResizeObserver(entries=>{for(const entry of entries){const el=entry.target;if(el.scrollWidth>el.clientWidth+2&&getComputedStyle(el).overflowX==='visible')el.classList.add('layout-overflow');else el.classList.remove('layout-overflow');}});document.addEventListener('DOMContentLoaded',()=>observer.observe(document.body));}
 })();
