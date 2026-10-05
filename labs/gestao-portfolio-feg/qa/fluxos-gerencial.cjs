@@ -171,17 +171,24 @@ module.exports = {
       const dist = rows.map(row => { const n = row.querySelector('.name'), rg = document.createRange(); rg.selectNodeContents(n); return Math.round(row.querySelector('.track').getBoundingClientRect().left - rg.getBoundingClientRect().right); });
       const vals = rows.map(row => parseInt(row.querySelector('.count').textContent, 10));
       const et = [...document.querySelectorAll('.gx-ind .card')].find(c => /Distribuição por etapa/.test(c.textContent)), canc = [...et.querySelectorAll('.percent-row')].find(x => /Cancelado/.test(x.textContent));
-      return { dist, vals, canc: canc ? getComputedStyle(canc).opacity : null }; });
+      const sonda = document.createElement('span'); sonda.style.color = 'var(--dim)'; canc.appendChild(sonda); const dim = getComputedStyle(sonda).color; sonda.remove();
+      return { dist, vals, canc: canc ? { op: getComputedStyle(canc).opacity, cor: getComputedStyle(canc.querySelector('.name')).color, dim } : null }; });
     check(r.dist.every(d => d < 16), 'G14: FEG/FEL a menos de 16px da barra: ' + r.dist.join(','));
     check(r.vals.every((v, i) => !i || r.vals[i - 1] >= v), 'G14: gerências em ordem decrescente: ' + r.vals.join(','));
-    check(r.canc === '0.5', 'G14: "Cancelado 0" esmaecido (opacidade ' + r.canc + ')');
+    // esmaecido com var(--dim) e sem opacidade: o texto mantém contraste de 4,5:1 (transversal B5)
+    check(r.canc && r.canc.op === '1' && r.canc.cor === r.canc.dim, 'G14: "Cancelado 0" esmaecido em var(--dim), sem opacidade: ' + JSON.stringify(r.canc));
   },
   async 'gerencial G16: variação de 30 dias com cor pela direção'({ p, ir, check, recarregar }){
     await exemplos(p, recarregar, 1); await ir('#/indicadores', 300);
     const chip = async rot => p.evaluate(r => { const m = [...document.querySelectorAll('#conteudo .metric')].find(x => x.querySelector('.metric-head').textContent.includes(r)), d = m && m.querySelector('.metric-delta'); return d ? { t: d.textContent, c: d.className } : null; }, rot);
+    const a0 = await chip('Registros na base'), b0 = await chip('Fila de entrada');
+    // exemplos recém-carregados: as mudanças de etapa ficam datadas na carga, então a fila de 30 dias atrás é desconhecida
+    check(a0 && /em 30 dias/.test(a0.t) && b0 === null, 'G16: sem histórico que cubra 30 dias, a fila não mostra variação: ' + JSON.stringify([a0, b0]));
+    await p.evaluate(() => { const d = new Date(Date.now() - 60 * 864e5).toISOString(); GP.projetos.todos().forEach(x => { x.criadoEm = d; (x.historico || []).forEach(h => { h.data = d; }); }); GP.save(); });
+    await ir('#/painel', 200); await ir('#/indicadores', 300);
     const a = await chip('Registros na base'), b = await chip('Fila de entrada');
     check(a && /^[+−]?\d+ em 30 dias|^↑ \+\d+ em 30 dias/.test(a.t.replace(/^0/, '+0')) && b && /[+−0]/.test(b.t), 'G16: registros e fila com chip de variação: ' + JSON.stringify([a, b]));
-    check(b && !/ruim/.test(b.c), 'G16: fila diminuindo não fica em cobre');
+    check(b && !/ruim/.test(b.c), 'G16: fila estável ou diminuindo não fica em cobre');
     await p.evaluate(() => { for(let i = 0; i < 12; i++) GP.projetos.criar({ titulo:'Nova demanda de teste ' + i, descricao:'d', gerencia:'FEG', demandante:'x', tipo:'Projeto', natureza:'demanda' }); });
     await ir('#/painel', 200); await ir('#/indicadores', 300);
     const c = await chip('Fila de entrada');
@@ -193,9 +200,10 @@ module.exports = {
     await ir('#/acervo', 150); await ir('#/painel', 300);
     const li = await p.locator('.gx-feed li').first().textContent();
     check(li.includes(cod) && /há instantes/.test(li), 'G17: a mudança de etapa aparece no topo com "há instantes": ' + li.trim().slice(0, 90));
-    await p.evaluate(() => { GP.state().ui.ultimaVisita = '2000-01-01T00:00:00.000Z'; GP.save(); }); await recarregar(400);
+    // a visita fica numa chave própria do navegador, fora da carteira (abrir outra aba não grava o estado)
+    await p.evaluate(() => { localStorage.setItem(GP.storageKey + '-visita', '2000-01-01T00:00:00.000Z'); }); await recarregar(400);
     check(await p.locator('.gx-novidades').count() === 1 && await p.locator('.gx-feed li.novo .gx-dot').count() >= 1, 'G17: nova sessão mostra a contagem de novidades e o ponto ouro');
-    check(await p.evaluate(() => GP.state().ui.visitaAnterior === '2000-01-01T00:00:00.000Z' && GP.state().ui.ultimaVisita > '2020'), 'G17: a visita anterior fica guardada e a última visita é atualizada');
+    check(await p.evaluate(() => GP.visitaAnterior() === '2000-01-01T00:00:00.000Z' && localStorage.getItem(GP.storageKey + '-visita') > '2020'), 'G17: a visita anterior fica guardada e a última visita é atualizada');
   },
   async 'gerencial: PDF, PPT e CSV continuam funcionando com a nova barra de filtros'({ p, ir, check, recarregar }){
     await exemplos(p, recarregar, 3); await ir('#/painel', 300);
