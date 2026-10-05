@@ -46,7 +46,9 @@ const check = (cond, msg) => { if(cond) ok++; else falhas.push(msg); };
   await p.setViewportSize({ width: 1440, height: 900 });
 
   /* 3) Fluxos por passo */
-  const fluxos = require('./fluxos.cjs');
+  // Fluxos: fluxos.cjs + qa/fluxos-*.cjs (um arquivo por pacote de trabalho, para evitar conflitos)
+  const fsq = require('fs'), pathq = require('path');
+  const fluxos = Object.assign({}, require('./fluxos.cjs'), ...fsq.readdirSync(__dirname).filter(f => /^fluxos-.+\.cjs$/.test(f)).sort().map(f => require(pathq.join(__dirname, f))));
   for(const [nome, fn] of Object.entries(fluxos)){
     try { await reset(); await fn({ p, ir, check, APP, recarregar }); }
     catch(e){ falhas.push(`fluxo "${nome}" lançou: ${e.message.split('\n')[0]}`); }
