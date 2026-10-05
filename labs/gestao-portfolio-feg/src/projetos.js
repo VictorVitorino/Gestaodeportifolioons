@@ -190,6 +190,7 @@
       ...GP.acervoColunas.filter(c => c.nivel <= GP.nivel()).map(c => c.coluna),
       { key:'responsavel', label:'Responsável', align:'op-c-resp', fmt:(v, r) => `${v ? esc(v) : '<span class="dim">Sem responsável</span>'}<small class="op-fim-sub">${r.fimPrevisto ? 'até ' + fmt.data(r.fimPrevisto) : 'sem prazo'}</small>` },
       { key:'fimPrevisto', label:'Fim previsto', align:'op-c-fim op-show-xl', fmt:v => v ? fmt.data(v) : '<span class="dim">Sem data</span>' },
+      { key:'_acoes', label:'Ações', sort:false, align:'op-c-acoes', fmt:(v, r) => `<button type="button" class="icon-btn ac-btn" data-acoes="${esc(r.id)}" aria-haspopup="menu" aria-expanded="false" aria-label="Ações de ${esc(r.codigo)}" title="Ações: resumo, editar, etapa, excluir…">${OP.ic.mais(18)}</button>` },
     ];
   }
   /** Mesma ordenação do U.table (chave S.ui['sort:acervo']) */
@@ -251,11 +252,12 @@
     el.querySelector('[data-filtros-folha]').onclick = folhaFiltros;
   }
   document.addEventListener('click', e => {
+    if(e.target.closest('[data-acoes], .ac-pop')) return;
     const a = e.target.closest('[data-abrir]'); if(a){ GP.go('#/projeto/' + a.dataset.abrir); return; }
     if(e.target.closest('[data-exemplos]')){ const n = GP.modelo.carregarExemplos(); GP.toast(n ? `${plural(n, 'projeto de exemplo carregado', 'projetos de exemplo carregados')}.` : 'Os exemplos já estão carregados.'); GP.refresh(); }
   });
   document.addEventListener('keydown', e => {
-    if(e.key === 'Enter'){ const a = e.target.closest && e.target.closest('[data-abrir]'); if(a) GP.go('#/projeto/' + a.dataset.abrir); }
+    if(e.key === 'Enter'){ if(e.target.closest && e.target.closest('[data-acoes], .ac-pop')) return; const a = e.target.closest && e.target.closest('[data-abrir]'); if(a) GP.go('#/projeto/' + a.dataset.abrir); }
     if(e.altKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight') && GP.rota().id === 'projeto' && !document.querySelector('.modal-bg')){
       const t = e.target; if(t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
       const b = document.querySelector(`[data-nav="${e.key === 'ArrowLeft' ? 'ant' : 'prox'}"]`);
@@ -369,12 +371,7 @@
         <aside class="op-ficha-aside">${dados(p)}</aside></div></div>`;
     secoes.forEach(s => { if(s.bind) s.bind(el.querySelector(`[data-secao="${s.id}"]`), p); });
     el.querySelectorAll('[data-nav]').forEach(b => b.onclick = () => { const alvo = b.dataset.nav === 'ant' ? nav.ant : nav.prox; if(alvo) GP.go('#/projeto/' + alvo.id); });
-    el.querySelector('[data-excluir]').onclick = () => GP.confirmar('Excluir cadastro?', `<p><b>${esc(p.codigo)} · ${esc(p.titulo)}</b> será removido do acervo, com seu histórico. Use apenas para cadastros feitos por engano; para projetos interrompidos, mude a etapa para <b>Cancelado</b>.</p>`, 'Excluir', () => {
-      const S = GP.state(), pos = S.projetos.findIndex(x => x.id === p.id), copia = GP.util.clone(p);
-      P.excluir(p.id); GP.go('#/acervo');
-      OP.toast(`<b>${esc(p.codigo)}</b> excluído.`, 'Desfazer', () => { const S2 = GP.state(); if(S2.projetos.some(x => x.id === copia.id)) return;
-        S2.projetos.splice(Math.max(0, Math.min(pos, S2.projetos.length)), 0, copia); GP.save(); GP.go('#/projeto/' + copia.id); GP.toast(`<b>${esc(copia.codigo)}</b> restaurado.`); });
-    }, {perigo:true});
+    el.querySelector('[data-excluir]').onclick = () => excluirProjeto(p, true);
     el.querySelector('[data-etapa]').onclick = () => modalEtapa(p);
     const vr = el.querySelector('[data-ver-ranking]');
     if(vr && GP.priorizacao && GP.priorizacao.verNoRanking) vr.onclick = e => { e.preventDefault(); GP.priorizacao.verNoRanking(p.id); };
@@ -429,6 +426,109 @@
     };
   }
   GP.mudarEtapa = id => { const p = P.get(id); if(p) modalEtapa(p); };
+
+  /* ---------------- Exclusão com Desfazer (ficha e acervo) ---------------- */
+  function excluirProjeto(p, irAcervo){
+    GP.confirmar('Excluir cadastro?', `<p><b>${esc(p.codigo)} · ${esc(p.titulo)}</b> será removido do acervo, com seu histórico. Use apenas para cadastros feitos por engano; para projetos interrompidos, mude a etapa para <b>Cancelado</b>.</p>`, 'Excluir', () => {
+      const S = GP.state(), pos = S.projetos.findIndex(x => x.id === p.id), copia = GP.util.clone(p);
+      P.excluir(p.id); if(irAcervo) GP.go('#/acervo'); else GP.refresh();
+      OP.toast(`<b>${esc(p.codigo)}</b> excluído.`, 'Desfazer', () => { const S2 = GP.state(); if(S2.projetos.some(x => x.id === copia.id)) return;
+        S2.projetos.splice(Math.max(0, Math.min(pos, S2.projetos.length)), 0, copia); GP.save(); if(irAcervo) GP.go('#/projeto/' + copia.id); else GP.refresh(); GP.toast(`<b>${esc(copia.codigo)}</b> restaurado.`); });
+    }, {perigo:true});
+  }
+
+  /* ---------------- Ações por linha do acervo: menu flutuante (não é cortado pela rolagem da tabela) ---------------- */
+  let pop = null, popBtn = null;
+  const fecharAcoes = (devolverFoco) => { if(pop){ pop.remove(); pop = null; } if(popBtn){ popBtn.setAttribute('aria-expanded', 'false'); if(devolverFoco && document.contains(popBtn)) popBtn.focus(); popBtn = null; } };
+  /** Posiciona o menu junto ao botão (abre para cima perto do fim da tela); fecha se o botão saiu da tela */
+  function posicionar(){
+    if(!pop || !popBtn) return;
+    const r = popBtn.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight, vw = innerWidth, vh = innerHeight;
+    if(!document.contains(popBtn) || r.bottom < 0 || r.top > vh){ fecharAcoes(); return; }
+    pop.style.left = Math.max(8, Math.min(vw - w - 8, r.right - w)) + 'px';
+    pop.style.top = (r.bottom + 6 + h > vh - 8 ? Math.max(8, r.top - h - 6) : r.bottom + 6) + 'px';
+  }
+  function itensAcoes(p){
+    const nivel = GP.nivel(), sc = M.pontuar(p), filaEntrada = ['entrada', 'triagem'].includes(p.etapa);
+    const it = (ic, txt, attrs, extra = '') => `<button type="button" role="menuitem" ${attrs}${extra}>${icon(ic, 16)}<span>${txt}</span></button>`;
+    const grupos = [
+      [it('painel', 'Resumo rápido', `data-ac="resumo"`), it('acervo', 'Abrir ficha', `data-ac="ficha"`), it('editar', 'Editar cadastro', `data-ac="editar"`)],
+      [it('seta', 'Mudar etapa', `data-ac="etapa"`), ...(filaEntrada ? [it('funil', p.etapa === 'triagem' ? 'Reavaliar entrada' : 'Fazer checklist de entrada', `data-ac="checklist"`)] : []),
+        ...(nivel >= 2 && M.ETAPAS_PRIORIZAVEIS.includes(p.etapa) ? [it('avaliar', sc.completo ? 'Revisar avaliação' : 'Avaliar prioridade', `data-ac="avaliar"`)] : []),
+        ...(nivel >= 2 && sc.completo ? [it('ranking', 'Ver no ranking', `data-ac="ranking"`)] : []),
+        ...(nivel >= 2 && GP.riscos ? [it('alerta', 'Riscos do projeto', `data-ac="riscos"`)] : [])],
+      [it('lixo', 'Excluir', `data-ac="excluir" class="ac-perigo"`)],
+    ];
+    return grupos.filter(g => g.length).map(g => `<div class="ac-grupo" role="group">${g.join('')}</div>`).join('');
+  }
+  function abrirAcoes(btn){
+    const p = P.get(btn.dataset.acoes); if(!p) return;
+    if(pop && popBtn === btn){ fecharAcoes(true); return; }
+    fecharAcoes();
+    pop = document.createElement('div'); pop.className = 'ac-pop'; pop.setAttribute('role', 'menu'); pop.setAttribute('aria-label', `Ações de ${p.codigo}`); pop.dataset.id = p.id;
+    pop.innerHTML = `<div class="ac-cab"><span class="code">${esc(p.codigo)}</span><b>${esc(p.titulo)}</b></div>${itensAcoes(p)}`;
+    document.body.appendChild(pop); popBtn = btn; btn.setAttribute('aria-expanded', 'true');
+    posicionar();
+    const f = pop.querySelector('[role=menuitem]'); if(f) f.focus({ preventScroll:true });
+  }
+  function executar(acao, id){
+    const p = P.get(id); fecharAcoes(); if(!p) return;
+    if(acao === 'resumo') return resumoRapido(p);
+    if(acao === 'ficha') return GP.go('#/projeto/' + p.id);
+    if(acao === 'editar') return GP.go('#/novo/' + p.id);
+    if(acao === 'etapa') return modalEtapa(p);
+    if(acao === 'checklist') return GP.abrirEntrada && GP.abrirEntrada(p.id);
+    if(acao === 'avaliar') return GP.go('#/avaliar/' + p.id);
+    if(acao === 'ranking') return GP.priorizacao && GP.priorizacao.verNoRanking ? GP.priorizacao.verNoRanking(p.id) : GP.go('#/ranking');
+    if(acao === 'riscos') return GP.go('#/riscos?projeto=' + encodeURIComponent(p.id));
+    if(acao === 'excluir') return excluirProjeto(p, false);
+  }
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-acoes]'); if(b){ e.preventDefault(); abrirAcoes(b); return; }
+    const a = e.target.closest('.ac-pop [data-ac]'); if(a){ executar(a.dataset.ac, a.closest('.ac-pop').dataset.id); return; }
+    if(pop && !e.target.closest('.ac-pop')) fecharAcoes();
+  });
+  document.addEventListener('keydown', e => {
+    if(!pop) return;
+    if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); fecharAcoes(true); return; }
+    if(e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Home' || e.key === 'End'){ const its = [...pop.querySelectorAll('[role=menuitem]')], i = its.indexOf(document.activeElement);
+      e.preventDefault(); const n = e.key === 'Home' ? 0 : e.key === 'End' ? its.length - 1 : (i + (e.key === 'ArrowDown' ? 1 : -1) + its.length) % its.length; its[n].focus(); }
+    if(e.key === 'Tab') fecharAcoes();
+  }, true);
+  window.addEventListener('scroll', posicionar, { passive:true, capture:true });
+  window.addEventListener('resize', posicionar, { passive:true });
+  window.addEventListener('hashchange', () => fecharAcoes());
+
+  /* ---------------- Resumo rápido: os indicadores do projeto sem sair do acervo ---------------- */
+  function resumoRapido(p){
+    const nivel = GP.nivel(), sc = M.pontuar(p), et = M.etapa(p.etapa), quad = sc.quadrante && M.QUADRANTES ? M.QUADRANTES[sc.quadrante] : null;
+    const prog = p.etapa === 'concluido' ? 100 : p.progresso;
+    const venc = p.fimPrevisto && ['aprovado', 'execucao', 'espera'].includes(p.etapa) && p.fimPrevisto < GP.util.hoje();
+    const ent = p.entrada && M.RESULTADO_ENTRADA ? M.RESULTADO_ENTRADA[p.entrada.resultado] : null;
+    let riscos = null; if(nivel >= 2 && GP.riscos && GP.riscos.todos){ const rs = GP.riscos.todos().filter(r => r.projetoId === p.id && ['aberto', 'tratamento'].includes(r.status)); riscos = { n: rs.length, altos: rs.filter(r => ['alto', 'critico'].includes(GP.riscos.nivel(r))).length }; }
+    let cart = null; if(nivel >= 3){ try { const c = M.montarCarteira(P.todos(), GP.state().capacidade, GP.state().forcar); const i = c.itens.find(x => x.p.id === p.id); if(i) cart = M.STATUS_CARTEIRA[i.status]; } catch(err){} }
+    const cel = (rot, val, sub = '', tom = '') => `<div class="rr-cel ${tom}"><span class="rr-rot">${rot}</span><b class="rr-val">${val}</b>${sub ? `<span class="rr-sub">${sub}</span>` : ''}</div>`;
+    const anel = prog == null ? '' : `<svg class="rr-anel" viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15" fill="none" stroke="#3E6801" stroke-opacity=".16" stroke-width="4"/><circle cx="18" cy="18" r="15" fill="none" stroke="#3E6801" stroke-width="4" stroke-linecap="round" stroke-dasharray="${(Math.max(0, Math.min(100, prog)) / 100 * 94.25).toFixed(2)} 94.25" transform="rotate(-90 18 18)"/></svg>`;
+    const cels = [
+      cel('Etapa', etapaPill(p.etapa), OP.txtNaEtapa ? OP.txtNaEtapa(p) : ''),
+      cel('Responsável', p.responsavel ? esc(p.responsavel) : '<span class="dim">Não definido</span>', p.demandante ? 'Demandante: ' + esc(p.demandante) : '', p.responsavel ? '' : 'rr-alerta'),
+      cel('Prazo', p.fimPrevisto ? fmt.data(p.fimPrevisto) : '<span class="dim">Sem data</span>', p.inicioPrevisto ? 'Início ' + fmt.data(p.inicioPrevisto) : '', venc ? 'rr-alerta' : ''),
+      cel('Avanço físico', prog == null ? '<span class="dim">Não informado</span>' : `<span class="rr-prog">${anel}${fmt.n(prog)}%</span>`),
+      cel('Custo estimado', p.custo != null ? fmt.brl(p.custo) : '<span class="dim">Não informado</span>'),
+      cel('Esforço', p.esforcoFte != null ? fmt.n(p.esforcoFte, 1) + ' FTE' : '<span class="dim">Não informado</span>', p.duracaoMeses ? plural(p.duracaoMeses, 'mês', 'meses') : ''),
+      cel('Entrada no portfólio', ent ? esc(ent.nome) : '<span class="dim">Checklist não feito</span>', p.entrada && p.entrada.data ? fmt.data(String(p.entrada.data).slice(0, 10)) : ''),
+      ...(nivel >= 2 ? [cel('Prioridade', sc.completo ? `${GP.notaHtml ? GP.notaHtml(sc.valor) : fmt.n(sc.valor)} <span class="rr-esf">Esforço ${fmt.n(sc.esforco)}</span>` : '<span class="dim">Não avaliado</span>', quad ? esc(quad.nome) : '')] : []),
+      ...(riscos ? [cel('Riscos ativos', fmt.n(riscos.n), riscos.altos ? plural(riscos.altos, 'alto ou crítico', 'altos ou críticos') : 'nenhum alto', riscos.altos ? 'rr-alerta' : '')] : []),
+      ...(cart ? [cel('Carteira', esc(cart.nome), '', cart.fora ? 'rr-alerta' : '')] : []),
+    ];
+    const m = GP.modal(`<div class="rr-cab"><span class="code">${esc(p.codigo)}</span><h3>${esc(p.titulo)}</h3><p class="muted">${esc([p.gerencia, p.tipo, p.area].filter(Boolean).join(' · '))}${p.obrigatorio ? ' · <b>obrigatório</b>' : ''}</p></div>
+      <div class="rr-grid">${cels.join('')}</div>
+      ${p.descricao ? `<p class="rr-desc">${esc(p.descricao).slice(0, 320)}${p.descricao.length > 320 ? '…' : ''}</p>` : ''}
+      <div class="m-act"><button class="btn btn-ghost" data-close="1">Fechar</button><button class="btn btn-ghost" data-rr="editar">${icon('editar', 16)} Editar</button><button class="btn btn-ghost" data-rr="etapa">${icon('seta', 16)} Mudar etapa</button><button class="btn btn-primary" data-rr="ficha">Abrir ficha completa</button></div>`, { largo:true });
+    m.classList.add('rr-modal');
+    m.querySelectorAll('[data-rr]').forEach(b => b.onclick = () => { const a = b.dataset.rr; GP.closeModal(); if(a === 'etapa') modalEtapa(p); else GP.go(a === 'editar' ? '#/novo/' + p.id : '#/projeto/' + p.id); });
+  }
+  GP.resumoProjeto = id => { const p = P.get(id); if(p) resumoRapido(p); };
 
   GP.tela({ id:'novo', nivel:1, ordem:2, titulo:'Novo cadastro', icone:'novo', render: telaForm });
   GP.tela({ id:'acervo', nivel:1, ordem:3, titulo:'Acervo', icone:'acervo', render: telaAcervo });

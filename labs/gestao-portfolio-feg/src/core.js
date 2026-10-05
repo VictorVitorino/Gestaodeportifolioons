@@ -646,14 +646,17 @@
   }
   function menu(r, tela, nivel, niveis){
     const item = t => { const on = tela && tela.id === t.id; return `<a class="nav-item ${on ? 'on' : ''}" href="#/${t.id}" data-tip="${esc(t.titulo)}" aria-label="${esc(t.titulo)}"${on ? ' aria-current="page"' : ''}><span class="ic">${icon(t.icone)}</span><span class="lbl">${esc(t.titulo)}</span></a>`; };
-    const mini = estaMini();
+    const mini = estaMini(), sec = S.ui.menuSecoes || {};
+    // Grupos do menu com expandir/recolher (lembrado em S.ui.menuSecoes); no trilho recolhido viram só separadores
+    const grupo = (id, rotulo, titulo, itens) => { const rec = !!sec[id];
+      return `<button type="button" class="nav-sec nav-sec-tg" data-secao="${id}" aria-expanded="${!rec}" aria-controls="grupo-${id}" title="${rec ? 'Expandir' : 'Recolher'} ${titulo}"${mini ? ' tabindex="-1"' : ''}><span class="nav-sec-t">${rotulo}</span><svg class="nav-sec-ch" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="nav-grupo ${rec ? 'recolhido' : ''}" id="grupo-${id}" data-grupo="${id}">${itens}</div>`; };
     let h = `<div class="side-top"><a class="brand" href="#/painel" data-tip="Gestão de Portfólio FEG" aria-label="Gestão de Portfólio FEG, ir para o painel">${GP.logoFEG(36, true)}<span class="txt" aria-hidden="true"><b>Gestão de Portfólio</b><span>FEG · ONS · Maestro</span></span></a>
       <button type="button" class="side-close" data-fechar-menu aria-label="Fechar menu">${icon('x', 20)}</button></div>
       <div class="side-levels" role="group" aria-label="Nível do sistema">${niveis()}</div>
       <div class="nav-heading"><span>Navegação</span><button type="button" class="nav-toggle" data-recolher data-tip="${mini ? 'Expandir menu' : 'Recolher menu'}" aria-label="${mini ? 'Expandir menu' : 'Recolher menu'}" aria-expanded="${!mini}">${icon(mini ? 'expandir' : 'recolher',16)}</button></div>
-      <nav class="side-nav" aria-label="Áreas do portfólio"><div class="nav-sec">Visão gerencial</div>${TELAS.filter(t => t.gerencial).map(item).join('')}`;
+      <nav class="side-nav" aria-label="Áreas do portfólio">${grupo('gerencial', 'Visão gerencial', 'Visão gerencial', TELAS.filter(t => t.gerencial).map(item).join(''))}`;
     GP.NIVEIS.forEach(L => { if(L.n > nivel) return; const ts = TELAS.filter(t => t.menu !== false && t.nivel === L.n && !t.rodape && !t.gerencial); if(!ts.length) return;
-      h += `<div class="nav-sec" title="Nível ${L.n} · ${esc(L.nome)}">Nível ${L.n} · ${esc(L.curto)}</div>` + ts.map(item).join(''); });
+      h += grupo('n' + L.n, `Nível ${L.n} · ${esc(L.curto)}`, `Nível ${L.n} · ${esc(L.nome)}`, ts.map(item).join('')); });
     if(nivel < 3) h += `<div class="nav-sec">Mais recursos</div><button type="button" class="nav-item" data-nivel="${nivel + 1}" data-tip="Ativar nível ${nivel + 1}" aria-label="Ativar nível ${nivel + 1}"><span class="ic">${icon('estrela')}</span><span class="lbl">Ativar nível ${nivel + 1}</span></button>`;
     h += `</nav><div class="side-foot">${TELAS.filter(t => t.rodape).map(item).join('')}
       <div class="side-note">PORTFÓLIO FEG / MAESTRO</div></div>`;
@@ -685,6 +688,9 @@
     if(e.target.closest('[data-storage-status]')){ GP.go('#/config'); return; }
     if(e.target.closest('[data-ajuda-nivel]')){ GP.explicarNiveis(); return; }
     if(e.target.closest('[data-fechar-menu]')){ fecharMenuMovel(); return; }
+    const sg = e.target.closest('[data-secao]');
+    if(sg){ if(estaMini()) return; const id = sg.dataset.secao; S.ui.menuSecoes = Object.assign({}, S.ui.menuSecoes); const rec = !S.ui.menuSecoes[id]; if(rec) S.ui.menuSecoes[id] = true; else delete S.ui.menuSecoes[id]; GP.save();
+      const g = document.querySelector(`.side [data-grupo="${id}"]`); if(g) g.classList.toggle('recolhido', rec); sg.setAttribute('aria-expanded', String(!rec)); sg.title = (rec ? 'Expandir ' : 'Recolher ') + sg.textContent.trim(); return; }
     if(e.target.closest('[data-recolher]')){ if(ehMovel()) return;
       if(miniAuto()){ const expandir = estaMini(); S.ui.menuExpandido = expandir; if(expandir) S.ui.menuMini = false; } else S.ui.menuMini = !S.ui.menuMini;
       GP.save(); hideTip(); render(true); return; }

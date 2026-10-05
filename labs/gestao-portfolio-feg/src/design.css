@@ -759,3 +759,15 @@ body::before{background:
 .topbar .levels .seg button:not(.ativo){opacity:.85}
 .topbar .levels .seg button:not(.ativo):hover{opacity:1;background:rgba(255,255,255,.9)}
 .side-levels button.ativo:not(.on){background:rgba(255,255,255,.22);color:#fff}
+
+/* grupos do menu lateral: expandir/recolher por nível */
+.shell .side .nav-sec-tg{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;text-align:left;border-radius:10px;cursor:pointer;background:transparent;color:#b3cbc4;font:inherit;font-size:11px;font-weight:650;letter-spacing:.12em;text-transform:uppercase}
+.shell .side .nav-sec-tg:hover{color:#fff;background:rgba(255,255,255,.06)}
+.shell .side .nav-sec-tg .nav-sec-t{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.shell .side .nav-sec-ch{flex:none;opacity:.8;transition:transform .2s var(--ease)}
+.shell .side .nav-sec-tg[aria-expanded="false"] .nav-sec-ch{transform:rotate(-90deg)}
+.shell .side .nav-grupo.recolhido .nav-item:not(.on){display:none}
+.shell.mini .side .nav-sec-tg{pointer-events:none}
+.shell.mini .side .nav-sec-ch{display:none}
+.shell.mini .side .nav-grupo.recolhido .nav-item:not(.on){display:flex}
+@media(max-width:900px){.shell .side .nav-sec-tg{min-height:44px}}
