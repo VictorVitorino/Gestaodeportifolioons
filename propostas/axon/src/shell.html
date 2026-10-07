@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Axon · Propostas GMO e TMO</title>
+<meta name="description" content="Duas propostas de trabalho para levar o Axon do MVP à adoção nas gerências PE, PR, PL, OS e PD: Proposta A · GMO e Proposta B · TMO.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&amp;family=Archivo+Narrow:wght@400..700&amp;display=swap">
+<style id="axon-css">
+<!--CSS-->
+</style>
+<noscript><style>
+  body { overflow: auto; }
+  .stage { position: static; overflow: visible; padding: 16px; }
+  .canvas { position: relative; transform: none; margin: 0 auto; height: auto; overflow: visible; box-shadow: none; background: transparent; }
+  .deck { position: static; }
+  .slide { position: relative; opacity: 1; visibility: visible; margin: 0 auto 24px; box-shadow: 0 0 0 1px #CCD4DA; }
+  .topbar, .axonbar { display: none; }
+</style></noscript>
+</head>
+<body data-deck="A">
+
+<header class="topbar">
+  <div class="tb-left">
+    <span class="tb-mark">Axon <i class="chev" aria-hidden="true"></i></span>
+    <span class="tb-doc">Propostas de trabalho</span>
+    <span class="tb-badge" data-presenter-only hidden>Apresentador</span>
+  </div>
+  <div class="tb-center">
+    <div class="deckseg" role="group" aria-label="Proposta">
+      <button type="button" data-deck="A" aria-pressed="true" title="Proposta A · Gestão de Mudanças (tecla A)">A · GMO</button>
+      <button type="button" data-deck="B" aria-pressed="false" title="Proposta B · TMO, ≈70% GMO e ≈30% PMO (tecla B)">
+        <span>B · TMO</span><span class="ds-micro" aria-hidden="true"><i></i><i></i></span>
+      </button>
+    </div>
+  </div>
+  <div class="tb-right">
+    <button type="button" class="tb-ic tb-wide" data-act="notes" aria-pressed="false" aria-label="Notas do apresentador (N)" title="Notas do apresentador (N)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>
+    </button>
+    <button type="button" class="tb-ic" data-act="reading" aria-pressed="false" aria-label="Modo leitura (L)" title="Modo leitura (L)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5.5h6a3 3 0 0 1 3 3V19a2.5 2.5 0 0 0-2.5-2.5H3z"/><path d="M21 5.5h-6a3 3 0 0 0-3 3V19a2.5 2.5 0 0 1 2.5-2.5H21z"/></svg>
+    </button>
+    <button type="button" class="tb-ic tb-wide" data-act="presenter" aria-pressed="false" aria-label="Modo apresentador (P)" title="Modo apresentador (P)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/><circle cx="17.5" cy="7.5" r="0.6"/></svg>
+    </button>
+    <button type="button" class="tb-ic tb-wide" data-act="compare" aria-pressed="false" aria-label="Comparar A e B (C)" title="Comparar A e B (C)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="8" height="12" rx="1"/><rect x="13" y="6" width="8" height="12" rx="1"/></svg>
+    </button>
+    <button type="button" class="tb-ic tb-wide" data-act="fullscreen" aria-pressed="false" aria-label="Tela cheia (F)" title="Tela cheia (F)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>
+    </button>
+    <span class="tb-sep tb-wide" aria-hidden="true"></span>
+    <button type="button" class="tb-ic" data-act="print" aria-label="Imprimir" title="Imprimir">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V3.5h10V9"/><path d="M7 17H4.5V10h15v7H17"/><rect x="7" y="14" width="10" height="6.5"/></svg>
+    </button>
+    <button type="button" class="tb-ic" data-act="help" aria-label="Ajuda e atalhos (?)" title="Ajuda e atalhos (?)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .9-1 1.6v.5"/><path d="M12 17.2v.01"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="stage" id="stage" aria-label="Apresentação">
+  <div class="canvas" id="canvas">
+    <div class="deck" data-deck="A" aria-label="Proposta A · GMO">
+<!--SLIDES_A-->
+    </div>
+    <div class="deck" data-deck="B" aria-label="Proposta B · TMO">
+<!--SLIDES_B-->
+    </div>
+    <div class="rvpop" id="rvpop" role="dialog" aria-modal="false" aria-labelledby="rvpop-title" tabindex="-1" hidden>
+      <div class="rvpop-head">
+        <div class="rvpop-titles"><p class="rvpop-title" id="rvpop-title"></p><span class="selo" id="rvpop-selo" hidden></span></div>
+        <button type="button" class="rvpop-x" aria-label="Fechar">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg>
+        </button>
+      </div>
+      <div class="rvpop-body" id="rvpop-body"></div>
+    </div>
+  </div>
+</main>
+
+<footer class="axonbar" aria-label="Navegação e progresso">
+  <div class="ax-left"><span class="ax-deck" id="ax-deck">A · GMO</span><span class="ax-count" id="ax-count">01 / 06</span><span class="ax-title" id="ax-title"></span></div>
+  <div class="ax-mid">
+    <button type="button" class="ax-arrow" data-nav="prev" aria-label="Slide anterior (←)" title="Slide anterior (←)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6l-6 6 6 6"/></svg>
+    </button>
+    <div class="ax-fiber" id="ax-fiber" role="group" aria-label="Progresso da proposta: um nódulo por slide"></div>
+    <button type="button" class="ax-arrow" data-nav="next" aria-label="Próximo slide (→)" title="Próximo slide (→)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+  <div class="ax-right"><span class="ax-micro">Condução saltatória: cada onda é um nódulo, cada portão um salto.</span></div>
+</footer>
+
+<section class="drawer" id="notes" aria-label="Notas do apresentador" hidden>
+  <div class="dr-key"><span class="dr-lbl">Mensagem-chave</span><p id="notes-key"></p></div>
+  <div class="dr-notes"><span class="dr-lbl">Nota do apresentador</span><div id="notes-body"></div></div>
+  <button type="button" class="dr-close" data-act="close-notes" aria-label="Fechar notas">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg>
+  </button>
+</section>
+
+<aside class="presenter" id="presenter" aria-label="Painel do apresentador" hidden>
+  <div class="pr-top">
+    <div>
+      <div class="pr-clock" id="pr-clock" aria-label="Relógio">--:--</div>
+      <div class="pr-pos" id="pr-pos"></div>
+    </div>
+    <div class="pr-timer"><output id="pr-timer" aria-label="Cronômetro">00:00</output>
+      <button type="button" class="pr-btn" data-act="timer-toggle">Pausar</button>
+      <button type="button" class="pr-btn" data-act="timer-reset">Zerar</button>
+    </div>
+    <button type="button" class="pr-close" data-act="exit-presenter" aria-label="Sair do modo apresentador">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg>
+    </button>
+  </div>
+  <div class="pr-key"><span class="pr-lbl">Mensagem-chave</span><p id="pr-key"></p></div>
+  <div class="pr-next"><span class="pr-lbl">Próximo slide</span><div id="pr-next"></div><p class="pr-next-title" id="pr-next-title"></p></div>
+  <div class="pr-notes"><span class="pr-lbl">Nota do apresentador</span><div id="pr-notes"></div></div>
+</aside>
+
+<div class="reading" id="reading" role="region" aria-label="Modo leitura" hidden>
+  <div class="rd-bar">
+    <p class="rd-title" id="rd-title">Modo leitura</p>
+    <div class="rd-tools">
+      <label class="rd-check"><input type="checkbox" id="rd-notes"> Mostrar notas do apresentador</label>
+      <button type="button" class="rd-exit" data-act="exit-reading">Voltar à apresentação</button>
+    </div>
+  </div>
+  <div class="rd-list" id="rd-list"></div>
+</div>
+
+<div class="compare" id="compare" role="region" aria-label="Comparar propostas" hidden>
+  <div class="cmp-head">
+    <p class="cmp-title" id="cmp-title">Comparar</p>
+    <button type="button" class="ov-close" data-act="close-compare" aria-label="Fechar comparação">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg> Fechar
+    </button>
+  </div>
+  <div class="cmp-row" id="cmp-row"></div>
+  <p class="cmp-diff" id="cmp-diff" hidden></p>
+</div>
+
+<dialog class="dlg" id="help" aria-labelledby="help-title">
+  <div class="dlg-in">
+    <h2 id="help-title">Atalhos e navegação</h2>
+    <button type="button" class="dr-close" data-act="close-help" aria-label="Fechar ajuda">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg>
+    </button>
+    <table class="keys">
+      <tbody>
+        <tr><td><kbd>→</kbd><kbd>Espaço</kbd><kbd>PageDown</kbd></td><td>Próximo slide</td></tr>
+        <tr><td><kbd>←</kbd><kbd>PageUp</kbd></td><td>Slide anterior</td></tr>
+        <tr><td><kbd>Home</kbd><kbd>End</kbd></td><td>Primeiro e último slide</td></tr>
+        <tr><td><kbd>1</kbd> a <kbd>6</kbd></td><td>Ir ao slide</td></tr>
+        <tr><td><kbd>A</kbd><kbd>B</kbd></td><td>Trocar de proposta, mantendo o número do slide</td></tr>
+        <tr><td><kbd>C</kbd></td><td>Comparar o mesmo slide nas duas propostas</td></tr>
+        <tr><td><kbd>N</kbd></td><td>Notas do apresentador</td></tr>
+        <tr><td><kbd>P</kbd></td><td>Modo apresentador (segunda janela sincronizada)</td></tr>
+        <tr><td><kbd>L</kbd></td><td>Modo leitura, com todas as revelações abertas</td></tr>
+        <tr><td><kbd>F</kbd></td><td>Tela cheia</td></tr>
+        <tr><td><kbd>Esc</kbd></td><td>Fecha a revelação aberta ou sai do modo</td></tr>
+        <tr><td><kbd>Enter</kbd><kbd>Espaço</kbd> com foco</td><td>Abre a revelação ou vira a carta</td></tr>
+        <tr><td><kbd>?</kbd></td><td>Esta ajuda</td></tr>
+      </tbody>
+    </table>
+    <p class="dlg-note"><span class="dotx" aria-hidden="true"></span>O ponto laranja indica um elemento clicável. A barra inferior é o axônio: cada nódulo é um slide.</p>
+  </div>
+</dialog>
+
+<dialog class="dlg" id="print-dlg" aria-labelledby="pp-title">
+  <form method="dialog" class="dlg-in">
+    <h2 id="pp-title">Imprimir ou salvar em PDF</h2>
+    <fieldset class="pr-opts">
+      <legend>Conteúdo</legend>
+      <label class="pr-opt"><input type="radio" name="pp-deck" value="A" checked> Proposta A</label>
+      <label class="pr-opt"><input type="radio" name="pp-deck" value="B"> Proposta B</label>
+      <label class="pr-opt"><input type="radio" name="pp-deck" value="AB"> Ambas (A e depois B)</label>
+    </fieldset>
+    <label class="pr-opt"><input type="checkbox" id="pp-notes"> Incluir notas do apresentador</label>
+    <p class="dlg-note">Cada slide ocupa uma página 16:9, seguida do anexo com as revelações daquele slide.</p>
+    <div class="dlg-actions">
+      <button type="submit" class="dlg-btn" value="cancel">Cancelar</button>
+      <button type="submit" class="dlg-btn dlg-btn--primary" value="print">Imprimir</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="print-root" aria-hidden="true"></div>
+<div id="sr-live" class="sr-only" aria-live="polite"></div>
+
+<script>
+<!--JS-->
+</script>
+</body>
+</html>
