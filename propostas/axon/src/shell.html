@@ -8,7 +8,9 @@
 <meta name="description" content="Duas propostas de trabalho para levar o Axon do MVP à adoção nas gerências PE, PR, PL, OS e PD: Proposta A · GMO e Proposta B · TMO.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&amp;family=Archivo+Narrow:wght@400..700&amp;display=swap">
+<!-- fontes sem bloquear a renderização: rede lenta ou bloqueada não deixa a página em branco (fallback "Axon Fallback") -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&amp;family=Archivo+Narrow:wght@400..700&amp;display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&amp;family=Archivo+Narrow:wght@400..700&amp;display=swap"></noscript>
 <style id="axon-css">
 <!--CSS-->
 </style>
@@ -32,7 +34,7 @@
   <div class="tb-center">
     <div class="deckseg" role="group" aria-label="Proposta">
       <button type="button" data-deck="A" aria-pressed="true" title="Proposta A · Gestão de Mudanças (tecla A)">A · GMO</button>
-      <button type="button" data-deck="B" aria-pressed="false" title="Proposta B · TMO, ≈70% GMO e ≈30% PMO (tecla B)">
+      <button type="button" data-deck="B" aria-pressed="false" title="Proposta B · TMO: GMO + PMO, ênfase indicativa do esforço ≈70% · ≈30%, calibrada no diagnóstico (tecla B)">
         <span>B · TMO</span><span class="ds-micro" aria-hidden="true"><i></i><i></i></span>
       </button>
     </div>
@@ -154,22 +156,22 @@
     </button>
     <table class="keys">
       <tbody>
-        <tr><td><kbd>→</kbd><kbd>Espaço</kbd><kbd>PageDown</kbd></td><td>Próximo slide</td></tr>
-        <tr><td><kbd>←</kbd><kbd>PageUp</kbd></td><td>Slide anterior</td></tr>
+        <tr><td><kbd>→</kbd><kbd>Espaço</kbd><kbd>PageDown</kbd></td><td>Próximo passo de build; no último passo, próximo slide</td></tr>
+        <tr><td><kbd>←</kbd><kbd>PageUp</kbd></td><td>Passo anterior; no primeiro, slide anterior</td></tr>
         <tr><td><kbd>Home</kbd><kbd>End</kbd></td><td>Primeiro e último slide</td></tr>
         <tr><td><kbd>1</kbd> a <kbd>6</kbd></td><td>Ir ao slide</td></tr>
         <tr><td><kbd>A</kbd><kbd>B</kbd></td><td>Trocar de proposta, mantendo o número do slide</td></tr>
         <tr><td><kbd>C</kbd></td><td>Comparar o mesmo slide nas duas propostas</td></tr>
         <tr><td><kbd>N</kbd></td><td>Notas do apresentador</td></tr>
         <tr><td><kbd>P</kbd></td><td>Modo apresentador (segunda janela sincronizada)</td></tr>
-        <tr><td><kbd>L</kbd></td><td>Modo leitura, com todas as revelações abertas</td></tr>
+        <tr><td><kbd>L</kbd></td><td>Modo leitura, com todas as revelações abertas (<kbd>→</kbd><kbd>←</kbd> saltam entre slides)</td></tr>
         <tr><td><kbd>F</kbd></td><td>Tela cheia</td></tr>
         <tr><td><kbd>Esc</kbd></td><td>Fecha a revelação aberta ou sai do modo</td></tr>
         <tr><td><kbd>Enter</kbd><kbd>Espaço</kbd> com foco</td><td>Abre a revelação ou vira a carta</td></tr>
         <tr><td><kbd>?</kbd></td><td>Esta ajuda</td></tr>
       </tbody>
     </table>
-    <p class="dlg-note"><span class="dotx" aria-hidden="true"></span>O ponto laranja indica um elemento clicável. A barra inferior é o axônio: cada nódulo é um slide.</p>
+    <p class="dlg-note"><span class="dotx" aria-hidden="true"></span>O ponto laranja indica um elemento clicável. A barra inferior é o axônio: cada nódulo é um slide, e os traços sob o nódulo atual são os passos de build do slide.</p>
   </div>
 </dialog>
 

@@ -14,7 +14,10 @@
   const DECK_NAME = { A: 'Proposta A · GMO', B: 'Proposta B · TMO' };
   const STORE_KEY = 'axon-deck/v1';
   const SYNC_SEL = 'button, [role="button"], [data-reveal]';
+  const POP_SYNC_SEL = 'button, [role="button"], [data-reveal]';   // dentro de #rvpop-body (o × é sincronizado como 'close')
   const POP_MARGIN = 12, POP_GAP = 10, POP_MAX_H = 520;
+  const POP_SIDE = 50;   // margem lateral do slide: o popover respeita a mesma de todo o conteúdo
+  const POP_TOP = 140;   // abaixo do cabeçalho: gatilhos na área de conteúdo não abrem por cima do título
 
   const qs = (s, r) => (r || document).querySelector(s);
   const qsa = (s, r) => Array.from((r || document).querySelectorAll(s));
@@ -32,7 +35,7 @@
   const WIN_ID = Math.random().toString(36).slice(2, 10);
 
   const state = {
-    booted: false, deck: 'A', index: 1, scale: 1,
+    booted: false, deck: 'A', index: 1, step: 0, scale: 1,
     visited: { A: new Set(), B: new Set() },
     notes: false, reading: false, presenterInline: false, compare: false,
     autoReading: false, userLeftReading: false, readingIndex: 1,
@@ -43,6 +46,7 @@
   const byId = new Map();
   const pristine = new Map();
   const gateState = new Map();
+  const openGates = new Set();   // 'A5|◆1' etc.
   let els = {};
   let visit = null;           // { id, el, ctrl, fx }
   let pop = { open: false };  // estado do popover
@@ -50,6 +54,7 @@
   let axAnim = null;          // animação do impulso da barra
   let axTimers = [];
   let applyingRemote = false;
+  let stepping = false;       // cliques programáticos de um passo de build não ecoam para a outra janela
   let syncOn = IS_PRESENTER;
   let presenterWin = null;
   let msgSeq = 0;
@@ -95,6 +100,8 @@
     return l.length > 110 ? l.slice(0, 107).trim() + '…' : l;
   }
   function slideOf(el) { return el && el.closest ? el.closest('.slide') : null; }
+  /** Título em HTML seguro: o glifo ◆ dos portões sai em laranja, como no slide. */
+  function titleHTML(t) { return esc(t).replace(/◆/g, '<span class="gate-glyph">◆</span>'); }
   function emphHTML(txt) {
     const parts = String(txt).split('+').map((s) => s.trim()).filter(Boolean);
     return '<span class="emph" aria-label="Ênfase: ' + esc(txt) + '">' + parts.map((p, i) =>
@@ -117,9 +124,11 @@
     try {
       const r = fn.call(hk, el, ctx);
       if (r && typeof r.then === 'function') r.then(null, (err) => console.error('[AxonDeck] ' + id + '.' + name + '():', err));
+      return r;
     } catch (err) {
       console.error('[AxonDeck] ' + id + '.' + name + '():', err);
     }
+    return undefined;
   }
   function baseCtx(el) {
     return {
@@ -133,7 +142,14 @@
     const never = () => new Promise(() => {});
     const live = () => !signal.aborted;
     const anims = new Set();
-    signal.addEventListener('abort', () => { anims.forEach((a) => { try { a.cancel(); } catch (e) { /* */ } }); anims.clear(); });
+    const dots = new Set();
+    signal.addEventListener('abort', () => {
+      anims.forEach((a) => { try { a.cancel(); } catch (e) { /* */ } });
+      anims.clear();
+      // devolve os impulsos ao estado de repouso (sem posição inline, invisíveis)
+      dots.forEach((d) => { d.classList.remove('is-on'); d.style.left = ''; d.style.top = ''; d.style.margin = ''; });
+      dots.clear();
+    });
     const sc = () => state.scale || 1;
     function run(el, frames, opts) {
       if (!live()) return never();
@@ -152,7 +168,7 @@
       return local(ref || refOf(el), r.left + r.width / 2, r.top + r.height / 2);
     }
     const T = (p) => 'translate(' + p.x.toFixed(2) + 'px, ' + p.y.toFixed(2) + 'px)';
-    function prep(dot) { dot.style.left = '0px'; dot.style.top = '0px'; dot.style.margin = '0'; dot.style.marginLeft = '-' + (dot.offsetWidth / 2) + 'px'; dot.style.marginTop = '-' + (dot.offsetHeight / 2) + 'px'; }
+    function prep(dot) { dots.add(dot); dot.style.left = '0px'; dot.style.top = '0px'; dot.style.margin = '0'; dot.style.marginLeft = '-' + (dot.offsetWidth / 2) + 'px'; dot.style.marginTop = '-' + (dot.offsetHeight / 2) + 'px'; }
     function toPts(dot, targets) {
       const ref = refOf(dot);
       return targets.map((t) => (t && t.nodeType === 1 ? center(t, ref) : t)).filter(Boolean);
@@ -278,10 +294,34 @@
       t.setAttribute('aria-expanded', 'false');
       t.setAttribute('aria-controls', 'rvpop');
     });
-    qsa('.flip', el).forEach((f) => {
-      if (f.tagName !== 'BUTTON') { f.setAttribute('role', 'button'); if (!f.hasAttribute('tabindex')) f.tabIndex = 0; }
-      f.setAttribute('aria-pressed', 'false');
+    qsa('.flip', el).forEach((f, i) => {
+      const front = qs('.flip-front', f), back = qs('.flip-back', f);
+      // nome fixo (não muda para o texto do verso ao virar); o verso fica como descrição acessível
+      const label = f.getAttribute('data-label') || collapse(front ? front.textContent : f.textContent);
+      if (back && !back.id) back.id = 'flipb-' + el.id + '-' + (i + 1);
+      if (qs('button, a[href], input, select, textarea, [data-reveal]', f)) {
+        // carta com controles dentro (ex.: ▶ Rodar no A1): a carta vira grupo e ganha um botão próprio para virar
+        f.setAttribute('role', 'group');
+        f.setAttribute('aria-label', label);
+        f.removeAttribute('tabindex');
+        if (!qs(':scope > .flip-toggle', f)) {
+          const b = h('button', 'flip-toggle');
+          b.type = 'button';
+          b.setAttribute('aria-label', 'Virar a carta: ' + label);
+          b.setAttribute('aria-pressed', 'false');
+          if (back) b.setAttribute('aria-describedby', back.id);
+          f.appendChild(b);
+        }
+      } else {
+        if (f.tagName !== 'BUTTON') { f.setAttribute('role', 'button'); if (!f.hasAttribute('tabindex')) f.tabIndex = 0; }
+        f.setAttribute('aria-label', label);
+        f.setAttribute('aria-pressed', 'false');
+        if (back) f.setAttribute('aria-describedby', back.id);
+      }
     });
+    // passos de build: [data-build="1"] ou [data-build="1 2"]; o total vira data-steps no slide
+    const steps = qsa('[data-build]', el).reduce((m, x) => Math.max(m, ...x.getAttribute('data-build').split(/\s+/).map(Number).filter((v) => v > 0)), 0);
+    if (steps) el.dataset.steps = String(steps); else el.removeAttribute('data-steps');
     qsa('.seg', el).forEach((s) => {
       if (!s.hasAttribute('role')) s.setAttribute('role', 'group');
       const first = qs('button[data-value]', s);
@@ -347,13 +387,15 @@
   function fit() {
     if (!els.stage || !els.canvas) return;
     const r = els.stage.getBoundingClientRect();
-    const pad = window.innerWidth < 760 ? 16 : 24;
+    // tela cheia: sem moldura nem barras (reaparecem ao aproximar o mouse das bordas) → escala 1,0 em 720p
+    const pad = document.body.classList.contains('is-fs') ? 0 : window.innerWidth < 760 ? 16 : 24;
     const s = Math.max(0.05, Math.min((r.width - 2 * pad) / W, (r.height - 2 * pad) / H));
     const x = Math.round((r.width - W * s) / 2), y = Math.round((r.height - H * s) / 2);
     els.canvas.style.transform = 'translate(' + x + 'px, ' + y + 'px) scale(' + s + ')';
     state.scale = s;
     if (pop.open) positionPop();
     placeImpulse(state.index, true);
+    renderSteps();
   }
 
   /* ---------------------------------------------------------------------------
@@ -372,16 +414,17 @@
     const from = state.booted && !deckChanged ? state.index : null;
     closeReveal({ silent: true });
     if (prevEl) leaveSlide(prevEl);
-    state.deck = deck; state.index = index;
+    state.deck = deck; state.index = index; state.step = 0;
     els.canvas.style.setProperty('--fade', reduced() ? '150ms' : deckChanged ? '300ms' : '220ms');
     enterSlide(el);
     state.visited[deck].add(index);
     updateAxon(from, index, !state.booted || deckChanged);
     syncChrome();
     if (!o.fromHash) writeHash(o);
+    writeStepUrl();
     store();
-    announce();
-    if (!o.remote) send({ type: 'nav', deck, index });
+    if (!o.quiet) announce();
+    if (!o.remote) send({ type: 'nav', deck, index, step: 0 });
     if (state.reading && !o.fromReading) {
       if (deckChanged || o.rerenderReading) renderReading();
       scrollReadingTo(index);
@@ -389,9 +432,72 @@
     if (state.compare) renderCompare();
     document.dispatchEvent(new CustomEvent('axondeck:change', { detail: { deck, index, id: el.id } }));
   }
-  function next() { if (state.index < count()) go(state.deck, state.index + 1); }
-  function prev() { if (state.index > 1) go(state.deck, state.index - 1); }
+  /** → / Espaço / PageDown: próximo passo de build; no último passo, próximo slide. */
+  function next() {
+    if (!state.reading && state.step < stepsOf(currentEl())) { setStep(state.step + 1); return; }
+    if (state.index < count()) go(state.deck, state.index + 1);
+  }
+  /** ← / PageUp: passo anterior; no primeiro, slide anterior. */
+  function prev() {
+    if (!state.reading && state.step > 0) { setStep(state.step - 1); return; }
+    if (state.index > 1) go(state.deck, state.index - 1);
+  }
   function setDeck(d) { go(d, state.reading ? state.readingIndex : state.index, { rerenderReading: true }); }
+
+  /* ---------------------------------------------------------------------------
+     Passos de build (roteiro 4.3–4.5): [data-build="n"] no slide; o passo n
+     aciona (clica) o elemento marcado, como faria o apresentador com o mouse.
+     Voltar um passo recomeça o slide e refaz os passos anteriores.
+     ------------------------------------------------------------------------ */
+  function stepsOf(el) { return el ? Number(el.dataset.steps) || 0 : 0; }
+  function runStep(el, n) {
+    stepping = true;
+    try {
+      qsa('[data-build]', el).filter((x) => x.getAttribute('data-build').split(/\s+/).indexOf(String(n)) >= 0)
+        .forEach((x) => { try { x.click(); } catch (e) { console.error('[AxonDeck] passo ' + n + ':', e); } });
+    } finally { stepping = false; }
+    callHook(el.id, 'step', el, Object.assign({}, visit && visit.id === el.id ? visit.ctx : baseCtx(el), { step: n }));
+    dispatch(el, 'slide:step', { step: n, total: stepsOf(el) });
+  }
+  function setStep(n, o) {
+    o = o || {};
+    const el = currentEl();
+    if (!el) return;
+    n = clamp(Math.round(Number(n)) || 0, 0, stepsOf(el));
+    if (n === state.step) return;
+    if (n < state.step) {
+      go(state.deck, state.index, { force: true, remote: true, quiet: true });   // recomeça o slide no passo 0
+      for (let k = 1; k <= n; k++) { state.step = k; runStep(el, k); }
+    } else {
+      for (let k = state.step + 1; k <= n; k++) { state.step = k; runStep(el, k); }
+    }
+    state.step = n;
+    renderSteps();
+    writeStepUrl();
+    renderPresenter();
+    if (!o.remote) send({ type: 'step', deck: state.deck, index: state.index, step: n });
+  }
+  /** Traços sob o nódulo atual: um por passo de build; preenchidos até o passo atual. */
+  function renderSteps() {
+    const box = els.axSteps;
+    if (!box) return;
+    const total = stepsOf(currentEl());
+    box.hidden = !total;
+    if (!total) { box.replaceChildren(); return; }
+    if (box.childElementCount !== total) { box.replaceChildren(); for (let i = 0; i < total; i++) box.appendChild(h('i')); }
+    Array.from(box.children).forEach((x, i) => x.classList.toggle('is-on', i < state.step));
+    box.style.left = nodeX(state.index).toFixed(1) + 'px';
+    box.setAttribute('aria-label', 'Passo ' + state.step + ' de ' + total);
+  }
+  /** ?step=n no endereço (só quando há passo); preserva os demais parâmetros e a âncora. */
+  function writeStepUrl() {
+    try {
+      const u = new URL(location.href);
+      if (state.step > 0) u.searchParams.set('step', String(state.step)); else u.searchParams.delete('step');
+      const s = u.toString();
+      if (s !== location.href) history.replaceState(history.state, '', s);
+    } catch (e) { /* file:// restrito */ }
+  }
 
   function leaveSlide(el) {
     callHook(el.id, 'leave', el, visit && visit.id === el.id ? visit.ctx : baseCtx(el));
@@ -415,8 +521,15 @@
       on(target, type, fn, opts) { target.addEventListener(type, fn, Object.assign({}, opts || {}, { signal: ctrl.signal })); }
     });
     visit = { id: el.id, el, ctrl, fx, ctx };
-    callHook(el.id, 'enter', el, ctx);
+    el.removeAttribute('data-settled');
+    const r = callHook(el.id, 'enter', el, ctx);
     dispatch(el, 'slide:enter', { id: el.id });
+    // slide:settled: a animação de entrada do hook terminou (se a visita não foi interrompida)
+    Promise.resolve(r).then(() => {
+      if (ctrl.signal.aborted || !visit || visit.ctrl !== ctrl) return;
+      el.setAttribute('data-settled', '');
+      dispatch(el, 'slide:settled', { id: el.id });
+    }, () => {});
   }
   function resetSlide(el) {
     el.classList.add('is-resetting');
@@ -427,9 +540,11 @@
       if (v) setSeg(s, v, false);
     });
     Array.from(gateState.keys()).forEach((k) => { if (k.indexOf(el.id + '|') === 0) gateState.delete(k); });
+    Array.from(openGates).forEach((k) => { if (k.indexOf(el.id + '|') === 0) openGates.delete(k); });
     qsa('.gate', el).forEach((g) => { qsa('input[type="checkbox"]', g).forEach((c) => { c.checked = false; }); updateGateUI(g); g.classList.remove('is-open'); });
-    qsa('.is-open', el).forEach((t) => { if (t.matches('[data-reveal], .gate-mark')) t.classList.remove('is-open'); });
-    qsa('[data-reveal][aria-expanded="true"]', el).forEach((t) => t.setAttribute('aria-expanded', 'false'));
+    // gatilhos de portão marcados como abertos (inclui [data-gate] fora do checklist, ex.: cartões G0–G4 do B4)
+    qsa('.is-open', el).forEach((t) => { if (t.matches('[data-reveal], .gate-mark, [data-gate]:not(.gate)')) t.classList.remove('is-open'); });
+    qsa('[aria-haspopup][aria-expanded="true"]', el).forEach((t) => t.setAttribute('aria-expanded', 'false'));
     void el.offsetWidth;
     requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove('is-resetting')));
   }
@@ -485,6 +600,10 @@
     els.axImpulse = h('span', 'ax-impulse');
     els.axImpulse.setAttribute('aria-hidden', 'true');
     f.appendChild(els.axImpulse);
+    els.axSteps = h('div', 'ax-steps');
+    els.axSteps.setAttribute('role', 'img');
+    els.axSteps.hidden = true;
+    f.appendChild(els.axSteps);
     els.axTip = h('div', 'ax-tip');
     els.axTip.setAttribute('role', 'tooltip');
     els.axTip.id = 'ax-tip';
@@ -524,6 +643,7 @@
   }
   function updateAxon(from, to, jump) {
     const nodes = qsa('.ax-node', els.fiber);
+    if (els.axTip) els.axTip.classList.remove('is-on');
     const n = count();
     nodes.forEach((b, k) => {
       const i = k + 1;
@@ -536,6 +656,7 @@
       if (i === to) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current');
     });
     stopAxAnim();
+    renderSteps();
     const imp = els.axImpulse;
     if (!imp) return;
     const last = to === n && n > 1;
@@ -587,7 +708,8 @@
   function buildRevealContent(trg, slide, format, deck) {
     const spec = collapse(trg.getAttribute('data-reveal'));
     if (!spec) return null;
-    let title = trg.getAttribute('data-reveal-title') || '';
+    const trgTitle = trg.getAttribute('data-reveal-title') || '';
+    let base = '';
     let selo = trg.getAttribute('data-selo') || '';
     let w = Number(trg.getAttribute('data-w')) || 0;
     let node;
@@ -597,20 +719,22 @@
       if (!tpl || tpl.tagName !== 'TEMPLATE') { console.warn('[AxonDeck] template não encontrado: ' + spec); return null; }
       node = tpl.content.cloneNode(true);
       fillIncludes(node, deck, format === 'annex' ? 'annex' : 'pop');
-      title = title || tpl.getAttribute('data-title') || '';
+      base = tpl.getAttribute('data-title') || '';
       selo = selo || tpl.getAttribute('data-selo') || '';
       w = w || Number(tpl.getAttribute('data-w')) || 0;
     } else {
       const L = window.AxonReveals;
       if (!L || !L.has(spec)) { console.warn('[AxonDeck] revelação desconhecida: ' + spec); return null; }
-      node = frag(L.render(spec, readOpts(trg, deck, format)));
-      title = title || L.title(spec);
+      const ro = readOpts(trg, deck, format);
+      node = frag(L.render(spec, ro));
+      base = L.titleFor ? L.titleFor(spec, ro) : L.title(spec);
       selo = selo || L.selo(spec);
       w = w || L.width(spec);
     }
+    let title = trgTitle || base;
     if (!title) title = labelOf(trg);
     if (format !== 'pop') staticize(node);
-    return { spec, title, selo, w: clamp(w || 380, 320, 420), node };
+    return { spec, title, base: base || title, trgTitle, selo, w: clamp(w || 380, 320, 420), node };
   }
 
   function openReveal(trg, o) {
@@ -618,14 +742,19 @@
     if (!trg) return;
     const nested = !!(trg.closest && trg.closest('#rvpop'));
     if (pop.open && pop.trigger === trg && !o.force) { closeReveal({ restoreFocus: true }); return; }
-    const anchor = o.anchor || (nested ? pop.anchor : trg);
-    const slide = o.slide || (nested ? pop.slide : slideOf(anchor) || slideOf(trg) || currentEl());
+    const prev = pop.open ? pop : null;
+    // linha de tabela com o gatilho na 1ª célula: o popover se ancora na linha inteira
+    const anchor = o.anchor || (nested && prev ? prev.anchor : (trg.closest && trg.closest('tr.rv-row')) || trg);
+    const slide = o.slide || (nested && prev ? prev.slide : slideOf(anchor) || slideOf(trg) || currentEl());
     const deck = slide ? slide.dataset.deck : state.deck;
     const c = buildRevealContent(trg, slide, 'pop', deck);
     if (!c) return;
+    // para onde o foco volta ao fechar: o gatilho original (mesmo em revelação aninhada),
+    // o elemento indicado em returnFocus (ex.: cartão do B4) ou a âncora de um gatilho virtual
+    const origin = (nested && prev && prev.origin) || o.returnFocus || (!nested && trg.isConnected ? trg : anchor);
     closeReveal({ silent: true });
     const p = els.pop;
-    els.popTitle.textContent = c.title;
+    els.popTitle.innerHTML = titleHTML(c.title);
     if (c.selo) { els.popSelo.textContent = c.selo; els.popSelo.hidden = false; } else { els.popSelo.hidden = true; }
     els.popBody.replaceChildren(c.node);
     els.popBody.scrollTop = 0;
@@ -633,14 +762,29 @@
     p.style.left = '0px'; p.style.top = '0px';
     p.hidden = false;
     p.classList.remove('is-in');
-    pop = { open: true, trigger: trg, anchor, slide, spec: c.spec };
+    pop = { open: true, trigger: trg, anchor, slide, spec: c.spec, origin };
+    // escopo do conteúdo: o CSS do deck alcança o popover por :is(#rvpop, .annex)[data-slide="A2"] …
+    if (slide) { p.setAttribute('data-slide', slide.id); p.setAttribute('data-deck', deck); }
+    else { p.removeAttribute('data-slide'); p.removeAttribute('data-deck'); }
     qsa('.gate', els.popBody).forEach((g) => bindGate(g, slide));
     positionPop();
+    updateMore();
     void p.offsetWidth;
     if (!reduced()) p.classList.add('is-in');
     if (trg.setAttribute && trg.isConnected) trg.setAttribute('aria-expanded', 'true');
-    try { p.focus({ preventScroll: true }); } catch (e) { /* */ }
+    // o gatilho de origem continua "expandido" enquanto houver revelação aninhada aberta a partir dele
+    if (origin && origin !== trg && origin.isConnected && origin.hasAttribute && origin.hasAttribute('aria-expanded')) origin.setAttribute('aria-expanded', 'true');
+    // conteúdo com rolagem: o foco vai para o corpo, para ↑ ↓ PageDown rolarem pelo teclado
+    const b = els.popBody;
+    const scrolls = b.scrollHeight > b.clientHeight + 4;
+    if (scrolls) b.tabIndex = 0; else b.removeAttribute('tabindex');
+    try { (scrolls ? b : p).focus({ preventScroll: true }); } catch (e) { /* */ }
     dispatch(slide, 'reveal:open', { key: c.spec, trigger: trg });
+  }
+  /** Esmaece a borda inferior quando há conteúdo abaixo (a barra de rolagem pode ser invisível). */
+  function updateMore() {
+    const b = els.popBody;
+    els.pop.classList.toggle('has-more', b.scrollTop + b.clientHeight < b.scrollHeight - 4);
   }
   /** Abre uma revelação sem gatilho real, ancorada a qualquer elemento do slide. */
   function showReveal(spec, anchor, opts) {
@@ -664,19 +808,23 @@
     p.style.maxHeight = Math.min(POP_MAX_H, H - 2 * POP_MARGIN) + 'px';
     const w = p.offsetWidth, hh = p.offsetHeight;
     const cx = (t.l + t.r) / 2, cy = (t.t + t.b) / 2;
-    const cX = (x) => clamp(x, POP_MARGIN, W - POP_MARGIN - w);
-    const cY = (y) => clamp(y, POP_MARGIN, H - POP_MARGIN - hh);
+    // margens: 50 px nas laterais (como todo o conteúdo) e, para gatilhos na área de conteúdo,
+    // nada acima de y = 140 (o popover não cobre título nem subtítulo)
+    const side = w > W - 2 * POP_SIDE ? POP_MARGIN : POP_SIDE;
+    const top = t.t >= POP_TOP ? POP_TOP : POP_MARGIN;
+    const cX = (x) => clamp(x, side, W - side - w);
+    const cY = (y) => clamp(y, top, H - POP_MARGIN - hh);
     const cands = [
       { x: cX(cx - w / 2), y: t.b + POP_GAP, ok: t.b + POP_GAP + hh <= H - POP_MARGIN },
-      { x: cX(cx - w / 2), y: t.t - POP_GAP - hh, ok: t.t - POP_GAP - hh >= POP_MARGIN },
-      { x: t.r + POP_GAP, y: cY(cy - hh / 2), ok: t.r + POP_GAP + w <= W - POP_MARGIN },
-      { x: t.l - POP_GAP - w, y: cY(cy - hh / 2), ok: t.l - POP_GAP - w >= POP_MARGIN }
+      { x: cX(cx - w / 2), y: t.t - POP_GAP - hh, ok: t.t - POP_GAP - hh >= top },
+      { x: t.r + POP_GAP, y: cY(cy - hh / 2), ok: t.r + POP_GAP + w <= W - side },
+      { x: t.l - POP_GAP - w, y: cY(cy - hh / 2), ok: t.l - POP_GAP - w >= side }
     ];
     let c = cands.find((k) => k.ok);
     if (!c) {
       // gatilho grande: sobrepõe na lateral com mais espaço, sempre contido
       const spaceR = W - t.r, spaceL = t.l;
-      c = { x: cX(spaceR >= spaceL ? W - POP_MARGIN - w : POP_MARGIN), y: cY(cy - hh / 2) };
+      c = { x: cX(spaceR >= spaceL ? W - side - w : side), y: cY(cy - hh / 2) };
     }
     p.style.left = Math.round(cX(c.x)) + 'px';
     p.style.top = Math.round(cY(c.y)) + 'px';
@@ -684,21 +832,53 @@
   function closeReveal(o) {
     o = o || {};
     if (!pop.open) return;
-    const trg = pop.trigger, slide = pop.slide;
+    const trg = pop.trigger, slide = pop.slide, origin = pop.origin, anchor = pop.anchor;
     els.pop.hidden = true;
     els.pop.classList.remove('is-in');
+    els.pop.removeAttribute('data-slide');
+    els.pop.removeAttribute('data-deck');
     els.popBody.replaceChildren();
+    els.popBody.removeAttribute('tabindex');
     if (trg && trg.setAttribute) trg.setAttribute('aria-expanded', 'false');
+    if (origin && origin !== trg && origin.setAttribute && origin.hasAttribute('aria-expanded')) origin.setAttribute('aria-expanded', 'false');
     pop = { open: false };
     clearTimeout(gateCloseTimer);
-    if (o.silent) return;
-    if (o.restoreFocus && trg && trg.isConnected && typeof trg.focus === 'function') {
-      try { trg.focus({ preventScroll: true }); } catch (e) { /* */ }
+    if (o.restoreFocus && !o.silent) {
+      // o gatilho pode ter saído do DOM (revelação aninhada, gatilho virtual): volta à origem ou à âncora
+      const back = [origin, trg, anchor].find((x) => x && x.isConnected && !els.pop.contains(x) && focusable(x));
+      if (back) { try { back.focus({ preventScroll: true }); } catch (e) { /* */ } }
     }
-    dispatch(slide, 'reveal:close', {});
-    if (!o.remote) send({ type: 'close' });
+    // sempre emitido, também no fechamento silencioso (troca de slide, outra revelação, modos):
+    // os hooks limpam destaques ligados à revelação; o silencioso só não devolve o foco nem sincroniza
+    dispatch(slide, 'reveal:close', { silent: !!o.silent });
+    if (!o.silent && !o.remote) send({ type: 'close' });
   }
-  const revealAPI = { open: openReveal, show: showReveal, close: closeReveal, isOpen: () => pop.open, reposition: positionPop };
+  function focusable(x) {
+    if (!x || typeof x.focus !== 'function' || x.disabled || x.closest('[inert]')) return false;
+    return x.tabIndex >= 0 || x.matches('button, a[href], input, select, textarea');
+  }
+  /** Troca o título do popover aberto (ex.: "Ficha de impacto · PE"). */
+  function setRevealTitle(txt) {
+    if (!pop.open) return;
+    els.popTitle.innerHTML = titleHTML(txt == null ? '' : txt);
+    positionPop();
+  }
+  /** Destaca, no popover aberto, os trechos que casam com o seletor (classe .rv-mark). */
+  function markReveal(sel) {
+    if (!pop.open) return [];
+    qsa('.rv-mark', els.popBody).forEach((x) => x.classList.remove('rv-mark'));
+    if (!sel) return [];
+    let hit = [];
+    try { hit = qsa(sel, els.popBody); } catch (e) { console.warn('[AxonDeck] reveal.mark: seletor inválido: ' + sel); }
+    hit.forEach((x) => x.classList.add('rv-mark'));
+    return hit;
+  }
+  const revealAPI = {
+    open: openReveal, show: showReveal, close: closeReveal, isOpen: () => pop.open, reposition: positionPop,
+    setTitle: setRevealTitle, mark: markReveal,
+    get body() { return pop.open ? els.popBody : null; },
+    get trigger() { return pop.open ? pop.trigger : null; }
+  };
 
   /* ---------------------------------------------------------------------------
      Portões (checklists)
@@ -743,6 +923,7 @@
     dispatch(slide, 'gate:check', { gate: code, checked: st.n, total: st.total });
     if (!remote) send({ type: 'gatecheck', slide: slide && slide.id, gate: code, i: Number(cb.dataset.i), checked: cb.checked });
     const trigs = gateTriggers(slide, code);
+    if (st.open) openGates.add(k); else openGates.delete(k);
     if (st.open && !wasOpen) {
       trigs.forEach((t) => t.classList.add('is-open'));
       trigs.forEach((t) => { const d = qs('.diamond', t) || t; fxProxy.pulse(d, { size: 16 }); });
@@ -751,7 +932,8 @@
       const auto = !trg || !trg.getAttribute || trg.getAttribute('data-gate-autoclose') !== 'false';
       if (trg && auto) {
         clearTimeout(gateCloseTimer);
-        gateCloseTimer = setTimeout(() => closeReveal({ remote: true }), reduced() ? 300 : 900);
+        // fecha sozinho; se o foco estava no checklist, volta ao gatilho (não se perde no <body>)
+        gateCloseTimer = setTimeout(() => closeReveal({ remote: true, restoreFocus: els.pop.contains(document.activeElement) }), reduced() ? 300 : 900);
       }
     } else if (!st.open && wasOpen) {
       trigs.forEach((t) => t.classList.remove('is-open'));
@@ -763,7 +945,8 @@
      Cartas flip e alternadores
      ------------------------------------------------------------------------ */
   function setFlip(f, on) {
-    if (f.classList.contains('is-flipped') === on) { f.setAttribute('aria-pressed', String(on)); return; }
+    const pressedEl = qs(':scope > .flip-toggle', f) || f;   // carta-grupo: o estado fica no botão de virar
+    if (f.classList.contains('is-flipped') === on) { pressedEl.setAttribute('aria-pressed', String(on)); return; }
     const slide = slideOf(f);
     const animate = !reduced() && !(slide && slide.classList.contains('is-resetting'));
     if (animate) {
@@ -772,7 +955,7 @@
       f.__turnT = setTimeout(() => f.classList.remove('is-turning'), 560);
     }
     f.classList.toggle('is-flipped', on);
-    f.setAttribute('aria-pressed', String(on));
+    pressedEl.setAttribute('aria-pressed', String(on));
   }
   function toggleFlip(f, force) {
     const on = force === undefined ? !f.classList.contains('is-flipped') : !!force;
@@ -847,6 +1030,13 @@
     return host;
   }
 
+  /** Remove clones de um contêiner, deixando de observá-los. */
+  function clearClones(box) {
+    if (!box) return;
+    if (cloneRO) qsa('.slide-clone', box).forEach((c) => cloneRO.unobserve(c));
+    box.replaceChildren();
+  }
+
   /* ---------------------------------------------------------------------------
      Anexo (revelações estáticas do slide)
      ------------------------------------------------------------------------ */
@@ -879,19 +1069,28 @@
         return;
       }
       if (n.matches('[data-reveal]')) {
+        // biblioteca: todos os recortes (data-pick) da mesma entrada viram um item só no anexo
+        // (ex.: as seis linhas de R-07 numa tabela; RAID completo + itens = RAID completo)
         const spec = collapse(n.getAttribute('data-reveal'));
-        const key = [spec, n.getAttribute('data-pick') || '', n.getAttribute('data-variant') || '', n.getAttribute('data-part') || ''].join('|');
+        const lib = spec.charAt(0) !== '#';
+        const pick = n.getAttribute('data-pick') || '';
+        const vp = [n.getAttribute('data-variant') || '', n.getAttribute('data-part') || ''];
+        const key = [spec, lib ? '*' : pick].concat(vp).join('|');
         const label = labelOf(n);
         if (seen.has(key)) {
           const it = seen.get(key);
-          if (it.labels.indexOf(label) < 0) { it.labels.push(label); it.label = it.labels.join(' · '); }
+          if (it.labels.indexOf(label) < 0) it.labels.push(label);
+          // títulos próprios por gatilho (data-reveal-title) não valem para o grupo: volta ao título-base
+          if ((n.getAttribute('data-reveal-title') || '') !== it.trgTitle) it.retitle = true;
+          if (lib) { if (!pick) it.full = true; else if (it.picks.indexOf(pick) < 0) it.picks.push(pick); }
         } else {
           const c = buildRevealContent(n, slide, 'annex', deck);
           if (c) {
-            const it = { label, labels: [label], title: c.title, selo: c.selo, node: c.node };
+            const it = { label, labels: [label], title: c.title, base: c.base, trgTitle: c.trgTitle, selo: c.selo, node: c.node,
+              lib, spec, vp, full: lib && !pick, picks: pick ? [pick] : [] };
             seen.set(key, it);
             out.push(it);
-            if (spec.charAt(0) !== '#') usedLib.add(spec);
+            if (lib) usedLib.add(spec);
             else { try { const tpl = slide.querySelector(spec); if (tpl) noteLib(tpl.content); } catch (e) { /* */ } }
           }
         }
@@ -914,9 +1113,18 @@
             if (!parts.length) return;
             const txt = collapse(parts.map((e) => e.textContent).join(' '));
             const lab = collapse(b.textContent);
-            const p = h('p');
-            p.innerHTML = (txt.toLowerCase().indexOf(lab.toLowerCase()) === 0 ? '' : '<strong>' + esc(lab) + ':</strong> ') + esc(txt);
-            box.appendChild(p);
+            // a estrutura do estado é preservada (rótulo e valor de cada par dt/dd): achatar com
+            // textContent colava as palavras ("MódulosPadrão…")
+            const nodes = parts.map(segPart);
+            if (nodes.length === 1 && nodes[0].tagName === 'P') {
+              if (txt.toLowerCase().indexOf(lab.toLowerCase()) !== 0) nodes[0].insertAdjacentHTML('afterbegin', '<strong>' + esc(lab) + ':</strong> ');
+              box.appendChild(nodes[0]);
+            } else {
+              const item = h('div', 'rv-seg-item');
+              item.appendChild(h('p', 'rv-k', esc(lab)));
+              nodes.forEach((x) => item.appendChild(x));
+              box.appendChild(item);
+            }
           });
           if (box.childNodes.length) out.push({ label: n.getAttribute('aria-label') || 'Alternador', title: '', node: box });
         }
@@ -924,6 +1132,20 @@
       if (n.hasAttribute('data-annex')) {
         out.push({ label: labelOf(n), title: '', node: h('p', '', esc(n.getAttribute('data-annex'))) });
       }
+    });
+    // fecha os grupos: recortes somados (ou a entrada inteira) e rótulos do grupo
+    seen.forEach((it) => {
+      const merged = it.lib && (it.picks.length > 1 || (it.full && it.picks.length > 0));
+      if (merged) {
+        const v = document.createElement('span');
+        v.setAttribute('data-reveal', it.spec);
+        if (!it.full) v.setAttribute('data-pick', it.picks.join(';'));
+        if (it.vp[0]) v.setAttribute('data-variant', it.vp[0]);
+        if (it.vp[1]) v.setAttribute('data-part', it.vp[1]);
+        const c = buildRevealContent(v, slide, 'annex', deck);
+        if (c) { it.node = c.node; it.title = c.base; it.selo = it.selo || c.selo; }
+      } else if (it.retitle) it.title = it.base;
+      it.label = merged && it.labels.length > 2 ? it.title : it.labels.join(' · ');
     });
     if (L) {
       usedLib.forEach((k) => (L.readingOnly(k) || []).forEach((x) => {
@@ -934,7 +1156,34 @@
     }
     return out;
   }
+  /** Cópia estática de um estado de alternador para o anexo: sem classes de layout do slide;
+      registros (.rv-recs) viram <dl> simples, que o anexo mostra em qualquer largura. */
+  function segPart(e) {
+    const c = e.cloneNode(true);
+    ['data-when', 'data-include', 'data-pick', 'data-filled', 'data-variant', 'data-part', 'id', 'class'].forEach((a) => c.removeAttribute(a));
+    qsa('.rv-recs', c).forEach((rs) => {
+      const f = document.createDocumentFragment();
+      qsa('.rv-rec', rs).forEach((r) => {
+        const k = qs('.rv-rec-k', r);
+        if (k) f.appendChild(h('p', 'rv-k', k.innerHTML));
+        const dl = qs('dl', r);
+        if (dl) { const d = document.createElement('dl'); d.innerHTML = dl.innerHTML; f.appendChild(d); }
+      });
+      rs.replaceWith(f);
+    });
+    qsa('[id]', c).forEach((x) => x.removeAttribute('id'));
+    return c;
+  }
   function strip(s) { return String(s || '').replace(/<[^>]+>/g, ' '); }
+  /** Rótulo de meses no início ("M1–M2", "M5–M6+"): título e rótulo com os mesmos meses são redundantes no anexo. */
+  function monthKey(s) { const m = /^\s*(M\d+(?:\s*[–-]\s*M\d+\+?)?)/.exec(strip(s)); return m ? m[1].replace(/\s+/g, '') : ''; }
+  /** Título redundante com o rótulo do gatilho no anexo: um contém o outro (sem caixa, acentos e pontuação). */
+  function sameish(a, b) { const x = looseKey(a), y = looseKey(b); return !!x && !!y && (x.indexOf(y) >= 0 || y.indexOf(x) >= 0); }
+  /** Chave frouxa para comparar rótulo e título no anexo (ignora caixa, acentos e pontuação). */
+  function looseKey(s) {
+    return collapse(strip(s)).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+      .replace(/[·:|›,.;()“”"']/g, ' ').replace(/\s+/g, ' ').trim();
+  }
 
   function buildAnnex(slide, o) {
     o = o || {};
@@ -946,6 +1195,8 @@
     if (!items.length && !withNotes) return null;
     const sec = h('section', 'annex');
     sec.setAttribute('aria-label', 'Anexo do slide ' + slide.dataset.index);
+    sec.setAttribute('data-slide', slide.id);
+    sec.setAttribute('data-deck', deck);
     const head = h('header', 'annex-head');
     if (o.print) {
       head.innerHTML = '<p class="annex-kicker">Anexo · ' + esc(DECK_NAME[deck]) + ' · slide ' + esc(slide.dataset.index) + '</p>' +
@@ -965,9 +1216,10 @@
       items.forEach((it) => {
         const art = h('article', 'annex-item');
         const hh = h('h4', 'annex-h');
-        hh.innerHTML = '<span class="annex-trg">' + esc(it.label) + '</span>' +
-          (it.title && collapse(it.title).toLowerCase() !== collapse(it.label).toLowerCase()
-            ? '<span class="annex-sep" aria-hidden="true">›</span><span class="annex-ttl">' + esc(it.title) + '</span>' : '') +
+        const dup = !it.title || sameish(it.title, it.label) || (!!monthKey(it.title) && monthKey(it.title) === monthKey(it.label));
+        hh.innerHTML = '<span class="annex-trg">' + titleHTML(it.label) + '</span>' +
+          (!dup
+            ? '<span class="annex-sep" aria-hidden="true">›</span><span class="annex-ttl">' + titleHTML(it.title) + '</span>' : '') +
           (it.selo ? '<span class="selo">' + esc(it.selo) + '</span>' : '');
         art.appendChild(hh);
         art.appendChild(it.node);
@@ -986,6 +1238,7 @@
     o = o || {};
     on = !!on;
     if (on === state.reading) return;
+    const hadFocus = !on && els.reading.contains(document.activeElement);   // antes de ocultar o contêiner
     state.reading = on;
     document.body.classList.toggle('is-reading', on);
     els.reading.hidden = !on;
@@ -995,15 +1248,23 @@
       if (state.compare) setCompare(false);
       state.readingIndex = state.index;
       renderReading();
+      // o contêiner rolável recebe o foco: ↑ ↓ PageDown Espaço rolam pelo teclado (e pelo passador)
+      els.reading.tabIndex = -1;
+      try { els.reading.focus({ preventScroll: true }); } catch (e) { /* */ }
       requestAnimationFrame(() => scrollReadingTo(state.index, true));
     } else {
       if (readingIO) { readingIO.disconnect(); readingIO = null; }
-      els.rdList.replaceChildren();
+      clearClones(els.rdList);
       if (o.user && window.innerWidth < 760) state.userLeftReading = true;
       state.autoReading = false;
       const idx = state.readingIndex;
       fit();
       if (idx !== state.index) go(state.deck, idx, { fromReading: true });
+      if (hadFocus) {
+        const b = qs('.topbar [data-act="reading"]');
+        if (b && b.offsetParent) { try { b.focus({ preventScroll: true }); } catch (e) { /* */ } }
+        else if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+      }
     }
   }
   function renderReading() {
@@ -1012,7 +1273,7 @@
     els.rdTitle.textContent = 'Modo leitura · ' + DECK_NAME[state.deck];
     const notes = !!(els.rdNotes && els.rdNotes.checked);
     const list = els.rdList;
-    list.replaceChildren();
+    clearClones(list);
     decks[state.deck].forEach((sl, i) => {
       const art = h('article', 'rd-slide');
       art.dataset.index = String(i + 1);
@@ -1026,7 +1287,12 @@
     });
     if ('IntersectionObserver' in window) {
       readingIO = new IntersectionObserver((entries) => {
-        entries.forEach((en) => { if (en.isIntersecting) state.readingIndex = Number(en.target.dataset.index) || state.readingIndex; });
+        entries.forEach((en) => {
+          if (!en.isIntersecting) return;
+          state.readingIndex = Number(en.target.dataset.index) || state.readingIndex;
+          // o endereço acompanha a leitura: um link copiado aponta para o slide que está na tela
+          try { const hsh = '#' + state.deck + '-' + state.readingIndex; if (location.hash !== hsh) history.replaceState(history.state, '', hsh); } catch (e) { /* */ }
+        });
       }, { root: els.reading, rootMargin: '-35% 0px -55% 0px' });
       qsa('.rd-slide', list).forEach((a) => readingIO.observe(a));
     }
@@ -1105,9 +1371,12 @@
     const c = notesOf(el);
     els.prKey.textContent = c.key || '—';
     els.prNotes.innerHTML = c.notes || '<p>—</p>';
-    els.prPos.textContent = DECK_LABEL[state.deck] + ' · slide ' + state.index + ' de ' + count();
+    const total = stepsOf(el);
+    els.prPos.textContent = DECK_LABEL[state.deck] + ' · slide ' + state.index + ' de ' + count() +
+      (total ? ' · passo ' + state.step + ' de ' + total : '');
     const nx = decks[state.deck][state.index];
-    els.prNext.replaceChildren(nx ? makeClone(nx.id) : h('p', 'pr-end', 'Fim da proposta'));
+    clearClones(els.prNext);
+    els.prNext.appendChild(nx ? makeClone(nx.id) : h('p', 'pr-end', 'Fim da proposta'));
     els.prNextTitle.textContent = nx ? pad2(state.index + 1) + ' · ' + (nx.dataset.title || '') : '';
   }
   function togglePresenter() {
@@ -1145,11 +1414,16 @@
     try {
       switch (m.type) {
         case 'hello':
-          if (!IS_PRESENTER) { applyingRemote = false; send({ type: 'nav', deck: state.deck, index: state.index }); }
+          if (!IS_PRESENTER) { applyingRemote = false; send({ type: 'nav', deck: state.deck, index: state.index, step: state.step }); }
           break;
         case 'nav':
           if (state.reading) { state.readingIndex = m.index; }
           go(m.deck, m.index, { remote: true });
+          if (m.step) setStep(m.step, { remote: true });
+          break;
+        case 'step':
+          if (m.deck !== state.deck || m.index !== state.index) go(m.deck, m.index, { remote: true });
+          setStep(m.step, { remote: true });
           break;
         case 'click': {
           const sl = byId.get(m.slide);
@@ -1157,7 +1431,8 @@
           break;
         }
         case 'popclick': {
-          const el = qsa('[data-reveal]', els.pop)[m.idx];
+          if (!pop.open || (m.spec && pop.spec !== m.spec)) break;
+          const el = qsa(POP_SYNC_SEL, els.popBody)[m.idx];
           if (el) el.click();
           break;
         }
@@ -1177,7 +1452,12 @@
       console.error('[AxonDeck] sincronização:', err);
     } finally { applyingRemote = false; }
   }
-  window.addEventListener('message', (e) => { if (e.data && e.data.ns === 'axon-deck') receive(e.data); });
+  // postMessage só da janela do apresentador ou da que a abriu (o BroadcastChannel já é da mesma origem)
+  window.addEventListener('message', (e) => {
+    if (!e.data || e.data.ns !== 'axon-deck') return;
+    if (!e.source || (e.source !== presenterWin && e.source !== window.opener)) return;
+    receive(e.data);
+  });
 
   /* ---------------------------------------------------------------------------
      Comparar (C), ajuda (?), tela cheia (F), impressão
@@ -1187,12 +1467,12 @@
     els.compare.hidden = !state.compare;
     setPressed('compare', state.compare);
     if (state.compare) { closeReveal({ silent: true }); renderCompare(); }
-    else els.cmpRow.replaceChildren();
+    else clearClones(els.cmpRow);
   }
   function renderCompare() {
     const i = state.index;
     els.cmpTitle.textContent = 'Comparar · slide ' + i + ' nas duas propostas';
-    els.cmpRow.replaceChildren();
+    clearClones(els.cmpRow);
     ['A', 'B'].forEach((d) => {
       const sl = decks[d][i - 1];
       const fig = h('figure', 'cmp-fig');
@@ -1223,6 +1503,7 @@
     const r = qs('input[name="pp-deck"][value="' + state.deck + '"]', d);
     if (r) r.checked = true;
     closeReveal({ silent: true });
+    d.returnValue = '';   // reabrir depois de imprimir não pode herdar "print" (cancelar com Esc não imprime de novo)
     try { d.showModal(); } catch (e) { d.setAttribute('open', ''); }
   }
   function preparePrint(o) {
@@ -1258,14 +1539,32 @@
   /* ---------------------------------------------------------------------------
      Eventos
      ------------------------------------------------------------------------ */
+  /** Elementos focáveis visíveis dentro do popover (na ordem do DOM). */
+  function popFocusables() {
+    return qsa('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])', els.pop)
+      .filter((x) => !x.disabled && x.getClientRects().length > 0);
+  }
+  /** Tab no popover: sair pelo fim (ou voltar pelo início) fecha a revelação e devolve o foco ao gatilho,
+      de onde o Tab nativo continua; o popover nunca fica aberto com o foco fora dele. */
+  function onPopTab(e) {
+    const f = popFocusables();
+    const a = document.activeElement;
+    if (e.shiftKey) {
+      if (a === els.pop || a === f[0]) { e.preventDefault(); closeReveal({ restoreFocus: true }); }
+    } else if (!f.length || a === f[f.length - 1]) {
+      closeReveal({ restoreFocus: true });   // sem preventDefault: o Tab segue a partir do gatilho
+    }
+  }
+
   function onKey(e) {
     if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
     const t = e.target;
+    const k = e.key;
+    if (k === 'Tab') { if (pop.open && t && els.pop.contains(t)) onPopTab(e); return; }
     const tag = t && t.tagName;
     const typing = (tag === 'INPUT' && !/^(checkbox|radio|button|submit)$/i.test(t.type)) || tag === 'TEXTAREA' || tag === 'SELECT' || (t && t.isContentEditable);
     if (typing) return;
     if (qs('dialog[open]')) return; // diálogos tratam as próprias teclas (Esc nativo)
-    const k = e.key;
     if (k === 'Escape') {
       if (pop.open) { e.preventDefault(); closeReveal({ restoreFocus: true }); return; }
       if (state.compare) { setCompare(false); return; }
@@ -1291,11 +1590,40 @@
       default: break;
     }
     if (state.reading) {
-      if (/^[1-9]$/.test(k) && Number(k) <= count()) { scrollReadingTo(Number(k)); }
-      return; // rolagem nativa no modo leitura
+      // → ← Home End e 1–6 saltam entre slides; ↑ ↓ PageDown PageUp Espaço rolam (nativo, com o foco no contêiner)
+      const n = count();
+      const jump = (i) => { e.preventDefault(); scrollReadingTo(clamp(i, 1, n)); };
+      if (/^[1-9]$/.test(k) && Number(k) <= n) { jump(Number(k)); return; }
+      switch (k) {
+        case 'ArrowRight': jump(state.readingIndex + 1); return;
+        case 'ArrowLeft': jump(state.readingIndex - 1); return;
+        case 'Home': jump(1); return;
+        case 'End': jump(n); return;
+        case 'PageDown': case 'PageUp': case ' ': case 'Spacebar': case 'ArrowDown': case 'ArrowUp':
+          if (!els.reading.contains(document.activeElement)) {
+            // foco fora do contêiner (ex.: barra superior): rola por aqui
+            e.preventDefault();
+            const dir = (k === 'PageUp' || k === 'ArrowUp' || ((k === ' ' || k === 'Spacebar') && e.shiftKey)) ? -1 : 1;
+            const amt = /Arrow/.test(k) ? 60 : els.reading.clientHeight * 0.85;
+            els.reading.scrollBy({ top: dir * amt, behavior: reduced() ? 'auto' : 'smooth' });
+          }
+          return;
+        default: return;
+      }
+    }
+    if (pop.open && t && els.pop.contains(t)) {
+      // popover com rolagem: ↑ ↓ rolam (nativo); PageDown/PageUp/Espaço rolam até o fim ou o início e só então navegam
+      const b = els.popBody;
+      const canDown = b.scrollTop + b.clientHeight < b.scrollHeight - 2, canUp = b.scrollTop > 1;
+      const space = k === ' ' || k === 'Spacebar';
+      if (k === 'ArrowDown' || k === 'ArrowUp') return;
+      if ((k === 'PageDown' || (space && !e.shiftKey)) && canDown) { e.preventDefault(); b.scrollBy({ top: b.clientHeight * 0.85, behavior: reduced() ? 'auto' : 'smooth' }); return; }
+      if ((k === 'PageUp' || (space && e.shiftKey)) && canUp) { e.preventDefault(); b.scrollBy({ top: -b.clientHeight * 0.85, behavior: reduced() ? 'auto' : 'smooth' }); return; }
     }
     switch (k) {
-      case 'ArrowRight': case 'PageDown': case ' ': case 'Spacebar':
+      case ' ': case 'Spacebar':
+        e.preventDefault(); if (e.shiftKey) prev(); else next(); break;
+      case 'ArrowRight': case 'PageDown':
         e.preventDefault(); next(); break;
       case 'ArrowLeft': case 'PageUp':
         e.preventDefault(); prev(); break;
@@ -1311,9 +1639,12 @@
 
     // difusão de cliques para a outra janela (fase de captura)
     document.addEventListener('click', (e) => {
-      if (applyingRemote || !syncOn || !e.target || !e.target.closest) return;
-      const inPop = e.target.closest('#rvpop [data-reveal]');
-      if (inPop) { send({ type: 'popclick', idx: qsa('[data-reveal]', els.pop).indexOf(inPop) }); return; }
+      if (applyingRemote || stepping || !syncOn || !e.target || !e.target.closest) return;
+      if (e.target.closest('#rvpop')) {
+        const inPop = e.target.closest(POP_SYNC_SEL);
+        if (inPop && els.popBody.contains(inPop)) send({ type: 'popclick', spec: pop.spec, idx: qsa(POP_SYNC_SEL, els.popBody).indexOf(inPop) });
+        return;
+      }
       const slide = e.target.closest('.slide.is-active');
       if (!slide) return;
       const el = e.target.closest(SYNC_SEL);
@@ -1327,14 +1658,16 @@
       const t = e.target;
       if (!t || !t.closest) return;
       if (t.closest('.rvpop-x')) { closeReveal({ restoreFocus: true }); return; }
-      const trg = t.closest('[data-reveal]');
+      let trg = t.closest('[data-reveal]');
+      // linha de tabela clicável: o gatilho real é o botão da 1ª célula (a linha mantém a semântica de tabela)
+      if (!trg) { const row = t.closest('.slide.is-active tr.rv-row'); if (row) trg = qs('[data-reveal]', row); }
       if (trg && (trg.closest('.slide.is-active') || trg.closest('#rvpop'))) { e.preventDefault(); openReveal(trg); return; }
       const segBtn = t.closest('.seg button[data-value]');
       if (segBtn && segBtn.closest('.slide.is-active')) { setSeg(segBtn.closest('.seg'), segBtn.dataset.value, true); return; }
       const flip = t.closest('.flip');
       if (flip && flip.closest('.slide.is-active')) {
         const inner = t.closest('button, a[href], input, label, [data-reveal]');
-        if (inner && inner !== flip && flip.contains(inner)) return;
+        if (inner && inner !== flip && flip.contains(inner) && !inner.classList.contains('flip-toggle')) return;
         toggleFlip(flip);
       }
     });
@@ -1351,7 +1684,7 @@
       const t = e.target;
       if (els.pop.contains(t)) return;
       if (pop.trigger && pop.trigger.contains && pop.trigger.contains(t)) return;
-      if (t.closest && t.closest('.slide.is-active [data-reveal]')) return;
+      if (t.closest && t.closest('.slide.is-active [data-reveal], .slide.is-active tr.rv-row')) return;
       closeReveal();
     }, true);
 
@@ -1363,7 +1696,7 @@
       if (b.dataset.nav === 'prev') { prev(); return; }
       if (b.dataset.nav === 'next') { next(); return; }
       switch (b.dataset.act) {
-        case 'notes': setNotes(!state.notes); break;
+        case 'notes': if (!document.body.classList.contains('presenter')) setNotes(!state.notes); break;
         case 'reading': setReading(!state.reading, { user: true }); break;
         case 'presenter': togglePresenter(); break;
         case 'compare': setCompare(!state.compare); break;
@@ -1384,6 +1717,7 @@
       }
     });
 
+    els.popBody.addEventListener('scroll', updateMore, { passive: true });
     if (els.rdNotes) els.rdNotes.addEventListener('change', () => { const i = state.readingIndex; renderReading(); scrollReadingTo(i, true); });
 
     // diálogo de impressão
@@ -1418,11 +1752,37 @@
     window.addEventListener('hashchange', () => {
       const r = parseHash();
       if (r && (r.deck !== state.deck || r.index !== state.index)) go(r.deck, r.index, { fromHash: true, rerenderReading: true });
+      // âncora inválida (#A-9, #b-2, #C-2) volta à forma canônica do slide em exibição
+      const want = '#' + state.deck + '-' + (state.reading ? state.readingIndex : state.index);
+      if (location.hash !== want) { try { location.replace(want); } catch (e) { /* */ } }
     });
     let rz = 0;
     window.addEventListener('resize', () => { cancelAnimationFrame(rz); rz = requestAnimationFrame(() => { fit(); checkNarrow(); }); });
-    if ('ResizeObserver' in window) new ResizeObserver(() => fit()).observe(els.stage);
-    document.addEventListener('fullscreenchange', () => setPressed('fullscreen', !!document.fullscreenElement));
+    if ('ResizeObserver' in window) {
+      new ResizeObserver(() => fit()).observe(els.stage);
+      // gaveta de notas: a altura muda com a largura da janela; o palco acompanha
+      if (els.notes) new ResizeObserver(() => {
+        if (!state.notes) return;
+        document.documentElement.style.setProperty('--drawer-h', els.notes.offsetHeight + 'px');
+        fit();
+      }).observe(els.notes);
+    }
+    // tela cheia: barras recolhidas; reaparecem com o mouse perto da borda (ou com foco do teclado nelas)
+    document.addEventListener('fullscreenchange', () => {
+      const fs = !!document.fullscreenElement;
+      document.body.classList.toggle('is-fs', fs);
+      document.body.classList.remove('fs-top', 'fs-bot');
+      setPressed('fullscreen', fs);
+      requestAnimationFrame(fit);
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (!document.body.classList.contains('is-fs')) return;
+      const y = e.clientY, vh = window.innerHeight;
+      const inTop = !!(e.target && e.target.closest && e.target.closest('.topbar'));
+      const inBot = !!(e.target && e.target.closest && e.target.closest('.axonbar'));
+      document.body.classList.toggle('fs-top', y < 56 || inTop);
+      document.body.classList.toggle('fs-bot', y > vh - 64 || inBot);
+    }, { passive: true });
     const onMotion = () => document.documentElement.classList.toggle('rm', reduced());
     if (mqReduce.addEventListener) mqReduce.addEventListener('change', onMotion);
     onMotion();
@@ -1473,6 +1833,8 @@
     fit();
     go(r.deck, r.index, { initial: true, replace: true });
     state.booted = true;
+    const st0 = Number(params.get('step')) || 0;   // ?step=n: abre o slide já no passo n
+    if (st0 > 0) setStep(st0, { remote: true });
     checkNarrow();
     document.documentElement.classList.add('axon-ready');
     if (IS_PRESENTER) send({ type: 'hello' });
@@ -1481,6 +1843,8 @@
   window.AxonDeck = {
     version: '1.0.0',
     register, boot, go, next, prev, setDeck,
+    /** Vai ao passo de build n do slide atual (0 = slide recém-aberto). */
+    step: (n) => setStep(n),
     current: () => { const el = currentEl(); return { deck: state.deck, index: state.index, id: el ? el.id : null, el }; },
     slide: (id) => byId.get(id) || null,
     slides: (d) => (decks[d || state.deck] || []).slice(),
@@ -1489,7 +1853,8 @@
     flip: (el, on) => toggleFlip(el, on),
     seg: (el, value) => setSeg(el, value, true),
     gate: {
-      isOpen: (slideId, code) => { const s = gateState.get(slideId + '|' + code); const g = window.AxonReveals && window.AxonReveals.gate(code); return !!(s && g && s.size >= (g.items.length + (g.keys ? g.keys.length : 0))); },
+      isOpen: (slideId, code) => openGates.has(slideId + '|' + code),
+      list: (slideId) => Array.from(openGates).filter((k) => k.indexOf(slideId + '|') === 0).map((k) => k.split('|')[1]),
       reset: (slideId) => { const s = byId.get(slideId); if (s) resetSlide(s); }
     },
     reducedMotion: reduced,
@@ -1497,7 +1862,7 @@
     openPrint, preparePrint, endPrint,
     buildAnnex: (id, o) => { const s = byId.get(id); return s ? buildAnnex(s, o) : null; },
     get scale() { return state.scale; },
-    get state() { return { deck: state.deck, index: state.index, reading: state.reading, notes: state.notes, compare: state.compare, presenter: document.body.classList.contains('presenter') }; }
+    get state() { return { deck: state.deck, index: state.index, step: state.step, steps: stepsOf(currentEl()), reading: state.reading, notes: state.notes, compare: state.compare, presenter: document.body.classList.contains('presenter') }; }
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });

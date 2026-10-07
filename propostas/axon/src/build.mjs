@@ -87,7 +87,19 @@ for (const deck of ['A', 'B']) {
     if (v.startsWith('#')) { if (!templates.has(v.slice(1))) warn(`${file}: data-${m[1]}="${v}" sem <template id="${v.slice(1)}">`); }
     else if (!libKeys.has(v)) warn(`${file}: data-${m[1]}="${v}" não existe na biblioteca (R-01 … R-19)`);
   }
-  // escopo do CSS do deck
+  // escopo do CSS do deck: #A1…#A6 (slide) ou o conteúdo das revelações do slide, que vive fora dele:
+  // :is(#rvpop, .annex)[data-slide="A2"] · #rvpop[data-slide="A2"] · .annex[data-slide="A2"] (o motor marca os dois)
+  const scopeRe = new RegExp(`^(#${deck}[1-6]\\b|(:is\\(\\s*#rvpop\\s*,\\s*\\.annex\\s*\\)|:is\\(\\s*\\.annex\\s*,\\s*#rvpop\\s*\\)|#rvpop|\\.annex)?\\[data-slide=(["']?)${deck}[1-6]\\3\\])`);
+  const splitSel = (prelude) => {
+    const out = []; let depth = 0, cur = '';
+    for (const ch of prelude) {
+      if (ch === '(' || ch === '[') depth++;
+      else if (ch === ')' || ch === ']') depth--;
+      if (ch === ',' && depth === 0) { out.push(cur); cur = ''; } else cur += ch;
+    }
+    out.push(cur);
+    return out.map((x) => x.trim()).filter(Boolean);
+  };
   const dcss = read(`slides-${deck}.css`, false).replace(/\/\*[\s\S]*?\*\//g, '');
   const unscoped = [];
   const stack = [];
@@ -101,8 +113,8 @@ for (const deck of ['A', 'B']) {
       else {
         stack.push('rule');
         if (!inKf) {
-          for (const s of prelude.split(',').map((x) => x.trim()).filter(Boolean)) {
-            if (!new RegExp(`^#${deck}[1-6]\\b`).test(s)) unscoped.push(s);
+          for (const s of splitSel(prelude)) {
+            if (!scopeRe.test(s)) unscoped.push(s);
           }
         }
       }
@@ -110,7 +122,7 @@ for (const deck of ['A', 'B']) {
     } else if (ch === '}') { stack.pop(); last = i + 1; }
     else if (ch === ';' && !stack.includes('rule')) last = i + 1;
   }
-  if (unscoped.length) warn(`slides-${deck}.css: ${unscoped.length} seletor(es) fora do escopo #${deck}1…#${deck}6, ex.: ${unscoped.slice(0, 4).join(' | ')}`);
+  if (unscoped.length) warn(`slides-${deck}.css: ${unscoped.length} seletor(es) fora do escopo #${deck}1…#${deck}6 ou :is(#rvpop, .annex)[data-slide="${deck}n"], ex.: ${unscoped.slice(0, 4).join(' | ')}`);
 }
 
 if (errors.length) {

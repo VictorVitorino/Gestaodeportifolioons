@@ -4,21 +4,25 @@
 
    Uso:
      node shoot.cjs <arquivo.html> <pastaSaida> [--deck A|B|AB] [--reveals] [--mobile]
-                    [--print] [--notes] [--only A3,B4] [--wait 1200]
+                    [--print] [--notes] [--offline] [--only A3,B4] [--wait 2200]
 
    (a) Abre o HTML via file:// em 1600 × 900, navega pela rota de cada slide,
-       espera as animações e salva <saida>/<id>.png do canvas.
+       espera o evento slide:settled (fim da entrada animada do hook) e ao
+       menos --wait ms (padrão 2200, cobre o pulso dos pontos laranja) e
+       salva <saida>/<id>.png do canvas.
    (b) Audita cada slide: elementos fora do canvas 1280 × 720, texto cortado ou
        transbordando da caixa, sobreposição entre blocos irmãos de texto e erros
        de console.
    (c) --reveals: abre cada gatilho [data-reveal] (<id>-rv<n>.png), verifica se o
-       popover cabe no canvas e não corta texto; marca os checklists de portão e
-       confere o evento gate:open; vira cada .flip (<id>-flip<n>.png) e confere o
+       popover cabe no canvas e não corta texto (espera o evento reveal:open);
+       marca os checklists de portão e confere o evento gate:open (portão já
+       aberto na mesma visita conta como ok); vira cada .flip (<id>-flip<n>.png) e confere o
        verso; alterna cada .seg (<id>-seg<n>.png).
    (d) --mobile: 390 × 844, confere o modo leitura automático e a ausência de
        rolagem horizontal (mobile-<deck>.png e mobile-<deck>-full.png).
    (e) --print: prepara a impressão "Ambas" (A e depois B), gera print-AB.pdf e
        informa o número de páginas (com --notes, inclui as notas).
+   (f) --offline: bloqueia o Google Fonts para testar o fallback (arquivo aberto sem rede).
    Saída: JSON resumido no stdout; relatório completo em <saida>/report.json.
    ========================================================================== */
 'use strict';
@@ -29,17 +33,18 @@ const path = require('path');
 
 /* ---------- argumentos ---------- */
 const argv = process.argv.slice(2);
-const opts = { deck: 'AB', reveals: false, mobile: false, print: false, notes: false, only: null, wait: 1200 };
+const opts = { deck: 'AB', reveals: false, mobile: false, print: false, notes: false, offline: false, only: null, wait: 2200 };
 const pos = [];
 for (let i = 0; i < argv.length; i++) {
   const a = argv[i];
   if (a === '--deck') opts.deck = String(argv[++i] || 'AB').toUpperCase();
   else if (a === '--only') opts.only = String(argv[++i] || '').toUpperCase().split(',').filter(Boolean);
-  else if (a === '--wait') opts.wait = Number(argv[++i]) || 1200;
+  else if (a === '--wait') opts.wait = Number(argv[++i]) || 2200;
   else if (a === '--reveals') opts.reveals = true;
   else if (a === '--mobile') opts.mobile = true;
   else if (a === '--print') opts.print = true;
   else if (a === '--notes') opts.notes = true;
+  else if (a === '--offline') opts.offline = true;
   else if (a === '--help' || a === '-h') { console.log(fs.readFileSync(__filename, 'utf8').split('\n').slice(1, 22).join('\n')); process.exit(0); }
   else pos.push(a);
 }
@@ -70,7 +75,7 @@ function auditSlide(id) {
     return t ? d + ' «' + t + '»' : d;
   };
   const inSvg = (el) => el.parentElement && el.parentElement.closest('svg');
-  const skip = (el) => el.closest('.notes, .keymsg, template, [data-qa-ignore], .flip-back, .impulse') || inSvg(el) || /^(SCRIPT|STYLE|TEMPLATE|BR)$/.test(el.tagName);
+  const skip = (el) => el.closest('.notes, .keymsg, template, [data-qa-ignore], .sr-only, .flip-back, .impulse') || inSvg(el) || /^(SCRIPT|STYLE|TEMPLATE|BR)$/.test(el.tagName);
   const vis = (el) => {
     const cs = getComputedStyle(el);
     if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity) === 0) return false;
@@ -170,6 +175,7 @@ function popState() {
   const watch = (page, tag) => {
     page.on('console', (m) => {
       const t = m.type();
+      if (t === 'error' && opts.offline && /Failed to load resource/.test(m.text())) return; // esperado sem rede (fontes)
       if (t === 'error') report.console.push({ where: tag + ':' + cur, text: m.text() });
       else if (t === 'warning') report.warnings.push({ where: tag + ':' + cur, text: m.text() });
     });
@@ -178,6 +184,8 @@ function popState() {
   };
 
   const ctx = await browser.newContext({ viewport: { width: 1600, height: 900 }, deviceScaleFactor: 1 });
+  const offline = async (c) => { if (opts.offline) await c.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort()); };
+  await offline(ctx);
   const page = await ctx.newPage();
   watch(page, 'desktop');
   await page.goto(URL + '#' + DECKS[0] + '-1', { waitUntil: 'load' });
@@ -193,12 +201,20 @@ function popState() {
       if (opts.only && !opts.only.includes(id)) continue;
       cur = id;
       const before = report.console.length + report.pageErrors.length;
+      const t0 = Date.now();
+      await page.evaluate((sid) => {
+        window.__settled = false;
+        const sl = document.getElementById(sid);
+        if (sl) sl.addEventListener('slide:settled', () => { window.__settled = true; }, { once: true });
+      }, id);
       await page.evaluate((h) => { location.hash = h; }, '#' + d + '-' + i);
-      await sleep(opts.wait);
+      let settled = true;
+      try { await page.waitForFunction(() => window.__settled === true, null, { timeout: 6000, polling: 50 }); } catch (e) { settled = false; }
+      await sleep(Math.max(150, opts.wait - (Date.now() - t0)));
       const active = await page.evaluate(() => window.AxonDeck.current().id);
       await page.locator('#canvas').screenshot({ path: path.join(OUT, id + '.png') });
       const a = await page.evaluate(auditSlide, id);
-      const entry = { active: active === id, overflow: a.overflow, clipped: a.clipped, overlap: a.overlap, reveals: [], flips: [], segs: [] };
+      const entry = { active: active === id, settled, overflow: a.overflow, clipped: a.clipped, overlap: a.overlap, reveals: [], flips: [], segs: [] };
 
       if (opts.reveals) {
         await page.evaluate((sid) => {
@@ -220,11 +236,17 @@ function popState() {
           if (!info.visible) { entry.reveals.push(Object.assign(info, { skipped: 'invisível' })); continue; }
           const h = (await page.$$('#' + id + ' [data-reveal]'))[k];
           let covered = false;
+          await page.evaluate(() => {
+            window.__rvOpen = false;
+            document.addEventListener('reveal:open', () => { window.__rvOpen = true; }, { once: true });
+          });
           try { await h.click({ timeout: 1500 }); } catch (e) {
             covered = true;
             await page.evaluate(([sid, k]) => document.getElementById(sid).querySelectorAll('[data-reveal]')[k].click(), [id, k]);
           }
-          await sleep(320);
+          // gatilhos que animam antes de abrir (ex.: impulso pela sinapse) abrem depois do clique
+          try { await page.waitForFunction(() => window.__rvOpen === true, null, { timeout: 2500, polling: 30 }); } catch (e) { /* não abriu: o popState acusa */ }
+          await sleep(220);   // entrada do popover (170 ms)
           const st = await page.evaluate(popState);
           shot++;
           await page.locator('#canvas').screenshot({ path: path.join(OUT, id + '-rv' + shot + '.png') });
@@ -241,10 +263,16 @@ function popState() {
           }
           if (covered) prob.push('gatilho coberto por outro elemento (clique real falhou)');
           if (st.open && st.gates) {
+            // portão já aberto nesta visita (outro gatilho do mesmo portão): o estado persiste, não há novo gate:open
+            const already = await page.evaluate(() => {
+              const gs = Array.from(document.querySelectorAll('#rvpop .gate'));
+              return gs.length > 0 && gs.every((g) => g.classList.contains('is-open'));
+            });
             await page.evaluate(() => document.querySelectorAll('#rvpop .gate input[type="checkbox"]').forEach((c) => { if (!c.checked) c.click(); }));
             await sleep(450);
             const g = await page.evaluate(() => window.__gates.slice());
-            item.gateOpened = g.length > 0;
+            item.gateOpened = g.length > 0 || already;
+            if (already) item.gateAlreadyOpen = true;
             if (!item.gateOpened) prob.push('portão não disparou gate:open');
             await page.locator('#canvas').screenshot({ path: path.join(OUT, id + '-rv' + shot + '-gate.png') });
             await page.evaluate(() => { window.__gates = []; });
@@ -267,7 +295,8 @@ function popState() {
             const fl = document.getElementById(sid).querySelectorAll('.flip')[k];
             const b = fl.querySelector('.flip-back'), fr = fl.querySelector('.flip-front');
             const ov = (x) => x ? { dh: x.scrollHeight - x.clientHeight, dw: x.scrollWidth - x.clientWidth } : null;
-            return { flipped: fl.classList.contains('is-flipped'), pressed: fl.getAttribute('aria-pressed'), back: ov(b), front: ov(fr),
+            const tg = fl.querySelector(':scope > .flip-toggle');   // carta-grupo (controles dentro): o estado fica no botão de virar
+            return { flipped: fl.classList.contains('is-flipped'), pressed: (tg || fl).getAttribute('aria-pressed'), back: ov(b), front: ov(fr),
               label: (fl.getAttribute('data-label') || (fr ? fr.textContent : '')).replace(/\s+/g, ' ').trim().slice(0, 60) };
           }, [id, k]);
           f.problems = [];
@@ -303,6 +332,7 @@ function popState() {
     report.mobile = {};
     for (const d of DECKS) {
       const mctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
+      await offline(mctx);
       const mp = await mctx.newPage();
       cur = 'mobile-' + d;
       watch(mp, 'mobile');
@@ -385,6 +415,7 @@ function popState() {
     const fp = e.flips.filter((f) => f.problems.length).length;
     const sp = e.segs.filter((s) => s.clipped.length || s.overlap.length || s.overflow.length).length;
     totals.overflow += e.overflow.length; totals.clipped += e.clipped.length; totals.overlap += e.overlap.length;
+    if (!e.settled) totals.notSettled = (totals.notSettled || 0) + 1;
     totals.revealProblems += rp; totals.flipProblems += fp; totals.segProblems += sp;
     per[id] = {
       overflow: e.overflow.length, clipped: e.clipped.length, overlap: e.overlap.length, console: e.consoleErrors,
@@ -399,7 +430,7 @@ function popState() {
   }
   fs.writeFileSync(path.join(OUT, 'report.json'), JSON.stringify(report, null, 2));
   const summary = {
-    file: HTML, out: OUT, fontsLoaded: report.fontsLoaded.length > 0, engine: report.engine,
+    file: HTML, out: OUT, fontsLoaded: report.fontsLoaded.length > 0, offline: opts.offline, engine: report.engine,
     totals, slides: per,
     consoleErrors: report.console.concat(report.pageErrors).slice(0, 10),
     warnings: report.warnings.length,

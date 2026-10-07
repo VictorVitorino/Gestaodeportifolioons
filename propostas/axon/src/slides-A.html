@@ -1,18 +1,18 @@
 <!-- =========================================================================
-     slides-A.html · STUB DO MOTOR (provisório). Os autores do deck A substituem
-     este arquivo. Cada seção demonstra componentes do design system com a copy
-     do roteiro: cabeçalho, marca (injetada), rodapé, número (injetado), carta
-     flip, gatilho de revelação R-xx e portão.
+     slides-A.html · Proposta A · GMO (Gestão de Mudanças) · 6 slides
+     Fonte da verdade: ../02-roteiro-propostas.md, seção 2 (A1 a A6).
+     Posições em px de canvas (1280 × 720). Marca e número: injetados pelo motor.
+     DOM repetitivo (heatmap do A2) é gerado em slides-A.js (init).
      ======================================================================= -->
 
-<!-- A1 ················································································ -->
+<!-- A1 · O que vamos entregar ··············································· -->
 <section class="slide" id="A1" data-deck="A" data-index="1" data-title="O que vamos entregar">
   <header class="hdr">
-    <h1 class="hdr-title"><button class="rv-link" data-reveal="R-02" data-label="Axon (no título)">Axon</button><span class="pipe" aria-hidden="true"></span>Proposta de Gestão de Mudanças</h1>
+    <h1 class="hdr-title"><button class="rv-link a1-axon" data-reveal="R-02" data-label="Axon (no título)">Axon</button><span class="pipe" aria-hidden="true"></span>Proposta de Gestão de Mudanças</h1>
     <p class="hdr-sub">Do MVP ao hábito nas cinco gerências: o processo permanece, muda o como.</p>
   </header>
 
-  <div class="kpis">
+  <div class="kpis a1-kpis">
     <div class="kpi"><span class="kpi-num">5 gerências</span><span class="kpi-lbl">PE • PR • PL • OS • PD</span></div>
     <div class="kpi"><span class="kpi-num">≥ 6 meses</span><span class="kpi-lbl">horizonte mínimo</span></div>
     <button class="kpi rv dot" data-reveal="R-01" data-pick="mvp;ambicao" data-label="MVP em produção*"><span class="kpi-num">MVP em produção*</span><span class="kpi-lbl">2 times pioneiros</span></button>
@@ -20,31 +20,40 @@
 
   <div class="a1-left at" style="--x:50;--y:240;--w:770;--h:390">
     <div class="fiber fiber--v a1-fiber" aria-hidden="true">
-      <span class="node" style="--at:15.4"></span><span class="node" style="--at:50"></span><span class="node" style="--at:84.6"></span>
+      <span class="node" style="--at:12.82"></span><span class="node" style="--at:48.72"></span><span class="node" style="--at:85.9"></span>
       <span class="impulse"></span>
     </div>
+
     <div class="card card--row a1-card a1-perm">
       <p class="card-title">O que permanece</p>
       <p class="card-text">O macroprocesso: o estudo que a área roda três vezes por semana segue rodando.</p>
     </div>
-    <div class="flip a1-card a1-muda dot" data-label="O que muda (vire a carta)">
-      <div class="flip-front card--row">
+
+    <div class="flip a1-card a1-muda dot" data-label="O que muda, na prática">
+      <div class="flip-front">
         <p class="card-title">O que muda</p>
         <div>
           <p class="card-text">O como: arquivos de definição viram tela de parâmetros; rodadas viram pipelines; o custo fica visível.</p>
-          <div class="a1-jobs row" style="--gap:6">
+          <div class="a1-jobs">
             <span class="a1-job">Job 1</span><i class="chev chev--sm" aria-hidden="true"></i>
             <span class="a1-job">Job 2</span><i class="chev chev--sm" aria-hidden="true"></i>
             <span class="a1-job">Job 3</span>
-            <button class="btn btn--play a1-run" data-annex="O impulso percorre Job 1 › Job 2 › Job 3 e abre o cartão de evidências do MVP.">Rodar</button>
+            <button class="btn btn--play a1-run" data-build="1" aria-label="Rodar o pipeline de exemplo e ver as evidências do MVP">Rodar</button>
             <span class="impulse" aria-hidden="true"></span>
           </div>
         </div>
       </div>
       <div class="flip-back">
-        <p><strong>Configurar:</strong> arquivos de definição viram tela de parâmetros, salva por estudo e duplicável. <strong>Executar:</strong> pipeline de arrastar e soltar, orquestrado pelos contratos de entrada e saída. <strong>Custo:</strong> visível por rodada, no orçamento do time. <strong>IA (MCP):</strong> preenche parâmetros quando você pede; você aprova. <strong>Agentes do setor:</strong> retorno pela Caixa de Entrada, pelo mesmo canal de hoje.</p>
+        <div class="a1-chg">
+          <p><strong>Configurar:</strong> arquivos de definição viram tela de parâmetros, salva por estudo e duplicável.</p>
+          <p><strong>Executar:</strong> pipeline de arrastar e soltar, orquestrado pelos contratos de entrada e saída.</p>
+          <p><strong>Custo:</strong> visível por rodada, no orçamento do time.</p>
+          <p><strong>IA (MCP):</strong> preenche parâmetros quando você pede; você aprova.</p>
+          <p><strong>Agentes do setor:</strong> retorno pela Caixa de Entrada, pelo mesmo canal de hoje.</p>
+        </div>
       </div>
     </div>
+
     <button class="card card--row rv dot a1-card a1-nasce" data-reveal="#tpl-a1-nasce" data-label="O que nasce">
       <span class="card-title">O que nasce</span>
       <span class="card-text">Papéis novos: Guardiões do Legado, arquitetos de estudos, curadores de modelos e gestores de orçamento.</span>
@@ -60,74 +69,131 @@
       <li><span class="n">03</span>Capacidade liberada com destino</li>
       <li><span class="n">04</span>Voz das pessoas no produto</li>
     </ol>
-    <p class="a1-method"><button class="rv-link" data-reveal="#tpl-a1-metodo" data-label="Método">Método: ADKAR · Bridges · ondas com portões</button><span class="gt" aria-hidden="true">›</span></p>
+    <p class="a1-method"><button class="rv-link" data-reveal="#tpl-a1-metodo" data-label="Método: ADKAR · Bridges · ondas com portões">Método: ADKAR · Bridges · ondas com portões</button><span class="gt" aria-hidden="true">›</span></p>
   </div>
 
-  <footer class="foot">*Informado pelo time do produto, a validar. Impactos e calendário confirmados no diagnóstico.</footer>
+  <footer class="foot">*Informado pelo time do produto, a validar. Impactos e calendário serão confirmados no diagnóstico.</footer>
 
-  <template id="tpl-a1-nasce" data-title="Papéis que nascem">
-    <p><strong>Guardião do Legado:</strong> define casos de teste e valida a equivalência dos resultados. <strong>Arquiteto de estudos:</strong> desenha, compara e analisa estudos na tela de parâmetros. <strong>Curador de modelos:</strong> mantém containers, contratos e documentação fiel ao código. <strong>Gestor de orçamento:</strong> planeja e acompanha o custo de nuvem do time. Todos a validar no diagnóstico.</p>
+  <template id="tpl-a1-nasce" data-title="Papéis que nascem" data-w="380">
+    <p><strong>Guardião do Legado:</strong> define casos de teste e valida a equivalência dos resultados.</p>
+    <p><strong>Arquiteto de estudos:</strong> desenha, compara e analisa estudos na tela de parâmetros.</p>
+    <p><strong>Curador de modelos:</strong> mantém containers, contratos e documentação fiel ao código.</p>
+    <p><strong>Gestor de orçamento:</strong> planeja e acompanha o custo de nuvem do time.</p>
+    <p class="rv-flag">Todos a validar no diagnóstico.</p>
   </template>
-  <template id="tpl-a1-metodo" data-title="Método">
+  <template id="tpl-a1-metodo" data-title="Método" data-w="380">
     <p><strong>ADKAR</strong> acompanha cada pessoa: consciência, desejo, conhecimento, habilidade e reforço.</p>
     <p><strong>Bridges</strong> cuida da transição: toda mudança começa por um fim, atravessa uma zona neutra e só então vira novo começo.</p>
     <p><strong>Ondas com portões:</strong> cada grupo entra quando está pronto, nunca por data.</p>
-    <div data-include="R-16" data-pick="◆1"></div>
+  </template>
+  <template class="annex" data-title="▶ Rodar · Job 1 › Job 2 › Job 3">
+    <p>O impulso atravessa os jobs como num pipeline real e abre as evidências do MVP.</p>
+    <div data-include="R-01"></div>
   </template>
 
   <aside class="notes"><p>Começamos pelo que não muda, porque é isso que reduz a ansiedade: o macroprocesso e a responsabilidade de cada gerência ficam onde estão. A aposta central é que quem domina os legados se torne autor do novo jeito de trabalhar, e não alvo dele. Os números do MVP são do time do produto e viram linha de base no diagnóstico.</p></aside>
   <p class="keymsg" hidden>O ONS não muda o que faz; muda como faz, e quem domina o como de hoje desenha o de amanhã.</p>
 </section>
 
-<!-- A2 ················································································ -->
+<!-- A2 · Mapa de impactos no nível da atividade ···························· -->
 <section class="slide" id="A2" data-deck="A" data-index="2" data-title="Mapa de impactos no nível da atividade">
   <header class="hdr">
     <h1 class="hdr-title">Mapa de impactos: muda o como, não o porquê</h1>
     <p class="hdr-sub">Cinco gerências × sete perfis, lidos no nível da atividade, a partir dos pioneiros e validados pelos responsáveis.</p>
   </header>
 
-  <p class="lbl at" style="--x:50;--y:166">Mapa de impactos<span class="pipe" aria-hidden="true"></span>Gerência × perfil</p>
-  <div class="hm a2-hm at" style="--x:50;--y:192;--w:720">
-    <span class="hm-rowh a2-h">Perfil</span><span class="hm-rowh a2-h">Hipótese</span>
-    <span class="hm-colh">PE</span><span class="hm-colh">PR</span><span class="hm-colh">PL</span><span class="hm-colh">OS</span><span class="hm-colh">PD</span>
-    <!-- linhas geradas pelo hook A2.init a partir de data-rows -->
+  <p class="lbl at" style="--x:50;--y:160">Mapa de impactos<span class="pipe" aria-hidden="true"></span>Gerência × perfil</p>
+  <div class="hm a2-hm at" style="--x:50;--y:188;--w:720">
+    <span class="a2-h">Perfil</span><span class="a2-h a2-h--c">Hipótese</span>
+    <button class="hm-colh rv a2-colh" style="--c:0" data-reveal="#tpl-a2-camadas" data-reveal-title="PE em três camadas" data-ger="PE" data-label="Cabeçalho de gerência" aria-label="PE: abrir em três camadas">PE</button>
+    <button class="hm-colh rv a2-colh" style="--c:1" data-reveal="#tpl-a2-camadas" data-reveal-title="PR em três camadas" data-ger="PR" data-label="Cabeçalho de gerência" aria-label="PR: abrir em três camadas">PR</button>
+    <button class="hm-colh rv a2-colh" style="--c:2" data-reveal="#tpl-a2-camadas" data-reveal-title="PL em três camadas" data-ger="PL" data-label="Cabeçalho de gerência" aria-label="PL: abrir em três camadas">PL</button>
+    <button class="hm-colh rv a2-colh" style="--c:3" data-reveal="#tpl-a2-camadas" data-reveal-title="OS em três camadas" data-ger="OS" data-label="Cabeçalho de gerência" aria-label="OS: abrir em três camadas">OS</button>
+    <button class="hm-colh rv a2-colh" style="--c:4" data-reveal="#tpl-a2-camadas" data-reveal-title="PD em três camadas" data-ger="PD" data-label="Cabeçalho de gerência" aria-label="PD: abrir em três camadas">PD</button>
+    <!-- sete linhas (perfil, hipótese e 35 células) geradas por A2.init -->
   </div>
-  <div class="hm-legend at a2-legend" style="--x:50;--y:540;--w:720">
-    <span><i class="sw sw--map"></i>a mapear</span><span><i class="sw sw--hyp"></i>hipótese</span><span><i class="sw sw--val"></i>validado</span><span><i class="sw sw--act"></i>em ação</span>
-    <span>· <button class="rv-link" data-reveal="#tpl-a2-ti" data-label="TI/Infra">TI/Infra: transversal</button></span>
-    <button class="gate-mark a2-gate" data-reveal="R-16" data-pick="◆2" aria-label="Portão ◆2: antes de cada onda"><span class="diamond diamond--num" aria-hidden="true"><span>2</span></span>Antes de cada onda</button>
+  <div class="a2-legend at" style="--x:50;--y:574;--w:720">
+    <button class="a2-leg" data-annex="Exemplo ilustrativo: uma única célula percorre os três estados, a mapear › hipótese › validado." aria-label="Legenda: ver uma célula de exemplo percorrer os três estados"><span><i class="sw sw--map"></i>a mapear</span><span><i class="sw sw--hyp"></i>hipótese</span><span><i class="sw sw--val"></i>validado</span></button>
+    <span class="a2-sep" aria-hidden="true">·</span>
+    <button class="rv-link a2-ti" data-reveal="#tpl-a2-ti" data-label="TI/Infra: transversal">TI/Infra: transversal</button>
+  </div>
+  <div class="a2-demo at" style="--x:50;--y:606;--w:720" aria-live="polite">
+    <span class="selo">exemplo ilustrativo</span>
+    <span class="hm-cell a2-demo-cell" aria-hidden="true"></span>
+    <span class="a2-demo-st"><span data-st="map">a mapear</span><i class="chev chev--sm" aria-hidden="true"></i><span data-st="hyp">hipótese</span><i class="chev chev--sm" aria-hidden="true"></i><span data-st="val">validado</span></span>
   </div>
 
-  <div class="at a2-right" style="--x:800;--y:160;--w:430;--h:470">
+  <div class="at a2-right" style="--x:800;--y:160;--w:430;--h:466">
     <p class="lbl">Lupa em três níveis</p>
     <ol class="a2-lupa">
-      <li class="is-fixed"><span>Macroprocesso</span><i class="chev chev--sm" aria-hidden="true"></i><span>permanece</span></li>
-      <li><span>Atividade</span><i class="chev chev--sm" aria-hidden="true"></i><span>muda o como</span></li>
-      <li><span>Tarefa</span><i class="chev chev--sm" aria-hidden="true"></i><span>passa ao Axon</span></li>
+      <li class="is-fixed"><span class="a2-lv">Macroprocesso</span><i class="chev chev--sm" aria-hidden="true"></i><span>permanece</span></li>
+      <li><span class="a2-lv">Atividade</span><i class="chev chev--sm" aria-hidden="true"></i><span>muda o como</span></li>
+      <li><span class="a2-lv">Tarefa</span><i class="chev chev--sm" aria-hidden="true"></i><span>passa ao Axon</span></li>
     </ol>
+
     <div class="card card--white a2-tempo">
-      <div class="row a2-tempo-h"><p class="lbl fill">Uma atividade em dois tempos</p>
-        <div class="seg" data-target="#a2-tempo" aria-label="Uma atividade em dois tempos"><button data-value="hoje">Hoje</button><button data-value="axon">Com Axon</button></div>
+      <div class="a2-tempo-h">
+        <p class="lbl">Uma atividade em dois tempos</p>
+        <div class="seg" data-target="#a2-tempo" aria-label="Uma atividade em dois tempos"><button data-value="hoje">Hoje</button><button data-value="axon" data-build="1">Com Axon</button></div>
       </div>
-      <div id="a2-tempo" class="a2-tempo-b">
-        <p data-when="hoje"><strong>Hoje:</strong> edita arquivos de definição › dispara a rodada › confere e envia o resultado.</p>
-        <p data-when="axon"><strong>Com Axon:</strong> ajusta parâmetros na tela › o pipeline orquestra › o resultado vai ao catálogo ou ao Axon Drive.</p>
+      <p class="a2-fixo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><circle cx="12" cy="12" r="4.5"/></svg><span>A área roda o estudo três vezes por semana para a programação.</span></p>
+      <div id="a2-tempo" class="a2-flow">
+        <p class="sr-only" data-when="hoje">Hoje: edita arquivos de definição › dispara a rodada › confere e envia o resultado.</p>
+        <p class="sr-only" data-when="axon">Com Axon: ajusta parâmetros na tela › o pipeline orquestra › o resultado vai ao catálogo ou ao Axon Drive.</p>
+        <div class="a2-steps" aria-hidden="true">
+          <div class="a2-s" data-face="hoje">
+            <span class="a2-f a2-f--hoje"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg>Edita arquivos de definição</span>
+            <span class="a2-f a2-f--axon"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h11M19 17h1"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17" r="2"/></svg>Ajusta parâmetros na tela</span>
+          </div>
+          <i class="chev chev--sm" aria-hidden="true"></i>
+          <div class="a2-s" data-face="hoje">
+            <span class="a2-f a2-f--hoje"><svg viewBox="0 0 24 24"><path d="M6 3.5l12 7-5.2 1.6L10 17.5z"/><path d="M13 12.3l4.5 6"/></svg>Dispara a rodada</span>
+            <span class="a2-f a2-f--axon"><svg viewBox="0 0 24 24"><rect x="2.5" y="9" width="5" height="6" rx="1"/><rect x="16.5" y="3.5" width="5" height="6" rx="1"/><rect x="16.5" y="14.5" width="5" height="6" rx="1"/><path d="M7.5 12h4V6.5h5M11.5 12v5.5h5"/></svg>O pipeline orquestra</span>
+          </div>
+          <i class="chev chev--sm" aria-hidden="true"></i>
+          <div class="a2-s" data-face="hoje">
+            <span class="a2-f a2-f--hoje"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12.5" rx="1.5"/><path d="M3.5 7l8.5 6 8.5-6"/></svg>Confere e envia o resultado</span>
+            <span class="a2-f a2-f--axon"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="2.5"/><path d="M5 6v12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5"/></svg>O resultado vai ao catálogo ou ao Axon Drive</span>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="flip a2-oculta dot" data-label="Mudança oculta (vire a carta)">
-      <div class="flip-front callout">
-        <p class="callout-lbl">Mudança oculta</p>
-        <p class="callout-text">Cada time passa a gerir o próprio orçamento de nuvem.</p>
-      </div>
-      <div class="flip-back">
-        <p>O Axon mostra o custo de cada rodada antes de executar e permite orçamento mensal ou anual por time (exemplo citado pelo time do produto: menos de US$&nbsp;0,01 por rodada em fan-out, a validar). Autonomia nova, responsabilidade nova: escolher máquina, dimensionar o fan-out e responder pelo orçamento.</p>
-      </div>
-    </div>
+
+    <button class="callout rv dot a2-oculta" data-reveal="#tpl-a2-oculta" data-label="Mudança oculta"><span class="callout-lbl">Mudança oculta</span><span class="callout-text">Cada time passa a gerir o próprio orçamento de nuvem.</span></button>
   </div>
 
   <footer class="foot">Método: escuta dos pioneiros, observação de rotinas e oficinas por gerência. Nenhuma célula é preenchida sem evidência.</footer>
 
-  <template id="tpl-a2-ti" data-title="TI/Infra">
+  <template id="tpl-a2-camadas" data-title="A gerência em três camadas" data-w="360">
+    <div class="a2l">
+      <p class="a2l-1"><strong>Macroprocesso</strong> · permanece</p>
+      <p class="a2l-2"><strong>Atividades</strong> · a levantar no diagnóstico</p>
+      <p class="a2l-3"><strong>Tarefas</strong> · a levantar no diagnóstico</p>
+    </div>
+    <p class="rv-note">O macroprocesso não se move; a leitura desce até a atividade e a tarefa.</p>
+  </template>
+  <template id="tpl-a2-oculta" data-title="Mudança oculta" data-w="400">
+    <p>O Axon mostra o custo de cada rodada antes de executar e permite orçamento mensal ou anual por time (exemplo citado pelo time do produto: menos de US$&nbsp;0,01 por rodada em fan-out, a validar).</p>
+    <p>Autonomia nova, responsabilidade nova: escolher máquina, dimensionar o fan-out e responder pelo orçamento.</p>
+    <p>Ninguém pediu essa mudança; por isso ela entra no mapa, ganha trilha própria e aparece no Axon Live.</p>
+  </template>
+  <template id="tpl-a2-agentes" data-title="Agentes do setor (externos)" data-w="400">
+    <p class="rv-sub">O laço da Caixa de Entrada</p>
+    <div class="rv-loop">
+      <p class="rv-loop-b">Axon processa</p>
+      <i class="chev chev--sm" aria-hidden="true"></i>
+      <p class="rv-loop-b">encontra erro</p>
+      <i class="chev chev--sm rv-loop-up" aria-hidden="true"></i>
+      <span></span>
+      <i class="chev chev--sm rv-loop-down" aria-hidden="true"></i>
+      <p class="rv-loop-b rv-loop-b--navy">agentes do setor recebem pelo canal de sempre</p>
+      <i class="chev chev--sm rv-loop-back" aria-hidden="true"></i>
+      <p class="rv-loop-b">notifica a Caixa de Entrada</p>
+    </div>
+    <p class="rv-flag">Agentes do setor ≠ agentes de IA.</p>
+    <div data-include="R-07" data-pick="Agentes do setor"></div>
+  </template>
+  <template id="tpl-a2-ti" data-title="TI/Infra" data-w="360">
     <p>Aliada crítica, não perfil impactado: coautora das regras de segurança, identidade, ambientes e uso da IA, com cadeira fixa no fórum quinzenal.</p>
   </template>
 
@@ -135,14 +201,14 @@
   <p class="keymsg" hidden>Não mapeamos sistemas nem pessoas: mapeamos o gesto que muda em cada atividade.</p>
 </section>
 
-<!-- A3 ················································································ -->
+<!-- A3 · Do domínio do legado à autoria do novo ···························· -->
 <section class="slide" id="A3" data-deck="A" data-index="3" data-title="Do domínio do legado à autoria do novo">
   <header class="hdr">
     <h1 class="hdr-title">Do domínio do legado à autoria do novo</h1>
     <p class="hdr-sub">Toda capacidade liberada tem destino: reconhecer, requalificar, realocar e reinventar, com o menor impacto possível.</p>
   </header>
 
-  <div class="steps at a3-steps" style="--x:50;--y:160;--w:1180;--h:170">
+  <div class="steps at a3-steps" style="--x:50;--y:160;--w:1180;--h:136">
     <button class="step rv dot" data-reveal="R-13" data-pick="Reconhecer" data-label="01 Reconhecer"><span class="step-head"><span class="num">01</span>Reconhecer</span><span class="step-body">Nomear o que termina e dar crédito a quem construiu e manteve os legados.</span></button>
     <i class="chev" aria-hidden="true"></i>
     <button class="step rv dot" data-reveal="R-13" data-pick="Requalificar" data-label="02 Requalificar"><span class="step-head"><span class="num">02</span>Requalificar</span><span class="step-body">Trilhas por perfil, com prática em estudos reais do próprio time.</span></button>
@@ -150,136 +216,188 @@
     <button class="step rv dot" data-reveal="R-13" data-pick="Realocar" data-label="03 Realocar"><span class="step-head"><span class="num">03</span>Realocar</span><span class="step-body">Levar capacidade às frentes do ONS que precisam dela.</span></button>
     <i class="chev" aria-hidden="true"></i>
     <button class="step rv dot" data-reveal="R-13" data-pick="Reinventar" data-label="04 Reinventar"><span class="step-head"><span class="num">04</span>Reinventar</span><span class="step-body">Novas atividades: desenho e análise de estudos, curadoria de modelos, orçamento de nuvem.</span></button>
+    <span class="impulse" aria-hidden="true"></span>
   </div>
 
-  <button class="band rv dot at a3-band" style="--x:50;--y:345;--w:1180;--h:80" data-reveal="#tpl-a3-guardioes" data-label="Guardiões do Legado">
+  <button class="band rv dot at a3-band" style="--x:50;--y:314;--w:1180;--h:78" data-reveal="#tpl-a3-guardioes" data-label="Guardiões do Legado" data-build="1">
     <span class="band-lbl">Guardiões do Legado</span>
-    <span><span class="band-main" style="display:block">Quem conhece o legado valida o futuro.</span>
-    <span class="band-text" style="display:block">Especialistas dos sistemas atuais definem os casos de teste, validam a equivalência dos resultados e conduzem a passagem de bastão.</span></span>
+    <span class="a3-band-txt"><span class="band-main">Quem conhece o legado valida o futuro.</span><span class="band-text">Especialistas dos sistemas atuais definem os casos de teste, validam a equivalência dos resultados e conduzem a passagem de bastão.</span></span>
   </button>
 
-  <div class="row at a3-risk-h" style="--x:50;--y:443;--w:1180">
-    <p class="lbl fill">Riscos a investigar</p>
-    <button class="gate-mark" data-reveal="R-16" data-pick="◆3" aria-label="Portão ◆3: antes de desligar um legado"><span class="diamond diamond--num" aria-hidden="true"><span>3</span></span>Antes de desligar um legado</button>
-  </div>
-  <div class="grid at a3-risks flip-group" style="--x:50;--y:472;--w:1180;--h:176;--cols:5;--gap:12">
-    <div class="flip dot"><div class="flip-front"><p class="flip-q">Receio de perder posicionamento</p></div><div class="flip-back" data-include="R-15" data-pick="Receio de perder"></div></div>
-    <div class="flip dot"><div class="flip-front"><p class="flip-q">Perda de conhecimento tácito</p></div><div class="flip-back" data-include="R-15" data-pick="Perda de conhecimento"></div></div>
-    <div class="flip dot"><div class="flip-front"><p class="flip-q">Sobrecarga na convivência</p></div><div class="flip-back" data-include="R-15" data-pick="Sobrecarga"></div></div>
-    <div class="flip dot"><div class="flip-front"><p class="flip-q">Controles paralelos</p></div><div class="flip-back" data-include="R-15" data-pick="Controles paralelos"></div></div>
-    <div class="flip dot"><div class="flip-front"><p class="flip-q">Quem não quer mudar</p></div><div class="flip-back"><p>Conversa individual com a liderança e Pessoas/RH; identificar a barreira (ADKAR); oferecer tempo de convivência, mentoria em dupla “veterano do legado + nativo do Axon” e alternativas internas reais. Decisão respeitosa e documentada.</p></div></div>
+  <svg class="a3-links" viewBox="0 0 1280 720" aria-hidden="true">
+    <circle cx="330" cy="393" r="3.5"/>
+    <path d="M330 394 C330 418 250 414 250 439"/>
+    <path d="M330 394 C330 418 401 414 401 439"/>
+  </svg>
+
+  <p class="lbl at" style="--x:50;--y:414">Riscos a investigar</p>
+  <div class="grid at a3-risks flip-group" style="--x:50;--y:440;--w:1180;--h:160;--cols:5;--gap:12">
+    <div class="flip flip--light flip--grow flip--up a3-risk a3-r1" data-label="Receio de perder posicionamento"><div class="flip-front"><p class="flip-q">Receio de perder posicionamento</p><p class="a3-more">Resposta e evidência<span class="gt" aria-hidden="true">›</span></p></div><div class="flip-back" data-include="R-15" data-pick="Receio de perder"></div></div>
+    <div class="flip flip--light flip--grow flip--up a3-risk a3-r2" data-label="Perda de conhecimento tácito"><div class="flip-front"><p class="flip-q">Perda de conhecimento tácito</p><p class="a3-more">Resposta e evidência<span class="gt" aria-hidden="true">›</span></p></div><div class="flip-back" data-include="R-15" data-pick="Perda de conhecimento"></div></div>
+    <div class="flip flip--light flip--grow flip--up a3-risk" data-label="Sobrecarga na convivência"><div class="flip-front"><p class="flip-q">Sobrecarga na convivência</p><p class="a3-more">Resposta e evidência<span class="gt" aria-hidden="true">›</span></p></div><div class="flip-back" data-include="R-15" data-pick="Sobrecarga"></div></div>
+    <div class="flip flip--light flip--grow flip--up a3-risk" data-label="Controles paralelos"><div class="flip-front"><p class="flip-q">Controles paralelos</p><p class="a3-more">Resposta e evidência<span class="gt" aria-hidden="true">›</span></p></div><div class="flip-back" data-include="R-15" data-pick="Controles paralelos"></div></div>
+    <div class="flip flip--light flip--grow flip--up a3-risk a3-r5" data-label="Quem não quer mudar"><div class="flip-front"><p class="flip-q">Quem não quer mudar</p><p class="a3-more">Resposta e evidência<span class="gt" aria-hidden="true">›</span></p></div><div class="flip-back"><dl><dt>Resposta proposta</dt><dd>Conversa individual com a liderança e Pessoas/RH; identificar a barreira (ADKAR); oferecer tempo de convivência, mentoria em dupla “veterano do legado + nativo do Axon” e alternativas internas reais. Decisão respeitosa e documentada.</dd><dt>Evidência de tratamento</dt><dd>Plano individual pactuado e documentado</dd></dl></div></div>
   </div>
 
   <footer class="foot">Prioridade: requalificação e realocação. Cenários de quadro são decisão da liderança e de Pessoas/RH, sempre com evidência.</footer>
 
   <template id="tpl-a3-guardioes" data-title="Guardiões do Legado" data-w="420">
-    <p><strong>O que fazem:</strong> listam exceções e regras implícitas; transformam-nas em casos de teste; aceitam ou devolvem as rodadas espelho; conduzem a passagem de bastão do sistema que conhecem.</p>
-    <p><strong>Por que importa:</strong> reduz ao mesmo tempo o risco técnico (paridade, exceções) e o humano (perda de posicionamento).</p>
-    <p><strong>Reconhecimento:</strong> papel formal pactuado com Pessoas/RH e crédito público em cada desligamento.</p>
-    <p><button class="rv-link" data-reveal="R-09">Ver passagem de bastão</button> <span class="gt" aria-hidden="true">›</span></p>
+    <div class="a3g">
+      <p><strong>O que fazem:</strong> listam exceções e regras implícitas; transformam-nas em casos de teste; aceitam ou devolvem as rodadas espelho; conduzem a passagem de bastão do sistema que conhecem.</p>
+      <div class="a3g-r">
+        <p><strong>Por que importa:</strong> reduz ao mesmo tempo o risco técnico (paridade, exceções) e o humano (perda de posicionamento).</p>
+        <p><strong>Reconhecimento:</strong> papel formal pactuado com Pessoas/RH e crédito público em cada desligamento.</p>
+      </div>
+    </div>
+    <p><button class="rv-link" data-reveal="R-09">Ver passagem de bastão</button><span class="gt" aria-hidden="true">›</span></p>
   </template>
 
   <aside class="notes"><p>A pergunta na cabeça das pessoas é “e eu?”, e a respondemos com caminhos concretos antes de qualquer cenário de quadro, que é decisão da liderança e de Pessoas/RH, com evidência. Os Guardiões do Legado são o centro da estratégia: o saber de quem domina o sistema atual vira caso de teste, critério de desligamento e novo papel, do “eu rodo” ao “eu desenho, valido e analiso”.</p></aside>
   <p class="keymsg" hidden>Quem conhece o legado valida o futuro: as pessoas que mais temem a mudança são as mais necessárias para uma migração segura.</p>
 </section>
 
-<!-- A4 ················································································ -->
+<!-- A4 · Mostrar, não convencer ············································· -->
 <section class="slide" id="A4" data-deck="A" data-index="4" data-title="Evangelização com prova">
   <header class="hdr">
     <h1 class="hdr-title">Mostrar, não convencer: marca, vitrine e escuta</h1>
     <p class="hdr-sub">Evangelizar com prova: o Axon exibe seus movimentos, ouve cada inquietação e responde mitos com fatos.</p>
   </header>
 
-  <div class="at a4-eco" style="--x:50;--y:160;--w:690;--h:340">
-    <svg class="a4-syn" viewBox="0 0 690 340" aria-hidden="true">
-      <path d="M345 150 L115 52"/><path d="M345 150 L575 52"/><path d="M345 150 L115 188"/><path d="M345 150 L575 188"/><path d="M345 150 L345 290"/>
+  <div class="at a4-eco" style="--x:50;--y:160;--w:690;--h:322">
+    <svg class="a4-syn" viewBox="0 0 690 322" aria-hidden="true">
+      <path class="a4-p" d="M345 150 L230 56"/>
+      <path class="a4-p" d="M345 150 L460 56"/>
+      <path class="a4-p" d="M345 150 L230 172"/>
+      <path class="a4-p" d="M345 150 L460 172"/>
+      <path class="a4-p" d="M345 150 L345 244"/>
     </svg>
     <span class="a4-core" aria-hidden="true">Axon</span>
-    <button class="card rv dot a4-n" style="--x:0;--y:16" data-reveal="#tpl-a4-marca" data-label="Marca interna"><span class="card-title">Marca interna</span><span class="card-text">Menos tempo rodando, mais tempo pensando.</span></button>
-    <button class="card rv dot a4-n" style="--x:460;--y:16" data-reveal="R-19" data-label="Axon Live"><span class="card-title">Axon Live</span><span class="card-text">Vitrine com rodadas, chamados, indicadores e a rodada do mês.</span></button>
-    <button class="card rv dot a4-n" style="--x:0;--y:152" data-reveal="#tpl-a4-sinapse" data-label="Rede Sinapse"><span class="card-title">Rede Sinapse</span><span class="card-text">Embaixadores por gerência, a partir dos pioneiros; demo days por onda.</span></button>
-    <button class="card rv dot a4-n" style="--x:460;--y:152" data-reveal="R-12" data-label="Guia de Bolso"><span class="card-title">Guia de Bolso</span><span class="card-text">Manual friendly por situação real, sem jargão.</span></button>
-    <button class="card rv dot a4-n" style="--x:230;--y:252" data-reveal="R-10" data-label="Radar de Inquietações"><span class="card-title">Radar de Inquietações</span><span class="card-text">O reporte de bug passa a ouvir dúvida, ideia e receio.</span></button>
+    <button class="card rv dot a4-n" style="--x:0;--y:18" data-reveal="#tpl-a4-marca" data-label="Marca interna"><span class="card-title">Marca interna</span><span class="card-text">Menos tempo rodando, mais tempo pensando.</span></button>
+    <button class="card rv dot a4-n" style="--x:460;--y:18" data-reveal="#tpl-a4-live" data-label="Axon Live"><span class="card-title">Axon Live</span><span class="card-text">Vitrine com rodadas, chamados, indicadores e a rodada do mês.</span></button>
+    <button class="card rv dot a4-n" style="--x:0;--y:134" data-reveal="#tpl-a4-sinapse" data-label="Rede Sinapse"><span class="card-title">Rede Sinapse</span><span class="card-text">Embaixadores por gerência, a partir dos pioneiros; demo days por onda.</span></button>
+    <button class="card rv dot a4-n" style="--x:460;--y:134" data-reveal="R-12" data-label="Guia de Bolso"><span class="card-title">Guia de Bolso</span><span class="card-text">Manual friendly por situação real, sem jargão.</span></button>
+    <button class="card rv dot a4-n" style="--x:230;--y:244" data-reveal="R-10" data-label="Radar de Inquietações"><span class="card-title">Radar de Inquietações</span><span class="card-text">O reporte de bug passa a ouvir dúvida, ideia e receio.</span></button>
+    <span class="impulse a4-dot" aria-hidden="true"></span>
   </div>
 
-  <div class="at a4-loop" style="--x:50;--y:520;--w:690;--h:110">
-    <div class="row a4-loop-row" style="--gap:8">
-      <span class="chip chip--light chip--plain">Você fala</span><i class="chev chev--sm" aria-hidden="true"></i>
-      <span class="chip chip--light chip--plain">a GMO tria</span><i class="chev chev--sm" aria-hidden="true"></i>
-      <span class="chip chip--light chip--plain">o produto responde</span><i class="chev chev--sm" aria-hidden="true"></i>
-      <span class="chip chip--light chip--plain">o Axon Live mostra</span>
-      <span class="impulse" aria-hidden="true"></span>
+  <div class="at a4-loop" style="--x:50;--y:500;--w:690;--h:130">
+    <svg class="a4-ring" viewBox="0 0 690 64" aria-hidden="true">
+      <path class="a4-ret" d="M568 33 V44 Q568 52 560 52 H78 Q70 52 70 44 V40"/>
+      <path class="a4-arrow" d="M64.5 41 L70 33.5 L75.5 41 Z"/>
+      <path class="a4-track" d="M70 16 H568 V44 Q568 52 560 52 H78 Q70 52 70 44 Z"/>
+    </svg>
+    <div class="a4-st">
+      <button class="a4-s a4-s--you" data-annex="O laço gira uma volta completa: estende o canal de reporte de bugs que já existe no Axon." aria-label="Você fala: girar o laço da escuta">Você fala</button>
+      <i class="chev chev--sm" aria-hidden="true"></i>
+      <span class="a4-s">a GMO tria</span>
+      <i class="chev chev--sm" aria-hidden="true"></i>
+      <span class="a4-s">o produto responde</span>
+      <i class="chev chev--sm" aria-hidden="true"></i>
+      <span class="a4-s">o Axon Live mostra</span>
     </div>
-    <div class="row a4-loop-act" style="--gap:12">
-      <button class="btn btn--ghost a4-sim">Simule uma inquietação</button><span class="selo">ilustrativo</span>
-      <button class="gate-mark" data-reveal="R-16" data-pick="◆2" aria-label="Portão ◆2: antes de cada onda"><span class="diamond diamond--num" aria-hidden="true"><span>2</span></span>Inquietações críticas respondidas</button>
+    <span class="impulse a4-ldot" aria-hidden="true"></span>
+    <span class="a4-msg" aria-hidden="true"></span>
+    <div class="a4-act">
+      <button class="btn btn--ghost a4-sim" data-build="1 2">Simule uma inquietação</button><span class="selo">ilustrativo</span>
+      <p class="a4-out" aria-live="polite"><span class="a4-o-msg"></span><i class="chev chev--sm" aria-hidden="true"></i><span class="a4-o-tag"></span><i class="chev chev--sm" aria-hidden="true"></i><span class="a4-o-dest"></span></p>
     </div>
+    <p class="a4-cap" aria-live="polite">Estende o canal de reporte de bugs que já existe no Axon.</p>
   </div>
 
   <div class="at a4-myths" style="--x:770;--y:160;--w:460;--h:470">
     <p class="lbl">Mito × Fato<span class="pipe" aria-hidden="true"></span><span class="hint">Vire a carta</span></p>
-    <div class="grid flip-group" style="--cols:2;--gap:12">
-      <div class="flip dot"><div class="flip-front"><span class="flip-tag">Mito</span><p class="flip-q">“Vou perder meu posicionamento.”</p></div><div class="flip-back"><span class="flip-tag">Fato</span><div data-include="R-06" data-pick="1" data-part="back"></div></div></div>
-      <div class="flip dot"><div class="flip-front"><span class="flip-tag">Mito</span><p class="flip-q">“Vão desligar meu sistema amanhã.”</p></div><div class="flip-back"><span class="flip-tag">Fato</span><div data-include="R-06" data-pick="2" data-part="back"></div></div></div>
-      <div class="flip dot"><div class="flip-front"><span class="flip-tag">Mito</span><p class="flip-q">“A IA vai decidir por mim.”</p></div><div class="flip-back"><span class="flip-tag">Fato</span><div data-include="R-06" data-pick="3" data-part="back"></div></div></div>
-      <div class="flip dot"><div class="flip-front"><span class="flip-tag">Mito</span><p class="flip-q">“Orçamento de nuvem não é comigo.”</p></div><div class="flip-back"><span class="flip-tag">Fato</span><div data-include="R-06" data-pick="4" data-part="back"></div></div></div>
+    <div class="grid flip-group a4-grid" style="--cols:2;--gap:12">
+      <div class="flip dot" data-label="Mito: “Vou perder meu posicionamento.”"><div class="flip-front"><span class="flip-tag">Mito</span><p class="flip-q">“Vou perder meu posicionamento.”</p></div><div class="flip-back"><span class="flip-tag">Fato</span><div data-include="R-06" data-pick="1" data-part="back"></div></div></div>
+      <div class="flip dot" data-label="Mito: “Vão desligar meu sistema amanhã.”"><div class="flip-front"><span class="flip-tag">Mito</span><p class="flip-q">“Vão desligar meu sistema amanhã.”</p></div><div class="flip-back"><span class="flip-tag">Fato</span><div data-include="R-06" data-pick="2" data-part="back"></div></div></div>
+      <div class="flip dot" data-label="Mito: “A IA vai decidir por mim.”"><div class="flip-front"><span class="flip-tag">Mito</span><p class="flip-q">“A IA vai decidir por mim.”</p></div><div class="flip-back"><span class="flip-tag">Fato</span><div data-include="R-06" data-pick="3" data-part="back"></div></div></div>
+      <div class="flip dot" data-label="Mito: “Orçamento de nuvem não é comigo.”"><div class="flip-front"><span class="flip-tag">Mito</span><p class="flip-q">“Orçamento de nuvem não é comigo.”</p></div><div class="flip-back"><span class="flip-tag">Fato</span><div data-include="R-06" data-pick="4" data-part="back"></div></div></div>
     </div>
   </div>
 
   <footer class="foot">O Axon Live mostra a plataforma e a voz das pessoas; não ranqueia pessoas nem gerências.</footer>
 
-  <template id="tpl-a4-marca" data-title="Marca interna">
-    <p>Assinatura: “Axon · menos tempo rodando, mais tempo pensando.” Três atributos: Conecta · Mostra o custo · Aprende com quem usa. Glifo: o chevron laranja “›” vira o impulso da marca (sem logotipo novo nesta fase). Alternativas a testar com os pioneiros: “o estudo em movimento” · “do arquivo ao resultado”.</p>
+  <template id="tpl-a4-marca" data-title="Marca interna" data-w="380">
+    <p><strong>Assinatura:</strong> “Axon › menos tempo rodando, mais tempo pensando.”</p>
+    <p><strong>Três atributos:</strong> Conecta · Mostra o custo · Aprende com quem usa.</p>
+    <p><strong>Glifo:</strong> o chevron laranja “›” vira o impulso da marca (sem logotipo novo nesta fase).</p>
+    <p><strong>Alternativas a testar com os pioneiros:</strong> “o estudo em movimento” · “do arquivo ao resultado”.</p>
   </template>
-  <template id="tpl-a4-sinapse" data-title="Rede Sinapse">
-    <p>Critérios, sem número fixo: ao menos uma referência por perfil relevante em cada gerência; mistura deliberada de pioneiros do MVP e de mantenedores de legado (convidá-los é a resposta mais forte ao “vou perder posicionamento”); duplas “veterano do legado + nativo do Axon”; demo days por onda, em que um time mostra a própria rodada; reconhecimento formal pactuado com Pessoas/RH.</p>
+  <template id="tpl-a4-live" data-title="Axon Live" data-selo="dados reais a partir da linha de base" data-w="420">
+    <div class="a4lv">
+      <div class="a4lv-t"><p class="txt-sm">Rodadas no Axon</p><p class="a4lv-v">—</p></div>
+      <div class="a4lv-t"><p class="txt-sm">Times ativos</p><p class="a4lv-v">—</p></div>
+      <div class="a4lv-t"><p class="txt-sm">Inquietações e respostas</p><p class="a4lv-v">—</p></div>
+      <div class="a4lv-t"><p class="txt-sm">Você disse, nós fizemos</p><p class="a4lv-v">—</p></div>
+      <div class="a4lv-t"><p class="txt-sm">Tempo por processo</p><p class="a4lv-v">—</p></div>
+      <div class="a4lv-t"><p class="txt-sm">Nuvem: previsto × realizado</p><p class="a4lv-v">—</p></div>
+    </div>
+    <div data-include="R-19"></div>
+  </template>
+  <template id="tpl-a4-sinapse" data-title="Rede Sinapse" data-w="400">
+    <p><strong>Critérios, sem número fixo:</strong></p>
+    <ul class="rv-facts">
+      <li>ao menos uma referência por perfil relevante em cada gerência;</li>
+      <li>mistura deliberada de pioneiros do MVP e de mantenedores de legado (convidá-los é a resposta mais forte ao “vou perder meu posicionamento”);</li>
+      <li>duplas “veterano do legado + nativo do Axon”;</li>
+      <li>demo days por onda, em que um time mostra a própria rodada;</li>
+      <li>reconhecimento formal pactuado com Pessoas/RH.</li>
+    </ul>
+  </template>
+  <template class="annex" data-title="Simule uma inquietação" data-selo="ilustrativo">
+    <ol class="rv-frames">
+      <li><span class="rv-frame-k">Quadro 1</span>O cartão “Não acho o resultado do meu estudo” entra no laço: você fala.</li>
+      <li><span class="rv-frame-k">Quadro 2</span>A GMO tria e o cartão cai em dúvida › Guia de Bolso; o produto responde e o Axon Live mostra.</li>
+      <li><span class="rv-frame-k">Quadro 3</span>Segundo clique: “Vou perder meu papel?” segue para receio › ação de mudança.</li>
+    </ol>
   </template>
 
   <aside class="notes"><p>A técnica está pronta; falta fazer o Axon ser desejado, e o cliente nos pediu exatamente isso: catequizar, no sentido de mostrar. Vender, aqui, é tornar visível o que roda, o que foi pedido e o que mudou por causa de quem pediu. O Radar de Inquietações aproveita o canal de bugs que já existe e chega triado ao time do produto, que hoje tem pouca capacidade para absorver a demanda que a adoção vai gerar.</p></aside>
   <p class="keymsg" hidden>Ninguém se convence por apresentação; convence-se vendo o colega rodar o próprio estudo.</p>
 </section>
 
-<!-- A5 ················································································ -->
+<!-- A5 · Plano de trabalho ·················································· -->
 <section class="slide" id="A5" data-deck="A" data-index="5" data-title="Plano de trabalho">
   <header class="hdr">
     <h1 class="hdr-title">Plano de trabalho: pioneiros primeiro, ondas depois</h1>
     <p class="hdr-sub">Cada onda só avança com os portões de prontidão cumpridos; cada perfil aprende migrando um estudo real.</p>
   </header>
 
-  <p class="lbl at" style="--x:50;--y:166">Cronograma indicativo</p>
-  <div class="tl at a5-tl" style="--x:50;--y:194;--w:750;--label:262px">
+  <p class="lbl at" style="--x:50;--y:160">Cronograma indicativo</p>
+  <div class="tl at a5-tl" style="--x:50;--y:186;--w:750;--label:262px">
     <div class="tl-grid" aria-hidden="true"></div>
-    <div class="tl-row"><span class="tl-label">Diagnóstico e linha de base</span><span class="tl-track"><span class="tl-bar" style="--s:1;--e:2"></span></span></div>
-    <div class="tl-row"><span class="tl-label">Onda 0 · pioneiros do MVP e rodadas espelho</span><span class="tl-track"><button class="tl-bar tl-bar--orange dot dot--in" style="--s:2;--e:3" data-reveal="R-08" data-label="Onda 0 (rodada espelho)" aria-label="Onda 0: rodada espelho"></button></span></div>
-    <div class="tl-row"><span class="tl-label">Ondas por gerência, conforme prontidão</span><span class="tl-track"><button class="tl-bar tl-bar--orange" style="--s:3;--e:6" data-reveal="#tpl-a5-ondas" data-label="Ondas por gerência" aria-label="Ondas por gerência"></button></span></div>
-    <div class="tl-row"><span class="tl-label">Marca, Axon Live e escuta</span><span class="tl-track"><span class="tl-bar tl-bar--steel" style="--s:1;--e:6"></span></span></div>
-    <div class="tl-row"><span class="tl-label">Capacitação e Rede Sinapse</span><span class="tl-track"><span class="tl-bar tl-bar--steel" style="--s:2;--e:6"></span></span></div>
-    <div class="tl-row"><span class="tl-label">Passagens de bastão dos legados</span><span class="tl-track"><button class="tl-bar tl-bar--dashed tl-bar--more" style="--s:4;--e:6" data-reveal="R-09" data-label="Passagens de bastão" aria-label="Passagens de bastão dos legados"></button></span></div>
-    <div class="tl-row a5-gates">
-      <span class="tl-label">Portões</span>
-      <span class="tl-track">
-        <span class="fiber fiber--thin a5-fiber" aria-hidden="true"><span class="impulse"></span></span>
-        <button class="gate-mark a5-g" style="--at:1" data-reveal="R-16" data-pick="◆1" aria-label="Portão ◆1: antes da Onda 0"><span class="diamond" aria-hidden="true"></span>1</button>
-        <button class="gate-mark a5-g" style="--at:2" data-reveal="R-16" data-pick="◆2" aria-label="Portão ◆2: antes de cada onda"><span class="diamond" aria-hidden="true"></span>2</button>
-        <button class="gate-mark a5-g" style="--at:3" data-reveal="R-16" data-pick="◆3" aria-label="Portão ◆3: antes de desligar um legado"><span class="diamond" aria-hidden="true"></span>3</button>
+    <div class="tl-row"><span class="tl-label">Diagnóstico e linha de base</span><span class="tl-track"><span class="tl-bar" style="--s:1;--e:2"><span class="a5-per">M1–M2</span></span></span></div>
+    <div class="tl-row"><span class="tl-label">Onda 0 · pioneiros do MVP e rodadas espelho</span><span class="tl-track"><button class="tl-bar tl-bar--orange dot dot--in" style="--s:2;--e:3" data-reveal="#tpl-a5-espelho" data-label="Onda 0 · rodada espelho" aria-label="Onda 0, M2–M3: ver a rodada espelho"><span class="a5-per">M2–M3</span></button></span></div>
+    <div class="tl-row"><span class="tl-label">Ondas por gerência, conforme prontidão</span><span class="tl-track"><button class="tl-bar tl-bar--orange dot dot--in" style="--s:3;--e:6" data-reveal="#tpl-a5-ondas" data-label="Ondas por gerência" aria-label="Ondas por gerência, M3–M6"><span class="a5-per">M3–M6</span></button></span></div>
+    <div class="tl-row"><span class="tl-label">Marca, Axon Live e escuta</span><span class="tl-track"><span class="tl-bar tl-bar--steel" style="--s:1;--e:6"><span class="a5-per">M1–M6</span></span></span></div>
+    <div class="tl-row"><span class="tl-label">Capacitação e Rede Sinapse</span><span class="tl-track"><span class="tl-bar tl-bar--steel" style="--s:2;--e:6"><span class="a5-per">M2–M6</span></span></span></div>
+    <div class="tl-row"><span class="tl-label">Passagens de bastão dos legados</span><span class="tl-track"><button class="tl-bar tl-bar--dashed tl-bar--more" style="--s:4;--e:6" data-reveal="R-09" data-selo="precedente Workfront" data-label="Passagens de bastão dos legados" aria-label="Passagens de bastão dos legados, M4–M6 e além"><span class="a5-per">M4–M6+</span></button></span></div>
+    <div class="tl-row a5-axisrow" data-annex="Ao entrar, o impulso percorre o cronograma e para no portão ◆1; só salta para o segmento seguinte quando os critérios do portão são marcados (condução saltatória)." aria-label="Portões sobre o eixo">
+      <span class="tl-label"></span>
+      <span class="tl-track a5-axis">
+        <span class="a5-lit" aria-hidden="true"></span>
+        <button class="gate-mark a5-g" style="--at:1" data-reveal="R-16" data-pick="◆1" aria-label="Portão ◆1: antes da Onda 0"><span class="diamond diamond--num" aria-hidden="true"><span>1</span></span></button>
+        <button class="gate-mark a5-g" style="--at:2" data-reveal="R-16" data-pick="◆2" aria-label="Portão ◆2: antes de cada onda"><span class="diamond diamond--num" aria-hidden="true"><span>2</span></span></button>
+        <button class="gate-mark a5-g" style="--at:3" data-reveal="R-16" data-pick="◆3" aria-label="Portão ◆3: antes de desligar um legado"><span class="diamond diamond--num" aria-hidden="true"><span>3</span></span></button>
+        <span class="impulse a5-dot" aria-hidden="true"></span>
       </span>
     </div>
     <div class="tl-axis"><span></span><span class="tl-ticks"><span>M1</span><span>M2</span><span>M3</span><span>M4</span><span>M5</span><span>M6</span></span><span class="tl-axis-cap">meses após o início</span></div>
   </div>
-  <ul class="at a5-crit" style="--x:50;--y:540;--w:750">
-    <li><b>◆1</b> Antes da Onda 0 · linha de base, acessos e casos de teste</li>
-    <li><b>◆2</b> Antes de cada onda · autonomia por perfil comprovada</li>
-    <li><b>◆3</b> Antes de desligar · rodadas espelho aceitas pelos Guardiões</li>
+
+  <ul class="at a5-crit" style="--x:50;--y:516;--w:750">
+    <li><span class="gate-mark a5-cg" data-gate="◆1"><span class="diamond diamond--num" aria-hidden="true"><span>1</span></span><span class="a5-ct"><b>Antes da Onda 0</b> · linha de base, acessos e casos de teste</span></span></li>
+    <li><span class="gate-mark a5-cg" data-gate="◆2"><span class="diamond diamond--num" aria-hidden="true"><span>2</span></span><span class="a5-ct"><b>Antes de cada onda</b> · autonomia por perfil comprovada</span></span></li>
+    <li><span class="gate-mark a5-cg" data-gate="◆3"><span class="diamond diamond--num" aria-hidden="true"><span>3</span></span><span class="a5-ct"><b>Antes de desligar</b> · rodadas espelho aceitas pelos Guardiões</span></span></li>
   </ul>
 
   <div class="result at a5-panel" style="--x:830;--y:160;--w:400;--h:470">
     <p class="result-lbl">Capacitação por perfil</p>
-    <ol class="a5-stairs flip-group">
-      <li class="flip" style="--i:0"><span class="flip-front">Ver</span><span class="flip-back">demonstração ao vivo e pílulas curtas no momento de uso.</span></li>
-      <li class="flip" style="--i:1"><span class="flip-front">Fazer junto</span><span class="flip-back">dupla com um pioneiro ou um Guardião.</span></li>
-      <li class="flip" style="--i:2"><span class="flip-front">Fazer sozinho</span><span class="flip-back">ambiente de prática, receitas e orçamento de treino.</span></li>
-      <li class="flip is-top" style="--i:3"><span class="flip-front">Ensinar</span><span class="flip-back">Rede Sinapse e clínicas no horário de trabalho.</span></li>
-    </ol>
+    <div class="a5-stairs" role="group" aria-label="Ver › Fazer junto › Fazer sozinho › Ensinar">
+      <button class="a5-step" style="--i:0" data-reveal="#tpl-a5-escada" data-step="ver" data-label="Escada: Ver › Fazer junto › Fazer sozinho › Ensinar"><span>Ver</span></button>
+      <button class="a5-step" style="--i:1" data-reveal="#tpl-a5-escada" data-step="junto" data-label="Escada: Ver › Fazer junto › Fazer sozinho › Ensinar"><span>Fazer junto</span></button>
+      <button class="a5-step" style="--i:2" data-reveal="#tpl-a5-escada" data-step="sozinho" data-label="Escada: Ver › Fazer junto › Fazer sozinho › Ensinar"><span>Fazer sozinho</span></button>
+      <button class="a5-step a5-step--top" style="--i:3" data-reveal="#tpl-a5-escada" data-step="ensinar" data-label="Escada: Ver › Fazer junto › Fazer sozinho › Ensinar"><span>Ensinar</span></button>
+    </div>
     <p class="a5-k">Trilhas</p>
     <div class="a5-chips">
       <button class="chip chip--on-navy chip--plain" data-reveal="R-05" data-pick="Construtor">Construtor</button>
@@ -289,75 +407,103 @@
       <button class="chip chip--on-navy chip--plain" data-reveal="R-05" data-pick="Gestor de orçamento">Gestor de orçamento</button>
     </div>
     <p class="a5-mirror"><b>Rodada espelho:</b> aprender migrando um estudo real do próprio time.</p>
-    <div class="a5-chips">
+    <div class="a5-chips a5-chips--sup">
       <button class="chip chip--on-navy" data-reveal="R-12">Guia de Bolso</button>
-      <button class="chip chip--on-navy" data-reveal="R-11">Copiloto de parâmetros (IA)</button>
+      <button class="chip chip--on-navy" data-reveal="R-11">Copiloto de parâmetros (IA via MCP)</button>
       <button class="chip chip--on-navy" data-reveal="#tpl-a5-treino">Orçamento de treino</button>
     </div>
   </div>
 
-  <footer class="foot">Ordem das gerências e desligamentos dependem do diagnóstico e da validação técnica; a duração pode superar seis meses.</footer>
+  <footer class="foot">A ordem das gerências e os desligamentos dependem do diagnóstico e da validação técnica; a duração pode superar seis meses.</footer>
 
-  <template id="tpl-a5-ondas" data-title="Ondas por gerência">
+  <template id="tpl-a5-espelho" data-title="Rodada espelho" data-selo="ilustrativo" data-w="400">
+    <div class="a5m">
+      <p class="rv-sub">O mesmo estudo entra nos dois trilhos</p>
+      <div class="a5m-rails">
+        <span class="txt-sm"><strong>Sistema atual</strong></span>
+        <span class="a5m-tr"><span class="fiber a5m-f"><span class="node" style="--at:0"></span><span class="node a5m-end" style="--at:100"></span><span class="impulse"></span></span></span>
+        <span class="txt-sm"><strong>Axon</strong></span>
+        <span class="a5m-tr"><span class="fiber a5m-f"><span class="node" style="--at:0"></span><span class="node a5m-end" style="--at:100"></span><span class="impulse"></span></span></span>
+      </div>
+      <ul class="rv-facts a5m-out">
+        <li>Resultado equivalente? ✓ aceito pelo Guardião</li>
+        <li>Tempo de ciclo registrado</li>
+      </ul>
+    </div>
+    <div data-include="R-08"></div>
+  </template>
+  <template id="tpl-a5-ondas" data-title="Ondas por gerência" data-w="360">
     <p>A ordem das gerências sai do diagnóstico, combinando criticidade operacional, maturidade e dependência de legados, e é decidida no fórum mensal. Nenhuma gerência é citada como “primeira” antes disso.</p>
   </template>
-  <template id="tpl-a5-treino" data-title="Orçamento de treino">
-    <p>Antes de responder pelo orçamento real, cada time pratica num projeto de treino com orçamento próprio, a configurar com o time do produto. O gestor de orçamento conclui a trilha antes de o time receber a nova responsabilidade. FinOps chega como autonomia, não como fiscalização.</p>
+  <template id="tpl-a5-escada" data-title="Escada de aprendizagem" data-w="380">
+    <p data-step="ver"><strong>Ver:</strong> demonstração ao vivo e pílulas curtas no momento de uso.</p>
+    <p data-step="junto"><strong>Fazer junto:</strong> dupla com um pioneiro ou um Guardião.</p>
+    <p data-step="sozinho"><strong>Fazer sozinho:</strong> ambiente de prática, receitas e orçamento de treino.</p>
+    <p data-step="ensinar"><strong>Ensinar:</strong> Rede Sinapse e clínicas no horário de trabalho.</p>
+    <p class="rv-note"><em>Neuroplasticidade: o caminho fica rápido com repetição, não com apresentação.</em></p>
   </template>
-  <template class="annex" data-title="Escada de aprendizagem">
-    <p><em>Neuroplasticidade: o caminho fica rápido com repetição, não com apresentação.</em></p>
+  <template id="tpl-a5-treino" data-title="Orçamento de treino" data-w="380">
+    <p>Antes de responder pelo orçamento real, cada time pratica num projeto de treino com orçamento próprio, a configurar com o time do produto.</p>
+    <p>O gestor de orçamento conclui a trilha antes de o time receber a nova responsabilidade. FinOps chega como autonomia, não como fiscalização.</p>
   </template>
 
   <aside class="notes"><p>A Onda 0 já existe: são os dois times pioneiros, que nos dão diagnóstico, casos reais e os primeiros multiplicadores. Ninguém aprende em exemplo genérico: cada pessoa migra um estudo real do próprio time, o que gera, de uma vez, competência, medição do tempo por processo e um caso para o Axon Live. Seis meses é o mínimo; se as ondas pedirem mais, o plano se estende com a mesma lógica.</p></aside>
   <p class="keymsg" hidden>Onda não avança por data; avança por prontidão. E nenhum legado sai antes de o novo caminho estar pavimentado.</p>
 </section>
 
-<!-- A6 ················································································ -->
+<!-- A6 · Indicadores, governança e entregáveis ······························· -->
 <section class="slide" id="A6" data-deck="A" data-index="6" data-title="Indicadores, governança e entregáveis">
   <header class="hdr">
     <h1 class="hdr-title">Indicadores, governança e entregáveis</h1>
-    <p class="hdr-sub">Indicadores como fórmula e fonte, rituais curtos de decisão e pacotes validados por etapa.</p>
+    <p class="hdr-sub">Indicadores como fórmula e fonte, ritos curtos de decisão e pacotes validados por etapa.</p>
   </header>
 
-  <p class="lbl at" style="--x:50;--y:166">Indicadores<span class="pipe" aria-hidden="true"></span><span class="hint">Toque para ver fórmula e fonte</span></p>
-  <div class="grid at a6-tiles" style="--x:50;--y:192;--w:570;--cols:3;--gap:10">
-    <button class="card card--bar card--num rv dot" data-reveal="R-04" data-pick="Prontidão"><span class="card-num">01</span><span class="card-title">Prontidão</span></button>
-    <button class="card card--bar card--num rv dot" data-reveal="R-04" data-pick="Adoção efetiva"><span class="card-num">02</span><span class="card-title">Adoção efetiva</span></button>
-    <button class="card card--bar card--num rv dot" data-reveal="R-04" data-pick="Autonomia"><span class="card-num">03</span><span class="card-title">Autonomia</span></button>
-    <button class="card card--bar card--num rv dot" data-reveal="R-04" data-pick="Protagonismo"><span class="card-num">04</span><span class="card-title">Protagonismo</span></button>
-    <button class="card card--bar card--num rv dot" data-reveal="R-04" data-pick="Tempo por processo"><span class="card-num">05</span><span class="card-title">Tempo por processo</span></button>
-    <button class="card card--bar card--num rv dot" data-reveal="R-04" data-pick="Sombra no legado"><span class="card-num">06</span><span class="card-title">Sombra no legado</span></button>
+  <p class="lbl at" style="--x:50;--y:160">Indicadores<span class="pipe" aria-hidden="true"></span><span class="hint">Vire para ver fórmula e fonte</span></p>
+  <div class="grid at a6-tiles flip-group" style="--x:50;--y:186;--w:570;--h:350;--cols:3;--gap:10">
+    <div class="flip flip--light flip--grow a6-tile dot" data-label="01 Prontidão"><div class="flip-front"><p class="a6-tt"><span class="card-num">01</span><span class="card-title">Prontidão</span></p><p class="a6-what">Quem da onda está pronto para entrar.</p><p class="a6-more">Fórmula e fonte<span class="gt" aria-hidden="true">›</span></p></div><div class="flip-back" data-include="R-04" data-pick="Prontidão"></div></div>
+    <div class="flip flip--light flip--grow a6-tile dot" data-label="02 Adoção efetiva"><div class="flip-front"><p class="a6-tt"><span class="card-num">02</span><span class="card-title">Adoção efetiva</span></p><p class="a6-what">Rodadas elegíveis que já rodam no Axon.</p><p class="a6-more">Fórmula e fonte<span class="gt" aria-hidden="true">›</span></p></div><div class="flip-back" data-include="R-04" data-pick="Adoção efetiva"></div></div>
+    <div class="flip flip--light flip--grow a6-tile dot" data-label="03 Autonomia"><div class="flip-front"><p class="a6-tt"><span class="card-num">03</span><span class="card-title">Autonomia</span></p><p class="a6-what">Quem roda sozinho, sem apoio.</p><p class="a6-more">Fórmula e fonte<span class="gt" aria-hidden="true">›</span></p></div><div class="flip-back" data-include="R-04" data-pick="Autonomia"></div></div>
+    <div class="flip flip--light flip--grow flip--up a6-tile dot" data-label="04 Protagonismo"><div class="flip-front"><p class="a6-tt"><span class="card-num">04</span><span class="card-title">Protagonismo</span></p><p class="a6-what">Quem vem do legado e ganhou novo papel.</p><p class="a6-more">Fórmula e fonte<span class="gt" aria-hidden="true">›</span></p></div><div class="flip-back" data-include="R-04" data-pick="Protagonismo"></div></div>
+    <div class="flip flip--light flip--grow flip--up a6-tile dot" data-label="05 Tempo por processo"><div class="flip-front"><p class="a6-tt"><span class="card-num">05</span><span class="card-title">Tempo por processo</span></p><p class="a6-what">Ciclo antes × depois, por processo.</p><p class="a6-more">Fórmula e fonte<span class="gt" aria-hidden="true">›</span></p></div><div class="flip-back" data-include="R-04" data-pick="Tempo por processo"></div></div>
+    <div class="flip flip--light flip--grow flip--up a6-tile dot" data-label="06 Sombra no legado"><div class="flip-front"><p class="a6-tt"><span class="card-num">06</span><span class="card-title">Sombra no legado</span></p><p class="a6-what">O que ainda roda no legado “por garantia”.</p><p class="a6-more">Fórmula e fonte<span class="gt" aria-hidden="true">›</span></p></div><div class="flip-back" data-include="R-04" data-pick="Sombra no legado"></div></div>
   </div>
-  <div class="grid at a6-gov" style="--x:50;--y:400;--w:570;--cols:3;--gap:10">
-    <button class="card card--navy rv" data-reveal="R-18" data-pick="Semanal"><span class="a6-cad">Semanal</span><span class="card-text">Execução · GMO e Rede Sinapse</span></button>
-    <button class="card card--navy rv" data-reveal="R-18" data-pick="Quinzenal"><span class="a6-cad">Quinzenal</span><span class="card-text">Adoção · gerências, produto, TI e Pessoas/RH</span></button>
-    <button class="card card--navy rv" data-reveal="R-18" data-pick="Mensal"><span class="a6-cad">Mensal</span><span class="card-text">Patrocínio · ondas, riscos e transição</span></button>
-  </div>
-  <div class="flip flip--light at a6-ons dot" style="--x:50;--y:524;--w:570;--h:104" data-label="Do ONS, precisamos de">
-    <div class="flip-front"><p class="card-title">Do ONS, precisamos de</p><p class="txt-sm muted">Vire o cartão.</p></div>
-    <div class="flip-back"><p>Patrocinador; pontos focais por gerência; acesso aos pioneiros, às pessoas e aos registros do Axon; ambiente de prática; TI e Pessoas/RH nos fóruns. Equipe, dedicação e condições: composição comercial final.</p></div>
+  <div class="grid at a6-gov" style="--x:50;--y:550;--w:570;--h:80;--cols:3;--gap:10">
+    <button class="card card--navy rv a6-g" data-reveal="R-18" data-pick="Semanal" data-label="Semanal | Execução"><span class="a6-cad">Semanal<span class="pipe" aria-hidden="true"></span>Execução</span><span class="card-text">GMO e Rede Sinapse</span></button>
+    <button class="card card--navy rv a6-g" data-reveal="R-18" data-pick="Quinzenal" data-label="Quinzenal | Adoção"><span class="a6-cad">Quinzenal<span class="pipe" aria-hidden="true"></span>Adoção</span><span class="card-text">Gerências, produto, TI e Pessoas/RH</span></button>
+    <button class="card card--navy rv a6-g" data-reveal="R-18" data-pick="Mensal" data-label="Mensal | Patrocínio"><span class="a6-cad">Mensal<span class="pipe" aria-hidden="true"></span>Patrocínio</span><span class="card-text">Ondas, riscos e transição</span></button>
   </div>
 
   <div class="at a6-pk" style="--x:650;--y:160;--w:580">
     <p class="lbl">Pacotes de entrega</p>
     <table class="tbl a6-tbl">
-      <thead><tr><th style="width:150px">Etapa</th><th>Entregáveis</th></tr></thead>
+      <thead><tr><th style="width:166px">Etapa</th><th>Entregáveis</th></tr></thead>
       <tbody>
-        <tr><td><span class="ck" aria-hidden="true"></span><button class="rv-link" data-reveal="#tpl-a6-aceite" data-label="Critério de aceite">M1–M2 Diagnóstico</button></td><td>Mapa de impactos por atividade, linha de base de tempo, prontidão, riscos e plano de mudança.</td></tr>
-        <tr><td><span class="ck" aria-hidden="true"></span>M2–M3 Preparação</td><td>Rotas 4R, marca e Axon Live, Guia de Bolso, trilhas por perfil e Rede Sinapse.</td></tr>
-        <tr><td><span class="ck" aria-hidden="true"></span>M3–M5 Ondas <button class="gate-mark" data-reveal="R-16" data-pick="◆2" aria-label="Portão ◆2"><span class="diamond" aria-hidden="true"></span></button></td><td>Onda 0 e ondas com portões, rodadas espelho, Radar de Inquietações e painel de adoção.</td></tr>
-        <tr><td><span class="ck" aria-hidden="true"></span>M5–M6+ Sustentação</td><td>Autonomia validada, passagens de bastão, lições aprendidas e plano de continuidade.</td></tr>
+        <tr class="rv-row"><td><button class="rv-cellbtn" data-reveal="#tpl-a6-aceite" data-row="1" data-label="Critério de aceite por etapa" aria-label="M1–M2 · Diagnóstico: ver critério de aceite"><span class="ck" aria-hidden="true"></span><span class="a6-et"><span class="a6-m">M1–M2</span>Diagnóstico</span></button></td><td>Mapa de impactos por atividade, linha de base de tempo, prontidão, riscos e plano de mudança.</td></tr>
+        <tr class="rv-row"><td><button class="rv-cellbtn" data-reveal="#tpl-a6-aceite" data-row="2" data-label="Critério de aceite por etapa" aria-label="M2–M3 · Preparação: ver critério de aceite"><span class="ck" aria-hidden="true"></span><span class="a6-et"><span class="a6-m">M2–M3</span>Preparação</span></button></td><td>Rotas 4R, marca e Axon Live, Guia de Bolso, trilhas por perfil e Rede Sinapse.</td></tr>
+        <tr class="rv-row"><td><button class="rv-cellbtn" data-reveal="#tpl-a6-aceite" data-row="3" data-label="Critério de aceite por etapa" aria-label="M3–M5 · Ondas: ver critério de aceite"><span class="ck" aria-hidden="true"></span><span class="a6-et"><span class="a6-m">M3–M5</span>Ondas</span></button></td><td>Onda 0 e ondas com portões, rodadas espelho, Radar de Inquietações e painel de adoção.</td></tr>
+        <tr class="rv-row"><td><button class="rv-cellbtn" data-reveal="#tpl-a6-aceite" data-row="4" data-label="Critério de aceite por etapa" aria-label="M5–M6+ · Sustentação: ver critério de aceite"><span class="ck" aria-hidden="true"></span><span class="a6-et"><span class="a6-m">M5–M6+</span>Sustentação</span></button></td><td>Autonomia validada, passagens de bastão, lições aprendidas e plano de continuidade.</td></tr>
       </tbody>
     </table>
   </div>
+  <p class="a6-sig" aria-hidden="true" data-qa-overlap="ok">Axon<i class="chev" aria-hidden="true"></i>menos tempo rodando, mais tempo pensando.</p>
 
-  <footer class="foot">Metas após a linha de base. ONS: patrocínio, pontos focais, dados, TI e Pessoas/RH. Desenvolvimento e infraestrutura: equipes técnicas.</footer>
+  <footer class="foot">Metas após a linha de base. ONS: patrocínio, pontos focais, dados, TI e Pessoas/RH. Desenvolvimento, migração e infraestrutura: equipes técnicas. <button class="rv-link a6-ons" data-reveal="#tpl-a6-ons" data-label="O que precisamos do ONS"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="1.5"/><path d="M9 4V2.8h6V4M8.5 10.5l1.6 1.6 3.4-3.4M8.5 16.5h7"/></svg>O que precisamos do ONS</button></footer>
 
-  <template id="tpl-a6-aceite" data-title="Critério de aceite por etapa">
-    <p><strong>M1–M2:</strong> mapa de impactos validado pelos responsáveis de cada gerência; linha de base aceita pelos donos de processo.</p>
-    <p><strong>M2–M3:</strong> rotas 4R pactuadas com liderança e Pessoas/RH; Axon Live no ar com dados reais.</p>
-    <p><strong>M3–M5:</strong> portões registrados em ata; rodadas espelho aceitas pelos Guardiões.</p>
-    <p><strong>M5–M6+:</strong> autonomia comprovada por perfil; plano de continuidade assumido pelo ONS.</p>
+  <template id="tpl-a6-aceite" data-title="Critério de aceite por etapa" data-w="400">
+    <p data-row="1"><strong>M1–M2:</strong> mapa de impactos validado pelos responsáveis de cada gerência; linha de base aceita pelos donos de processo.</p>
+    <p data-row="2"><strong>M2–M3:</strong> rotas 4R pactuadas com a liderança e Pessoas/RH; Axon Live no ar com dados reais.</p>
+    <p data-row="3"><strong>M3–M5:</strong> portões registrados em ata; rodadas espelho aceitas pelos Guardiões.</p>
+    <p data-row="4"><strong>M5–M6+:</strong> autonomia comprovada por perfil; plano de continuidade assumido pelo ONS.</p>
+  </template>
+  <template id="tpl-a6-ons" data-title="O que precisamos do ONS" data-w="380">
+    <ul class="rv-facts">
+      <li>Patrocinador</li>
+      <li>Pontos focais por gerência</li>
+      <li>Acesso aos pioneiros, às pessoas e aos registros do Axon</li>
+      <li>Ambiente de prática</li>
+      <li>TI e Pessoas/RH nos fóruns</li>
+    </ul>
+    <p class="rv-note">Equipe, dedicação e condições: composição comercial final.</p>
   </template>
 
   <aside class="notes"><p>Logins dizem pouco; importa se a pessoa roda sozinha e se quem mantinha o legado ganhou um novo papel. O indicador de sombra mostra quando o legado ainda é usado “por garantia”, e é ele que sinaliza o momento seguro de desligar. Metas serão pactuadas depois da linha de base; desenvolvimento, migração e infraestrutura seguem com as equipes técnicas.</p></aside>

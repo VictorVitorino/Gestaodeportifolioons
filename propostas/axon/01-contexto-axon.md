@@ -123,3 +123,6 @@ O usuário enviará depois **propostas de referência de GMO e de TMO**, que dev
 | 07/10/2026 | Nome padronizado como **Axon** nas propostas (referência dizia "Axol"). |
 | 07/10/2026 | Duas propostas em um único HTML navegável (A · GMO e B · TMO), até 6 slides cada, na identidade da referência, com camada lúdica baseada na metáfora neural. |
 | 07/10/2026 | Proposta de trabalho, sem valores. Evidências do MVP sempre rotuladas como "informadas, a validar". |
+| 07/10/2026 | Ideias-âncora aprovadas no roteiro: Guardiões do Legado, rodada espelho, 4R (Reconhecer, Requalificar, Realocar, Reinventar), Radar de Inquietações, FinOps como mudança oculta, Axon Live, Rede Sinapse, Guia de Bolso. Metáfora: GMO = mielina; TMO = sistema nervoso; ondas = condução saltatória. |
+| 07/10/2026 | TMO = ≈70% GMO / ≈30% PMO, sempre rotulado como ênfase indicativa do esforço. Camada PMO: Plano Mestre Integrado, portões G0–G4, funil de demanda, RAID, benefícios por fórmula e Torre de Controle. |
+| 07/10/2026 | Entregue `axon-propostas.html` v1 (fonte em `src/`). QA: 12 slides sem overflow nem erros, revelações e cartas verificadas, celular em modo leitura, PDF 16:9 com anexos. |

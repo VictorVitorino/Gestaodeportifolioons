@@ -90,15 +90,15 @@
   }
 
   /* ---------- portões (R-16) ---------- */
-  function gateHTML(g, interactive) {
+  function gateHTML(g, interactive, noHead) {
     let i = 0;
     const li = (t) => interactive
       ? '<li><label><input type="checkbox" data-i="' + (i++) + '"><span class="gate-txt">' + t + '</span></label></li>'
       : '<li><span class="gate-box" aria-hidden="true"></span><span class="gate-txt">' + t + '</span></li>';
     const glyph = g.code.charAt(0) === '◆';
     let h = '<div class="gate' + (interactive ? '' : ' gate--static') + '" data-gate="' + esc(g.code) + '">' +
-      '<p class="gate-head">' + (glyph ? '' : '<span class="diamond" aria-hidden="true"></span>') +
-      '<span class="gate-code">' + (glyph ? '<span class="gate-glyph">◆</span>' + g.code.slice(1) : g.code) + '</span><span class="gate-name">' + g.name + '</span></p>';
+      (noHead ? '' : '<p class="gate-head">' + (glyph ? '' : '<span class="diamond" aria-hidden="true"></span>') +
+      '<span class="gate-code">' + (glyph ? '<span class="gate-glyph">◆</span>' + g.code.slice(1) : g.code) + '</span><span class="gate-name">' + g.name + '</span></p>');
     if (g.keys) {
       h += '<p class="gate-sub">Três chaves</p><ol class="gate-list gate-list--keys">' + g.keys.map(li).join('') + '</ol>';
       h += '<p class="gate-sub">Mais</p>';
@@ -256,7 +256,7 @@
       title: 'Radar de Inquietações', w: 400,
       render(o) {
         return (o.format === 'compact' ? '' : sub('Um botão, quatro vozes')) +
-          '<p>O reporte de bug que já existe (captura de sessão, print, versão, link e área, com triagem por agente e aprovação humana antes da produção) ganha três novas vozes: dúvida, ideia e receio.</p>' +
+          '<p>O reporte de bug que já existe (captura de sessão, print, versão, link e área, com triagem por agente de IA e aprovação humana antes da produção) ganha três novas vozes: dúvida, ideia e receio.</p>' +
           '<ul class="rv-voices">' +
           '<li><strong>Bug</strong> segue a esteira atual do produto.</li>' +
           '<li><strong>Dúvida</strong> vira resposta ou receita no Guia de Bolso.</li>' +
@@ -345,11 +345,14 @@
         { code: 'G0', name: 'Piloto', items: ['linha de base de tempo e custo medida', 'ambiente, acessos e permissões prontos', 'cenários de prática definidos', 'responsáveis nomeados'] },
         { code: 'G1', name: 'Onda', items: ['autonomia validada em cenários críticos por perfil', 'suporte e escalonamento definidos', 'funcionalidades da onda liberadas pelo produto', 'públicos comunicados, inclusive agentes do setor'] },
         { code: 'G2', name: 'Paralelo', items: ['mesmos estudos rodados no Axon e no legado pelos ciclos acordados', 'divergências explicadas ou corrigidas', 'aceite dos Guardiões e do dono do processo'] },
-        { code: 'G3', name: 'Desligamento', keys: ['a função está coberta pelo produto', 'as pessoas estão capacitadas e com rota 4R pactuada', 'a evidência foi aceita'], items: ['interfaces migradas', 'plano de reversão testado', 'aceite do dono do processo, da TI e do patrocinador'] },
+        { code: 'G3', name: 'Desligamento', keys: ['A função está coberta pelo produto', 'As pessoas estão capacitadas e com rota 4R pactuada', 'A evidência foi aceita'], items: ['interfaces migradas', 'plano de reversão testado', 'aceite do dono do processo, da TI e do patrocinador'] },
         { code: 'G4', name: 'Sustentação', items: ['período de observação concluído sem divergência aberta', 'indicadores estáveis', 'lições registradas'] }
       ],
       all() { return this.A.concat(this.B); },
       find(code) { const n = norm(code); return this.all().find((g) => norm(g.code) === n || norm(g.code).replace('◆', '') === n); },
+      /** Um único portão selecionado: o título vira "Portão G3 · Desligamento" (o cabeçalho interno sai do popover). */
+      single(o) { const ps = splitPick(o && o.pick); return ps && ps.length === 1 ? this.find(ps[0]) || null : null; },
+      titleFor(o) { const g = this.single(o); return g ? 'Portão ' + g.code + ' · ' + g.name : this.title; },
       render(o) {
         let list;
         const ps = splitPick(o.pick);
@@ -357,7 +360,8 @@
         else list = o.variant === 'B' ? this.B : o.variant === 'all' ? this.all() : this.A;
         if (ps && !list.length) console.warn('[AxonReveals] R-16: portão desconhecido: ' + o.pick);
         const interactive = o.format === 'pop';
-        return list.map((g) => gateHTML(g, interactive)).join('');
+        const noHead = interactive && list.length === 1 && !!this.single(o);
+        return list.map((g) => gateHTML(g, interactive, noHead)).join('');
       }
     },
 
@@ -385,7 +389,7 @@
         { key: 'Semanal', label: { A: 'Semanal · Execução', B: 'Semanal · Execução' },
           pauta: { A: 'uso, inquietações da semana, incidentes, ações', B: 'uso, inquietações da semana, incidentes, ações' },
           part: { A: 'GMO e Rede Sinapse', B: 'TMO, Rede Sinapse e dono do produto' } },
-        { key: 'Quinzenal', label: { A: 'Quinzenal', B: 'Quinzenal' },
+        { key: 'Quinzenal', label: { A: 'Quinzenal · Adoção', B: 'Quinzenal · Produto e adoção' },
           pauta: { A: 'prontidão, impactos, rotas 4R, orçamento de nuvem e regras de uso da IA', B: 'prontidão, impactos, rotas 4R, orçamento de nuvem e regras de uso da IA; backlog priorizado e RAID' },
           part: { A: 'gerências, produto, TI e Pessoas/RH', B: 'gerências, produto, TI e Pessoas/RH' } },
         { key: 'Mensal', label: { A: 'Mensal · Patrocínio', B: 'Mensal · Comitê' },
@@ -419,6 +423,13 @@
     keys: () => Object.keys(LIB),
     has: (k) => Object.prototype.hasOwnProperty.call(LIB, k),
     title: (k) => (LIB[k] ? LIB[k].title : ''),
+    /** Título conforme a seleção (ex.: R-16 com um único portão); padrão: title(k). */
+    titleFor(k, opts) {
+      const e = LIB[k];
+      if (!e) return '';
+      if (typeof e.titleFor === 'function') { try { return e.titleFor(opts || {}) || e.title; } catch (err) { return e.title; } }
+      return e.title;
+    },
     selo: (k) => (LIB[k] && LIB[k].selo) || '',
     width: (k) => (LIB[k] && LIB[k].w) || 380,
     /** Renderiza uma entrada como HTML. */
